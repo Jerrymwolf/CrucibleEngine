@@ -1,0 +1,66 @@
+# Docker Compose specification (no version needed for modern Docker)
+name: crucible
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: crucible-postgres
+    environment:
+      POSTGRES_USER: crucible
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-crucible_dev_password}
+      POSTGRES_DB: crucible
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"  # Host port 5433 to avoid conflict with existing postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crucible -d crucible"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - crucible-network
+
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    container_name: crucible-server
+    environment:
+      DATABASE_URL: postgresql://crucible:${POSTGRES_PASSWORD:-crucible_dev_password}@postgres:5432/crucible
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      COLYSEUS_PORT: 2567
+      NODE_ENV: production
+    ports:
+      - "2567:2567"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - crucible-network
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_COLYSEUS_URL: ${NEXT_PUBLIC_COLYSEUS_URL:-ws://localhost:2567}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3210}
+    container_name: crucible-web
+    environment:
+      PORT: 3210
+    ports:
+      - "3210:3210"
+    depends_on:
+      - server
+    restart: unless-stopped
+    networks:
+      - crucible-network
+
+networks:
+  crucible-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

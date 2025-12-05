@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../apps/server/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id               String    @id @default(uuid())
+  code             String    @unique @db.VarChar(6)
+  status           String    @default("lobby") // lobby, active, completed
+  scenarioSeed     String?
+  companyName      String?
+  companyValues    String[] // Company values being tested (optional)
+  crucibleMasterId String
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  teams            Team[]
+  decisions        Decision[]
+  streamingContent StreamingContentRecord[]
+  reflections      Reflection[]
+  reports          Report[]
+
+  @@index([code])
+  @@index([status])
+}
+
+model Team {
+  id                  String   @id @default(uuid())
+  sessionId           String
+  parishId            String
+  name                String
+  statedValues        String[] // From discovery phase
+  valuesRankOrder     Int[] // Indices into statedValues
+  decisionProcess     String   @default("consensus")
+  commitmentStatement String?
+  createdAt           DateTime @default(now())
+
+  session      Session       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  participants Participant[]
+  decisions    Decision[]
+
+  @@unique([sessionId, parishId])
+  @@index([sessionId])
+}
+
+model Participant {
+  id              String   @id @default(uuid())
+  teamId          String
+  displayName     String
+  email           String?
+  personalValues  String[] // Individual's top 5
+  valuesRankOrder Int[]
+  role            String   @default("member") // member, leader
+  joinedAt        DateTime @default(now())
+
+  team               Team               @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  advocatedDecisions DecisionAdvocate[]
+  reflections        Reflection[]
+
+  @@index([teamId])
+}
+
+model Decision {
+  id               String   @id @default(uuid())
+  sessionId        String
+  teamId           String
+  categoryId       String
+  decisionTypeId   String
+  choice           String
+  rationale        String?
+  targetParishId   String? // For inter-parish decisions
+  simulationTime   Int // Minutes since storm watch
+  realTimestamp    DateTime @default(now())
+
+  // Values Observer analysis (populated asynchronously)
+  valuesAnalysis Json? // ABCD coding, alignment scores
+  notableMoment  Boolean @default(false)
+  notableReason  String?
+
+  // Consequence tracking
+  consequencesApplied Json?
+
+  session   Session            @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  team      Team               @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  advocates DecisionAdvocate[]
+
+  @@index([sessionId, simulationTime])
+  @@index([teamId])
+  @@index([sessionId, teamId])
+  @@index([categoryId])
+}
+
+model DecisionAdvocate {
+  id            String @id @default(uuid())
+  decisionId    String
+  participantId String
+  position      String // 'for', 'against', 'neutral'
+
+  decision    Decision    @relation(fields: [decisionId], references: [id], onDelete: Cascade)
+  participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@unique([decisionId, participantId])
+  @@index([decisionId])
+  @@index([participantId])
+}
+
+model StreamingContentRecord {
+  id             String   @id @default(uuid())
+  sessionId      String
+  type           String // 'news', 'social', 'radio', 'weather', 'official'
+  source         String
+  content        String
+  urgency        Int
+  relatedParish  String?
+  breaking       Boolean  @default(false)
+  simulationTime Int
+  createdAt      DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, simulationTime])
+}
+
+model Reflection {
+  id              String   @id @default(uuid())
+  sessionId       String
+  teamId          String
+  participantName String
+  content         String   @db.Text
+  visibility      String   @default("facilitator") // 'private' | 'team' | 'facilitator'
+  category        String   // 'values' | 'tradeoffs' | 'surprise' | 'growth'
+  timestamp       BigInt
+  createdAt       DateTime @default(now())
+
+  // Optional relation to participant if they exist in system
+  participantId   String?
+  participant     Participant? @relation(fields: [participantId], references: [id], onDelete: SetNull)
+
+  session         Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([teamId])
+  @@index([participantId])
+  @@index([sessionId, teamId])
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  sessionId   String
+  type        String // 'personal', 'team', 'organizational', 'cm', 'data'
+  recipientId String? // Participant or Team ID
+  filePath    String
+  format      String // 'pdf', 'docx', 'pptx', 'xlsx'
+  generatedAt DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, type])
+}

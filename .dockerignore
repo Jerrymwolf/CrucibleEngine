@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.next/
+.turbo/
+
+# Generated files
+generated/
+apps/server/generated/
+
+# Environment files (never commit secrets)
+.env
+.env.local
+.env.*.local
+.env.docker
+
+# Version control
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Test & coverage
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Development
+*.test.ts
+*.spec.ts
+__tests__/

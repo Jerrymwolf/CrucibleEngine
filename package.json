@@ -1,0 +1,36 @@
+{
+  "name": "crucible-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The Values Crucible - AI-powered multiplayer crisis simulation for leadership development",
+  "author": "Jerry Wolf",
+  "license": "MIT",
+  "packageManager": "pnpm@9.14.2",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "lint": "turbo lint",
+    "clean": "turbo clean && rm -rf node_modules",
+    "db:generate": "pnpm --filter @crucible/server db:generate",
+    "db:push": "pnpm --filter @crucible/server db:push",
+    "db:migrate": "pnpm --filter @crucible/server db:migrate",
+    "db:studio": "pnpm --filter @crucible/server db:studio",
+    "typecheck": "turbo typecheck",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:clean": "docker compose down -v --rmi local"
+  },
+  "devDependencies": {
+    "prisma": "^6.0.1",
+    "turbo": "^2.3.0",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.1"
+  }
+}

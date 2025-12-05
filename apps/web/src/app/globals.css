@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 13%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 13%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 199 89% 48%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 33% 25%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 25%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 25%;
+    --input: 217 33% 25%;
+    --ring: 199 89% 48%;
+
+    --radius: 0.5rem;
+
+    --chart-1: 199 89% 48%;
+    --chart-2: 142 76% 36%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 0 84% 60%;
+    --chart-5: 265 89% 48%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Command center aesthetic */
+@layer components {
+  .status-indicator {
+    @apply h-2 w-2 rounded-full;
+  }
+
+  .status-indicator-safe {
+    @apply bg-status-safe;
+  }
+
+  .status-indicator-warning {
+    @apply bg-status-warning animate-pulse-slow;
+  }
+
+  .status-indicator-danger {
+    @apply bg-status-danger animate-pulse;
+  }
+
+  .status-indicator-critical {
+    @apply bg-status-critical animate-breaking-flash;
+  }
+
+  .panel {
+    @apply bg-card rounded-lg border border-border p-4;
+  }
+
+  .panel-header {
+    @apply text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3;
+  }
+
+  .breaking-news {
+    @apply bg-destructive/20 border-destructive animate-breaking-flash;
+  }
+
+  .ticker {
+    @apply overflow-hidden whitespace-nowrap;
+  }
+
+  .ticker-content {
+    @apply inline-block animate-[slide_20s_linear_infinite];
+  }
+
+  @keyframes slide {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+}
+
+/* Scrollbar styling for command center feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-background;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground;
+}
+
+/* Map styling */
+.concordia-map {
+  @apply relative bg-card rounded-lg border border-border overflow-hidden;
+  background-image:
+    radial-gradient(circle at 50% 50%, hsl(217 33% 20%) 0%, transparent 50%),
+    linear-gradient(180deg, hsl(217 33% 17%) 0%, hsl(217 33% 12%) 100%);
+}
+
+.parish-marker {
+  @apply absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer transition-all duration-200;
+}
+
+.parish-marker:hover {
+  @apply scale-110;
+}
+
+.parish-marker.selected {
+  @apply scale-125 ring-2 ring-primary ring-offset-2 ring-offset-background;
+}
+
+/* Accessibility: Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .animate-in {
+    animation: none !important;
+  }
+
+  .ticker-content {
+    animation: none !important;
+  }
+}
