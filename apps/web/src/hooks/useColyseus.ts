@@ -102,6 +102,13 @@ interface DecisionSnapshot {
   rationale: string;
   simulationTime: number;
   realTime: number;
+  valuesAnalysis?: {
+    value: string;
+    alignment: number;
+    evidence: string;
+  }[];
+  notableMoment?: boolean;
+  notableReason?: string;
 }
 
 interface StreamingContentSnapshot {
@@ -273,6 +280,9 @@ export function useColyseus({
           rationale: dec.rationale as string,
           simulationTime: dec.simulationTime as number,
           realTime: dec.realTime as number,
+          valuesAnalysis: dec.valuesAnalysis as { value: string; alignment: number; evidence: string }[] | undefined,
+          notableMoment: dec.notableMoment as boolean | undefined,
+          notableReason: dec.notableReason as string | undefined,
         };
       }),
       feed: Array.from(s.feed as ArrayLike<unknown>).map((f) => {

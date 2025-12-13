@@ -6,7 +6,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { DECISION_CATEGORIES, PARISHES } from '@crucible/shared';
-import type { DecisionPayload } from '@crucible/shared';
+import type { DecisionPayload, ParishIdLower } from '@crucible/shared';
 import {
   AlertTriangle,
   Users,
@@ -102,7 +102,7 @@ export function DecisionInterface({
       decisionTypeId: selectedDecision,
       choice: selectedChoice,
       rationale: rationale || undefined,
-      targetParishId: targetParish || undefined,
+      targetParishId: (targetParish as ParishIdLower) || undefined,
     };
 
     onSubmitDecision(payload);
