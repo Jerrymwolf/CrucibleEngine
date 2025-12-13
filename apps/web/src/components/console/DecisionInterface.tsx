@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { DECISION_CATEGORIES, PARISHES } from '@crucible/shared';
 import type { DecisionPayload, ParishIdLower } from '@crucible/shared';
