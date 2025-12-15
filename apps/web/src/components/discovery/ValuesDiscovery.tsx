@@ -173,7 +173,7 @@ export function ValuesDiscovery({
         {step === 'select' && (
           <div className="panel space-y-6">
             <div>
-              <h2 className="text-xl font-semibold mb-2">Select Your Team's Values</h2>
+              <h2 className="text-xl font-semibold mb-2">Select Your Team&apos;s Values</h2>
               <p className="text-sm text-muted-foreground">
                 Choose 3-5 values that will guide your decisions during the crisis.
                 These values represent what your team believes is most important.
@@ -268,7 +268,7 @@ export function ValuesDiscovery({
               <h2 className="text-xl font-semibold mb-2">Rank Your Values</h2>
               <p className="text-sm text-muted-foreground">
                 Arrange your values in order of importance. The top value is your
-                team's highest priority when faced with difficult decisions.
+                team&apos;s highest priority when faced with difficult decisions.
               </p>
             </div>
 
@@ -336,7 +336,7 @@ export function ValuesDiscovery({
 
             {/* Values Summary */}
             <div className="p-4 bg-muted/30 rounded-lg">
-              <h3 className="font-medium mb-2">Your Team's Values</h3>
+              <h3 className="font-medium mb-2">Your Team&apos;s Values</h3>
               <ol className="list-decimal list-inside space-y-1 text-sm">
                 {values.map((value, i) => (
                   <li key={i}>{value}</li>
@@ -420,7 +420,7 @@ export function ValuesDiscovery({
         {isReady && (
           <div className="text-center text-sm text-muted-foreground">
             <Check className="h-6 w-6 text-status-safe mx-auto mb-2" />
-            Your team's values have been submitted. Waiting for the Crucible Master
+            Your team&apos;s values have been submitted. Waiting for the Crucible Master
             to begin the briefing...
           </div>
         )}

@@ -186,7 +186,7 @@ export default function SessionPage() {
           {currentTeamId && (
             <div className="text-center space-y-4">
               <Button size="lg" onClick={handleReady} className="px-8">
-                I'm Ready
+                I&apos;m Ready
               </Button>
               <p className="text-sm text-muted-foreground">
                 Waiting for Crucible Master to start the session...

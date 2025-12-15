@@ -164,6 +164,7 @@ export function useColyseus({
     return () => {
       room?.leave();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Convert Colyseus state to plain object snapshot
