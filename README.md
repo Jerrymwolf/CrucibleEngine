@@ -135,4 +135,4 @@ MIT
 
 ## Author
 
-Jerry Wolf (USCGR CMDCM / Penn CLO Doctoral Candidate)
+Jerry Wolf 
