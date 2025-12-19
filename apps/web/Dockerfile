@@ -10,11 +10,16 @@ RUN corepack enable && corepack prepare pnpm@9.14.2 --activate
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json tsconfig.json ./
 COPY apps/web/package.json apps/web/
 COPY packages/shared/package.json packages/shared/
+COPY prisma/schema.prisma prisma/
 
 RUN pnpm install --frozen-lockfile
 
 COPY apps/web/ apps/web/
 COPY packages/shared/ packages/shared/
+
+# Generate Prisma client for web app (modify schema to use default output)
+RUN sed 's|output.*=.*"../apps/server/generated/prisma"||g' prisma/schema.prisma > prisma/schema.web.prisma && \
+    npx prisma generate --schema=./prisma/schema.web.prisma
 
 # Build shared first
 RUN pnpm --filter @crucible/shared build
@@ -22,9 +27,11 @@ RUN pnpm --filter @crucible/shared build
 # Build args for Next.js public env vars (baked at build time)
 ARG NEXT_PUBLIC_COLYSEUS_URL=ws://localhost:2567
 ARG NEXT_PUBLIC_APP_URL=http://localhost:3210
+ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
 ENV NEXT_PUBLIC_COLYSEUS_URL=$NEXT_PUBLIC_COLYSEUS_URL
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 
 RUN pnpm --filter @crucible/web build
 

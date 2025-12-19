@@ -39,6 +39,33 @@
     --chart-3: 38 92% 50%;
     --chart-4: 0 84% 60%;
     --chart-5: 265 89% 48%;
+
+    /* Accessibility focus ring */
+    --focus-ring: 199 89% 48%;
+    --focus-ring-offset: 222 47% 11%;
+
+    /* Status colors for accessibility */
+    --status-safe: 142 76% 36%;
+    --status-warning: 38 92% 50%;
+    --status-danger: 0 84% 60%;
+    --status-critical: 0 100% 50%;
+    --status-info: 199 89% 48%;
+  }
+
+  /* Color vision deficiency alternatives */
+  [data-color-vision="protanopia"] {
+    --status-danger: 45 100% 50%;
+    --status-safe: 210 100% 50%;
+  }
+
+  [data-color-vision="deuteranopia"] {
+    --status-danger: 30 100% 50%;
+    --status-safe: 240 100% 60%;
+  }
+
+  [data-color-vision="tritanopia"] {
+    --status-danger: 350 100% 50%;
+    --status-safe: 160 100% 40%;
   }
 }
 
@@ -49,6 +76,320 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Large text mode */
+  body.large-text {
+    font-size: 112.5%; /* 18px base */
+  }
+
+  body.large-text h1 { font-size: 2.5rem; }
+  body.large-text h2 { font-size: 2rem; }
+  body.large-text h3 { font-size: 1.75rem; }
+  body.large-text h4 { font-size: 1.5rem; }
+}
+
+/* =============================================================================
+   ACCESSIBILITY UTILITIES
+   ============================================================================= */
+
+/* Screen reader only - visually hidden but accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Allow element to be focusable when navigated to */
+.sr-only-focusable:focus,
+.sr-only-focusable:active {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Skip link - visible on focus */
+.skip-link {
+  position: fixed;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 1rem 2rem;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0 0 0.5rem 0.5rem;
+  box-shadow: 0 4px 20px hsla(0, 0%, 0%, 0.3);
+  transition: top 200ms ease-out;
+}
+
+.skip-link:focus {
+  top: 0;
+  outline: none;
+  box-shadow:
+    0 0 0 3px hsl(var(--focus-ring-offset)),
+    0 0 0 6px hsl(var(--focus-ring)),
+    0 4px 20px hsla(0, 0%, 0%, 0.3);
+}
+
+/* =============================================================================
+   FOCUS MANAGEMENT
+   ============================================================================= */
+
+/* Default focus ring - only shows for keyboard users */
+body.keyboard-user *:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px hsl(var(--focus-ring-offset)),
+    0 0 0 4px hsl(var(--focus-ring));
+}
+
+/* Focus ring variants */
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 2px hsl(var(--focus-ring));
+}
+
+.focus-ring-offset:focus-visible {
+  box-shadow:
+    0 0 0 2px hsl(var(--focus-ring-offset)),
+    0 0 0 4px hsl(var(--focus-ring));
+}
+
+.focus-ring-inset:focus-visible {
+  box-shadow: inset 0 0 0 2px hsl(var(--focus-ring));
+}
+
+/* Status-colored focus rings */
+.focus-ring-safe:focus-visible {
+  box-shadow: 0 0 0 2px hsl(var(--status-safe));
+}
+
+.focus-ring-warning:focus-visible {
+  box-shadow: 0 0 0 2px hsl(var(--status-warning));
+}
+
+.focus-ring-danger:focus-visible {
+  box-shadow: 0 0 0 2px hsl(var(--status-danger));
+}
+
+/* Focus visible for all users (not just keyboard) */
+.focus-always:focus {
+  outline: none;
+  box-shadow:
+    0 0 0 2px hsl(var(--focus-ring-offset)),
+    0 0 0 4px hsl(var(--focus-ring));
+}
+
+/* =============================================================================
+   LIVE REGIONS
+   ============================================================================= */
+
+/* Live regions are visually hidden but announced by screen readers */
+#crucible-live-polite,
+#crucible-live-assertive {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =============================================================================
+   HIGH CONTRAST MODE
+   ============================================================================= */
+
+body.high-contrast {
+  --border: 217 33% 50%;
+  --muted-foreground: 215 20% 75%;
+}
+
+body.high-contrast .panel,
+body.high-contrast .card,
+body.high-contrast [class*="border"] {
+  border-width: 2px;
+}
+
+body.high-contrast button,
+body.high-contrast [role="button"],
+body.high-contrast a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+body.high-contrast button:hover,
+body.high-contrast [role="button"]:hover,
+body.high-contrast a:hover {
+  text-decoration-thickness: 2px;
+}
+
+body.high-contrast .status-indicator {
+  border: 2px solid currentColor;
+}
+
+body.high-contrast *:focus-visible {
+  box-shadow:
+    0 0 0 3px hsl(var(--focus-ring-offset)),
+    0 0 0 6px hsl(var(--focus-ring)) !important;
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --border: 217 33% 50%;
+    --muted-foreground: 215 20% 75%;
+  }
+
+  .panel,
+  .card,
+  [class*="border"] {
+    border-width: 2px;
+  }
+
+  button,
+  [role="button"],
+  a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  button:hover,
+  [role="button"]:hover,
+  a:hover {
+    text-decoration-thickness: 2px;
+  }
+
+  .status-indicator {
+    border: 2px solid currentColor;
+  }
+
+  *:focus-visible {
+    box-shadow:
+      0 0 0 3px hsl(var(--focus-ring-offset)),
+      0 0 0 6px hsl(var(--focus-ring)) !important;
+  }
+}
+
+/* =============================================================================
+   REDUCED MOTION ENHANCEMENTS
+   ============================================================================= */
+
+body.reduced-motion *,
+body.reduced-motion *::before,
+body.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+body.reduced-motion .state-loading {
+  opacity: 0.6;
+}
+
+body.reduced-motion .state-error {
+  animation: none !important;
+}
+
+body.reduced-motion button:active,
+body.reduced-motion [role="button"]:active {
+  transform: scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .state-loading {
+    opacity: 0.6;
+  }
+
+  .state-error {
+    animation: none !important;
+  }
+
+  button:active,
+  [role="button"]:active {
+    transform: scale(0.98);
+  }
+}
+
+/* =============================================================================
+   KEYBOARD NAVIGATION INDICATORS
+   ============================================================================= */
+
+/* Show keyboard shortcuts inline when available */
+[data-shortcut]::after {
+  content: attr(data-shortcut);
+  display: none;
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background-color: hsl(var(--muted));
+  border-radius: 0.25rem;
+  opacity: 0.7;
+}
+
+body.keyboard-user [data-shortcut]::after {
+  display: inline-block;
+}
+
+/* Navigation hint for keyboard users */
+.keyboard-hint {
+  display: none;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+body.keyboard-user .keyboard-hint {
+  display: block;
+}
+
+/* =============================================================================
+   TOUCH TARGET SIZING
+   ============================================================================= */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Ensure minimum touch target size of 44x44px */
+  button,
+  [role="button"],
+  a,
+  input[type="checkbox"],
+  input[type="radio"],
+  select {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Add padding to small interactive elements */
+  .touch-target {
+    padding: 0.75rem;
   }
 }
 
@@ -142,21 +483,174 @@
   @apply scale-125 ring-2 ring-primary ring-offset-2 ring-offset-background;
 }
 
-/* Accessibility: Reduced motion support */
+/* Note: Reduced motion support is handled in the accessibility utilities section above */
+
+/* =============================================================================
+   JUICE ANIMATIONS - Sprint 1 Core
+   ============================================================================= */
+
+/* Fade out animation for delta indicators */
+@keyframes fade-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.animate-fade-out {
+  animation: fade-out 1.5s ease-out forwards;
+}
+
+/* Subtle pulse for critical buttons (less aggressive than regular pulse) */
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Slow pulse for warning indicators */
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s ease-in-out infinite;
+}
+
+/* Breaking news flash effect */
+@keyframes breaking-flash {
+  0%, 100% {
+    border-color: hsl(var(--destructive));
+    background-color: hsla(0, 84%, 60%, 0.1);
+  }
+  50% {
+    border-color: hsl(var(--destructive) / 0.5);
+    background-color: hsla(0, 84%, 60%, 0.2);
+  }
+}
+
+.animate-breaking-flash {
+  animation: breaking-flash 1s ease-in-out infinite;
+}
+
+/* Glow pulse for important elements */
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px hsla(199, 89%, 48%, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 20px hsla(199, 89%, 48%, 0.6);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Scale bounce for selection feedback */
+@keyframes scale-bounce {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-scale-bounce {
+  animation: scale-bounce 0.3s ease-out;
+}
+
+/* Counter tick animation */
+@keyframes counter-tick {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-counter-tick {
+  animation: counter-tick 0.15s ease-out;
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted-foreground) / 0.1) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Respect reduced motion for all new animations */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-
-  .animate-in {
+  .animate-fade-out,
+  .animate-pulse-subtle,
+  .animate-pulse-slow,
+  .animate-breaking-flash,
+  .animate-glow-pulse,
+  .animate-scale-bounce,
+  .animate-counter-tick,
+  .animate-shimmer {
     animation: none !important;
   }
 
-  .ticker-content {
-    animation: none !important;
+  .animate-fade-out {
+    opacity: 0;
   }
+}
+
+body.reduced-motion .animate-fade-out,
+body.reduced-motion .animate-pulse-subtle,
+body.reduced-motion .animate-pulse-slow,
+body.reduced-motion .animate-breaking-flash,
+body.reduced-motion .animate-glow-pulse,
+body.reduced-motion .animate-scale-bounce,
+body.reduced-motion .animate-counter-tick,
+body.reduced-motion .animate-shimmer {
+  animation: none !important;
+}
+
+body.reduced-motion .animate-fade-out {
+  opacity: 0;
 }

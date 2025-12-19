@@ -1,14 +1,21 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NARRATIVE_AGENT_SYSTEM, NARRATIVE_AGENT_USER_TEMPLATE } from './prompts/narrativeAgent.js';
 import type { CrucibleState } from '../schema/CrucibleState.js';
+import {
+  buildPersonaConstraint,
+  getPersonaById,
+  getCurrentWindow,
+  type PersonaId,
+} from '@crucible/shared';
 
 interface NarrativeContent {
-  type: 'news' | 'social' | 'radio' | 'weather' | 'official';
+  type: 'news' | 'social' | 'radio' | 'weather' | 'official' | 'character';
   source: string;
   content: string;
   urgency: 1 | 2 | 3 | 4 | 5;
   relatedParish?: string;
   breaking: boolean;
+  personaId?: PersonaId;
 }
 
 interface NarrativeAgentConfig {
@@ -152,5 +159,136 @@ export class NarrativeAgent {
         relatedParish: item.relatedParish,
         breaking: Boolean(item.breaking),
       }));
+  }
+
+  /**
+   * Generate persona-constrained character dialogue
+   * Uses persona fences to ensure consistent character voice
+   */
+  async generateCharacterDialogue(
+    personaId: PersonaId,
+    situation: string,
+    state: CrucibleState
+  ): Promise<NarrativeContent | null> {
+    const persona = getPersonaById(personaId);
+    const personaConstraint = buildPersonaConstraint(personaId);
+    const currentWindow = getCurrentWindow(state.simulationTime);
+
+    const systemPrompt = `${NARRATIVE_AGENT_SYSTEM}
+
+CHARACTER CONSTRAINT:
+${personaConstraint}
+
+You must generate dialogue ONLY for this character. Stay strictly within their voice, knowledge, and values.
+The character must NEVER reference information from "doesNotKnow" list.`;
+
+    const userPrompt = `CURRENT SITUATION:
+${situation}
+
+TIMELINE: ${currentWindow.label} (${currentWindow.phase} phase)
+Weather: ${currentWindow.weather.windMph}mph winds, visibility ${currentWindow.weather.visibility}
+Emerging pressures: ${currentWindow.emergingPressures.join('; ')}
+
+GAME STATE:
+Simulation time: T+${state.simulationTime} minutes
+Intensity: ${state.intensity.global}/10
+Parish ${persona.parishId} morale: ${state.parishes.get(persona.parishId)?.morale || 'unknown'}%
+
+Generate a single piece of character dialogue (1-3 sentences) that ${persona.name} would say in this situation.
+The dialogue should reflect their ${persona.speakingStyle.vocabulary} vocabulary and ${persona.speakingStyle.tone} tone.
+It should advance the narrative tension around their core conflict: ${persona.valueTension}.
+
+Respond with JSON: { "content": "the dialogue", "urgency": 1-5, "breaking": boolean }`;
+
+    try {
+      const response = await this.client.messages.create({
+        model: this.model,
+        max_tokens: 256,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
+      });
+
+      const textContent = response.content.find((c) => c.type === 'text');
+      if (!textContent || textContent.type !== 'text') {
+        throw new Error('No text content in response');
+      }
+
+      const parsed = JSON.parse(textContent.text);
+
+      return {
+        type: 'character',
+        source: persona.name,
+        content: parsed.content,
+        urgency: Math.max(1, Math.min(5, parsed.urgency || 3)) as 1 | 2 | 3 | 4 | 5,
+        relatedParish: persona.parishId,
+        breaking: Boolean(parsed.breaking),
+        personaId,
+      };
+    } catch (error) {
+      console.error(`[NarrativeAgent] Character dialogue error for ${personaId}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Generate dialogue for a dilemma presentation
+   * The persona voices the pressure/conflict of the dilemma
+   */
+  async generateDilemmaPresentation(
+    personaId: PersonaId,
+    dilemmaSetup: string,
+    options: string[],
+    state: CrucibleState
+  ): Promise<NarrativeContent | null> {
+    const persona = getPersonaById(personaId);
+    const personaConstraint = buildPersonaConstraint(personaId);
+
+    const systemPrompt = `${NARRATIVE_AGENT_SYSTEM}
+
+CHARACTER CONSTRAINT:
+${personaConstraint}
+
+You are presenting a critical decision point to the player team. Stay in character.`;
+
+    const userPrompt = `DILEMMA SITUATION:
+${dilemmaSetup}
+
+AVAILABLE OPTIONS:
+${options.map((opt, i) => `${i + 1}. ${opt}`).join('\n')}
+
+Generate ${persona.name}'s in-character presentation of this dilemma (2-4 sentences).
+They should convey urgency and the weight of the decision without explicitly listing options.
+Their presentation should reflect their personal stake in the outcome based on their primary value: "${persona.primaryValue}".
+
+Respond with JSON: { "content": "the presentation dialogue", "urgency": 1-5 }`;
+
+    try {
+      const response = await this.client.messages.create({
+        model: this.model,
+        max_tokens: 300,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }],
+      });
+
+      const textContent = response.content.find((c) => c.type === 'text');
+      if (!textContent || textContent.type !== 'text') {
+        throw new Error('No text content in response');
+      }
+
+      const parsed = JSON.parse(textContent.text);
+
+      return {
+        type: 'character',
+        source: persona.name,
+        content: parsed.content,
+        urgency: Math.max(1, Math.min(5, parsed.urgency || 4)) as 1 | 2 | 3 | 4 | 5,
+        relatedParish: persona.parishId,
+        breaking: true, // Dilemmas are always breaking
+        personaId,
+      };
+    } catch (error) {
+      console.error(`[NarrativeAgent] Dilemma presentation error for ${personaId}:`, error);
+      return null;
+    }
   }
 }

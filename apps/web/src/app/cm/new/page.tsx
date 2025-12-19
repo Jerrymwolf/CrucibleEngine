@@ -1,80 +1,24 @@
-'use client';
+import { redirect } from 'next/navigation';
+import { requireCMLicense } from '@/lib/auth';
+import { NewSessionClient } from './NewSessionClient';
 
-import { useEffect, useRef, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import * as Colyseus from 'colyseus.js';
-import { Loader2 } from 'lucide-react';
-import { Logo } from '@/components/Logo';
+export default async function NewSessionPage() {
+  // Server-side license check
+  const authResult = await requireCMLicense();
 
-const COLYSEUS_URL = process.env.NEXT_PUBLIC_COLYSEUS_URL || 'ws://localhost:2567';
+  if (!authResult.authorized) {
+    redirect('/cm'); // Will show license error
+  }
 
-function NewSessionContent() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const cmName = searchParams.get('name') || 'Crucible Master';
-  const companyName = searchParams.get('company') || '';
-  const hasCreated = useRef(false);
-
-  useEffect(() => {
-    if (hasCreated.current) return;
-    hasCreated.current = true;
-
-    async function createSession() {
-      try {
-        const client = new Colyseus.Client(COLYSEUS_URL);
-
-        // Create a new room
-        const room = await client.create('crucible', {
-          role: 'cm',
-          participantName: cmName,
-          companyName,
-          create: true,
-        });
-
-        // Get the session code from the room
-        const sessionCode = room.roomId;
-
-        // Leave the room (we'll rejoin via the CM page)
-        await room.leave();
-
-        // Navigate to CM console with the session code
-        router.replace(`/cm/${sessionCode}?name=${encodeURIComponent(cmName)}`);
-      } catch (error) {
-        console.error('Failed to create session:', error);
-        router.replace('/?error=create-failed');
-      }
-    }
-
-    createSession();
-  }, [cmName, companyName, router]);
+  // Check if simulation limit reached
+  if (authResult.license?.simulationsRemaining === 0) {
+    redirect('/cm?error=limit-reached');
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4 animate-in fade-in duration-500">
-        <Logo variant="icon" size="lg" linkToHome={false} />
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin text-primary" />
-          <span className="text-muted-foreground">Creating new session...</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default function NewSessionPage() {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4 animate-in fade-in duration-500">
-          <Logo variant="icon" size="lg" linkToHome={false} />
-          <div className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            <span className="text-muted-foreground">Loading...</span>
-          </div>
-        </div>
-      </div>
-    }>
-      <NewSessionContent />
-    </Suspense>
+    <NewSessionClient
+      userId={authResult.userId!}
+      licenseId={authResult.license!.id}
+    />
   );
 }

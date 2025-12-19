@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { DECISION_CATEGORIES, PARISHES } from '@crucible/shared';
 import type { DecisionPayload, ParishIdLower } from '@crucible/shared';
+import { useDecisionShake } from '@/hooks/useScreenShake';
+import { useSound } from '@/hooks/useSound';
 import {
   AlertTriangle,
   Users,
@@ -23,6 +25,8 @@ interface DecisionInterfaceProps {
   onSubmitDecision: (decision: DecisionPayload) => void;
   disabled?: boolean;
   className?: string;
+  /** Optional external shake trigger for parent container */
+  onShake?: () => void;
 }
 
 const categoryIcons: Record<string, React.ReactNode> = {
@@ -39,6 +43,7 @@ export function DecisionInterface({
   onSubmitDecision,
   disabled = false,
   className,
+  onShake,
 }: DecisionInterfaceProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedDecision, setSelectedDecision] = useState<string | null>(null);
@@ -46,6 +51,10 @@ export function DecisionInterface({
   const [targetParish, setTargetParish] = useState<string | null>(null);
   const [rationale, setRationale] = useState('');
   const [showConfirm, setShowConfirm] = useState(false);
+
+  // Screen shake and sound effects for decision feedback
+  const { containerRef, onDecisionSubmit, onCriticalDecision } = useDecisionShake();
+  const { playDramatic } = useSound();
 
   // Get the current category and decision objects
   const category = selectedCategory
@@ -92,8 +101,8 @@ export function DecisionInterface({
     setShowConfirm(true);
   };
 
-  // Submit the decision
-  const handleSubmit = () => {
+  // Submit the decision with visual/audio feedback
+  const handleSubmit = useCallback(() => {
     if (!selectedCategory || !selectedDecision || !selectedChoice) return;
 
     const payload: DecisionPayload = {
@@ -104,6 +113,23 @@ export function DecisionInterface({
       targetParishId: (targetParish as ParishIdLower) || undefined,
     };
 
+    // Determine if this is a critical decision (evacuation or high-stakes)
+    const isCritical = selectedCategory === 'evacuation' ||
+      selectedDecision?.includes('emergency') ||
+      selectedDecision?.includes('critical');
+
+    // Trigger screen shake effect
+    if (isCritical) {
+      onCriticalDecision();
+      playDramatic('decisionConfirm');
+    } else {
+      onDecisionSubmit();
+      playDramatic('decisionConfirm');
+    }
+
+    // Also trigger parent shake if provided
+    onShake?.();
+
     onSubmitDecision(payload);
 
     // Reset state
@@ -113,7 +139,18 @@ export function DecisionInterface({
     setTargetParish(null);
     setRationale('');
     setShowConfirm(false);
-  };
+  }, [
+    selectedCategory,
+    selectedDecision,
+    selectedChoice,
+    rationale,
+    targetParish,
+    onSubmitDecision,
+    onDecisionSubmit,
+    onCriticalDecision,
+    playDramatic,
+    onShake,
+  ]);
 
   // Cancel and reset
   const handleCancel = () => {
@@ -126,7 +163,7 @@ export function DecisionInterface({
   };
 
   return (
-    <div className={cn('panel', className)}>
+    <div ref={containerRef} className={cn('panel', className)}>
       <div className="flex items-center justify-between mb-4">
         <h2 className="panel-header mb-0">Make Decision</h2>
         {selectedCategory && (

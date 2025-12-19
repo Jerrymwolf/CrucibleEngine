@@ -1,0 +1,85 @@
+# Replit Configuration for CrucibleEngine
+# Turborepo monorepo with Next.js web client and Colyseus server
+
+run = "pnpm dev"
+entrypoint = "apps/web/src/app/page.tsx"
+
+[nix]
+channel = "stable-24_05"
+
+[env]
+PATH = "/home/runner/$REPL_SLUG/.config/npm/node_global/bin:/home/runner/$REPL_SLUG/node_modules/.bin:$PATH"
+
+[deployment]
+run = ["sh", "-c", "pnpm build && pnpm start"]
+deploymentTarget = "cloudrun"
+
+# Web client (Next.js)
+[[ports]]
+localPort = 3000
+externalPort = 80
+
+# Colyseus game server (WebSocket)
+[[ports]]
+localPort = 2567
+externalPort = 2567
+
+[languages]
+
+[languages.typescript]
+pattern = "**/*.{ts,tsx}"
+
+[languages.javascript]
+pattern = "**/*.{js,jsx}"
+
+[gitHubImport]
+requiredFiles = [".replit", "replit.nix", "package.json", "pnpm-workspace.yaml"]
+
+[packager]
+language = "nodejs"
+
+[packager.features]
+packageSearch = true
+guessImports = true
+enabledForHosting = false
+
+[unitTest]
+language = "nodejs"
+
+[debugger]
+support = true
+
+[debugger.interactive]
+transport = "localhost:0"
+startCommand = ["dap-node"]
+
+[debugger.interactive.initializeMessage]
+command = "initialize"
+type = "request"
+
+[debugger.interactive.initializeMessage.arguments]
+clientID = "replit"
+clientName = "replit.com"
+columnsStartAt1 = true
+linesStartAt1 = true
+locale = "en-us"
+pathFormat = "path"
+supportsInvalidatedEvent = true
+supportsProgressReporting = true
+supportsRunInTerminalRequest = true
+supportsVariablePaging = true
+supportsVariableType = true
+
+[debugger.interactive.launchMessage]
+command = "launch"
+type = "request"
+
+[debugger.interactive.launchMessage.arguments]
+console = "externalTerminal"
+cwd = "."
+pauseForSourceMap = false
+program = "./apps/server/src/index.ts"
+request = "launch"
+sourceMaps = true
+stopOnEntry = false
+type = "pwa-node"

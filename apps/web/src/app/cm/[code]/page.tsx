@@ -1,30 +1,41 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+/**
+ * Crucible Master Console Page
+ *
+ * The facilitator dashboard for managing and monitoring the simulation.
+ * Refactored to use modular components from the cm component library.
+ */
+
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { useColyseus } from '@/hooks/useColyseus';
 import { useGameStore } from '@/stores/gameStore';
+import { PARISHES } from '@crucible/shared';
+import { Loader2, AlertCircle, CloudLightning, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { PARISHES, INTENSITY_LEVELS, DIRECTIVE_TYPES } from '@crucible/shared';
-import {
-  Loader2,
-  AlertCircle,
-  Play,
-  Pause,
-  Users,
-  Gauge,
-  Radio,
-  CloudLightning,
-  MessageSquare,
-} from 'lucide-react';
 import { Logo } from '@/components/Logo';
 
-export default function CrucibleMasterPage() {
+// Import CM components
+import {
+  ControlDeck,
+  type PhaseId,
+  TeamMonitor,
+  type TeamData,
+  InterventionPanel,
+  type InterventionHistory,
+  type TeamOption,
+  NarrativeQueue,
+  type FeedItem,
+  SessionRecovery,
+  type ConnectionStatus,
+  FacilitationGuide,
+  type TeamAnalysis,
+} from '@/components/cm';
+
+function CrucibleMasterPageContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -36,29 +47,27 @@ export default function CrucibleMasterPage() {
     connecting,
     error,
     state,
+    authStatus,
+    authError,
     setPhase,
     setIntensity,
     setTeamIntensity,
     togglePause,
     sendDirective,
+    triggerIntervention,
+    reconnect,
   } = useColyseus({
     sessionCode: code,
     role: 'cm',
     participantName: cmName,
   });
 
-  // Directive form state
-  const [directiveType, setDirectiveType] = useState<string>('');
-  const [directiveContent, setDirectiveContent] = useState('');
-  const [selectedTeams, setSelectedTeams] = useState<string[]>([]);
-
-  const toggleTeamSelection = (teamId: string) => {
-    setSelectedTeams(prev =>
-      prev.includes(teamId)
-        ? prev.filter(id => id !== teamId)
-        : [...prev, teamId]
-    );
-  };
+  // Local state
+  const [interventionHistory, setInterventionHistory] = useState<InterventionHistory[]>([]);
+  const [pendingFeedItems, setPendingFeedItems] = useState<FeedItem[]>([]);
+  const [reconnectAttempt, setReconnectAttempt] = useState(0);
+  const [lastConnectedTime, setLastConnectedTime] = useState<number | undefined>();
+  const [selectedTeamId, setSelectedTeamId] = useState<string | undefined>();
 
   const { updateFromSnapshot } = useGameStore();
 
@@ -69,8 +78,194 @@ export default function CrucibleMasterPage() {
     }
   }, [state, updateFromSnapshot]);
 
+  // Track connection time
+  useEffect(() => {
+    if (connected) {
+      setLastConnectedTime(Date.now());
+      setReconnectAttempt(0);
+    }
+  }, [connected]);
+
+  // Derive connection status
+  const connectionStatus: ConnectionStatus = useMemo(() => {
+    if (connected) return 'connected';
+    if (connecting) return 'connecting';
+    if (error) return 'failed';
+    if (reconnectAttempt > 0) return 'reconnecting';
+    return 'disconnected';
+  }, [connected, connecting, error, reconnectAttempt]);
+
+  // Transform teams for components
+  const teamsArray = useMemo(() => {
+    if (!state?.teams) return [];
+    return Array.from(state.teams.values());
+  }, [state?.teams]);
+
+  // Transform teams for TeamMonitor
+  const teamMonitorData: TeamData[] = useMemo(() => {
+    return teamsArray.map((team) => {
+      const parishState = state?.parishes.get(team.parishId);
+      const teamIntensity = state?.intensity.byTeam.get(team.parishId) ?? state?.intensity.global ?? 5;
+
+      // Get decision count for this team from decisions array
+      const teamDecisions = state?.decisions.filter((d) => d.teamId === team.id) || [];
+
+      return {
+        id: team.id,
+        parishId: team.parishId,
+        teamName: team.teamName || PARISHES[team.parishId as keyof typeof PARISHES]?.name || team.parishId,
+        // members is string[] in TeamSnapshot, convert to expected format
+        members: team.members.map((memberName: string, index: number) => ({
+          id: `${team.id}-member-${index}`,
+          name: memberName,
+          connected: true,
+          ready: team.ready,
+        })),
+        ready: team.ready,
+        status: parishState?.status || {
+          power: 100,
+          communications: 100,
+          roads: 100,
+          hospital: 100,
+          port: 100,
+        },
+        morale: parishState?.morale || 100,
+        decisionCount: teamDecisions.length,
+        lastActivityTime: Date.now() - Math.random() * 300000, // Placeholder
+        currentIntensity: teamIntensity,
+        activeDecision: undefined,
+      };
+    });
+  }, [teamsArray, state?.parishes, state?.intensity, state?.decisions]);
+
+  // Transform teams for InterventionPanel
+  const interventionTeams: TeamOption[] = useMemo(() => {
+    return teamsArray.map((team) => ({
+      id: team.id,
+      name: team.teamName || PARISHES[team.parishId as keyof typeof PARISHES]?.name || team.parishId,
+      parishId: team.parishId,
+      interventionCount: interventionHistory.filter((h) => h.teamId === team.id).length,
+      lastIntervention: interventionHistory
+        .filter((h) => h.teamId === team.id)
+        .sort((a, b) => b.timestamp - a.timestamp)[0]?.timestamp,
+    }));
+  }, [teamsArray, interventionHistory]);
+
+  // Transform teams for FacilitationGuide
+  const facilitationTeams: TeamAnalysis[] = useMemo(() => {
+    return teamsArray.map((team) => {
+      const teamDecisions = state?.decisions.filter((d) => d.teamId === team.id) || [];
+      return {
+        teamId: team.id,
+        teamName: team.teamName || PARISHES[team.parishId as keyof typeof PARISHES]?.name || team.parishId,
+        decisionCount: teamDecisions.length,
+        averageDecisionTime: 60, // Placeholder - would need actual timing data
+        valueConflicts: 0, // Placeholder - would need actual conflict tracking
+        statedValues: team.statedValues || [],
+        enactedValueScore: {},
+        lastDecisionTime: Date.now() - Math.random() * 300000, // Placeholder
+        interventionsReceived: interventionHistory.filter((h) => h.teamId === team.id).length,
+      };
+    });
+  }, [teamsArray, interventionHistory, state?.decisions]);
+
+  // Transform feed items
+  const feedItems: FeedItem[] = useMemo(() => {
+    if (!state?.feed) return [];
+    return state.feed.map((item) => ({
+      id: item.id,
+      type: item.type as FeedItem['type'],
+      source: item.source,
+      content: item.content,
+      timestamp: item.timestamp || Date.now(),
+      breaking: item.breaking,
+      approved: true,
+    }));
+  }, [state?.feed]);
+
+  // Handlers
+  const handlePhaseChange = (phase: PhaseId) => {
+    setPhase(phase);
+  };
+
+  const handleIntensityChange = (intensity: number) => {
+    setIntensity(intensity);
+  };
+
+  const handleTeamIntensityChange = (teamId: string, intensity: number) => {
+    setTeamIntensity(teamId, intensity);
+  };
+
+  const handleTriggerIntervention = (teamIds: string[], type: 'flash' | 'moment' | 'mirror') => {
+    teamIds.forEach((teamId) => {
+      triggerIntervention(teamId, type);
+
+      // Track in local history
+      const team = teamsArray.find((t) => t.id === teamId);
+      setInterventionHistory((prev) => [
+        ...prev,
+        {
+          id: `${teamId}-${Date.now()}`,
+          type,
+          teamId,
+          teamName: team?.teamName || teamId,
+          timestamp: Date.now(),
+          triggered: true,
+        },
+      ]);
+    });
+  };
+
+  const handleInjectFeed = (item: Omit<FeedItem, 'id' | 'timestamp' | 'approved'>) => {
+    sendDirective({
+      type: item.type,
+      targetTeams: item.targetTeams || [],
+      content: item.content,
+    });
+  };
+
+  const handleApproveFeed = (itemId: string) => {
+    setPendingFeedItems((prev) => prev.filter((item) => item.id !== itemId));
+    // Would send approval to server
+  };
+
+  const handleRejectFeed = (itemId: string) => {
+    setPendingFeedItems((prev) => prev.filter((item) => item.id !== itemId));
+  };
+
+  const handleReconnect = () => {
+    setReconnectAttempt((prev) => prev + 1);
+    reconnect?.();
+  };
+
+  const handleTransfer = (newCmName: string) => {
+    // Would implement CM transfer logic
+    console.log('Transfer to:', newCmName);
+  };
+
+  const handleExit = () => {
+    router.push('/');
+  };
+
+  // Auth error state - show if not authorized for this session
+  if (authError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="panel max-w-md text-center space-y-4">
+          <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
+          <h2 className="text-xl font-semibold">Access Denied</h2>
+          <p className="text-muted-foreground">{authError}</p>
+          <p className="text-sm text-muted-foreground">
+            You may not have permission to access this session.
+          </p>
+          <Button onClick={() => router.push('/cm')}>Return to Dashboard</Button>
+        </div>
+      </div>
+    );
+  }
+
   // Loading state
-  if (connecting) {
+  if (connecting && reconnectAttempt === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4 animate-in fade-in duration-500">
@@ -84,21 +279,21 @@ export default function CrucibleMasterPage() {
     );
   }
 
-  // Error state
-  if (error) {
+  // Error state (only show if not trying to reconnect)
+  if (error && reconnectAttempt === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="panel max-w-md text-center space-y-4">
           <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
           <h2 className="text-xl font-semibold">Connection Error</h2>
           <p className="text-muted-foreground">{error.message}</p>
-          <Button onClick={() => router.push('/')}>Return Home</Button>
+          <Button onClick={() => router.push('/cm')}>Return to Dashboard</Button>
         </div>
       </div>
     );
   }
 
-  const currentPhase = state?.phase.current || 'lobby';
+  const currentPhase = (state?.phase.current || 'lobby') as PhaseId;
   const isPaused = state?.phase.paused || false;
   const globalIntensity = state?.intensity.global || 5;
   const simulationTime = state?.simulationTime || 0;
@@ -108,19 +303,6 @@ export default function CrucibleMasterPage() {
   state?.teams.forEach((team) => {
     totalParticipants += team.members.length;
   });
-
-  // Get teams as array
-  const teamsArray = state?.teams ? Array.from(state.teams.values()) : [];
-
-  // Phase buttons config
-  const phases = [
-    { id: 'lobby', label: 'Lobby' },
-    { id: 'discovery', label: 'Discovery' },
-    { id: 'briefing', label: 'Briefing' },
-    { id: 'storm', label: 'Storm' },
-    { id: 'recovery', label: 'Recovery' },
-    { id: 'debrief', label: 'Debrief' },
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -141,226 +323,73 @@ export default function CrucibleMasterPage() {
               T+{simulationTime} min
             </div>
 
-            {/* Pause/Play */}
-            {(currentPhase === 'storm' || currentPhase === 'recovery') && (
-              <Button
-                variant={isPaused ? 'default' : 'secondary'}
-                size="sm"
-                onClick={() => togglePause()}
-              >
-                {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
-                {isPaused ? 'Resume' : 'Pause'}
-              </Button>
-            )}
-
             {/* Connection Status */}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span
-                className={`h-2 w-2 rounded-full ${
-                  connected ? 'bg-status-safe' : 'bg-status-warning animate-pulse'
-                }`}
-              />
-              {connected ? 'Connected' : 'Reconnecting'}
-            </div>
+            <SessionRecovery
+              status={connectionStatus}
+              reconnectAttempt={reconnectAttempt}
+              maxReconnectAttempts={5}
+              lastConnectedTime={lastConnectedTime}
+              sessionCode={code}
+              onReconnect={handleReconnect}
+              onTransfer={handleTransfer}
+              onExit={handleExit}
+            />
           </div>
         </div>
       </header>
 
       <div className="container mx-auto p-2 md:p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
-          {/* Left Sidebar - Phase & Controls */}
+          {/* Left Sidebar - Controls */}
           <div className="md:col-span-1 lg:col-span-3 space-y-4">
-            {/* Phase Control */}
+            {/* Control Deck */}
             <div className="panel">
-              <h2 className="panel-header">Session Phase</h2>
-              <div className="space-y-2">
-                {phases.map((phase) => (
-                  <Button
-                    key={phase.id}
-                    variant={currentPhase === phase.id ? 'default' : 'ghost'}
-                    className="w-full justify-start"
-                    onClick={() => setPhase(phase.id)}
-                  >
-                    {phase.label}
-                  </Button>
-                ))}
-              </div>
+              <ControlDeck
+                currentPhase={currentPhase}
+                isPaused={isPaused}
+                simulationTime={simulationTime}
+                globalIntensity={globalIntensity}
+                onPhaseChange={handlePhaseChange}
+                onTogglePause={togglePause}
+                onIntensityChange={handleIntensityChange}
+              />
             </div>
 
-            {/* Intensity Control */}
+            {/* Facilitation Guide */}
             <div className="panel">
-              <h2 className="panel-header flex items-center gap-2">
-                <Gauge className="h-4 w-4" />
-                Global Intensity
-              </h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-3xl font-bold">{globalIntensity}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {INTENSITY_LEVELS[globalIntensity as keyof typeof INTENSITY_LEVELS]?.name}
-                  </span>
-                </div>
-                <Slider
-                  value={[globalIntensity]}
-                  onValueChange={(value) => setIntensity(value[0] ?? 5)}
-                  min={1}
-                  max={10}
-                  step={1}
-                />
-                <p className="text-xs text-muted-foreground">
-                  {INTENSITY_LEVELS[globalIntensity as keyof typeof INTENSITY_LEVELS]?.description}
-                </p>
-              </div>
+              <FacilitationGuide
+                teams={facilitationTeams}
+                currentPhase={currentPhase}
+                simulationTime={simulationTime}
+                globalIntensity={globalIntensity}
+                onTriggerIntervention={(teamId, type) => handleTriggerIntervention([teamId], type)}
+                onAdjustIntensity={(delta) => handleIntensityChange(globalIntensity + delta)}
+              />
             </div>
 
-            {/* Participants Count */}
+            {/* Intervention Panel */}
             <div className="panel">
-              <h2 className="panel-header flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Participants
-              </h2>
-              <div className="text-3xl font-bold">{totalParticipants}</div>
-              <div className="text-sm text-muted-foreground">
-                across {teamsArray.length} team{teamsArray.length !== 1 ? 's' : ''}
-              </div>
-            </div>
-
-            {/* Directive Panel */}
-            <div className="panel">
-              <h2 className="panel-header flex items-center gap-2">
-                <MessageSquare className="h-4 w-4" />
-                Send Directive
-              </h2>
-              <div className="space-y-3">
-                <Select value={directiveType} onValueChange={setDirectiveType}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Directive type..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DIRECTIVE_TYPES.map((type) => (
-                      <SelectItem key={type.id} value={type.id}>{type.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-
-                <div className="flex flex-wrap gap-1">
-                  {teamsArray.map((team) => (
-                    <Button
-                      key={team.id}
-                      size="sm"
-                      variant={selectedTeams.includes(team.id) ? 'default' : 'outline'}
-                      onClick={() => toggleTeamSelection(team.id)}
-                    >
-                      {team.teamName || team.parishId}
-                    </Button>
-                  ))}
-                  <Button
-                    size="sm"
-                    variant={selectedTeams.length === teamsArray.length ? 'default' : 'outline'}
-                    onClick={() => setSelectedTeams(teamsArray.map(t => t.id))}
-                  >
-                    All
-                  </Button>
-                </div>
-
-                <Textarea
-                  placeholder="Directive content..."
-                  value={directiveContent}
-                  onChange={(e) => setDirectiveContent(e.target.value)}
-                  rows={3}
-                />
-
-                <Button
-                  className="w-full"
-                  disabled={!directiveType || selectedTeams.length === 0 || !directiveContent.trim()}
-                  onClick={() => {
-                    sendDirective({
-                      type: directiveType,
-                      targetTeams: selectedTeams,
-                      content: directiveContent,
-                    });
-                    setDirectiveContent('');
-                    setDirectiveType('');
-                    setSelectedTeams([]);
-                  }}
-                >
-                  Send Directive
-                </Button>
-              </div>
+              <InterventionPanel
+                teams={interventionTeams}
+                history={interventionHistory}
+                maxInterventions={5}
+                onTrigger={handleTriggerIntervention}
+                disabled={isPaused}
+              />
             </div>
           </div>
 
           {/* Main Content - Team Overview */}
           <div className="md:col-span-1 lg:col-span-6 space-y-4">
-            {/* Parish/Team Grid */}
+            {/* Team Monitor */}
             <div className="panel">
-              <h2 className="panel-header">Team Status</h2>
-              <div className="grid grid-cols-2 gap-3">
-                {Object.values(PARISHES).map((parish) => {
-                  const team = state?.teams.get(parish.id);
-                  const parishState = state?.parishes.get(parish.id);
-                  const teamIntensity = state?.intensity.byTeam.get(parish.id) ?? state?.intensity.global ?? 5;
-
-                  return (
-                    <div
-                      key={parish.id}
-                      className="p-3 rounded-lg border border-border bg-background/50"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h3 className="font-semibold">{parish.name}</h3>
-                          <p className="text-xs text-muted-foreground">
-                            {team?.teamName || 'No team'}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-3 w-3 text-muted-foreground" />
-                          <span className="text-sm">{team?.members.length || 0}</span>
-                        </div>
-                      </div>
-
-                      {parishState && (
-                        <div className="mt-2 grid grid-cols-3 gap-1 text-xs">
-                          <div>
-                            <span className="text-muted-foreground">Power</span>
-                            <div className="font-mono">{parishState.status.power}%</div>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Comms</span>
-                            <div className="font-mono">{parishState.status.communications}%</div>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Morale</span>
-                            <div className="font-mono">{parishState.morale}%</div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Team Intensity Slider */}
-                      {team && (
-                        <div className="mt-3 pt-2 border-t border-border">
-                          <div className="flex items-center justify-between text-xs mb-1">
-                            <span className="text-muted-foreground">Team Intensity</span>
-                            <span className="font-mono">{teamIntensity}/10</span>
-                          </div>
-                          <Slider
-                            value={[teamIntensity]}
-                            onValueChange={(value) => setTeamIntensity(parish.id, value[0] ?? 5)}
-                            min={1}
-                            max={10}
-                            step={1}
-                            className="h-1"
-                          />
-                        </div>
-                      )}
-
-                      {team?.ready && (
-                        <div className="mt-2 text-xs text-status-safe">Ready</div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+              <TeamMonitor
+                teams={teamMonitorData}
+                currentPhase={currentPhase}
+                onIntensityChange={handleTeamIntensityChange}
+                onSelectTeam={setSelectedTeamId}
+                selectedTeamId={selectedTeamId}
+              />
             </div>
 
             {/* Weather Status */}
@@ -400,7 +429,7 @@ export default function CrucibleMasterPage() {
             </div>
           </div>
 
-          {/* Right Sidebar - Feed & Tempest */}
+          {/* Right Sidebar - Feed & Narrative */}
           <div className="md:col-span-2 lg:col-span-3 space-y-4">
             {/* Tempest Advisory */}
             <div className="panel">
@@ -413,36 +442,28 @@ export default function CrucibleMasterPage() {
               </p>
             </div>
 
-            {/* Live Feed */}
-            <div className="panel flex-1">
-              <h2 className="panel-header">Live Feed</h2>
-              <ScrollArea className="h-[400px]">
-                <div className="space-y-2">
-                  {state?.feed.slice(-20).reverse().map((item) => (
-                    <div
-                      key={item.id}
-                      className={`text-xs p-2 rounded ${
-                        item.breaking ? 'bg-destructive/20 border border-destructive' : 'bg-muted/50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <span className="uppercase">{item.type}</span>
-                        <span>{item.source}</span>
-                      </div>
-                      <p className="mt-1">{item.content}</p>
-                    </div>
-                  ))}
-                  {(!state?.feed || state.feed.length === 0) && (
-                    <p className="text-sm text-muted-foreground text-center py-8">
-                      No feed items yet
-                    </p>
-                  )}
-                </div>
-              </ScrollArea>
+            {/* Narrative Queue */}
+            <div className="panel">
+              <NarrativeQueue
+                feedItems={feedItems}
+                pendingItems={pendingFeedItems}
+                onApprove={handleApproveFeed}
+                onReject={handleRejectFeed}
+                onInject={handleInjectFeed}
+                teams={interventionTeams.map((t) => ({ id: t.id, name: t.name }))}
+              />
             </div>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CrucibleMasterPage() {
+  return (
+    <ErrorBoundary>
+      <CrucibleMasterPageContent />
+    </ErrorBoundary>
   );
 }

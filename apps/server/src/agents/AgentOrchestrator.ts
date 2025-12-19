@@ -48,7 +48,7 @@ interface ValuesObservation {
 }
 
 interface NarrativeContent {
-  type: 'news' | 'social' | 'radio' | 'weather' | 'official';
+  type: 'news' | 'social' | 'radio' | 'weather' | 'official' | 'character';
   source: string;
   content: string;
   urgency: 1 | 2 | 3 | 4 | 5;

@@ -1,0 +1,682 @@
+/**
+ * Values Card Deck for Pre-Crisis Discovery
+ *
+ * 40 values organized by Schwartz's universal values theory.
+ * Used in the Values Quick Sort exercise during pre-crisis phase.
+ *
+ * Circumplex structure:
+ * - Adjacent values tend to be compatible
+ * - Opposite values tend to create tension
+ */
+
+export type SchwartzCluster =
+  | 'self-direction'
+  | 'achievement'
+  | 'power'
+  | 'security'
+  | 'conformity'
+  | 'tradition'
+  | 'benevolence'
+  | 'universalism'
+  | 'integrity'
+  | 'courage';
+
+export type CircumplexQuadrant =
+  | 'openness-to-change' // Self-direction, Creativity, Curiosity, Independence
+  | 'self-enhancement' // Achievement, Success, Impact, Recognition
+  | 'self-transcendence' // Benevolence, Service, Fairness, Justice, Compassion
+  | 'conservation'; // Security, Stability, Tradition, Loyalty, Duty
+
+export interface ValueCard {
+  id: string;
+  name: string;
+  definition: string;
+  cluster: SchwartzCluster;
+  quadrant: CircumplexQuadrant;
+  relatedValues: string[];
+  potentialTensions: {
+    value: string;
+    reason: string;
+  }[];
+}
+
+// ============================================================================
+// SELF-DIRECTION VALUES (Openness to Change)
+// ============================================================================
+
+const SELF_DIRECTION_VALUES: ValueCard[] = [
+  {
+    id: 'autonomy',
+    name: 'Autonomy',
+    definition: 'Freedom to make my own choices and direct my own work',
+    cluster: 'self-direction',
+    quadrant: 'openness-to-change',
+    relatedValues: ['independence', 'creativity', 'curiosity'],
+    potentialTensions: [
+      { value: 'loyalty', reason: 'When loyalty requires following group decisions' },
+      { value: 'obedience', reason: 'When rules restrict personal choice' },
+    ],
+  },
+  {
+    id: 'creativity',
+    name: 'Creativity',
+    definition: 'Generating new ideas and approaches',
+    cluster: 'self-direction',
+    quadrant: 'openness-to-change',
+    relatedValues: ['autonomy', 'curiosity', 'boldness'],
+    potentialTensions: [
+      { value: 'tradition', reason: 'When custom discourages innovation' },
+      { value: 'order', reason: 'When structure limits experimentation' },
+    ],
+  },
+  {
+    id: 'curiosity',
+    name: 'Curiosity',
+    definition: 'Desire to learn, explore, and understand',
+    cluster: 'self-direction',
+    quadrant: 'openness-to-change',
+    relatedValues: ['creativity', 'autonomy', 'independence'],
+    potentialTensions: [
+      { value: 'security', reason: 'When exploration creates risk' },
+      { value: 'discipline', reason: 'When focus is required over exploration' },
+    ],
+  },
+  {
+    id: 'independence',
+    name: 'Independence',
+    definition: 'Relying on my own judgment and capabilities',
+    cluster: 'self-direction',
+    quadrant: 'openness-to-change',
+    relatedValues: ['autonomy', 'creativity', 'authenticity'],
+    potentialTensions: [
+      { value: 'loyalty', reason: 'When group needs override personal judgment' },
+      { value: 'service', reason: 'When others depend on your involvement' },
+    ],
+  },
+];
+
+// ============================================================================
+// ACHIEVEMENT VALUES (Self-Enhancement)
+// ============================================================================
+
+const ACHIEVEMENT_VALUES: ValueCard[] = [
+  {
+    id: 'excellence',
+    name: 'Excellence',
+    definition: 'Striving for the highest quality in all I do',
+    cluster: 'achievement',
+    quadrant: 'self-enhancement',
+    relatedValues: ['competence', 'ambition', 'discipline'],
+    potentialTensions: [
+      { value: 'compassion', reason: 'When high standards hurt struggling others' },
+      { value: 'forgiveness', reason: 'When mistakes are hard to accept' },
+    ],
+  },
+  {
+    id: 'competence',
+    name: 'Competence',
+    definition: 'Being skilled and effective at what I do',
+    cluster: 'achievement',
+    quadrant: 'self-enhancement',
+    relatedValues: ['excellence', 'ambition', 'preparedness'],
+    potentialTensions: [
+      { value: 'humility', reason: 'When skill becomes pride' },
+      { value: 'kindness', reason: 'When efficiency overrides people' },
+    ],
+  },
+  {
+    id: 'ambition',
+    name: 'Ambition',
+    definition: 'Drive to accomplish significant goals',
+    cluster: 'achievement',
+    quadrant: 'self-enhancement',
+    relatedValues: ['excellence', 'success', 'impact'],
+    potentialTensions: [
+      { value: 'service', reason: 'When personal goals conflict with serving others' },
+      { value: 'stability', reason: 'When growth requires disrupting the status quo' },
+    ],
+  },
+  {
+    id: 'success',
+    name: 'Success',
+    definition: 'Achieving recognition for my accomplishments',
+    cluster: 'achievement',
+    quadrant: 'self-enhancement',
+    relatedValues: ['ambition', 'recognition', 'impact'],
+    potentialTensions: [
+      { value: 'equality', reason: 'When success creates hierarchy' },
+      { value: 'compassion', reason: 'When winning means others lose' },
+    ],
+  },
+];
+
+// ============================================================================
+// POWER/INFLUENCE VALUES (Self-Enhancement)
+// ============================================================================
+
+const POWER_VALUES: ValueCard[] = [
+  {
+    id: 'leadership',
+    name: 'Leadership',
+    definition: 'Guiding and influencing others toward goals',
+    cluster: 'power',
+    quadrant: 'self-enhancement',
+    relatedValues: ['authority', 'impact', 'courage'],
+    potentialTensions: [
+      { value: 'equality', reason: 'When leading creates power imbalance' },
+      { value: 'autonomy', reason: "When others' independence is limited" },
+    ],
+  },
+  {
+    id: 'authority',
+    name: 'Authority',
+    definition: 'Having legitimate power to make decisions',
+    cluster: 'power',
+    quadrant: 'self-enhancement',
+    relatedValues: ['leadership', 'order', 'accountability'],
+    potentialTensions: [
+      { value: 'autonomy', reason: 'When authority limits individual choice' },
+      { value: 'equality', reason: 'When hierarchy creates disparity' },
+    ],
+  },
+  {
+    id: 'impact',
+    name: 'Impact',
+    definition: 'Making a significant difference in outcomes',
+    cluster: 'power',
+    quadrant: 'self-enhancement',
+    relatedValues: ['leadership', 'success', 'ambition'],
+    potentialTensions: [
+      { value: 'safety', reason: 'When bold action creates risk' },
+      { value: 'tradition', reason: 'When change disrupts established ways' },
+    ],
+  },
+  {
+    id: 'recognition',
+    name: 'Recognition',
+    definition: 'Being acknowledged for my contributions',
+    cluster: 'power',
+    quadrant: 'self-enhancement',
+    relatedValues: ['success', 'impact', 'excellence'],
+    potentialTensions: [
+      { value: 'service', reason: 'When credit-seeking overrides helping' },
+      { value: 'humility', reason: 'When acknowledgment becomes need' },
+    ],
+  },
+];
+
+// ============================================================================
+// SECURITY VALUES (Conservation)
+// ============================================================================
+
+const SECURITY_VALUES: ValueCard[] = [
+  {
+    id: 'safety',
+    name: 'Safety',
+    definition: 'Protecting people from harm',
+    cluster: 'security',
+    quadrant: 'conservation',
+    relatedValues: ['stability', 'preparedness', 'order'],
+    potentialTensions: [
+      { value: 'courage', reason: 'When safety means avoiding necessary risk' },
+      { value: 'impact', reason: 'When caution limits bold action' },
+    ],
+  },
+  {
+    id: 'stability',
+    name: 'Stability',
+    definition: 'Maintaining consistency and predictability',
+    cluster: 'security',
+    quadrant: 'conservation',
+    relatedValues: ['safety', 'order', 'tradition'],
+    potentialTensions: [
+      { value: 'creativity', reason: 'When innovation disrupts consistency' },
+      { value: 'ambition', reason: 'When growth requires change' },
+    ],
+  },
+  {
+    id: 'preparedness',
+    name: 'Preparedness',
+    definition: 'Being ready for challenges and contingencies',
+    cluster: 'security',
+    quadrant: 'conservation',
+    relatedValues: ['safety', 'competence', 'discipline'],
+    potentialTensions: [
+      { value: 'creativity', reason: 'When preparation limits spontaneity' },
+      { value: 'trust', reason: 'When over-preparation signals distrust' },
+    ],
+  },
+  {
+    id: 'order',
+    name: 'Order',
+    definition: 'Clear structures, rules, and expectations',
+    cluster: 'security',
+    quadrant: 'conservation',
+    relatedValues: ['stability', 'discipline', 'authority'],
+    potentialTensions: [
+      { value: 'creativity', reason: 'When structure limits innovation' },
+      { value: 'autonomy', reason: 'When rules restrict freedom' },
+    ],
+  },
+];
+
+// ============================================================================
+// CONFORMITY VALUES (Conservation)
+// ============================================================================
+
+const CONFORMITY_VALUES: ValueCard[] = [
+  {
+    id: 'obedience',
+    name: 'Obedience',
+    definition: 'Following established rules and authority',
+    cluster: 'conformity',
+    quadrant: 'conservation',
+    relatedValues: ['discipline', 'respect', 'duty'],
+    potentialTensions: [
+      { value: 'autonomy', reason: 'When rules conflict with personal judgment' },
+      { value: 'courage', reason: 'When following orders feels wrong' },
+    ],
+  },
+  {
+    id: 'discipline',
+    name: 'Discipline',
+    definition: 'Self-control and adherence to standards',
+    cluster: 'conformity',
+    quadrant: 'conservation',
+    relatedValues: ['obedience', 'excellence', 'preparedness'],
+    potentialTensions: [
+      { value: 'creativity', reason: 'When discipline limits exploration' },
+      { value: 'compassion', reason: 'When standards override understanding' },
+    ],
+  },
+  {
+    id: 'respect',
+    name: 'Respect',
+    definition: 'Honoring the dignity and position of others',
+    cluster: 'conformity',
+    quadrant: 'conservation',
+    relatedValues: ['obedience', 'duty', 'honor'],
+    potentialTensions: [
+      { value: 'candor', reason: 'When respect limits difficult feedback' },
+      { value: 'courage', reason: 'When deference prevents speaking up' },
+    ],
+  },
+  {
+    id: 'duty',
+    name: 'Duty',
+    definition: 'Fulfilling obligations and responsibilities',
+    cluster: 'conformity',
+    quadrant: 'conservation',
+    relatedValues: ['obedience', 'respect', 'loyalty'],
+    potentialTensions: [
+      { value: 'autonomy', reason: 'When duty conflicts with personal choice' },
+      { value: 'compassion', reason: 'When duty requires hard decisions' },
+    ],
+  },
+];
+
+// ============================================================================
+// TRADITION VALUES (Conservation)
+// ============================================================================
+
+const TRADITION_VALUES: ValueCard[] = [
+  {
+    id: 'honor',
+    name: 'Honor',
+    definition: 'Living up to the highest standards of my profession',
+    cluster: 'tradition',
+    quadrant: 'conservation',
+    relatedValues: ['loyalty', 'integrity', 'respect'],
+    potentialTensions: [
+      { value: 'pragmatism', reason: 'When ideals conflict with reality' },
+      { value: 'forgiveness', reason: 'When honor demands consequences' },
+    ],
+  },
+  {
+    id: 'loyalty',
+    name: 'Loyalty',
+    definition: 'Commitment to people and institutions I serve',
+    cluster: 'tradition',
+    quadrant: 'conservation',
+    relatedValues: ['honor', 'duty', 'tradition'],
+    potentialTensions: [
+      { value: 'honesty', reason: 'When loyalty means protecting wrongdoing' },
+      { value: 'independence', reason: 'When loyalty limits personal judgment' },
+    ],
+  },
+  {
+    id: 'tradition',
+    name: 'Tradition',
+    definition: 'Preserving established customs and practices',
+    cluster: 'tradition',
+    quadrant: 'conservation',
+    relatedValues: ['honor', 'heritage', 'stability'],
+    potentialTensions: [
+      { value: 'creativity', reason: 'When tradition resists change' },
+      { value: 'fairness', reason: 'When customs perpetuate inequity' },
+    ],
+  },
+  {
+    id: 'heritage',
+    name: 'Heritage',
+    definition: 'Honoring the legacy of those who came before',
+    cluster: 'tradition',
+    quadrant: 'conservation',
+    relatedValues: ['tradition', 'honor', 'loyalty'],
+    potentialTensions: [
+      { value: 'innovation', reason: 'When the past limits the future' },
+      { value: 'equality', reason: 'When legacy perpetuates privilege' },
+    ],
+  },
+];
+
+// ============================================================================
+// BENEVOLENCE VALUES (Self-Transcendence)
+// ============================================================================
+
+const BENEVOLENCE_VALUES: ValueCard[] = [
+  {
+    id: 'compassion',
+    name: 'Compassion',
+    definition: 'Caring about the suffering of others',
+    cluster: 'benevolence',
+    quadrant: 'self-transcendence',
+    relatedValues: ['service', 'kindness', 'forgiveness'],
+    potentialTensions: [
+      { value: 'excellence', reason: 'When standards hurt struggling people' },
+      { value: 'accountability', reason: 'When compassion overrides consequences' },
+    ],
+  },
+  {
+    id: 'service',
+    name: 'Service',
+    definition: 'Dedicating myself to helping others',
+    cluster: 'benevolence',
+    quadrant: 'self-transcendence',
+    relatedValues: ['compassion', 'kindness', 'duty'],
+    potentialTensions: [
+      { value: 'ambition', reason: 'When personal goals conflict with service' },
+      { value: 'independence', reason: 'When serving limits self-care' },
+    ],
+  },
+  {
+    id: 'kindness',
+    name: 'Kindness',
+    definition: 'Treating others with warmth and generosity',
+    cluster: 'benevolence',
+    quadrant: 'self-transcendence',
+    relatedValues: ['compassion', 'service', 'forgiveness'],
+    potentialTensions: [
+      { value: 'honesty', reason: 'When truth would hurt' },
+      { value: 'accountability', reason: 'When kindness enables poor behavior' },
+    ],
+  },
+  {
+    id: 'forgiveness',
+    name: 'Forgiveness',
+    definition: 'Letting go of resentment and offering second chances',
+    cluster: 'benevolence',
+    quadrant: 'self-transcendence',
+    relatedValues: ['compassion', 'kindness', 'justice'],
+    potentialTensions: [
+      { value: 'accountability', reason: 'When forgiveness overrides consequences' },
+      { value: 'justice', reason: 'When mercy conflicts with fairness' },
+    ],
+  },
+];
+
+// ============================================================================
+// UNIVERSALISM VALUES (Self-Transcendence)
+// ============================================================================
+
+const UNIVERSALISM_VALUES: ValueCard[] = [
+  {
+    id: 'fairness',
+    name: 'Fairness',
+    definition: 'Treating everyone equitably and justly',
+    cluster: 'universalism',
+    quadrant: 'self-transcendence',
+    relatedValues: ['justice', 'equality', 'honesty'],
+    potentialTensions: [
+      { value: 'loyalty', reason: 'When fairness means treating loved ones equally' },
+      { value: 'compassion', reason: 'When equity overrides individual need' },
+    ],
+  },
+  {
+    id: 'justice',
+    name: 'Justice',
+    definition: 'Ensuring right outcomes for all',
+    cluster: 'universalism',
+    quadrant: 'self-transcendence',
+    relatedValues: ['fairness', 'equality', 'accountability'],
+    potentialTensions: [
+      { value: 'forgiveness', reason: 'When mercy conflicts with justice' },
+      { value: 'kindness', reason: 'When justice requires hard consequences' },
+    ],
+  },
+  {
+    id: 'equality',
+    name: 'Equality',
+    definition: 'Valuing all people regardless of status',
+    cluster: 'universalism',
+    quadrant: 'self-transcendence',
+    relatedValues: ['fairness', 'justice', 'respect'],
+    potentialTensions: [
+      { value: 'authority', reason: 'When hierarchy creates disparity' },
+      { value: 'success', reason: 'When achievement creates inequality' },
+    ],
+  },
+  {
+    id: 'stewardship',
+    name: 'Stewardship',
+    definition: 'Responsible care for resources and environment',
+    cluster: 'universalism',
+    quadrant: 'self-transcendence',
+    relatedValues: ['service', 'accountability', 'preparedness'],
+    potentialTensions: [
+      { value: 'ambition', reason: 'When growth depletes resources' },
+      { value: 'success', reason: 'When short-term gains harm long-term' },
+    ],
+  },
+];
+
+// ============================================================================
+// INTEGRITY VALUES (Spans Quadrants)
+// ============================================================================
+
+const INTEGRITY_VALUES: ValueCard[] = [
+  {
+    id: 'integrity',
+    name: 'Integrity',
+    definition: 'Acting in accordance with my beliefs, even when difficult',
+    cluster: 'integrity',
+    quadrant: 'self-transcendence',
+    relatedValues: ['honesty', 'accountability', 'authenticity'],
+    potentialTensions: [
+      { value: 'loyalty', reason: 'When group asks you to bend' },
+      { value: 'kindness', reason: 'When truth hurts' },
+    ],
+  },
+  {
+    id: 'honesty',
+    name: 'Honesty',
+    definition: 'Telling the truth and being transparent',
+    cluster: 'integrity',
+    quadrant: 'self-transcendence',
+    relatedValues: ['integrity', 'accountability', 'candor'],
+    potentialTensions: [
+      { value: 'kindness', reason: 'When truth causes pain' },
+      { value: 'loyalty', reason: 'When honesty exposes allies' },
+    ],
+  },
+  {
+    id: 'accountability',
+    name: 'Accountability',
+    definition: 'Taking responsibility for my actions and their consequences',
+    cluster: 'integrity',
+    quadrant: 'self-transcendence',
+    relatedValues: ['integrity', 'honesty', 'duty'],
+    potentialTensions: [
+      { value: 'compassion', reason: 'When accountability hurts people' },
+      { value: 'forgiveness', reason: 'When consequences seem harsh' },
+    ],
+  },
+  {
+    id: 'authenticity',
+    name: 'Authenticity',
+    definition: 'Being true to myself in all situations',
+    cluster: 'integrity',
+    quadrant: 'openness-to-change',
+    relatedValues: ['integrity', 'honesty', 'independence'],
+    potentialTensions: [
+      { value: 'service', reason: 'When role requires presenting differently' },
+      { value: 'respect', reason: 'When authenticity conflicts with norms' },
+    ],
+  },
+];
+
+// ============================================================================
+// COURAGE VALUES (Spans Quadrants)
+// ============================================================================
+
+const COURAGE_VALUES: ValueCard[] = [
+  {
+    id: 'courage',
+    name: 'Courage',
+    definition: 'Acting despite fear when it matters',
+    cluster: 'courage',
+    quadrant: 'openness-to-change',
+    relatedValues: ['boldness', 'candor', 'resilience'],
+    potentialTensions: [
+      { value: 'safety', reason: 'When courage requires risk' },
+      { value: 'prudence', reason: 'When boldness seems reckless' },
+    ],
+  },
+  {
+    id: 'resilience',
+    name: 'Resilience',
+    definition: 'Persevering through adversity',
+    cluster: 'courage',
+    quadrant: 'conservation',
+    relatedValues: ['courage', 'discipline', 'preparedness'],
+    potentialTensions: [
+      { value: 'flexibility', reason: 'When persistence becomes stubbornness' },
+      { value: 'compassion', reason: 'When self-care is needed' },
+    ],
+  },
+  {
+    id: 'boldness',
+    name: 'Boldness',
+    definition: 'Willingness to take risks for important goals',
+    cluster: 'courage',
+    quadrant: 'openness-to-change',
+    relatedValues: ['courage', 'ambition', 'creativity'],
+    potentialTensions: [
+      { value: 'safety', reason: 'When boldness endangers others' },
+      { value: 'stability', reason: 'When risk disrupts consistency' },
+    ],
+  },
+  {
+    id: 'candor',
+    name: 'Candor',
+    definition: 'Speaking difficult truths directly',
+    cluster: 'courage',
+    quadrant: 'openness-to-change',
+    relatedValues: ['honesty', 'courage', 'integrity'],
+    potentialTensions: [
+      { value: 'kindness', reason: 'When directness causes hurt' },
+      { value: 'respect', reason: 'When candor challenges authority' },
+    ],
+  },
+];
+
+// ============================================================================
+// COMBINED VALUES DECK (40 cards)
+// ============================================================================
+
+export const VALUES_DECK: ValueCard[] = [
+  ...SELF_DIRECTION_VALUES,
+  ...ACHIEVEMENT_VALUES,
+  ...POWER_VALUES,
+  ...SECURITY_VALUES,
+  ...CONFORMITY_VALUES,
+  ...TRADITION_VALUES,
+  ...BENEVOLENCE_VALUES,
+  ...UNIVERSALISM_VALUES,
+  ...INTEGRITY_VALUES,
+  ...COURAGE_VALUES,
+];
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Get a value card by ID
+ */
+export function getValueById(id: string): ValueCard | undefined {
+  return VALUES_DECK.find((v) => v.id === id);
+}
+
+/**
+ * Get all values in a specific cluster
+ */
+export function getValuesByCluster(cluster: SchwartzCluster): ValueCard[] {
+  return VALUES_DECK.filter((v) => v.cluster === cluster);
+}
+
+/**
+ * Get all values in a specific quadrant
+ */
+export function getValuesByQuadrant(quadrant: CircumplexQuadrant): ValueCard[] {
+  return VALUES_DECK.filter((v) => v.quadrant === quadrant);
+}
+
+/**
+ * Get values that potentially conflict with a given value
+ */
+export function getConflictingValues(valueId: string): ValueCard[] {
+  const value = getValueById(valueId);
+  if (!value) return [];
+
+  const conflictingIds = value.potentialTensions.map((t) => {
+    const match = VALUES_DECK.find(
+      (v) => v.name.toLowerCase() === t.value.toLowerCase() || v.id === t.value.toLowerCase()
+    );
+    return match?.id;
+  });
+
+  return VALUES_DECK.filter((v) => conflictingIds.includes(v.id));
+}
+
+/**
+ * Get values related to a given value
+ */
+export function getRelatedValues(valueId: string): ValueCard[] {
+  const value = getValueById(valueId);
+  if (!value) return [];
+
+  return VALUES_DECK.filter((v) => value.relatedValues.includes(v.id));
+}
+
+/**
+ * Shuffle values deck for randomized display
+ */
+export function shuffleValuesDeck(): ValueCard[] {
+  const shuffled = [...VALUES_DECK];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+/**
+ * Commonly selected values (for facilitator awareness)
+ */
+export const COMMONLY_SELECTED = ['integrity', 'honesty', 'respect', 'accountability', 'loyalty'];
+
+/**
+ * Frequently underselected but crisis-critical values
+ */
+export const UNDERSELECTED_CRITICAL = ['courage', 'candor', 'fairness', 'safety'];

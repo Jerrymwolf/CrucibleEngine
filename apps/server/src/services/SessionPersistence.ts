@@ -285,4 +285,282 @@ export class SessionPersistence {
       },
     });
   }
+
+  // ============================================================================
+  // PRE-CRISIS PERSISTENCE
+  // ============================================================================
+
+  async createPreCrisisProfile(data: {
+    sessionId: string;
+    participantId: string;
+    participantName: string;
+    topFive: string[];
+    valueMeanings: Record<string, {
+      definition: string;
+      livingIt: string[];
+      violatingIt: string[];
+    }>;
+    valuesStory?: string;
+    selfIdentifiedValues: string[];
+    peerIdentifiedValues: string[];
+  }): Promise<void> {
+    // Check for significant misalignment between self and peer identified values
+    const selfSet = new Set(data.selfIdentifiedValues);
+    const peerNotInSelf = data.peerIdentifiedValues.filter(v => !selfSet.has(v));
+    const alignmentFlag = peerNotInSelf.length >= 2; // Flag if peers see 2+ different values
+
+    await prisma.preCrisisProfile.upsert({
+      where: { participantId: data.participantId },
+      create: {
+        participantId: data.participantId,
+        participantName: data.participantName,
+        topFiveValues: data.topFive,
+        valueMeanings: data.valueMeanings as Prisma.InputJsonValue,
+        storyText: data.valuesStory,
+        selfIdentifiedValues: data.selfIdentifiedValues,
+        peerIdentifiedValues: data.peerIdentifiedValues,
+        alignmentFlag,
+        roundTimings: [],
+        cardsConsidered: [],
+      },
+      update: {
+        participantName: data.participantName,
+        topFiveValues: data.topFive,
+        valueMeanings: data.valueMeanings as Prisma.InputJsonValue,
+        storyText: data.valuesStory,
+        selfIdentifiedValues: data.selfIdentifiedValues,
+        peerIdentifiedValues: data.peerIdentifiedValues,
+        alignmentFlag,
+      },
+    });
+  }
+
+  async createTeamCommitment(data: {
+    sessionId: string;
+    teamId: string;
+    teamName: string;
+    statedValues: string[];
+    valueDefinitions: Array<{
+      value: string;
+      teamDefinition: string;
+      livingIt: string[];
+      violatingIt: string[];
+    }>;
+    commitmentStatement: string;
+    decisionProcess: string;
+    signatures: string[];
+    readAloudAt?: number;
+  }): Promise<void> {
+    await prisma.teamCommitment.upsert({
+      where: { teamId: data.teamId },
+      create: {
+        teamId: data.teamId,
+        sessionId: data.sessionId,
+        values: data.valueDefinitions as Prisma.InputJsonValue,
+        commitmentText: data.commitmentStatement,
+        decisionProcess: data.decisionProcess,
+        signatures: data.signatures,
+        readAloudAt: data.readAloudAt ? new Date(data.readAloudAt) : null,
+        orgValues: [],
+      },
+      update: {
+        values: data.valueDefinitions as Prisma.InputJsonValue,
+        commitmentText: data.commitmentStatement,
+        decisionProcess: data.decisionProcess,
+        signatures: data.signatures,
+        readAloudAt: data.readAloudAt ? new Date(data.readAloudAt) : null,
+      },
+    });
+
+    // Also update the Team record for Colyseus state recovery
+    await prisma.team.update({
+      where: { id: data.teamId },
+      data: {
+        statedValues: data.statedValues,
+        commitmentStatement: data.commitmentStatement,
+        decisionProcess: data.decisionProcess,
+      },
+    }).catch(() => {
+      // Team might not exist in DB yet if created only in Colyseus
+      // This is okay - TeamCommitment is the authoritative source
+    });
+  }
+
+  async getTeamCommitment(teamId: string): Promise<{
+    values: unknown;
+    commitmentText: string;
+    decisionProcess: string;
+    signatures: string[];
+    readAloudAt: Date | null;
+  } | null> {
+    const commitment = await prisma.teamCommitment.findUnique({
+      where: { teamId },
+    });
+    if (!commitment) return null;
+    return {
+      values: commitment.values,
+      commitmentText: commitment.commitmentText,
+      decisionProcess: commitment.decisionProcess,
+      signatures: commitment.signatures,
+      readAloudAt: commitment.readAloudAt,
+    };
+  }
+
+  async getPreCrisisProfiles(participantIds: string[]): Promise<Array<{
+    participantId: string;
+    participantName: string;
+    topFiveValues: string[];
+    valueMeanings: unknown;
+    storyText: string | null;
+    selfIdentifiedValues: string[];
+    peerIdentifiedValues: string[];
+  }>> {
+    const profiles = await prisma.preCrisisProfile.findMany({
+      where: { participantId: { in: participantIds } },
+    });
+    return profiles.map(p => ({
+      participantId: p.participantId,
+      participantName: p.participantName,
+      topFiveValues: p.topFiveValues,
+      valueMeanings: p.valueMeanings,
+      storyText: p.storyText,
+      selfIdentifiedValues: p.selfIdentifiedValues,
+      peerIdentifiedValues: p.peerIdentifiedValues,
+    }));
+  }
+
+  // ============================================================================
+  // PRODUCTION SNAPSHOTS
+  // ============================================================================
+
+  async createProductionSnapshot(data: {
+    sessionId: string;
+    simulationTime: number;
+    revenueImpact: number;
+    productionHoursLost: number;
+    quarterlyProgress: number;
+    pipelineStatus: string;
+    patientsAffected: number;
+    childrenAffected: number;
+    workersAtRisk: number;
+    workersEvacuated: number;
+    globalStockpileWeeks: number;
+  }): Promise<void> {
+    await prisma.productionSnapshot.create({ data });
+  }
+
+  // ============================================================================
+  // DEBRIEF DATA RETRIEVAL
+  // ============================================================================
+
+  /**
+   * ValuesObservation stored in DB - matches AgentOrchestrator output
+   */
+  private static parseValuesObservation(json: unknown): {
+    statedValuesAnalysis: Array<{ value: string; alignment: number; evidence: string }>;
+    abcd: { affect: string; behavior: string; cognition: string; desire: string };
+  } | null {
+    if (!json || typeof json !== 'object') return null;
+    const obj = json as Record<string, unknown>;
+    return {
+      statedValuesAnalysis: (obj.statedValuesAnalysis as Array<{ value: string; alignment: number; evidence: string }>) || [],
+      abcd: (obj.abcd as { affect: string; behavior: string; cognition: string; desire: string }) || {
+        affect: 'unknown',
+        behavior: 'unknown',
+        cognition: 'unknown',
+        desire: 'unknown',
+      },
+    };
+  }
+
+  async getDebriefData(teamId: string): Promise<{
+    valueDefinitions: Array<{
+      value: string;
+      teamDefinition: string;
+      livingIt: string[];
+      violatingIt: string[];
+    }>;
+    statedValues: string[];
+    commitmentStatement: string;
+    decisionProcess: string;
+    decisions: Array<{
+      id: string;
+      choice: string;
+      rationale: string;
+      simulationTime: number;
+      valuesAnalysis: {
+        statedValuesAnalysis: Array<{ value: string; alignment: number; evidence: string }>;
+        abcd: { affect: string; behavior: string; cognition: string; desire: string };
+      } | null;
+      notableMoment: boolean;
+      notableReason: string | null;
+    }>;
+  } | null> {
+    const commitment = await this.getTeamCommitment(teamId);
+    if (!commitment) return null;
+
+    const decisions = await prisma.decision.findMany({
+      where: { teamId },
+      orderBy: { simulationTime: 'asc' },
+    });
+
+    // Parse the values JSON from commitment
+    const valueDefinitions = (commitment.values as Array<{
+      value: string;
+      teamDefinition: string;
+      livingIt: string[];
+      violatingIt: string[];
+    }>) || [];
+
+    // Extract just the value names for GapAnalyzer
+    const statedValues = valueDefinitions.map(v => v.value);
+
+    return {
+      valueDefinitions,
+      statedValues,
+      commitmentStatement: commitment.commitmentText,
+      decisionProcess: commitment.decisionProcess,
+      decisions: decisions.map(d => ({
+        id: d.id,
+        choice: d.choice,
+        rationale: d.rationale || '',
+        simulationTime: d.simulationTime,
+        valuesAnalysis: SessionPersistence.parseValuesObservation(d.valuesAnalysis),
+        notableMoment: d.notableMoment || false,
+        notableReason: d.notableReason,
+      })),
+    };
+  }
+
+  async createTransferReflection(data: {
+    sessionId: string;
+    teamId: string;
+    participantId: string;
+    participantName: string;
+    realSituation: string;
+    valueTested: string;
+    whatYouDid: string;
+    pressureTrigger: string;
+    committedAction: string;
+    valueProtected: string;
+  }): Promise<void> {
+    await prisma.reflection.create({
+      data: {
+        sessionId: data.sessionId,
+        teamId: data.teamId,
+        participantName: data.participantName,
+        content: JSON.stringify({
+          realSituation: data.realSituation,
+          valueTested: data.valueTested,
+          whatYouDid: data.whatYouDid,
+          pressureTrigger: data.pressureTrigger,
+          committedAction: data.committedAction,
+          valueProtected: data.valueProtected,
+        }),
+        visibility: 'facilitator',
+        category: 'transfer',
+        timestamp: BigInt(Date.now()),
+      },
+    });
+  }
 }

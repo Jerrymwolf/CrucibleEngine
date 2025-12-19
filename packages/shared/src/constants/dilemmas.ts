@@ -1,0 +1,2616 @@
+/**
+ * Dilemma Library
+ * 45 total dilemmas: 15 Watch, 20 Crisis, 10 Recovery
+ *
+ * Each dilemma is mapped to:
+ * - A specific parish (or 'multi' for cross-parish)
+ * - A persona who voices the pressure
+ * - Learning outcomes it serves
+ * - Values it tests
+ *
+ * Pattern: "Should we X now or wait for better information?" (Watch)
+ *          "You can save A or B, not both. 30 seconds." (Crisis)
+ *          "The reporter is asking why you..." (Recovery)
+ */
+
+import type { Dilemma, DilemmaLibrary, DilemmaPhase } from '../types/dilemma.js';
+
+// ============================================================================
+// WATCH PHASE DILEMMAS (15)
+// ============================================================================
+
+const WATCH_DILEMMAS: Dilemma[] = [
+  // WATCH-KEYSTONE-01: Last Production Run
+  {
+    id: 'watch-keystone-01',
+    title: 'Last Production Run',
+    phase: 'watch',
+    parishId: 'keystone',
+    setup:
+      'Hurricane watch just issued. One more production cycle completes in 18 hours—worth $43M and fulfilling a contract that keeps 200 jobs secure. Storm could arrive in 48-72 hours.',
+    trigger: {
+      timelineWindow: 'watch-72',
+      intensityMin: 2,
+      intensityMax: 5,
+    },
+    options: [
+      {
+        id: 'continue',
+        label: 'Complete the run',
+        description: 'Keep production going. Workers can shelter after cycle completes.',
+        valueAlignment: { production: 2, 'worker-safety': -2, financial: 2, trust: -1 },
+        consequenceSketch: {
+          immediate: 'Production continues. Workers anxious but compliant.',
+          ripple: 'Maria Santos calls emergency union meeting in Haven.',
+          delayed:
+            'If storm accelerates, workers trapped in facility. Union grievance filed regardless.',
+        },
+      },
+      {
+        id: 'halt-now',
+        label: 'Halt immediately',
+        description: 'Stop production, begin orderly shutdown, prepare evacuation.',
+        valueAlignment: { production: -2, 'worker-safety': 2, financial: -2, trust: 1 },
+        consequenceSketch: {
+          immediate: '$43M contract breach. Workers relieved. Reeves faces Summit pressure.',
+          ripple: 'Webb demands explanation in 30 minutes.',
+          delayed:
+            'If storm misses, Reeves blamed for "overreaction." Contract may be salvageable if storm hits.',
+        },
+      },
+      {
+        id: 'accelerate',
+        label: 'Accelerate timeline',
+        description: 'Run 24-hour shifts to complete in 12 hours instead of 18.',
+        valueAlignment: { production: 1, 'worker-safety': -1, financial: 1, trust: -2 },
+        consequenceSketch: {
+          immediate: 'Workers pushed hard. Error risk increases. Deadline might be achievable.',
+          ripple: 'Quality control flags potential contamination from rushed process.',
+          delayed:
+            'If batch is contaminated, $43M becomes $0 plus recall costs. Workers exhausted for evacuation.',
+        },
+      },
+      {
+        id: 'partial',
+        label: 'Partial production',
+        description: 'Complete critical sub-batch worth $15M, abandon rest.',
+        valueAlignment: { production: 0, 'worker-safety': 1, financial: 0, trust: 0 },
+        consequenceSketch: {
+          immediate: 'Compromise satisfies no one fully. Some workers released early.',
+          ripple: 'Contract penalty but not breach. Summit frustrated, union suspicious.',
+          delayed: 'Positioned okay regardless of storm outcome, but relationships strained.',
+        },
+      },
+    ],
+    valuesTested: ['production', 'worker-safety', 'financial-responsibility', 'trust'],
+    personaId: 'reeves',
+    learningOutcomes: ['LO1', 'LO2'],
+    narrativeWeight: 'major',
+  },
+
+  // WATCH-KEYSTONE-02: Clean Room Shutdown
+  {
+    id: 'watch-keystone-02',
+    title: 'Clean Room Shutdown',
+    phase: 'watch',
+    parishId: 'keystone',
+    setup:
+      'Clean rooms require 48 hours to restart after shutdown. If you close them now and the storm misses, you lose a week of production. If you wait and power fails, contamination destroys months of work.',
+    trigger: {
+      timelineWindow: 'watch-48',
+      intensityMin: 3,
+      intensityMax: 7,
+    },
+    options: [
+      {
+        id: 'shutdown-now',
+        label: 'Shutdown now',
+        description: 'Begin orderly shutdown of all clean rooms immediately.',
+        valueAlignment: { protocol: 2, flexibility: -2, 'risk-management': 2 },
+        consequenceSketch: {
+          immediate: 'Clean rooms begin shutdown sequence. 48-hour restart clock starts.',
+          ripple: 'Webb questions if this was necessary. Competitors may gain ground.',
+          delayed: 'Clean rooms protected. Week lost if storm misses, but no contamination risk.',
+        },
+      },
+      {
+        id: 'wait-24',
+        label: 'Wait 24 hours',
+        description: 'Continue operations until warning is issued, then shutdown.',
+        valueAlignment: { protocol: -1, flexibility: 1, 'risk-management': -1 },
+        consequenceSketch: {
+          immediate: 'Production continues. Workers increasingly anxious.',
+          ripple: 'Tanaka warns power may become unstable before shutdown completes.',
+          delayed:
+            'If storm accelerates, may not have time for proper shutdown. Contamination risk.',
+        },
+      },
+      {
+        id: 'skeleton-crew',
+        label: 'Skeleton crew standby',
+        description: 'Reduce staff, maintain minimum operations, ready for rapid shutdown.',
+        valueAlignment: { protocol: 0, flexibility: 0, 'risk-management': 0 },
+        consequenceSketch: {
+          immediate: 'Most workers released. Small team maintains readiness.',
+          ripple: 'Workers unsure if they should stay or go. Mixed messages.',
+          delayed: 'Positioned for either outcome but with reduced capability.',
+        },
+      },
+    ],
+    valuesTested: ['protocol', 'flexibility', 'risk-management'],
+    personaId: 'reeves',
+    learningOutcomes: ['LO1', 'LO5'],
+    narrativeWeight: 'standard',
+  },
+
+  // WATCH-HAVEN-01: Early Port Closure
+  {
+    id: 'watch-haven-01',
+    title: 'Early Port Closure',
+    phase: 'watch',
+    parishId: 'haven',
+    setup:
+      'Union rep Maria Santos demands port closure 24 hours before mandatory. This protects workers but strands three supply ships with $8M in cargo and blocks the last evacuation route by sea.',
+    trigger: {
+      timelineWindow: 'watch-48',
+      intensityMin: 3,
+      intensityMax: 6,
+    },
+    options: [
+      {
+        id: 'close-early',
+        label: 'Close early',
+        description: 'Honor union demand. Close port immediately.',
+        valueAlignment: { 'worker-safety': 2, livelihood: -1, solidarity: 2 },
+        consequenceSketch: {
+          immediate: 'Port closes. Workers relieved. Ships turned away.',
+          ripple: '$8M cargo stranded offshore. Gateway loses sea evacuation option.',
+          delayed:
+            'Union trust built. Corporate furious. Cargo may be lost if ships cannot shelter.',
+        },
+      },
+      {
+        id: 'negotiate-hours',
+        label: 'Negotiate 12 hours',
+        description: 'Ask Santos for 12 more hours to offload critical supplies.',
+        valueAlignment: { 'worker-safety': 0, livelihood: 1, solidarity: -1 },
+        consequenceSketch: {
+          immediate: 'Tense negotiation. Workers suspicious but tentatively agree.',
+          ripple: 'Race to offload critical medical supplies before closure.',
+          delayed: 'Some supplies saved. Union trust damaged. Workers remember the delay.',
+        },
+      },
+      {
+        id: 'override-union',
+        label: 'Override demand',
+        description: 'Cite emergency authority to keep port open until mandatory closure.',
+        valueAlignment: { 'worker-safety': -2, livelihood: 2, solidarity: -3 },
+        consequenceSketch: {
+          immediate: 'Santos threatens walkout. Some workers leave anyway.',
+          ripple: 'Work slowdown begins. Cargo offloading delayed by resistance.',
+          delayed:
+            'Union files formal grievance. Relationship poisoned. Future cooperation unlikely.',
+        },
+      },
+    ],
+    valuesTested: ['worker-safety', 'livelihood', 'solidarity'],
+    personaId: 'santos',
+    learningOutcomes: ['LO2', 'LO3'],
+    narrativeWeight: 'major',
+  },
+
+  // WATCH-HAVEN-02: Union Meeting Timing
+  {
+    id: 'watch-haven-02',
+    title: 'Union Meeting Timing',
+    phase: 'watch',
+    parishId: 'haven',
+    setup:
+      'Maria Santos wants to hold emergency union meeting during work hours. This will halt processing for 2 hours but let workers voice concerns. Management says wait until after shift.',
+    trigger: {
+      timelineWindow: 'watch-72',
+      intensityMin: 2,
+      intensityMax: 5,
+    },
+    options: [
+      {
+        id: 'meeting-now',
+        label: 'Hold meeting now',
+        description: 'Authorize work-hours meeting. Production halts for 2 hours.',
+        valueAlignment: { solidarity: 2, compliance: -1, 'worker-voice': 2 },
+        consequenceSketch: {
+          immediate: 'Workers gather. Concerns voiced. Some feel heard.',
+          ripple: 'Webb notes production loss. Santos gains influence.',
+          delayed: 'Workers more unified in whatever decisions follow.',
+        },
+      },
+      {
+        id: 'after-shift',
+        label: 'After shift only',
+        description: 'Meeting can happen but not during work hours.',
+        valueAlignment: { solidarity: -1, compliance: 2, 'worker-voice': -1 },
+        consequenceSketch: {
+          immediate: 'Workers grumble. Some skip meeting due to family obligations.',
+          ripple: 'Santos notes who prioritized work over voice.',
+          delayed: 'Meeting attendance lower. Decisions made without full input.',
+        },
+      },
+      {
+        id: 'management-present',
+        label: 'Joint meeting',
+        description: 'Hold meeting now with management present to address concerns directly.',
+        valueAlignment: { solidarity: 0, compliance: 0, 'worker-voice': 1, transparency: 1 },
+        consequenceSketch: {
+          immediate: 'Tense joint meeting. Some concerns addressed. Some tensions surface.',
+          ripple: 'Workers see management response firsthand. Trust tested.',
+          delayed:
+            'Relationship depends on follow-through. Promises remembered.',
+        },
+      },
+    ],
+    valuesTested: ['solidarity', 'compliance', 'worker-voice'],
+    personaId: 'santos',
+    learningOutcomes: ['LO2', 'LO5'],
+    narrativeWeight: 'standard',
+  },
+
+  // WATCH-GATEWAY-01: Final Harvest Run
+  {
+    id: 'watch-gateway-01',
+    title: 'Final Harvest Run',
+    phase: 'watch',
+    parishId: 'gateway',
+    setup:
+      'Captain Mendez says sea conditions allow one more harvest run—worth $2M in raw materials for Keystone. But if the storm accelerates, the crew could be caught at sea.',
+    trigger: {
+      timelineWindow: 'watch-48',
+      intensityMin: 3,
+      intensityMax: 6,
+    },
+    options: [
+      {
+        id: 'no-run',
+        label: 'No more runs',
+        description: 'Recall all vessels. Secure the fleet.',
+        valueAlignment: { 'crew-safety': 2, quota: -2, prudence: 2 },
+        consequenceSketch: {
+          immediate: 'Fleet secured. Keystone loses raw material buffer.',
+          ripple: 'Reeves complains about supply shortage impacting production.',
+          delayed: 'Crews safe. Production may face shortage. No regrets if storm hits.',
+        },
+      },
+      {
+        id: 'one-run',
+        label: 'One final run',
+        description: 'Authorize one more run with experienced crew only.',
+        valueAlignment: { 'crew-safety': -1, quota: 1, prudence: -1 },
+        consequenceSketch: {
+          immediate: 'Veteran crew departs. Weather window is tight.',
+          ripple: 'Other crews feel pressure to volunteer. Mendez worried.',
+          delayed: 'If successful, hero story. If caught, tragedy. High stakes.',
+        },
+      },
+      {
+        id: 'voluntary-only',
+        label: 'Voluntary crew',
+        description: 'Allow run only if crew volunteers with full risk disclosure.',
+        valueAlignment: { 'crew-safety': 0, quota: 0, prudence: 0, autonomy: 1 },
+        consequenceSketch: {
+          immediate: 'Some volunteer. Others refuse. Creates division.',
+          ripple: 'Those who refuse may feel judged. Those who go may feel martyred.',
+          delayed: 'Outcome determines narrative. Either brave or reckless.',
+        },
+      },
+    ],
+    valuesTested: ['crew-safety', 'quota', 'prudence'],
+    personaId: 'mendez',
+    learningOutcomes: ['LO1', 'LO2'],
+    narrativeWeight: 'major',
+  },
+
+  // WATCH-GATEWAY-02: Tourist Evacuation Priority
+  {
+    id: 'watch-gateway-02',
+    title: 'Tourist Evacuation Priority',
+    phase: 'watch',
+    parishId: 'gateway',
+    setup:
+      'Last commercial flights are filling. Tourists with expensive tickets get priority, but Gateway residents need those seats too. Resort owner pressures for tourist priority to "protect reputation."',
+    trigger: {
+      timelineWindow: 'watch-48',
+      intensityMin: 3,
+      intensityMax: 6,
+    },
+    options: [
+      {
+        id: 'residents-first',
+        label: 'Residents first',
+        description: 'Prioritize Gateway residents over tourists for remaining seats.',
+        valueAlignment: { equity: 2, economics: -2, community: 2 },
+        consequenceSketch: {
+          immediate: 'Tourists stranded. Resort owner furious. Residents relieved.',
+          ripple: 'Tourism industry threatens to pull future business.',
+          delayed: 'Community remembers who was protected. Tourism may suffer long-term.',
+        },
+      },
+      {
+        id: 'tourists-first',
+        label: 'Tourists first',
+        description: 'Honor existing tickets. Tourists evacuate first.',
+        valueAlignment: { equity: -2, economics: 2, community: -2 },
+        consequenceSketch: {
+          immediate: 'Tourists evacuate. Residents furious. Mayor Chen intervenes.',
+          ripple: 'Sterling shelter must absorb Gateway residents.',
+          delayed: 'Residents never forget. Class division deepens.',
+        },
+      },
+      {
+        id: 'lottery',
+        label: 'Random lottery',
+        description: 'Fair lottery for remaining seats regardless of ticket or residence.',
+        valueAlignment: { equity: 1, economics: -1, community: 0 },
+        consequenceSketch: {
+          immediate: 'Some tourists stranded. Some residents stranded. Everyone unhappy.',
+          ripple: 'Perceived as fair but unsatisfying to everyone.',
+          delayed: 'Process defended as equitable even if outcome was painful.',
+        },
+      },
+    ],
+    valuesTested: ['equity', 'economics', 'community'],
+    personaId: 'mendez',
+    learningOutcomes: ['LO3', 'LO5'],
+    narrativeWeight: 'standard',
+  },
+
+  // WATCH-HEARTLAND-01: Reservoir Pre-Release
+  {
+    id: 'watch-heartland-01',
+    title: 'Reservoir Pre-Release',
+    phase: 'watch',
+    parishId: 'heartland',
+    setup:
+      'Tanaka recommends pre-releasing 20% of reservoir capacity to create storm buffer. This wastes water if storm misses but prevents overflow risk if it hits. Webb says keep water for post-storm needs.',
+    trigger: {
+      timelineWindow: 'watch-72',
+      intensityMin: 2,
+      intensityMax: 5,
+    },
+    options: [
+      {
+        id: 'pre-release',
+        label: 'Pre-release now',
+        description: 'Release 20% capacity to create buffer for storm rainfall.',
+        valueAlignment: { precaution: 2, 'resource-conservation': -2, 'system-safety': 2 },
+        consequenceSketch: {
+          immediate: 'Water released. Capacity buffer created. Webb notes waste.',
+          ripple: 'Post-storm water supply reduced if storm misses.',
+          delayed: 'If storm hits, buffer prevents overflow. If misses, water wasted.',
+        },
+      },
+      {
+        id: 'hold-water',
+        label: 'Hold capacity',
+        description: 'Maintain current levels. Post-storm needs may be greater.',
+        valueAlignment: { precaution: -1, 'resource-conservation': 2, 'system-safety': -1 },
+        consequenceSketch: {
+          immediate: 'Reservoir at capacity. Tanaka warns of overflow risk.',
+          ripple: 'If storm brings heavy rain, controlled release may be impossible.',
+          delayed: 'Full capacity for recovery. But overflow could damage dam.',
+        },
+      },
+      {
+        id: 'partial-release',
+        label: 'Release 10%',
+        description: 'Compromise: release half of what Tanaka recommends.',
+        valueAlignment: { precaution: 0, 'resource-conservation': 0, 'system-safety': 0 },
+        consequenceSketch: {
+          immediate: 'Small buffer created. Neither fully safe nor fully stocked.',
+          ripple: 'Tanaka notes this may not be enough. Webb notes water lost.',
+          delayed: 'Middle ground that satisfies no engineering requirement.',
+        },
+      },
+    ],
+    valuesTested: ['precaution', 'resource-conservation', 'system-safety'],
+    personaId: 'tanaka',
+    learningOutcomes: ['LO1', 'LO3'],
+    narrativeWeight: 'standard',
+  },
+
+  // WATCH-HEARTLAND-02: Power Rationing Start
+  {
+    id: 'watch-heartland-02',
+    title: 'Power Rationing Start',
+    phase: 'watch',
+    parishId: 'heartland',
+    setup:
+      'Tanaka wants to begin power rationing to build generator reserves. This means rolling brownouts for Sterling (lowest Meridian percentage) while Keystone and Summit maintain full power.',
+    trigger: {
+      timelineWindow: 'watch-48',
+      intensityMin: 3,
+      intensityMax: 6,
+    },
+    options: [
+      {
+        id: 'ration-sterling',
+        label: 'Ration Sterling',
+        description: 'Begin brownouts in Sterling to preserve reserves for critical facilities.',
+        valueAlignment: { fairness: -2, efficiency: 2, 'corporate-priority': 2 },
+        consequenceSketch: {
+          immediate: 'Sterling brownouts begin. Hospital on backup. Mayor Chen protests.',
+          ripple: 'Sterling residents see corporate facilities with full power.',
+          delayed: 'Class resentment deepens. Sterling remembers who was sacrificed.',
+        },
+      },
+      {
+        id: 'equal-rationing',
+        label: 'Equal rationing',
+        description: 'All parishes share brownouts equally, including Keystone.',
+        valueAlignment: { fairness: 2, efficiency: -1, 'corporate-priority': -2 },
+        consequenceSketch: {
+          immediate: 'All parishes experience brownouts. Keystone production impacted.',
+          ripple: 'Reeves warns clean rooms at risk. Webb questions prioritization.',
+          delayed: 'Perceived as fair. Production suffers. But community unified.',
+        },
+      },
+      {
+        id: 'no-rationing',
+        label: 'No rationing yet',
+        description: 'Wait until warning is issued to begin any rationing.',
+        valueAlignment: { fairness: 0, efficiency: 0, 'corporate-priority': 0 },
+        consequenceSketch: {
+          immediate: 'Full power continues. Reserves not built.',
+          ripple: 'If storm hits, rationing begins in crisis conditions.',
+          delayed: 'May not have reserves when needed most.',
+        },
+      },
+    ],
+    valuesTested: ['fairness', 'efficiency', 'equity'],
+    personaId: 'tanaka',
+    learningOutcomes: ['LO2', 'LO5'],
+    narrativeWeight: 'standard',
+  },
+
+  // WATCH-SUMMIT-01: Executive Evacuation
+  {
+    id: 'watch-summit-01',
+    title: 'Executive Evacuation',
+    phase: 'watch',
+    parishId: 'summit',
+    setup:
+      'Webb has chartered a private plane for executive families. Word has leaked. Workers are asking why their families cannot evacuate while executives do.',
+    trigger: {
+      timelineWindow: 'watch-48',
+      intensityMin: 3,
+      intensityMax: 6,
+    },
+    options: [
+      {
+        id: 'proceed-quietly',
+        label: 'Proceed quietly',
+        description: 'Executives evacuate as planned. Say nothing publicly.',
+        valueAlignment: { equity: -3, continuity: 2, optics: -2 },
+        consequenceSketch: {
+          immediate: 'Executive families leave. Workers watch from the ground.',
+          ripple: 'Photos circulate. Union posts on social media.',
+          delayed: 'Narrative of corporate abandonment takes hold. Trust destroyed.',
+        },
+      },
+      {
+        id: 'cancel-evacuation',
+        label: 'Cancel evacuation',
+        description: 'Cancel executive evacuation. Leadership stays with workers.',
+        valueAlignment: { equity: 2, continuity: -1, optics: 2 },
+        consequenceSketch: {
+          immediate: 'Executive families stay. Webb under pressure from board.',
+          ripple: 'Workers note leadership sharing their fate.',
+          delayed: 'If anyone is hurt, board questions decision. But trust built.',
+        },
+      },
+      {
+        id: 'expand-seats',
+        label: 'Expand to all families',
+        description: 'Add charter flights for all worker families who want to leave.',
+        valueAlignment: { equity: 1, continuity: 0, optics: 1, cost: -2 },
+        consequenceSketch: {
+          immediate: '$500K additional cost. Logistics scramble. Many families evacuate.',
+          ripple: 'Some workers grateful. Others note it took public pressure.',
+          delayed: 'Expensive but defensible. Some goodwill earned.',
+        },
+      },
+    ],
+    valuesTested: ['equity', 'continuity', 'leadership'],
+    personaId: 'webb',
+    learningOutcomes: ['LO2', 'LO3'],
+    narrativeWeight: 'pivotal',
+  },
+
+  // WATCH-SUMMIT-02: Information Disclosure
+  {
+    id: 'watch-summit-02',
+    title: 'Information Disclosure',
+    phase: 'watch',
+    parishId: 'summit',
+    setup:
+      'Meridian has internal models showing 70% chance of direct hit—higher than public forecasts. Releasing this could cause panic. Withholding it means people make decisions on incomplete information.',
+    trigger: {
+      timelineWindow: 'watch-72',
+      intensityMin: 2,
+      intensityMax: 5,
+    },
+    options: [
+      {
+        id: 'release-data',
+        label: 'Release data',
+        description: 'Share internal projections publicly.',
+        valueAlignment: { transparency: 2, 'panic-prevention': -2, trust: 1 },
+        consequenceSketch: {
+          immediate: 'Public panic. Run on supplies. Evacuation chaos.',
+          ripple: 'Government questions why corporate has better data than they do.',
+          delayed: 'If projection accurate, seen as honest. If wrong, blamed for panic.',
+        },
+      },
+      {
+        id: 'withhold-data',
+        label: 'Withhold data',
+        description: 'Keep internal models private. Let public forecasts guide decisions.',
+        valueAlignment: { transparency: -2, 'panic-prevention': 2, trust: -2 },
+        consequenceSketch: {
+          immediate: 'Calm continues. Decisions made on incomplete information.',
+          ripple: 'If storm hits as predicted, people ask what corporate knew and when.',
+          delayed: 'Legal exposure if withheld data contributed to harm.',
+        },
+      },
+      {
+        id: 'share-with-officials',
+        label: 'Share with officials only',
+        description: 'Give data to Mayor Chen and emergency services, not public.',
+        valueAlignment: { transparency: 0, 'panic-prevention': 1, trust: 0 },
+        consequenceSketch: {
+          immediate: 'Officials have better information. Public does not.',
+          ripple: 'Officials must decide whether to share. Burden shifted.',
+          delayed: 'If it leaks, both corporate and government blamed.',
+        },
+      },
+    ],
+    valuesTested: ['transparency', 'panic-prevention', 'trust'],
+    personaId: 'webb',
+    learningOutcomes: ['LO1', 'LO2'],
+    narrativeWeight: 'major',
+  },
+
+  // WATCH-STERLING-01: Shelter Pre-Positioning
+  {
+    id: 'watch-sterling-01',
+    title: 'Shelter Pre-Positioning',
+    phase: 'watch',
+    parishId: 'sterling',
+    setup:
+      'Mayor Chen wants to open shelters now and pre-position supplies. This costs money and may be unnecessary. Waiting until warning saves money but reduces preparation time.',
+    trigger: {
+      timelineWindow: 'watch-72',
+      intensityMin: 2,
+      intensityMax: 5,
+    },
+    options: [
+      {
+        id: 'open-now',
+        label: 'Open shelters now',
+        description: 'Open all shelters immediately. Begin supply pre-positioning.',
+        valueAlignment: { equity: 2, efficiency: -1, preparation: 2 },
+        consequenceSketch: {
+          immediate: 'Shelters open. Staff called in. Supplies deployed.',
+          ripple: 'If storm misses, criticism for wasted resources.',
+          delayed: 'Ready for whatever comes. Staff tired before storm arrives.',
+        },
+      },
+      {
+        id: 'wait-for-warning',
+        label: 'Wait for warning',
+        description: 'Wait until official warning to open shelters.',
+        valueAlignment: { equity: -1, efficiency: 2, preparation: -1 },
+        consequenceSketch: {
+          immediate: 'Resources conserved. Preparation delayed.',
+          ripple: 'If storm accelerates, scramble to open shelters.',
+          delayed: 'May not have time for proper preparation.',
+        },
+      },
+      {
+        id: 'partial-opening',
+        label: 'Partial opening',
+        description: 'Open main shelter only. Hold others in reserve.',
+        valueAlignment: { equity: 0, efficiency: 1, preparation: 1 },
+        consequenceSketch: {
+          immediate: 'Main shelter open. Others ready to activate.',
+          ripple: 'Vulnerable populations must choose: go now or wait.',
+          delayed: 'Some preparation without full resource commitment.',
+        },
+      },
+    ],
+    valuesTested: ['equity', 'efficiency', 'preparation'],
+    personaId: 'chen',
+    learningOutcomes: ['LO2', 'LO5'],
+    narrativeWeight: 'standard',
+  },
+
+  // WATCH-STERLING-02: School Closure Timing
+  {
+    id: 'watch-sterling-02',
+    title: 'School Closure Timing',
+    phase: 'watch',
+    parishId: 'sterling',
+    setup:
+      'Schools are scheduled to remain open tomorrow. Closing early lets families prepare, but many parents work at Meridian and cannot leave to pick up children. Keeping open provides childcare but risks children in transit if storm accelerates.',
+    trigger: {
+      timelineWindow: 'watch-48',
+      intensityMin: 2,
+      intensityMax: 5,
+    },
+    options: [
+      {
+        id: 'close-immediately',
+        label: 'Close immediately',
+        description: 'Close schools now. Parents must arrange pickup.',
+        valueAlignment: { caution: 2, disruption: -2, 'child-safety': 2 },
+        consequenceSketch: {
+          immediate: 'Schools close. Parents scramble. Meridian productivity drops.',
+          ripple: 'Some children stuck at school waiting for working parents.',
+          delayed: 'Families have time to prepare together.',
+        },
+      },
+      {
+        id: 'normal-schedule',
+        label: 'Normal schedule',
+        description: 'Keep schools open on normal schedule tomorrow.',
+        valueAlignment: { caution: -1, disruption: 1, 'child-safety': -1 },
+        consequenceSketch: {
+          immediate: 'Normal operations. Parents work. Children in school.',
+          ripple: 'If storm accelerates, children in transit during dangerous conditions.',
+          delayed: 'Productivity maintained. Risk accepted.',
+        },
+      },
+      {
+        id: 'early-release',
+        label: 'Early release',
+        description: 'Open tomorrow with early release at noon.',
+        valueAlignment: { caution: 1, disruption: 0, 'child-safety': 1 },
+        consequenceSketch: {
+          immediate: 'Half-day school. Parents have afternoon to prepare.',
+          ripple: 'Compromise gives some preparation time.',
+          delayed: 'Middle ground that partially serves both needs.',
+        },
+      },
+    ],
+    valuesTested: ['caution', 'disruption', 'child-safety'],
+    personaId: 'chen',
+    learningOutcomes: ['LO1', 'LO3'],
+    narrativeWeight: 'standard',
+  },
+
+  // WATCH-MULTI-01: Resource Pre-Staging
+  {
+    id: 'watch-multi-01',
+    title: 'Resource Pre-Staging',
+    phase: 'watch',
+    parishId: 'multi',
+    setup:
+      'Limited generators and medical supplies must be pre-staged. Each parish wants resources in their territory. Centralizing at Heartland enables redistribution but means some parishes start with nothing.',
+    trigger: {
+      timelineWindow: 'watch-72',
+      intensityMin: 2,
+      intensityMax: 5,
+    },
+    options: [
+      {
+        id: 'centralize',
+        label: 'Centralize at Heartland',
+        description: 'Stage all resources at Heartland for redistribution.',
+        valueAlignment: { cooperation: 2, 'self-interest': -2, flexibility: 2 },
+        consequenceSketch: {
+          immediate: 'Resources gathered at Heartland. Other parishes empty.',
+          ripple: 'If roads close, resources cannot be distributed.',
+          delayed: 'Maximum flexibility if roads stay open. Disaster if they close early.',
+        },
+      },
+      {
+        id: 'distribute',
+        label: 'Pre-distribute equally',
+        description: 'Split resources equally among all six parishes now.',
+        valueAlignment: { cooperation: 0, 'self-interest': 1, flexibility: -1 },
+        consequenceSketch: {
+          immediate: 'Each parish has some resources. Cannot be moved later.',
+          ripple: 'Some parishes may have more need than their allocation.',
+          delayed: 'Fair but inflexible. Some resources may go unused.',
+        },
+      },
+      {
+        id: 'need-based',
+        label: 'Need-based staging',
+        description: 'Stage more resources at vulnerable parishes (Sterling, Haven).',
+        valueAlignment: { cooperation: 1, 'self-interest': 0, flexibility: 0 },
+        consequenceSketch: {
+          immediate: 'Sterling and Haven get more. Summit and Keystone get less.',
+          ripple: 'Corporate facilities question why they are deprioritized.',
+          delayed: 'Vulnerable populations protected. Production facilities at risk.',
+        },
+      },
+    ],
+    valuesTested: ['cooperation', 'self-interest', 'equity'],
+    personaId: ['webb', 'chen'],
+    learningOutcomes: ['LO2', 'LO3'],
+    narrativeWeight: 'major',
+  },
+
+  // WATCH-MULTI-02: Communication Protocol
+  {
+    id: 'watch-multi-02',
+    title: 'Communication Protocol',
+    phase: 'watch',
+    parishId: 'multi',
+    setup:
+      'Who controls emergency communications? Webb wants corporate to manage messaging (consistent, controlled). Chen wants government emergency channel (public trust, independence).',
+    trigger: {
+      timelineWindow: 'watch-72',
+      intensityMin: 2,
+      intensityMax: 4,
+    },
+    options: [
+      {
+        id: 'corporate-control',
+        label: 'Corporate control',
+        description: 'Meridian manages all emergency communications.',
+        valueAlignment: { transparency: -1, control: 2, 'public-trust': -1 },
+        consequenceSketch: {
+          immediate: 'Consistent messaging. Corporate tone. Some distrust.',
+          ripple: 'Non-Meridian residents skeptical of corporate messaging.',
+          delayed: 'Message discipline maintained. Trust varies by audience.',
+        },
+      },
+      {
+        id: 'government-control',
+        label: 'Government control',
+        description: 'Mayor Chen leads all communications through emergency channel.',
+        valueAlignment: { transparency: 1, control: -1, 'public-trust': 2 },
+        consequenceSketch: {
+          immediate: 'Government voice. More trusted by community. Less corporate control.',
+          ripple: 'Webb concerned about messaging he cannot control.',
+          delayed: 'Public trust higher. Corporate may feel undermined.',
+        },
+      },
+      {
+        id: 'joint-protocol',
+        label: 'Joint protocol',
+        description: 'Corporate and government issue joint communications.',
+        valueAlignment: { transparency: 0, control: 0, 'public-trust': 1 },
+        consequenceSketch: {
+          immediate: 'Coordination required for each message. Slower but collaborative.',
+          ripple: 'Disagreements may delay critical communications.',
+          delayed: 'Unity presented. But coordination overhead is real.',
+        },
+      },
+    ],
+    valuesTested: ['transparency', 'control', 'public-trust'],
+    personaId: ['webb', 'chen'],
+    learningOutcomes: ['LO1', 'LO5'],
+    narrativeWeight: 'standard',
+  },
+
+  // WATCH-MULTI-03: Supply Chain Halt Timing
+  {
+    id: 'watch-multi-03',
+    title: 'Supply Chain Halt Timing',
+    phase: 'watch',
+    parishId: 'multi',
+    setup:
+      'Complete supply chain halt affects Gateway harvest, Haven processing, and Keystone manufacturing. Reeves wants to continue until warning. Mendez says halt harvest now. Santos says processing should stop first.',
+    trigger: {
+      timelineWindow: 'watch-48',
+      intensityMin: 3,
+      intensityMax: 6,
+    },
+    options: [
+      {
+        id: 'halt-all-now',
+        label: 'Halt everything now',
+        description: 'Stop all supply chain operations immediately.',
+        valueAlignment: { production: -2, prudence: 2, 'worker-safety': 2 },
+        consequenceSketch: {
+          immediate: 'All operations cease. Workers begin preparation.',
+          ripple: 'Webb questions if this was necessary. Production lost.',
+          delayed: 'Maximum preparation time. Maximum production loss.',
+        },
+      },
+      {
+        id: 'staged-halt',
+        label: 'Staged halt',
+        description: 'Halt harvest first, then processing, then manufacturing over 24 hours.',
+        valueAlignment: { production: 0, prudence: 1, 'worker-safety': 1 },
+        consequenceSketch: {
+          immediate: 'Orderly shutdown begins. Some production continues.',
+          ripple: 'Workers at different stages of shutdown. Coordination required.',
+          delayed: 'Balanced approach. Some value preserved. Some risk accepted.',
+        },
+      },
+      {
+        id: 'continue-manufacturing',
+        label: 'Continue manufacturing',
+        description: 'Halt harvest and processing but continue Keystone manufacturing with existing materials.',
+        valueAlignment: { production: 1, prudence: -1, 'worker-safety': -1 },
+        consequenceSketch: {
+          immediate: 'Keystone continues. Other operations cease.',
+          ripple: 'Keystone workers feel prioritized/pressured. Others relieved.',
+          delayed: 'Some production saved. Keystone workers at higher risk.',
+        },
+      },
+    ],
+    valuesTested: ['production', 'prudence', 'worker-safety'],
+    personaId: ['reeves', 'webb'],
+    learningOutcomes: ['LO1', 'LO2'],
+    narrativeWeight: 'major',
+  },
+];
+
+// ============================================================================
+// CRISIS PHASE DILEMMAS (20)
+// ============================================================================
+
+const CRISIS_DILEMMAS: Dilemma[] = [
+  // CRISIS-KEYSTONE-01: Generator Allocation
+  {
+    id: 'crisis-keystone-01',
+    title: 'Generator Allocation',
+    phase: 'crisis',
+    parishId: 'keystone',
+    setup:
+      'Power has failed. Keystone has two generators: one can maintain clean rooms, one can power the worker shelter. Sterling hospital is begging for a generator to run life support.',
+    trigger: {
+      timelineWindow: 'approach-6',
+      intensityMin: 6,
+      intensityMax: 9,
+    },
+    options: [
+      {
+        id: 'clean-rooms',
+        label: 'Prioritize clean rooms',
+        description: 'Use both generators for clean room integrity.',
+        valueAlignment: { production: 2, 'medical-care': -3, 'worker-comfort': -1 },
+        consequenceSketch: {
+          immediate: 'Clean rooms protected. Worker shelter cold. Hospital without power.',
+          ripple: 'Deaths at Sterling hospital. Production preserved.',
+          delayed: 'Lawsuits. Public outrage. Clean rooms intact.',
+        },
+      },
+      {
+        id: 'hospital',
+        label: 'Send to hospital',
+        description: 'Send one generator to Sterling hospital.',
+        valueAlignment: { production: -2, 'medical-care': 2, 'worker-comfort': 0 },
+        consequenceSketch: {
+          immediate: 'Hospital maintains life support. Clean rooms fail.',
+          ripple: 'Months of production lost. Lives saved.',
+          delayed: 'Defensible decision. Production loss huge.',
+        },
+      },
+      {
+        id: 'worker-shelter',
+        label: 'Worker shelter',
+        description: 'Prioritize worker shelter over clean rooms.',
+        valueAlignment: { production: -1, 'medical-care': -1, 'worker-comfort': 2 },
+        consequenceSketch: {
+          immediate: 'Workers comfortable. Clean rooms fail. Hospital still without.',
+          ripple: 'Workers grateful. But was comfort worth the loss?',
+          delayed: 'Workers remember. But hospital deaths still happened.',
+        },
+      },
+      {
+        id: 'split',
+        label: 'Split generators',
+        description: 'One to hospital, one to clean rooms. Worker shelter without power.',
+        valueAlignment: { production: 1, 'medical-care': 1, 'worker-comfort': -2 },
+        consequenceSketch: {
+          immediate: 'Hospital and clean rooms partially served. Workers cold.',
+          ripple: 'Workers angry at being deprioritized.',
+          delayed: 'Partial success on both fronts. Worker resentment.',
+        },
+      },
+    ],
+    valuesTested: ['production', 'medical-care', 'worker-safety'],
+    personaId: 'reeves',
+    learningOutcomes: ['LO2', 'LO3'],
+    narrativeWeight: 'pivotal',
+  },
+
+  // CRISIS-KEYSTONE-02: Contaminated Batch
+  {
+    id: 'crisis-keystone-02',
+    title: 'Contaminated Batch',
+    phase: 'crisis',
+    parishId: 'keystone',
+    setup:
+      'Power fluctuation may have contaminated the final batch—$43M worth. Reeves can ship it without disclosure (contamination uncertain), report possible contamination (product destroyed), or delay testing until after storm (quality unknown).',
+    trigger: {
+      timelineWindow: 'approach-12',
+      intensityMin: 5,
+      intensityMax: 8,
+    },
+    options: [
+      {
+        id: 'ship-anyway',
+        label: 'Ship without disclosure',
+        description: 'Ship the batch. Contamination is uncertain.',
+        valueAlignment: { honesty: -3, survival: 2, 'quality-control': -2 },
+        consequenceSketch: {
+          immediate: 'Product ships. Revenue preserved if clean.',
+          ripple: 'If contaminated, patients harmed. Recall catastrophic.',
+          delayed: 'Criminal liability if contamination proven and concealed.',
+        },
+      },
+      {
+        id: 'report-contamination',
+        label: 'Report possible contamination',
+        description: 'Disclose potential contamination. Product destroyed.',
+        valueAlignment: { honesty: 2, survival: -2, 'quality-control': 2 },
+        consequenceSketch: {
+          immediate: '$43M destroyed. Webb furious. Jobs at risk.',
+          ripple: 'No patients harmed. Regulatory praise.',
+          delayed: 'Right thing done. Financial pain immense.',
+        },
+      },
+      {
+        id: 'delay-testing',
+        label: 'Delay testing',
+        description: 'Store batch. Test after storm when proper analysis possible.',
+        valueAlignment: { honesty: 0, survival: 1, 'quality-control': 0 },
+        consequenceSketch: {
+          immediate: 'Batch stored. Decision deferred. Risk transferred.',
+          ripple: 'Storage may affect quality. Uncertainty continues.',
+          delayed: 'If clean, saved. If contaminated, delayed the inevitable.',
+        },
+      },
+    ],
+    valuesTested: ['honesty', 'survival', 'quality-control'],
+    personaId: 'reeves',
+    learningOutcomes: ['LO1', 'LO3'],
+    narrativeWeight: 'major',
+  },
+
+  // CRISIS-KEYSTONE-03: Worker Shelter Space
+  {
+    id: 'crisis-keystone-03',
+    title: 'Worker Shelter Space',
+    phase: 'crisis',
+    parishId: 'keystone',
+    setup:
+      'Keystone shelter is at capacity. A group of Sterling residents (non-Meridian employees) arrives seeking shelter. Turning them away sends them back into the storm.',
+    trigger: {
+      timelineWindow: 'approach-6',
+      intensityMin: 6,
+      intensityMax: 9,
+    },
+    options: [
+      {
+        id: 'employees-only',
+        label: 'Employees only',
+        description: 'Shelter is for Meridian employees. Others must leave.',
+        valueAlignment: { hierarchy: 2, equality: -2, 'corporate-loyalty': 2 },
+        consequenceSketch: {
+          immediate: 'Non-employees turned away. Some may die.',
+          ripple: 'Sterling residents remember. Community divided forever.',
+          delayed: 'Deaths blamed on corporate policy. Legal exposure.',
+        },
+      },
+      {
+        id: 'accept-all',
+        label: 'Accept everyone',
+        description: 'Accept all who need shelter. Overcrowd if necessary.',
+        valueAlignment: { hierarchy: -1, equality: 2, 'corporate-loyalty': -1 },
+        consequenceSketch: {
+          immediate: 'Shelter overcrowded. Resources strained. All alive.',
+          ripple: 'Conditions deteriorate. But everyone together.',
+          delayed: 'Community bonds formed. Resources depleted.',
+        },
+      },
+      {
+        id: 'women-children-first',
+        label: 'Women and children only',
+        description: 'Accept women and children. Others must find alternatives.',
+        valueAlignment: { hierarchy: 0, equality: 0, 'corporate-loyalty': 0 },
+        consequenceSketch: {
+          immediate: 'Families sheltered. Men turned away.',
+          ripple: 'Men face storm alone. Some resentment.',
+          delayed: 'Traditional priority honored. Some deaths among men.',
+        },
+      },
+    ],
+    valuesTested: ['hierarchy', 'equality', 'compassion'],
+    personaId: 'reeves',
+    learningOutcomes: ['LO2', 'LO5'],
+    narrativeWeight: 'major',
+  },
+
+  // CRISIS-HAVEN-01: Port Rescue Priority
+  {
+    id: 'crisis-haven-01',
+    title: 'Port Rescue Priority',
+    phase: 'crisis',
+    parishId: 'haven',
+    setup:
+      'Storm surge trapped people at the port. One boat can make one rescue run. Choice: trapped workers at the processing plant (12 people) or tourists stranded at a collapsed pier (6 people including children).',
+    trigger: {
+      timelineWindow: 'approach-6',
+      intensityMin: 7,
+      intensityMax: 10,
+    },
+    options: [
+      {
+        id: 'workers',
+        label: 'Rescue workers first',
+        description: '12 workers at processing plant.',
+        valueAlignment: { 'worker-solidarity': 2, 'tourist-lives': -1, numbers: 2 },
+        consequenceSketch: {
+          immediate: '12 workers rescued. Tourists wait.',
+          ripple: 'If boat cannot return, tourists die.',
+          delayed: 'More lives saved by numbers. But children...',
+        },
+      },
+      {
+        id: 'tourists',
+        label: 'Rescue tourists first',
+        description: '6 tourists including children.',
+        valueAlignment: { 'worker-solidarity': -1, 'tourist-lives': 2, numbers: -1 },
+        consequenceSketch: {
+          immediate: '6 tourists rescued including children. Workers wait.',
+          ripple: 'Workers feel abandoned. May not survive wait.',
+          delayed: 'Children saved. Workers may die.',
+        },
+      },
+      {
+        id: 'mixed',
+        label: 'Take who fits',
+        description: 'Take as many as boat holds regardless of group.',
+        valueAlignment: { 'worker-solidarity': 0, 'tourist-lives': 0, numbers: 1 },
+        consequenceSketch: {
+          immediate: 'Mixed rescue. Some workers, some tourists.',
+          ripple: 'Neither group fully rescued. Both wait.',
+          delayed: 'Partial success. Some from each group survive.',
+        },
+      },
+    ],
+    valuesTested: ['solidarity', 'numbers', 'innocence'],
+    personaId: 'santos',
+    learningOutcomes: ['LO2', 'LO3'],
+    narrativeWeight: 'pivotal',
+  },
+
+  // CRISIS-HAVEN-02: Flooded Warehouse
+  {
+    id: 'crisis-haven-02',
+    title: 'Flooded Warehouse',
+    phase: 'crisis',
+    parishId: 'haven',
+    setup:
+      'Cold chain warehouse is flooding. Workers can attempt to save $5M in pharmaceutical supplies, but water is rising and conditions are dangerous. Or they can evacuate now and lose everything.',
+    trigger: {
+      timelineWindow: 'approach-12',
+      intensityMin: 6,
+      intensityMax: 9,
+    },
+    options: [
+      {
+        id: 'save-cargo',
+        label: 'Attempt rescue',
+        description: 'Workers enter flooding warehouse to save supplies.',
+        valueAlignment: { property: 2, safety: -2, financial: 2 },
+        consequenceSketch: {
+          immediate: 'Workers enter dangerous conditions. Some supplies saved.',
+          ripple: 'If workers are injured, Santos will never forgive.',
+          delayed: 'Some supplies saved. Possible injuries or deaths.',
+        },
+      },
+      {
+        id: 'evacuate',
+        label: 'Evacuate immediately',
+        description: 'Abandon supplies. Get workers to safety.',
+        valueAlignment: { property: -2, safety: 2, financial: -2 },
+        consequenceSketch: {
+          immediate: 'Workers evacuate. Supplies lost.',
+          ripple: '$5M loss. But all workers safe.',
+          delayed: 'Right call for safety. Financial loss blamed on storm.',
+        },
+      },
+      {
+        id: 'volunteers-only',
+        label: 'Volunteers only',
+        description: 'Anyone who wants to can try. No pressure.',
+        valueAlignment: { property: 0, safety: 0, financial: 0, autonomy: 1 },
+        consequenceSketch: {
+          immediate: 'Some volunteer. Others leave. Division.',
+          ripple: 'Those who stayed may be heroes or victims.',
+          delayed: 'Individual choice. Collective outcome.',
+        },
+      },
+    ],
+    valuesTested: ['property', 'safety', 'financial'],
+    personaId: 'santos',
+    learningOutcomes: ['LO1', 'LO5'],
+    narrativeWeight: 'standard',
+  },
+
+  // CRISIS-HAVEN-03: Union Defiance
+  {
+    id: 'crisis-haven-03',
+    title: 'Union Defiance',
+    phase: 'crisis',
+    parishId: 'haven',
+    setup:
+      'Webb orders Haven workers to help secure Keystone facilities. Santos says no—her workers have done enough and face their own risks. Defying corporate order could cost jobs later.',
+    trigger: {
+      timelineWindow: 'approach-12',
+      intensityMin: 5,
+      intensityMax: 8,
+    },
+    options: [
+      {
+        id: 'defy',
+        label: 'Defy order',
+        description: 'Refuse Webb order. Workers stay in Haven.',
+        valueAlignment: { authority: -2, conscience: 2, 'job-security': -2 },
+        consequenceSketch: {
+          immediate: 'Workers stay. Webb notes defiance.',
+          ripple: 'Keystone facilities may suffer without help.',
+          delayed: 'Union solidarity demonstrated. Retaliation likely.',
+        },
+      },
+      {
+        id: 'comply',
+        label: 'Follow order',
+        description: 'Send workers to Keystone as ordered.',
+        valueAlignment: { authority: 2, conscience: -1, 'job-security': 2 },
+        consequenceSketch: {
+          immediate: 'Workers sent to Keystone. Haven less protected.',
+          ripple: 'Workers resentful. Santos loses credibility.',
+          delayed: 'Corporate relationship maintained. Worker trust damaged.',
+        },
+      },
+      {
+        id: 'negotiate',
+        label: 'Negotiate conditions',
+        description: 'Send some workers with safety guarantees.',
+        valueAlignment: { authority: 0, conscience: 1, 'job-security': 0 },
+        consequenceSketch: {
+          immediate: 'Partial compliance with conditions.',
+          ripple: 'Neither side fully satisfied.',
+          delayed: 'Compromise. Relationship preserved but strained.',
+        },
+      },
+    ],
+    valuesTested: ['authority', 'conscience', 'job-security'],
+    personaId: 'santos',
+    learningOutcomes: ['LO2', 'LO3'],
+    narrativeWeight: 'major',
+  },
+
+  // CRISIS-GATEWAY-01: Last Helicopter Seats
+  {
+    id: 'crisis-gateway-01',
+    title: 'Last Helicopter Seats',
+    phase: 'crisis',
+    parishId: 'gateway',
+    setup:
+      'Last helicopter out before conditions become impossible. 4 seats. Candidates: pregnant woman, elderly executive, injured child, Tanaka (needed for dam operations), essential medical technician.',
+    trigger: {
+      timelineWindow: 'approach-12',
+      intensityMin: 6,
+      intensityMax: 9,
+    },
+    options: [
+      {
+        id: 'vulnerable-first',
+        label: 'Most vulnerable',
+        description: 'Pregnant woman, child, elderly executive, random fourth.',
+        valueAlignment: { equity: 1, value: 0, vulnerability: 2 },
+        consequenceSketch: {
+          immediate: 'Vulnerable evacuated. Tanaka and technician remain.',
+          ripple: 'Dam may be at risk without Tanaka. Medical capacity reduced.',
+          delayed: 'Traditional priority honored. Essential personnel at risk.',
+        },
+      },
+      {
+        id: 'essential-first',
+        label: 'Essential personnel',
+        description: 'Tanaka, medical technician, pregnant woman, child.',
+        valueAlignment: { equity: -1, value: 2, vulnerability: 1 },
+        consequenceSketch: {
+          immediate: 'Essential personnel evacuated. Elderly executive remains.',
+          ripple: 'Executive furious. Board will hear about this.',
+          delayed: 'Operations preserved. Political consequences.',
+        },
+      },
+      {
+        id: 'lottery',
+        label: 'Fair lottery',
+        description: 'Random selection among all candidates.',
+        valueAlignment: { equity: 2, value: -1, vulnerability: 0 },
+        consequenceSketch: {
+          immediate: 'Random selection. Chance determines who lives.',
+          ripple: 'Perceived as fair but possibly unwise.',
+          delayed: 'No one can be blamed for selection bias.',
+        },
+      },
+    ],
+    valuesTested: ['equity', 'value', 'vulnerability'],
+    personaId: 'mendez',
+    learningOutcomes: ['LO2', 'LO3'],
+    narrativeWeight: 'pivotal',
+  },
+
+  // CRISIS-GATEWAY-02: Stranded Crew
+  {
+    id: 'crisis-gateway-02',
+    title: 'Stranded Crew',
+    phase: 'crisis',
+    parishId: 'gateway',
+    setup:
+      'A harvest vessel crew is stranded offshore—the ship that made the final run. They can attempt to reach shore in dangerous seas, or shelter on the vessel and wait for conditions to improve.',
+    trigger: {
+      timelineWindow: 'approach-6',
+      intensityMin: 7,
+      intensityMax: 10,
+    },
+    options: [
+      {
+        id: 'attempt-shore',
+        label: 'Attempt to reach shore',
+        description: 'Order crew to attempt shore approach in dangerous seas.',
+        valueAlignment: { mission: 1, safety: -2, 'crew-autonomy': -1 },
+        consequenceSketch: {
+          immediate: 'Crew attempts approach. High risk of capsizing.',
+          ripple: 'If they make it, rescued. If not, lost at sea.',
+          delayed: 'Heroic or tragic. No middle ground.',
+        },
+      },
+      {
+        id: 'shelter-vessel',
+        label: 'Shelter on vessel',
+        description: 'Order crew to ride out storm on the vessel.',
+        valueAlignment: { mission: -1, safety: 1, 'crew-autonomy': 0 },
+        consequenceSketch: {
+          immediate: 'Crew shelters on vessel. Conditions worsen.',
+          ripple: 'Vessel may survive or may sink. Unknown.',
+          delayed: 'Waiting game. Outcome uncertain.',
+        },
+      },
+      {
+        id: 'crew-choice',
+        label: 'Let crew decide',
+        description: 'Give captain authority to choose.',
+        valueAlignment: { mission: 0, safety: 0, 'crew-autonomy': 2 },
+        consequenceSketch: {
+          immediate: 'Captain makes call. Crew accepts decision.',
+          ripple: 'Outcome same but responsibility different.',
+          delayed: 'Captain bears weight of decision, good or bad.',
+        },
+      },
+    ],
+    valuesTested: ['mission', 'safety', 'crew-autonomy'],
+    personaId: 'mendez',
+    learningOutcomes: ['LO1', 'LO2'],
+    narrativeWeight: 'major',
+  },
+
+  // CRISIS-GATEWAY-03: Fuel Depot Fire Risk
+  {
+    id: 'crisis-gateway-03',
+    title: 'Fuel Depot Fire Risk',
+    phase: 'crisis',
+    parishId: 'gateway',
+    setup:
+      'Lightning strike near fuel depot. Fire risk increasing. Can attempt emergency drainage (risky, requires personnel in danger zone) or evacuate area and let it burn if ignited.',
+    trigger: {
+      timelineWindow: 'approach-6',
+      intensityMin: 7,
+      intensityMax: 10,
+    },
+    options: [
+      {
+        id: 'attempt-drainage',
+        label: 'Attempt drainage',
+        description: 'Send crew to drain fuel depot before ignition.',
+        valueAlignment: { heroism: 2, prudence: -2, 'property-protection': 2 },
+        consequenceSketch: {
+          immediate: 'Crew enters danger zone. Racing against ignition.',
+          ripple: 'If successful, depot saved. If not, workers may die.',
+          delayed: 'Hero or martyr. High stakes gamble.',
+        },
+      },
+      {
+        id: 'evacuate-let-burn',
+        label: 'Evacuate and let burn',
+        description: 'Pull everyone back. If it ignites, let it burn.',
+        valueAlignment: { heroism: -1, prudence: 2, 'property-protection': -2 },
+        consequenceSketch: {
+          immediate: 'Everyone safe. Depot at risk.',
+          ripple: 'If it burns, environmental damage, fuel loss.',
+          delayed: 'No lives risked. Property may be lost.',
+        },
+      },
+      {
+        id: 'partial-drainage',
+        label: 'Quick partial drain',
+        description: 'Brief attempt to drain critical tanks only.',
+        valueAlignment: { heroism: 1, prudence: 0, 'property-protection': 1 },
+        consequenceSketch: {
+          immediate: 'Limited exposure. Partial protection.',
+          ripple: 'Some fuel saved if successful.',
+          delayed: 'Moderate risk, moderate reward.',
+        },
+      },
+    ],
+    valuesTested: ['heroism', 'prudence', 'property-protection'],
+    personaId: 'mendez',
+    learningOutcomes: ['LO1', 'LO5'],
+    narrativeWeight: 'standard',
+  },
+
+  // CRISIS-HEARTLAND-01: Dam Stress Alert
+  {
+    id: 'crisis-heartland-01',
+    title: 'Dam Stress Alert',
+    phase: 'crisis',
+    parishId: 'heartland',
+    setup:
+      'Sensors show dam stress increasing. Tanaka says 60% chance structure is fine, 40% chance of failure. He can do controlled release (floods Haven downstream) or hope it holds.',
+    trigger: {
+      timelineWindow: 'approach-6',
+      intensityMin: 7,
+      intensityMax: 10,
+    },
+    options: [
+      {
+        id: 'controlled-release',
+        label: 'Controlled release',
+        description: 'Release water now to reduce stress. Haven will flood.',
+        valueAlignment: { 'known-risk': 2, 'unknown-risk': -2, 'downstream-harm': -2 },
+        consequenceSketch: {
+          immediate: 'Water released. Haven floods. People may die.',
+          ripple: 'Haven devastated. But dam survives.',
+          delayed: 'Controlled disaster vs. uncontrolled catastrophe.',
+        },
+      },
+      {
+        id: 'hold',
+        label: 'Hold and hope',
+        description: 'Maintain current state. Hope structure holds.',
+        valueAlignment: { 'known-risk': -1, 'unknown-risk': 1, 'downstream-harm': 1 },
+        consequenceSketch: {
+          immediate: 'Status quo. 40% chance of catastrophic failure.',
+          ripple: 'If it fails, uncontrolled flood kills more.',
+          delayed: 'Either fine or disaster. Binary outcome.',
+        },
+      },
+      {
+        id: 'partial-release',
+        label: 'Partial release',
+        description: 'Small release to reduce stress but minimize downstream damage.',
+        valueAlignment: { 'known-risk': 0, 'unknown-risk': 0, 'downstream-harm': 0 },
+        consequenceSketch: {
+          immediate: 'Moderate release. Some downstream flooding.',
+          ripple: 'May not be enough to protect dam. May still hurt Haven.',
+          delayed: 'Middle ground that may satisfy neither objective.',
+        },
+      },
+    ],
+    valuesTested: ['certainty', 'risk', 'downstream-harm'],
+    personaId: 'tanaka',
+    learningOutcomes: ['LO1', 'LO3'],
+    narrativeWeight: 'pivotal',
+  },
+
+  // CRISIS-HEARTLAND-02: Hospital Power Priority
+  {
+    id: 'crisis-heartland-02',
+    title: 'Hospital Power Priority',
+    phase: 'crisis',
+    parishId: 'heartland',
+    setup:
+      'Power grid failing. Tanaka can maintain power to either Sterling hospital (life support) OR Keystone clean rooms (production). Not both.',
+    trigger: {
+      timelineWindow: 'approach-6',
+      intensityMin: 7,
+      intensityMax: 10,
+    },
+    options: [
+      {
+        id: 'hospital',
+        label: 'Hospital priority',
+        description: 'Maintain power to Sterling hospital.',
+        valueAlignment: { 'medical-care': 2, industrial: -2, 'life-first': 2 },
+        consequenceSketch: {
+          immediate: 'Hospital maintains life support. Clean rooms fail.',
+          ripple: 'Lives saved. Months of production lost.',
+          delayed: 'Right thing done. Corporate furious.',
+        },
+      },
+      {
+        id: 'keystone',
+        label: 'Keystone priority',
+        description: 'Maintain power to Keystone clean rooms.',
+        valueAlignment: { 'medical-care': -2, industrial: 2, 'life-first': -2 },
+        consequenceSketch: {
+          immediate: 'Clean rooms protected. Hospital loses life support.',
+          ripple: 'Patients die. Production preserved.',
+          delayed: 'Indefensible decision. Criminal liability possible.',
+        },
+      },
+      {
+        id: 'alternating',
+        label: 'Alternating power',
+        description: 'Alternate power between both every hour.',
+        valueAlignment: { 'medical-care': 0, industrial: 0, 'life-first': 0 },
+        consequenceSketch: {
+          immediate: 'Neither fully served. Both partially maintained.',
+          ripple: 'Hospital patients at risk during gaps. Clean rooms unstable.',
+          delayed: 'Compromise that serves neither well.',
+        },
+      },
+    ],
+    valuesTested: ['medical-care', 'industrial', 'life-first'],
+    personaId: 'tanaka',
+    learningOutcomes: ['LO2', 'LO5'],
+    narrativeWeight: 'pivotal',
+  },
+
+  // CRISIS-HEARTLAND-03: Controlled Release
+  {
+    id: 'crisis-heartland-03',
+    title: 'Controlled Release',
+    phase: 'crisis',
+    parishId: 'heartland',
+    setup:
+      'Reservoir at 110% capacity. Must release water somewhere. Options: flood the access road (isolates Heartland), flood agricultural area (destroys crops), or flood industrial drainage (environmental contamination).',
+    trigger: {
+      timelineWindow: 'landfall-0',
+      intensityMin: 8,
+      intensityMax: 10,
+    },
+    options: [
+      {
+        id: 'access-road',
+        label: 'Flood access road',
+        description: 'Release into access road. Heartland isolated.',
+        valueAlignment: { isolation: -1, 'agricultural-harm': 1, environmental: 1 },
+        consequenceSketch: {
+          immediate: 'Road floods. Heartland cut off for days.',
+          ripple: 'Tanaka and crew stranded. Cannot help other parishes.',
+          delayed: 'Isolation may be dangerous if emergencies arise.',
+        },
+      },
+      {
+        id: 'agricultural',
+        label: 'Flood agriculture',
+        description: 'Release into agricultural area. Crops destroyed.',
+        valueAlignment: { isolation: 1, 'agricultural-harm': -2, environmental: 1 },
+        consequenceSketch: {
+          immediate: 'Crops destroyed. Food supply impacted.',
+          ripple: 'Farmers devastated. Long-term food security affected.',
+          delayed: 'Agricultural recovery takes seasons.',
+        },
+      },
+      {
+        id: 'industrial-drainage',
+        label: 'Industrial drainage',
+        description: 'Release into industrial drainage. Environmental contamination.',
+        valueAlignment: { isolation: 1, 'agricultural-harm': 1, environmental: -2 },
+        consequenceSketch: {
+          immediate: 'Environmental contamination downstream.',
+          ripple: 'EPA investigation. Cleanup costs enormous.',
+          delayed: 'Long-term environmental damage. Legal liability.',
+        },
+      },
+    ],
+    valuesTested: ['isolation', 'agricultural-harm', 'environmental'],
+    personaId: 'tanaka',
+    learningOutcomes: ['LO1', 'LO2'],
+    narrativeWeight: 'major',
+  },
+
+  // CRISIS-SUMMIT-01: Bunker Access
+  {
+    id: 'crisis-summit-01',
+    title: 'Bunker Access',
+    phase: 'crisis',
+    parishId: 'summit',
+    setup:
+      'Executive bunker has capacity for 200. 500 Summit residents seeking shelter. Webb can restrict to executives and families, open to all (overcrowded), or lottery.',
+    trigger: {
+      timelineWindow: 'approach-6',
+      intensityMin: 6,
+      intensityMax: 9,
+    },
+    options: [
+      {
+        id: 'executives-only',
+        label: 'Executives only',
+        description: 'Bunker restricted to executives and immediate families.',
+        valueAlignment: { survival: 1, solidarity: -3, hierarchy: 2 },
+        consequenceSketch: {
+          immediate: '200 executives sheltered. 300 turned away.',
+          ripple: 'Scientists, staff, families seek shelter elsewhere.',
+          delayed: 'Survivors remember who was protected.',
+        },
+      },
+      {
+        id: 'open-all',
+        label: 'Open to all',
+        description: 'Accept everyone. Severely overcrowded.',
+        valueAlignment: { survival: 0, solidarity: 2, hierarchy: -2 },
+        consequenceSketch: {
+          immediate: '500 people in space for 200. Dangerous conditions.',
+          ripple: 'Executives uncomfortable. But everyone together.',
+          delayed: 'Overcrowding may cause injuries. But solidarity demonstrated.',
+        },
+      },
+      {
+        id: 'lottery',
+        label: 'Fair lottery',
+        description: 'Random selection for 200 spots.',
+        valueAlignment: { survival: 0, solidarity: 1, hierarchy: 0 },
+        consequenceSketch: {
+          immediate: 'Random selection. Executives may lose spots.',
+          ripple: 'Perceived as fair. Outcome unpredictable.',
+          delayed: 'No favoritism. But random chance determines survival.',
+        },
+      },
+    ],
+    valuesTested: ['survival', 'solidarity', 'hierarchy'],
+    personaId: 'webb',
+    learningOutcomes: ['LO2', 'LO3'],
+    narrativeWeight: 'major',
+  },
+
+  // CRISIS-SUMMIT-02: Public Statement
+  {
+    id: 'crisis-summit-02',
+    title: 'Public Statement',
+    phase: 'crisis',
+    parishId: 'summit',
+    setup:
+      'Communications briefly restored. Webb can broadcast public statement. Options: honest assessment (terrifying but true), reassuring message (calming but misleading), or operational update only (informative but cold).',
+    trigger: {
+      timelineWindow: 'approach-6',
+      intensityMin: 6,
+      intensityMax: 9,
+    },
+    options: [
+      {
+        id: 'honest',
+        label: 'Honest assessment',
+        description: 'Full truth: situation dire, casualties expected.',
+        valueAlignment: { honesty: 2, liability: -2, 'public-trust': 1 },
+        consequenceSketch: {
+          immediate: 'Public terrified. Panic in shelters.',
+          ripple: 'People know truth. Prepare for worst.',
+          delayed: 'If honest, trusted. If wrong, blamed for panic.',
+        },
+      },
+      {
+        id: 'reassuring',
+        label: 'Reassuring message',
+        description: 'Calm message: situation under control, stay strong.',
+        valueAlignment: { honesty: -2, liability: 1, 'public-trust': -1 },
+        consequenceSketch: {
+          immediate: 'Public calmed. Some false hope.',
+          ripple: 'If reality worse, trust destroyed.',
+          delayed: 'Short-term calm. Long-term credibility risk.',
+        },
+      },
+      {
+        id: 'operational',
+        label: 'Operational only',
+        description: 'Facts only: conditions, shelter locations, no editorializing.',
+        valueAlignment: { honesty: 1, liability: 0, 'public-trust': 0 },
+        consequenceSketch: {
+          immediate: 'Useful information. No emotional content.',
+          ripple: 'People informed but not comforted.',
+          delayed: 'Professional but cold. Defensible.',
+        },
+      },
+    ],
+    valuesTested: ['honesty', 'liability', 'public-trust'],
+    personaId: 'webb',
+    learningOutcomes: ['LO1', 'LO3'],
+    narrativeWeight: 'standard',
+  },
+
+  // CRISIS-SUMMIT-03: Resource Commandeering
+  {
+    id: 'crisis-summit-03',
+    title: 'Resource Commandeering',
+    phase: 'crisis',
+    parishId: 'summit',
+    setup:
+      'Webb can invoke emergency authority to commandeer private resources (vehicles, generators, supplies) from Sterling residents for corporate use. Legal but ethically questionable.',
+    trigger: {
+      timelineWindow: 'approach-12',
+      intensityMin: 5,
+      intensityMax: 8,
+    },
+    options: [
+      {
+        id: 'commandeer',
+        label: 'Commandeer resources',
+        description: 'Use emergency authority to take what is needed.',
+        valueAlignment: { authority: 2, consent: -2, 'resource-optimization': 2 },
+        consequenceSketch: {
+          immediate: 'Resources redistributed. Private property taken.',
+          ripple: 'Sterling residents furious. Mayor Chen protests.',
+          delayed: 'Resources available but trust destroyed.',
+        },
+      },
+      {
+        id: 'request-only',
+        label: 'Request voluntarily',
+        description: 'Ask for donations. Accept only what is freely given.',
+        valueAlignment: { authority: -1, consent: 2, 'resource-optimization': -1 },
+        consequenceSketch: {
+          immediate: 'Some donations. Many keep their resources.',
+          ripple: 'Respect maintained. Resources limited.',
+          delayed: 'Goodwill preserved. May not have enough.',
+        },
+      },
+      {
+        id: 'compensate',
+        label: 'Commandeer with compensation',
+        description: 'Take what is needed with promise of full compensation.',
+        valueAlignment: { authority: 1, consent: 0, 'resource-optimization': 1 },
+        consequenceSketch: {
+          immediate: 'Resources taken with payment promise.',
+          ripple: 'Mixed reception. Some accept, some resist.',
+          delayed: 'Depends on whether promises are kept.',
+        },
+      },
+    ],
+    valuesTested: ['authority', 'consent', 'resource-optimization'],
+    personaId: 'webb',
+    learningOutcomes: ['LO2', 'LO5'],
+    narrativeWeight: 'standard',
+  },
+
+  // CRISIS-STERLING-01: Shelter Overflow
+  {
+    id: 'crisis-sterling-01',
+    title: 'Shelter Overflow',
+    phase: 'crisis',
+    parishId: 'sterling',
+    setup:
+      'Sterling shelter at 150% capacity. More people arriving. Chen can turn away new arrivals (send into storm), pack tighter (dangerous conditions), or redirect to hospital (strain medical).',
+    trigger: {
+      timelineWindow: 'approach-6',
+      intensityMin: 7,
+      intensityMax: 10,
+    },
+    options: [
+      {
+        id: 'turn-away',
+        label: 'Turn away new arrivals',
+        description: 'Shelter full. No more can be accepted.',
+        valueAlignment: { capacity: 2, compassion: -2, 'existing-safety': 2 },
+        consequenceSketch: {
+          immediate: 'New arrivals turned away. Some may die.',
+          ripple: 'Those turned away seek other shelter or face storm.',
+          delayed: 'Those inside safe. Those outside at risk.',
+        },
+      },
+      {
+        id: 'pack-tighter',
+        label: 'Accept everyone',
+        description: 'Accept all arrivals. Dangerous overcrowding.',
+        valueAlignment: { capacity: -1, compassion: 2, 'existing-safety': -1 },
+        consequenceSketch: {
+          immediate: 'Everyone accepted. Standing room only.',
+          ripple: 'Disease risk. Panic risk. Crush injuries possible.',
+          delayed: 'All sheltered. Conditions dangerous for all.',
+        },
+      },
+      {
+        id: 'redirect-hospital',
+        label: 'Redirect to hospital',
+        description: 'Send overflow to hospital which has some capacity.',
+        valueAlignment: { capacity: 0, compassion: 1, 'existing-safety': 0 },
+        consequenceSketch: {
+          immediate: 'Overflow sent to hospital. Medical capacity strained.',
+          ripple: 'Hospital treating healthy people. Actual patients affected.',
+          delayed: 'Shelter maintained. Hospital overwhelmed.',
+        },
+      },
+    ],
+    valuesTested: ['capacity', 'compassion', 'safety'],
+    personaId: 'chen',
+    learningOutcomes: ['LO2', 'LO3'],
+    narrativeWeight: 'major',
+  },
+
+  // CRISIS-STERLING-02: Medical Triage
+  {
+    id: 'crisis-sterling-02',
+    title: 'Medical Triage',
+    phase: 'crisis',
+    parishId: 'sterling',
+    setup:
+      'Hospital overwhelmed. Doctors ask Chen to authorize crisis triage standards: treat those most likely to survive, let others pass. Normal standard: treat everyone.',
+    trigger: {
+      timelineWindow: 'landfall-0',
+      intensityMin: 8,
+      intensityMax: 10,
+    },
+    options: [
+      {
+        id: 'crisis-triage',
+        label: 'Authorize crisis triage',
+        description: 'Allow doctors to prioritize survivable cases.',
+        valueAlignment: { efficiency: 2, equity: -2, 'life-saving': 1 },
+        consequenceSketch: {
+          immediate: 'Doctors triage. Some patients not treated.',
+          ripple: 'More lives saved overall. But some abandoned.',
+          delayed: 'Utilitarian outcome. Families question choices.',
+        },
+      },
+      {
+        id: 'normal-standard',
+        label: 'Maintain normal standard',
+        description: 'Treat all patients equally as resources allow.',
+        valueAlignment: { efficiency: -1, equity: 2, 'life-saving': 0 },
+        consequenceSketch: {
+          immediate: 'All treated equally. Resources spread thin.',
+          ripple: 'Fewer overall saved. But no one abandoned.',
+          delayed: 'Equal treatment. More total deaths.',
+        },
+      },
+      {
+        id: 'doctor-discretion',
+        label: 'Doctor discretion',
+        description: 'Let individual doctors make their own decisions.',
+        valueAlignment: { efficiency: 0, equity: 0, 'life-saving': 0 },
+        consequenceSketch: {
+          immediate: 'Inconsistent treatment across cases.',
+          ripple: 'Some doctors triage, some do not.',
+          delayed: 'No policy to defend or criticize.',
+        },
+      },
+    ],
+    valuesTested: ['efficiency', 'equity', 'life-saving'],
+    personaId: 'chen',
+    learningOutcomes: ['LO1', 'LO5'],
+    narrativeWeight: 'pivotal',
+  },
+
+  // CRISIS-STERLING-03: Looting Response
+  {
+    id: 'crisis-sterling-03',
+    title: 'Looting Response',
+    phase: 'crisis',
+    parishId: 'sterling',
+    setup:
+      'Looting reported at abandoned stores. Some looting survival supplies (food, water), some taking electronics. Chen can authorize force, look away, or differentiate response.',
+    trigger: {
+      timelineWindow: 'approach-6',
+      intensityMin: 6,
+      intensityMax: 9,
+    },
+    options: [
+      {
+        id: 'strict-enforcement',
+        label: 'Strict enforcement',
+        description: 'Authorize force against all looting. Law is law.',
+        valueAlignment: { order: 2, mercy: -2, 'property-rights': 2 },
+        consequenceSketch: {
+          immediate: 'Looting suppressed. Some injuries.',
+          ripple: 'Order maintained. But desperate people punished.',
+          delayed: 'Law upheld. Community resentment.',
+        },
+      },
+      {
+        id: 'look-away',
+        label: 'Look away',
+        description: 'Ignore looting. Focus resources on life safety.',
+        valueAlignment: { order: -2, mercy: 1, 'property-rights': -2 },
+        consequenceSketch: {
+          immediate: 'Looting continues unchecked.',
+          ripple: 'Some take survival needs. Some take advantage.',
+          delayed: 'Chaos. But resources focused on saving lives.',
+        },
+      },
+      {
+        id: 'differentiate',
+        label: 'Differentiate response',
+        description: 'Allow survival supply taking. Stop electronics theft.',
+        valueAlignment: { order: 0, mercy: 1, 'property-rights': 0 },
+        consequenceSketch: {
+          immediate: 'Nuanced enforcement. Judgment calls required.',
+          ripple: 'Some see as fair. Some see as inconsistent.',
+          delayed: 'Middle ground that requires explanation.',
+        },
+      },
+    ],
+    valuesTested: ['order', 'mercy', 'property-rights'],
+    personaId: 'chen',
+    learningOutcomes: ['LO2', 'LO3'],
+    narrativeWeight: 'standard',
+  },
+
+  // CRISIS-MULTI-01: Inter-Parish Rescue
+  {
+    id: 'crisis-multi-01',
+    title: 'Inter-Parish Rescue',
+    phase: 'crisis',
+    parishId: 'multi',
+    setup:
+      'Brief window for rescue operations. One rescue team available. Multiple parishes reporting emergencies. Who gets help first?',
+    trigger: {
+      timelineWindow: 'eye-6',
+      intensityMin: 6,
+      intensityMax: 9,
+    },
+    options: [
+      {
+        id: 'sterling-first',
+        label: 'Sterling first',
+        description: 'Highest population, most non-Meridian residents.',
+        valueAlignment: { 'local-priority': -1, 'island-wide': 2, equity: 2 },
+        consequenceSketch: {
+          immediate: 'Sterling receives first response.',
+          ripple: 'Other parishes wait. Corporate facilities second.',
+          delayed: 'Community priority demonstrated.',
+        },
+      },
+      {
+        id: 'keystone-first',
+        label: 'Keystone first',
+        description: 'Protect critical production facility.',
+        valueAlignment: { 'local-priority': 2, 'island-wide': -1, equity: -2 },
+        consequenceSketch: {
+          immediate: 'Keystone receives first response.',
+          ripple: 'Other parishes note corporate priority.',
+          delayed: 'Production protected. Community resentment.',
+        },
+      },
+      {
+        id: 'nearest-first',
+        label: 'Nearest first',
+        description: 'Help closest emergency first for efficiency.',
+        valueAlignment: { 'local-priority': 0, 'island-wide': 1, equity: 0 },
+        consequenceSketch: {
+          immediate: 'Nearest emergency addressed first.',
+          ripple: 'Efficient but possibly unfair.',
+          delayed: 'Defensible as practical. May not serve greatest need.',
+        },
+      },
+    ],
+    valuesTested: ['local-priority', 'island-wide', 'equity'],
+    personaId: ['webb', 'chen', 'reeves', 'santos', 'mendez', 'tanaka'],
+    learningOutcomes: ['LO2', 'LO4'],
+    narrativeWeight: 'major',
+  },
+
+  // CRISIS-MULTI-02: Information Blackout
+  {
+    id: 'crisis-multi-02',
+    title: 'Information Blackout',
+    phase: 'crisis',
+    parishId: 'multi',
+    setup:
+      'Communications mostly down. Webb has satellite phone. He can share it for public emergency calls, keep it for corporate coordination, or give it to Mayor Chen for government use.',
+    trigger: {
+      timelineWindow: 'approach-6',
+      intensityMin: 6,
+      intensityMax: 9,
+    },
+    options: [
+      {
+        id: 'public-use',
+        label: 'Public emergency calls',
+        description: 'Allow anyone with emergencies to use satellite phone.',
+        valueAlignment: { truth: 2, stability: -1, 'public-good': 2 },
+        consequenceSketch: {
+          immediate: 'Phone overwhelmed with calls. Battery drain.',
+          ripple: 'Some emergencies reported. Corporate comms limited.',
+          delayed: 'Public served. Corporate coordination suffers.',
+        },
+      },
+      {
+        id: 'corporate-only',
+        label: 'Corporate coordination',
+        description: 'Reserve phone for corporate emergency coordination.',
+        valueAlignment: { truth: -1, stability: 2, 'public-good': -1 },
+        consequenceSketch: {
+          immediate: 'Corporate maintains communication capability.',
+          ripple: 'Public without external contact. Isolation complete.',
+          delayed: 'Operations maintained. Public trust damaged.',
+        },
+      },
+      {
+        id: 'give-to-chen',
+        label: 'Give to government',
+        description: 'Give phone to Mayor Chen for government emergency use.',
+        valueAlignment: { truth: 1, stability: 0, 'public-good': 1 },
+        consequenceSketch: {
+          immediate: 'Government has communication. Corporate does not.',
+          ripple: 'Chen controls information flow.',
+          delayed: 'Government empowered. Corporate dependent.',
+        },
+      },
+    ],
+    valuesTested: ['truth', 'stability', 'public-good'],
+    personaId: ['webb', 'chen'],
+    learningOutcomes: ['LO1', 'LO3'],
+    narrativeWeight: 'standard',
+  },
+];
+
+// ============================================================================
+// RECOVERY PHASE DILEMMAS (10)
+// ============================================================================
+
+const RECOVERY_DILEMMAS: Dilemma[] = [
+  // RECOVERY-KEYSTONE-01: Production Restart Timing
+  {
+    id: 'recovery-keystone-01',
+    title: 'Production Restart Timing',
+    phase: 'recovery',
+    parishId: 'keystone',
+    setup:
+      'Storm passed. Clean rooms need assessment before restart. Webb wants production ASAP. Reeves says proper safety checks take 72 hours. Rushing risks contamination.',
+    trigger: {
+      timelineWindow: 'recovery-24',
+      intensityMin: 4,
+      intensityMax: 7,
+    },
+    options: [
+      {
+        id: 'rush-restart',
+        label: 'Rush restart',
+        description: 'Begin production in 24 hours with abbreviated checks.',
+        valueAlignment: { speed: 2, safety: -2, financial: 2 },
+        consequenceSketch: {
+          immediate: 'Production restarts quickly. Contamination risk elevated.',
+          ripple: 'Workers worried about conditions. Quality uncertain.',
+          delayed: 'If contamination, worse than delay. If clean, saved time.',
+        },
+      },
+      {
+        id: 'full-protocol',
+        label: 'Full 72-hour protocol',
+        description: 'Complete safety assessment before restart.',
+        valueAlignment: { speed: -2, safety: 2, financial: -2 },
+        consequenceSketch: {
+          immediate: 'Production delayed. Webb furious.',
+          ripple: 'Workers appreciate safety priority. Board questions delay.',
+          delayed: 'Safe restart. Financial loss from delay.',
+        },
+      },
+      {
+        id: 'parallel-assessment',
+        label: 'Parallel assessment',
+        description: 'Begin production in safe areas while assessing others.',
+        valueAlignment: { speed: 1, safety: 0, financial: 1 },
+        consequenceSketch: {
+          immediate: 'Partial production. Ongoing assessment.',
+          ripple: 'Some output maintained. Some risk accepted.',
+          delayed: 'Middle ground. Neither fully safe nor fully productive.',
+        },
+      },
+    ],
+    valuesTested: ['speed', 'safety', 'financial'],
+    personaId: 'reeves',
+    learningOutcomes: ['LO3', 'LO4'],
+    narrativeWeight: 'major',
+  },
+
+  // RECOVERY-HAVEN-01: Worker Compensation
+  {
+    id: 'recovery-haven-01',
+    title: 'Worker Compensation',
+    phase: 'recovery',
+    parishId: 'haven',
+    setup:
+      'Workers lost wages during storm shutdown. Santos demands full pay for missed shifts plus hazard bonus. Corporate offers 50% with no bonus, citing losses.',
+    trigger: {
+      timelineWindow: 'recovery-24',
+      intensityMin: 3,
+      intensityMax: 6,
+    },
+    options: [
+      {
+        id: 'full-compensation',
+        label: 'Full compensation plus bonus',
+        description: 'Meet all union demands.',
+        valueAlignment: { fairness: 2, 'corporate-survival': -2, 'worker-loyalty': 2 },
+        consequenceSketch: {
+          immediate: 'Workers paid in full. Significant corporate expense.',
+          ripple: 'Worker morale high. Board questions expense.',
+          delayed: 'Long-term loyalty earned. Short-term financial pain.',
+        },
+      },
+      {
+        id: 'fifty-percent',
+        label: '50% no bonus',
+        description: 'Accept corporate offer.',
+        valueAlignment: { fairness: -1, 'corporate-survival': 2, 'worker-loyalty': -2 },
+        consequenceSketch: {
+          immediate: 'Workers angry. Some quit.',
+          ripple: 'Union files grievance. Talent loss.',
+          delayed: 'Corporate saves money. Worker trust destroyed.',
+        },
+      },
+      {
+        id: 'negotiate-middle',
+        label: 'Negotiate 75%',
+        description: 'Counter-offer at 75% with small bonus.',
+        valueAlignment: { fairness: 0, 'corporate-survival': 0, 'worker-loyalty': 0 },
+        consequenceSketch: {
+          immediate: 'Negotiation continues. Moderate agreement possible.',
+          ripple: 'Neither side fully satisfied.',
+          delayed: 'Relationship preserved but strained.',
+        },
+      },
+    ],
+    valuesTested: ['fairness', 'corporate-survival', 'worker-loyalty'],
+    personaId: 'santos',
+    learningOutcomes: ['LO3', 'LO4'],
+    narrativeWeight: 'standard',
+  },
+
+  // RECOVERY-GATEWAY-01: Tourism vs Residents
+  {
+    id: 'recovery-gateway-01',
+    title: 'Tourism vs Residents',
+    phase: 'recovery',
+    parishId: 'gateway',
+    setup:
+      'Airport reopening. Limited capacity. Tourism board wants to resume flights to save industry. Residents who evacuated want to return home first.',
+    trigger: {
+      timelineWindow: 'recovery-24',
+      intensityMin: 3,
+      intensityMax: 6,
+    },
+    options: [
+      {
+        id: 'residents-first',
+        label: 'Residents return first',
+        description: 'Priority to returning residents over tourists.',
+        valueAlignment: { economics: -1, community: 2, 'tourism-recovery': -2 },
+        consequenceSketch: {
+          immediate: 'Residents return. Tourism delayed.',
+          ripple: 'Tourism industry suffers extended loss.',
+          delayed: 'Community restored. Economic recovery slower.',
+        },
+      },
+      {
+        id: 'tourism-priority',
+        label: 'Tourism priority',
+        description: 'Resume tourism to boost economic recovery.',
+        valueAlignment: { economics: 2, community: -2, 'tourism-recovery': 2 },
+        consequenceSketch: {
+          immediate: 'Tourists arrive. Residents wait.',
+          ripple: 'Economic activity resumes. Community anger.',
+          delayed: 'Money flowing. Residents displaced longer.',
+        },
+      },
+      {
+        id: 'balanced-schedule',
+        label: 'Balanced schedule',
+        description: 'Split flights between resident return and tourism.',
+        valueAlignment: { economics: 0, community: 0, 'tourism-recovery': 0 },
+        consequenceSketch: {
+          immediate: 'Both served partially.',
+          ripple: 'Neither fully satisfied. Compromise visible.',
+          delayed: 'Moderate progress on both fronts.',
+        },
+      },
+    ],
+    valuesTested: ['economics', 'community', 'tourism-recovery'],
+    personaId: 'mendez',
+    learningOutcomes: ['LO4', 'LO5'],
+    narrativeWeight: 'standard',
+  },
+
+  // RECOVERY-HEARTLAND-01: Infrastructure Blame
+  {
+    id: 'recovery-heartland-01',
+    title: 'Infrastructure Blame',
+    phase: 'recovery',
+    parishId: 'heartland',
+    setup:
+      'Dam held but barely. Investigation asks: was it maintenance deferral or act of God? Tanaka knows maintenance was deferred due to budget cuts Webb approved. Truth protects Tanaka but exposes corporate.',
+    trigger: {
+      timelineWindow: 'recovery-24',
+      intensityMin: 4,
+      intensityMax: 7,
+    },
+    options: [
+      {
+        id: 'tell-truth',
+        label: 'Tell full truth',
+        description: 'Testify about deferred maintenance and budget cuts.',
+        valueAlignment: { truth: 2, career: -2, 'corporate-protection': -2 },
+        consequenceSketch: {
+          immediate: 'Truth told. Webb exposed. Corporate liability.',
+          ripple: 'Tanaka protected but may be blacklisted from industry.',
+          delayed: 'Right thing done. Career consequences.',
+        },
+      },
+      {
+        id: 'act-of-god',
+        label: 'Blame storm',
+        description: 'Testify that storm exceeded all design parameters.',
+        valueAlignment: { truth: -2, career: 2, 'corporate-protection': 2 },
+        consequenceSketch: {
+          immediate: 'Storm blamed. Corporate protected. Tanaka protected.',
+          ripple: 'Deferred maintenance continues. Next storm may be worse.',
+          delayed: 'Lie maintained. Problem unfixed.',
+        },
+      },
+      {
+        id: 'partial-truth',
+        label: 'Partial disclosure',
+        description: 'Mention concerns were raised without specific blame.',
+        valueAlignment: { truth: 0, career: 0, 'corporate-protection': 0 },
+        consequenceSketch: {
+          immediate: 'Concerns noted. No smoking gun.',
+          ripple: 'Investigation may dig deeper or may accept.',
+          delayed: 'Truth partially told. Outcomes uncertain.',
+        },
+      },
+    ],
+    valuesTested: ['truth', 'career', 'corporate-protection'],
+    personaId: 'tanaka',
+    learningOutcomes: ['LO3', 'LO4'],
+    narrativeWeight: 'major',
+  },
+
+  // RECOVERY-SUMMIT-01: Board Report
+  {
+    id: 'recovery-summit-01',
+    title: 'Board Report',
+    phase: 'recovery',
+    parishId: 'summit',
+    setup:
+      'Board demands report on storm response. Webb can present honest assessment (admits failures), spin positive (minimizes problems), or blame-shift (identifies scapegoats).',
+    trigger: {
+      timelineWindow: 'recovery-24',
+      intensityMin: 4,
+      intensityMax: 7,
+    },
+    options: [
+      {
+        id: 'honest-report',
+        label: 'Honest assessment',
+        description: 'Present full truth including corporate failures.',
+        valueAlignment: { transparency: 2, 'corporate-survival': -1, accountability: 2 },
+        consequenceSketch: {
+          immediate: 'Board sees failures. Webb at risk.',
+          ripple: 'Some board members respect honesty. Others want blood.',
+          delayed: 'Trust built with honest board members. Position at risk.',
+        },
+      },
+      {
+        id: 'spin-positive',
+        label: 'Spin positive',
+        description: 'Emphasize successes, minimize failures.',
+        valueAlignment: { transparency: -1, 'corporate-survival': 2, accountability: -1 },
+        consequenceSketch: {
+          immediate: 'Board somewhat satisfied. Reality hidden.',
+          ripple: 'If truth emerges later, worse consequences.',
+          delayed: 'Short-term survival. Long-term exposure risk.',
+        },
+      },
+      {
+        id: 'blame-others',
+        label: 'Identify scapegoats',
+        description: 'Blame failures on specific individuals (Reeves, Tanaka).',
+        valueAlignment: { transparency: -2, 'corporate-survival': 1, accountability: -2 },
+        consequenceSketch: {
+          immediate: 'Scapegoats identified. Webb protected.',
+          ripple: 'Good people sacrificed. Others take note.',
+          delayed: 'Loyalty destroyed. Future cooperation unlikely.',
+        },
+      },
+    ],
+    valuesTested: ['transparency', 'corporate-survival', 'accountability'],
+    personaId: 'webb',
+    learningOutcomes: ['LO3', 'LO4'],
+    narrativeWeight: 'major',
+  },
+
+  // RECOVERY-SUMMIT-02: Scapegoat Selection
+  {
+    id: 'recovery-summit-02',
+    title: 'Scapegoat Selection',
+    phase: 'recovery',
+    parishId: 'summit',
+    setup:
+      'Board wants someone fired. Webb can sacrifice Reeves (production decisions), Tanaka (infrastructure), or take responsibility himself and resign.',
+    trigger: {
+      timelineWindow: 'recovery-24',
+      intensityMin: 5,
+      intensityMax: 8,
+      prerequisiteDecisions: ['recovery-summit-01'],
+    },
+    options: [
+      {
+        id: 'sacrifice-reeves',
+        label: 'Fire Reeves',
+        description: 'Blame production decisions. Reeves terminated.',
+        valueAlignment: { justice: -2, expedience: 2, 'self-preservation': 2 },
+        consequenceSketch: {
+          immediate: 'Reeves fired. Board satisfied.',
+          ripple: 'Reeves was trying to protect workers. Injustice visible.',
+          delayed: 'Wrong person blamed. System unchanged.',
+        },
+      },
+      {
+        id: 'sacrifice-tanaka',
+        label: 'Fire Tanaka',
+        description: 'Blame infrastructure maintenance. Tanaka terminated.',
+        valueAlignment: { justice: -2, expedience: 2, 'self-preservation': 2 },
+        consequenceSketch: {
+          immediate: 'Tanaka fired. Board satisfied.',
+          ripple: 'Tanaka warned about problems. Injustice visible.',
+          delayed: 'Wrong person blamed. Dam expertise lost.',
+        },
+      },
+      {
+        id: 'resign',
+        label: 'Webb resigns',
+        description: 'Take responsibility. Offer resignation.',
+        valueAlignment: { justice: 2, expedience: -1, 'self-preservation': -2 },
+        consequenceSketch: {
+          immediate: 'Webb resigns. Board may accept or decline.',
+          ripple: 'Leadership change. Uncertainty.',
+          delayed: 'Accountability demonstrated. Future uncertain.',
+        },
+      },
+    ],
+    valuesTested: ['justice', 'expedience', 'self-preservation'],
+    personaId: 'webb',
+    learningOutcomes: ['LO1', 'LO4'],
+    narrativeWeight: 'pivotal',
+  },
+
+  // RECOVERY-STERLING-01: Memorial Politics
+  {
+    id: 'recovery-sterling-01',
+    title: 'Memorial Politics',
+    phase: 'recovery',
+    parishId: 'sterling',
+    setup:
+      'Community wants memorial for storm victims. Options: corporate-funded (controlled message), community-funded (authentic but modest), or joint memorial with shared naming rights.',
+    trigger: {
+      timelineWindow: 'recovery-24',
+      intensityMin: 3,
+      intensityMax: 6,
+    },
+    options: [
+      {
+        id: 'corporate-memorial',
+        label: 'Corporate-funded memorial',
+        description: 'Accept Meridian funding for grand memorial.',
+        valueAlignment: { healing: 1, accountability: -2, authenticity: -1 },
+        consequenceSketch: {
+          immediate: 'Large memorial funded. Meridian branding prominent.',
+          ripple: 'Families feel memorial is corporate PR.',
+          delayed: 'Nice memorial. Complicated legacy.',
+        },
+      },
+      {
+        id: 'community-memorial',
+        label: 'Community-funded memorial',
+        description: 'Modest memorial funded by community donations.',
+        valueAlignment: { healing: 2, accountability: 1, authenticity: 2 },
+        consequenceSketch: {
+          immediate: 'Smaller memorial. Community ownership.',
+          ripple: 'Authentic tribute. Modest scale.',
+          delayed: 'True community healing. Modest monument.',
+        },
+      },
+      {
+        id: 'joint-memorial',
+        label: 'Joint memorial',
+        description: 'Combined funding with shared governance.',
+        valueAlignment: { healing: 1, accountability: 0, authenticity: 0 },
+        consequenceSketch: {
+          immediate: 'Negotiations over naming, design, message.',
+          ripple: 'Compromise memorial. Mixed ownership.',
+          delayed: 'Balance achieved. Neither fully satisfied.',
+        },
+      },
+    ],
+    valuesTested: ['healing', 'accountability', 'authenticity'],
+    personaId: 'chen',
+    learningOutcomes: ['LO4', 'LO5'],
+    narrativeWeight: 'standard',
+  },
+
+  // RECOVERY-STERLING-02: Rebuilding Priorities
+  {
+    id: 'recovery-sterling-02',
+    title: 'Rebuilding Priorities',
+    phase: 'recovery',
+    parishId: 'sterling',
+    setup:
+      'Limited rebuilding resources. Chen must choose priority: hospital expansion (serving all), affordable housing (residents displaced), or business district (economic recovery).',
+    trigger: {
+      timelineWindow: 'recovery-24',
+      intensityMin: 3,
+      intensityMax: 6,
+    },
+    options: [
+      {
+        id: 'hospital',
+        label: 'Hospital expansion',
+        description: 'Prioritize medical capacity improvement.',
+        valueAlignment: { equity: 1, efficiency: 1, 'long-term': 2 },
+        consequenceSketch: {
+          immediate: 'Hospital expansion begins. Housing waits.',
+          ripple: 'Medical capacity improved. Displaced still displaced.',
+          delayed: 'Better prepared for next crisis. Current crisis unresolved.',
+        },
+      },
+      {
+        id: 'housing',
+        label: 'Affordable housing',
+        description: 'Prioritize housing for displaced residents.',
+        valueAlignment: { equity: 2, efficiency: -1, 'long-term': 0 },
+        consequenceSketch: {
+          immediate: 'Housing construction begins. Economic recovery waits.',
+          ripple: 'Residents return home. Business district struggles.',
+          delayed: 'Community restored. Economic recovery slower.',
+        },
+      },
+      {
+        id: 'business',
+        label: 'Business district',
+        description: 'Prioritize economic recovery infrastructure.',
+        valueAlignment: { equity: -1, efficiency: 2, 'long-term': 1 },
+        consequenceSketch: {
+          immediate: 'Business district rebuilt. Housing waits.',
+          ripple: 'Jobs return. Displaced remain displaced.',
+          delayed: 'Economic engine restored. Community still fractured.',
+        },
+      },
+    ],
+    valuesTested: ['equity', 'efficiency', 'long-term'],
+    personaId: 'chen',
+    learningOutcomes: ['LO3', 'LO5'],
+    narrativeWeight: 'standard',
+  },
+
+  // RECOVERY-MULTI-01: Public Narrative
+  {
+    id: 'recovery-multi-01',
+    title: 'Public Narrative',
+    phase: 'recovery',
+    parishId: 'multi',
+    setup:
+      'Media wants the story. Options: unified corporate/government message (controlled but may feel hollow), independent accounts (authentic but may be contradictory), or full transparency (all documents released).',
+    trigger: {
+      timelineWindow: 'recovery-24',
+      intensityMin: 4,
+      intensityMax: 7,
+    },
+    options: [
+      {
+        id: 'unified-message',
+        label: 'Unified message',
+        description: 'Corporate and government agree on single narrative.',
+        valueAlignment: { truth: -1, unity: 2, accountability: -1 },
+        consequenceSketch: {
+          immediate: 'Coordinated message. Consistent story.',
+          ripple: 'Some truth hidden. Official line maintained.',
+          delayed: 'Unity preserved. Trust depends on story holding.',
+        },
+      },
+      {
+        id: 'independent-accounts',
+        label: 'Independent accounts',
+        description: 'Everyone tells their own story.',
+        valueAlignment: { truth: 1, unity: -1, accountability: 1 },
+        consequenceSketch: {
+          immediate: 'Multiple stories. Contradictions visible.',
+          ripple: 'Authentic but messy. Blame-shifting possible.',
+          delayed: 'Truth emerges eventually. Unified front gone.',
+        },
+      },
+      {
+        id: 'full-transparency',
+        label: 'Full transparency',
+        description: 'Release all documents. Let public judge.',
+        valueAlignment: { truth: 2, unity: -2, accountability: 2 },
+        consequenceSketch: {
+          immediate: 'All documents public. Nothing hidden.',
+          ripple: 'Full picture visible. Judgments follow.',
+          delayed: 'Truth known. Consequences follow.',
+        },
+      },
+    ],
+    valuesTested: ['truth', 'unity', 'accountability'],
+    personaId: ['webb', 'chen', 'reeves', 'santos', 'mendez', 'tanaka'],
+    learningOutcomes: ['LO3', 'LO4'],
+    narrativeWeight: 'major',
+  },
+
+  // RECOVERY-MULTI-02: Lessons Learned
+  {
+    id: 'recovery-multi-02',
+    title: 'Lessons Learned',
+    phase: 'recovery',
+    parishId: 'multi',
+    setup:
+      'Final reflection session. What changes should be made? Options range from minor process tweaks to fundamental restructuring of corporate-community relationship.',
+    trigger: {
+      timelineWindow: 'recovery-24',
+      intensityMin: 3,
+      intensityMax: 6,
+    },
+    options: [
+      {
+        id: 'process-tweaks',
+        label: 'Process improvements',
+        description: 'Minor adjustments to emergency procedures.',
+        valueAlignment: { change: -1, stability: 2, 'systemic-fix': -2 },
+        consequenceSketch: {
+          immediate: 'Small changes implemented. Core unchanged.',
+          ripple: 'Easy to implement. May not prevent next crisis.',
+          delayed: 'Comfortable change. Real issues remain.',
+        },
+      },
+      {
+        id: 'structural-reform',
+        label: 'Structural reforms',
+        description: 'Significant changes to corporate governance and community input.',
+        valueAlignment: { change: 2, stability: -1, 'systemic-fix': 2 },
+        consequenceSketch: {
+          immediate: 'Major changes proposed. Implementation difficult.',
+          ripple: 'Real change possible. Resistance expected.',
+          delayed: 'If implemented, better outcomes. If not, frustration.',
+        },
+      },
+      {
+        id: 'independent-oversight',
+        label: 'Independent oversight',
+        description: 'Create independent body to monitor corporate-community relations.',
+        valueAlignment: { change: 1, stability: 0, 'systemic-fix': 1 },
+        consequenceSketch: {
+          immediate: 'Oversight body proposed.',
+          ripple: 'Accountability mechanism created. Corporate resistance.',
+          delayed: 'Depends on oversight body independence and power.',
+        },
+      },
+    ],
+    valuesTested: ['change', 'stability', 'systemic-fix'],
+    personaId: ['webb', 'chen', 'reeves', 'santos', 'mendez', 'tanaka'],
+    learningOutcomes: ['LO4', 'LO5'],
+    narrativeWeight: 'pivotal',
+  },
+];
+
+// ============================================================================
+// DILEMMA LIBRARY EXPORT
+// ============================================================================
+
+export const DILEMMA_LIBRARY: DilemmaLibrary = {
+  watch: WATCH_DILEMMAS,
+  crisis: CRISIS_DILEMMAS,
+  recovery: RECOVERY_DILEMMAS,
+};
+
+export const ALL_DILEMMAS: Dilemma[] = [
+  ...WATCH_DILEMMAS,
+  ...CRISIS_DILEMMAS,
+  ...RECOVERY_DILEMMAS,
+];
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Get a dilemma by ID
+ */
+export function getDilemmaById(id: string): Dilemma | undefined {
+  return ALL_DILEMMAS.find((d) => d.id === id);
+}
+
+/**
+ * Get all dilemmas for a specific phase
+ */
+export function getDilemmasByPhase(phase: DilemmaPhase): Dilemma[] {
+  return DILEMMA_LIBRARY[phase];
+}
+
+/**
+ * Get all dilemmas for a specific parish
+ */
+export function getDilemmasByParish(parishId: string): Dilemma[] {
+  return ALL_DILEMMAS.filter((d) => d.parishId === parishId || d.parishId === 'multi');
+}
+
+/**
+ * Get dilemmas matching trigger conditions
+ */
+export function getEligibleDilemmas(
+  phase: DilemmaPhase,
+  parishId: string,
+  intensity: number,
+  timelineWindow: string,
+  completedDecisions: string[]
+): Dilemma[] {
+  return getDilemmasByPhase(phase).filter((d) => {
+    // Parish match
+    if (d.parishId !== parishId && d.parishId !== 'multi') return false;
+
+    // Intensity in range
+    if (d.trigger.intensityMin && intensity < d.trigger.intensityMin) return false;
+    if (d.trigger.intensityMax && intensity > d.trigger.intensityMax) return false;
+
+    // Timeline window match (if specified)
+    if (d.trigger.timelineWindow && d.trigger.timelineWindow !== timelineWindow) return false;
+
+    // Prerequisites met
+    if (d.trigger.prerequisiteDecisions) {
+      for (const prereq of d.trigger.prerequisiteDecisions) {
+        if (!completedDecisions.includes(prereq)) return false;
+      }
+    }
+
+    // Not already completed
+    if (completedDecisions.includes(d.id)) return false;
+
+    return true;
+  });
+}
+
+/**
+ * Select next dilemma based on narrative weight
+ */
+export function selectNextDilemma(
+  phase: DilemmaPhase,
+  parishId: string,
+  intensity: number,
+  timelineWindow: string,
+  completedDecisions: string[]
+): Dilemma | null {
+  const eligible = getEligibleDilemmas(phase, parishId, intensity, timelineWindow, completedDecisions);
+
+  if (eligible.length === 0) return null;
+
+  // Sort by narrative weight (pivotal > major > standard > minor)
+  const weightOrder: Record<string, number> = { pivotal: 4, major: 3, standard: 2, minor: 1 };
+  eligible.sort((a, b) => weightOrder[b.narrativeWeight] - weightOrder[a.narrativeWeight]);
+
+  return eligible[0];
+}
+
+/**
+ * Get dilemma statistics
+ */
+export function getDilemmaStats(): {
+  total: number;
+  byPhase: Record<DilemmaPhase, number>;
+  byParish: Record<string, number>;
+  byWeight: Record<string, number>;
+} {
+  const stats = {
+    total: ALL_DILEMMAS.length,
+    byPhase: { watch: 0, crisis: 0, recovery: 0 } as Record<DilemmaPhase, number>,
+    byParish: {} as Record<string, number>,
+    byWeight: { minor: 0, standard: 0, major: 0, pivotal: 0 } as Record<string, number>,
+  };
+
+  for (const d of ALL_DILEMMAS) {
+    stats.byPhase[d.phase]++;
+    stats.byParish[d.parishId] = (stats.byParish[d.parishId] || 0) + 1;
+    stats.byWeight[d.narrativeWeight]++;
+  }
+
+  return stats;
+}

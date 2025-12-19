@@ -10,8 +10,9 @@ datasource db {
 
 model Session {
   id               String    @id @default(uuid())
-  code             String    @unique @db.VarChar(6)
+  code             String    @unique @db.VarChar(8)
   status           String    @default("lobby") // lobby, active, completed
+  phase            String    @default("lobby") // lobby, briefing, pre_crisis, crisis, debrief
   scenarioSeed     String?
   companyName      String?
   companyValues    String[] // Company values being tested (optional)
@@ -21,11 +22,12 @@ model Session {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  teams            Team[]
-  decisions        Decision[]
-  streamingContent StreamingContentRecord[]
-  reflections      Reflection[]
-  reports          Report[]
+  teams               Team[]
+  decisions           Decision[]
+  streamingContent    StreamingContentRecord[]
+  reflections         Reflection[]
+  reports             Report[]
+  productionSnapshots ProductionSnapshot[]
 
   @@index([code])
   @@index([status])
@@ -36,15 +38,19 @@ model Team {
   sessionId           String
   parishId            String
   name                String
+  color               String?  // Team color for UI display
   statedValues        String[] // From discovery phase
   valuesRankOrder     Int[] // Indices into statedValues
   decisionProcess     String   @default("consensus")
   commitmentStatement String?
+  isAIControlled      Boolean  @default(false)
+  aiArchetype         String?  // For AI teams: 'by-the-book', 'cowboy', etc.
   createdAt           DateTime @default(now())
 
-  session      Session       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session      Session         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   participants Participant[]
   decisions    Decision[]
+  commitment   TeamCommitment?
 
   @@unique([sessionId, parishId])
   @@index([sessionId])
@@ -63,6 +69,7 @@ model Participant {
   team               Team               @relation(fields: [teamId], references: [id], onDelete: Cascade)
   advocatedDecisions DecisionAdvocate[]
   reflections        Reflection[]
+  preCrisisProfile   PreCrisisProfile?
 
   @@index([teamId])
 }
@@ -163,4 +170,276 @@ model Report {
   session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId, type])
+}
+
+// ============================================================================
+// PRE-CRISIS DISCOVERY MODELS
+// ============================================================================
+
+model PreCrisisProfile {
+  id                   String   @id @default(uuid())
+  participantId        String   @unique
+  participantName      String
+
+  // Quick Sort Results
+  topFiveValues        String[] // Ranked, index 0 = highest priority
+  roundTimings         Int[]    // Time spent on each of 3 rounds (ms)
+  cardsConsidered      String[] // All values that made it to "Essential" pile
+
+  // Values Meaning (for top 3 values)
+  valueMeanings        Json     // {value: {definition, behaviors[], honoredFeeling, violatedFeeling}}
+
+  // Values Story
+  storyText            String?  @db.Text
+  selfIdentifiedValues String[]
+  peerIdentifiedValues String[]
+  alignmentFlag        Boolean  @default(false) // True if peer values differ significantly
+
+  completedAt          DateTime @default(now())
+  createdAt            DateTime @default(now())
+
+  participant          Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+  @@index([participantId])
+}
+
+model TeamCommitment {
+  id                String   @id @default(uuid())
+  teamId            String   @unique
+  sessionId         String
+
+  // Team Values with Definitions
+  values            Json     // [{value, teamDefinition, livingIt[], violatingIt[]}]
+
+  // Commitment Statement
+  commitmentText    String   @db.Text
+
+  // Decision Process
+  decisionProcess   String   // 'consensus' | 'consultative' | 'majority' | 'leader' | 'valuesCheck'
+  processDescription String? @db.Text
+  valuesCheckTrigger String? // When to use values check overlay
+
+  // Signatures
+  signatures        String[] // Participant IDs who signed
+  readAloudAt       DateTime? // When commitment was read aloud
+
+  // Organizational Values (optional Phase 3)
+  orgValues         String[]
+  orgAlignmentRatings Json?   // {value: rating} for each org value
+  orgExtensionCommitment String? @db.Text
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  team              Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([teamId])
+  @@index([sessionId])
+}
+
+model ValuesScore {
+  id              String   @id @default(uuid())
+  decisionId      String
+  teamId          String
+  sessionId       String
+
+  // Timing Context
+  simulationTime  Int      // Minutes from landfall
+  phase           String   // 'watch' | 'crisis' | 'recovery'
+  intensityLevel  Int      // 1-10
+
+  // Per-Value Scores
+  scores          Json     // [{value, alignment (-3 to +3), evidence, confidence, teamDefinition?, rationaleQuote?}]
+
+  // ABCD Coding
+  affect          String   @db.Text // Emotional state observed
+  behavior        String   @db.Text // Actions taken
+  cognition       String   @db.Text // Reasoning expressed
+  desire          String   @db.Text // Outcome sought
+
+  // Notable Moment Tracking
+  isNotable       Boolean  @default(false)
+  notableReason   String?  @db.Text
+  notableCategory String?  // 'gap' | 'consistency' | 'conflict' | 'growth'
+
+  // Commitment Alignment
+  commitmentAlignment String  // 'aligned' | 'tension' | 'violation'
+  commitmentComparisonQuote String? @db.Text
+
+  // CM Intervention
+  valuesCheckTriggered Boolean @default(false)
+
+  // Metadata
+  modelUsed       String   @default("claude-3-5-sonnet")
+  confidence      Int      // 0-100
+  scoredAt        DateTime @default(now())
+
+  @@index([decisionId])
+  @@index([teamId])
+  @@index([sessionId, teamId])
+  @@index([sessionId, simulationTime])
+  @@index([isNotable])
+}
+
+model CMIntervention {
+  id              String   @id @default(uuid())
+  sessionId       String
+  teamId          String
+
+  // Intervention Details
+  level           String   // 'flash' | 'moment' | 'mirror'
+  duration        Int      // Seconds
+  reason          String?  @db.Text
+  content         String?  @db.Text // What was displayed (for moment/mirror)
+
+  // Timing
+  simulationTime  Int
+  triggeredAt     DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([teamId])
+  @@index([sessionId, teamId])
+}
+
+model TransferReflection {
+  id                String   @id @default(uuid())
+  sessionId         String
+  participantId     String
+  participantName   String
+
+  // Individual Reflection
+  realSituation     String   @db.Text // Real situation with similar pressure
+  valueTested       String
+  action            String   @db.Text // What they did
+  wouldDoDifferently String? @db.Text
+
+  // Personal Commitment
+  pressureTrigger   String   @db.Text // The pressure that triggers this
+  commitmentAction  String   @db.Text // The action they commit to
+  valueProtected    String   // The value being protected
+  fullCommitment    String   @db.Text // Full commitment statement
+
+  createdAt         DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([participantId])
+}
+
+// ============================================================================
+// AUTHENTICATION & LICENSING
+// ============================================================================
+
+model UserAccount {
+  id        String   @id // Clerk user ID
+  email     String   @unique
+  name      String?
+  role      String   @default("participant") // participant | crucible_master | admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cmLicense         CMRateLicense?
+  participantTokens ParticipantToken[]
+
+  @@index([email])
+}
+
+model CMRateLicense {
+  id                 String    @id @default(uuid())
+  userId             String    @unique
+  user               UserAccount @relation(fields: [userId], references: [id], onDelete: Cascade)
+  licenseType        String    // trial | individual | team | enterprise
+  grantedAt          DateTime  @default(now())
+  expiresAt          DateTime?
+  simulationsLimit   Int?      // null = unlimited
+  simulationsCreated Int       @default(0)
+  isActive           Boolean   @default(true)
+  grantedBy          String?   // Admin who granted the license
+
+  @@index([userId])
+  @@index([isActive, expiresAt])
+}
+
+// ============================================================================
+// ANONYMOUS PARTICIPANT TOKENS
+// ============================================================================
+
+model ParticipantToken {
+  id            String   @id @default(cuid())
+  token         String   @unique // pt_xxx format
+  linkedUserId  String?  // Clerk user ID if linked
+  createdAt     DateTime @default(now())
+  lastActiveAt  DateTime @default(now())
+
+  // Sessions this token has participated in
+  sessions      ParticipantSession[]
+
+  // Link to user account if authenticated
+  linkedUser    UserAccount? @relation(fields: [linkedUserId], references: [id])
+
+  @@index([token])
+  @@index([linkedUserId])
+}
+
+model ParticipantSession {
+  id              String   @id @default(cuid())
+  tokenId         String
+  sessionCode     String
+  teamId          String?
+  joinedAt        DateTime @default(now())
+  lastActiveAt    DateTime @default(now())
+
+  token           ParticipantToken @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+
+  @@unique([tokenId, sessionCode])
+  @@index([sessionCode])
+}
+
+// ============================================================================
+// SECURITY AUDIT LOG
+// ============================================================================
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  timestamp   DateTime @default(now())
+  action      String   // AUTH_SUCCESS, AUTH_FAILURE, RATE_LIMIT, etc.
+  userId      String?
+  sessionCode String?
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+  severity    String   @default("INFO") // INFO, WARN, ERROR, CRITICAL
+
+  @@index([timestamp])
+  @@index([userId])
+  @@index([action])
+  @@index([severity])
+}
+
+// ============================================================================
+// PRODUCTION TRACKING
+// ============================================================================
+
+model ProductionSnapshot {
+  id             String   @id @default(uuid())
+  sessionId      String
+  simulationTime Int
+
+  // Revenue & Production
+  revenueImpact       Float
+  productionHoursLost Float
+  quarterlyProgress   Float
+  pipelineStatus      String
+
+  // Human Impact
+  patientsAffected    Int
+  childrenAffected    Int
+  workersAtRisk       Int
+  workersEvacuated    Int
+  globalStockpileWeeks Float
+
+  createdAt DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, simulationTime])
 }

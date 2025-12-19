@@ -1,0 +1,628 @@
+/**
+ * Component State System
+ *
+ * Standardized interactive states for all components
+ * Based on 2025 AAA game UI standards
+ *
+ * Usage: Add these classes to interactive elements
+ * - .interactive: Base interactive styles
+ * - .interactive-scale: Adds scale effects
+ * - .interactive-glow: Adds glow effects
+ * - .state-*: Individual state classes
+ */
+
+/* =============================================================================
+   BASE INTERACTIVE STYLES
+   ============================================================================= */
+
+.interactive {
+  position: relative;
+  cursor: pointer;
+  transition:
+    transform 100ms cubic-bezier(0, 0, 0.2, 1),
+    opacity 100ms ease-out,
+    box-shadow 150ms ease-out,
+    border-color 150ms ease-out,
+    background-color 150ms ease-out;
+}
+
+.interactive:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(199, 89%, 48%);
+}
+
+.interactive:active:not(:disabled) {
+  transform: scale(0.98);
+  transition-duration: 50ms;
+}
+
+.interactive:disabled,
+.interactive[disabled],
+.interactive.state-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(30%);
+  pointer-events: none;
+}
+
+/* Scale variant - adds hover/active scale */
+.interactive-scale:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+.interactive-scale:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Glow variant - adds glow on hover/focus */
+.interactive-glow:hover:not(:disabled) {
+  box-shadow: 0 0 20px hsla(199, 89%, 48%, 0.3);
+}
+
+.interactive-glow:focus-visible {
+  box-shadow:
+    0 0 0 2px hsl(199, 89%, 48%),
+    0 0 20px hsla(199, 89%, 48%, 0.4);
+}
+
+/* =============================================================================
+   INDIVIDUAL STATE CLASSES
+   ============================================================================= */
+
+/* Default state (base) */
+.state-default {
+  opacity: 1;
+  transform: scale(1);
+  cursor: default;
+}
+
+/* Hover state */
+.state-hover {
+  opacity: 1;
+  transform: scale(1.02);
+  cursor: pointer;
+}
+
+/* Focus state */
+.state-focus {
+  opacity: 1;
+  transform: scale(1);
+  box-shadow: 0 0 0 2px hsl(199, 89%, 48%);
+  outline: none;
+}
+
+/* Active/Pressed state */
+.state-active {
+  opacity: 1;
+  transform: scale(0.98);
+  cursor: pointer;
+}
+
+/* Disabled state */
+.state-disabled {
+  opacity: 0.5;
+  transform: scale(1);
+  cursor: not-allowed;
+  filter: grayscale(30%);
+  pointer-events: none;
+}
+
+/* Loading state */
+.state-loading {
+  opacity: 0.7;
+  cursor: wait;
+  pointer-events: none;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+/* Error state */
+.state-error {
+  border-color: hsl(0, 84%, 60%) !important;
+  animation: shake 300ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Success state */
+.state-success {
+  border-color: hsl(142, 76%, 36%) !important;
+}
+
+/* =============================================================================
+   FOCUS RING UTILITIES
+   ============================================================================= */
+
+/* Standard focus ring */
+.focus-ring {
+  outline: none;
+}
+
+.focus-ring:focus-visible {
+  box-shadow: 0 0 0 2px hsl(199, 89%, 48%);
+}
+
+/* Offset focus ring (for cards, etc.) */
+.focus-ring-offset:focus-visible {
+  box-shadow:
+    0 0 0 2px hsl(var(--background)),
+    0 0 0 4px hsl(199, 89%, 48%);
+}
+
+/* Inset focus ring */
+.focus-ring-inset:focus-visible {
+  box-shadow: inset 0 0 0 2px hsl(199, 89%, 48%);
+}
+
+/* Status-colored focus rings */
+.focus-ring-danger:focus-visible {
+  box-shadow: 0 0 0 2px hsl(0, 84%, 60%);
+}
+
+.focus-ring-safe:focus-visible {
+  box-shadow: 0 0 0 2px hsl(142, 76%, 36%);
+}
+
+.focus-ring-warning:focus-visible {
+  box-shadow: 0 0 0 2px hsl(38, 92%, 50%);
+}
+
+/* =============================================================================
+   BUTTON STATES
+   ============================================================================= */
+
+.btn-interactive {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    transform 100ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 150ms ease-out,
+    background-color 150ms ease-out,
+    border-color 150ms ease-out;
+}
+
+.btn-interactive:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.btn-interactive:active:not(:disabled) {
+  transform: scale(0.98);
+  filter: brightness(0.95);
+}
+
+.btn-interactive:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px hsl(var(--background)),
+    0 0 0 4px hsl(199, 89%, 48%);
+}
+
+.btn-interactive:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(30%);
+}
+
+/* Primary button glow effect */
+.btn-primary-glow:hover:not(:disabled) {
+  box-shadow: 0 0 20px hsla(199, 89%, 48%, 0.4);
+}
+
+/* Danger button glow effect */
+.btn-danger-glow:hover:not(:disabled) {
+  box-shadow: 0 0 20px hsla(0, 84%, 60%, 0.4);
+}
+
+/* =============================================================================
+   CARD STATES
+   ============================================================================= */
+
+.card-interactive {
+  position: relative;
+  cursor: pointer;
+  transition:
+    transform 200ms cubic-bezier(0, 0, 0.2, 1),
+    box-shadow 200ms ease-out,
+    border-color 200ms ease-out;
+}
+
+.card-interactive:hover:not(.state-disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 20px hsla(0, 0%, 0%, 0.2),
+    0 0 0 1px hsla(199, 89%, 48%, 0.3);
+}
+
+.card-interactive:active:not(.state-disabled) {
+  transform: translateY(0);
+  transition-duration: 50ms;
+}
+
+.card-interactive:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px hsl(199, 89%, 48%),
+    0 10px 20px hsla(0, 0%, 0%, 0.2);
+}
+
+/* Selected card state */
+.card-selected {
+  border-color: hsl(199, 89%, 48%);
+  box-shadow:
+    0 0 0 2px hsl(199, 89%, 48%),
+    0 0 20px hsla(199, 89%, 48%, 0.3);
+}
+
+/* Card with hover glow */
+.card-glow:hover:not(.state-disabled) {
+  box-shadow:
+    0 10px 20px hsla(0, 0%, 0%, 0.2),
+    0 0 30px hsla(199, 89%, 48%, 0.2);
+}
+
+/* =============================================================================
+   INPUT STATES
+   ============================================================================= */
+
+.input-interactive {
+  transition:
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out,
+    background-color 150ms ease-out;
+}
+
+.input-interactive:hover:not(:disabled):not(:focus) {
+  border-color: hsl(217, 33%, 40%);
+}
+
+.input-interactive:focus {
+  outline: none;
+  border-color: hsl(199, 89%, 48%);
+  box-shadow: 0 0 0 3px hsla(199, 89%, 48%, 0.2);
+}
+
+.input-interactive:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: hsl(217, 33%, 15%);
+}
+
+/* Error state input */
+.input-error {
+  border-color: hsl(0, 84%, 60%) !important;
+  box-shadow: 0 0 0 3px hsla(0, 84%, 60%, 0.2) !important;
+}
+
+.input-error:focus {
+  border-color: hsl(0, 84%, 60%) !important;
+  box-shadow: 0 0 0 3px hsla(0, 84%, 60%, 0.3) !important;
+}
+
+/* Success state input */
+.input-success {
+  border-color: hsl(142, 76%, 36%) !important;
+  box-shadow: 0 0 0 3px hsla(142, 76%, 36%, 0.2) !important;
+}
+
+/* =============================================================================
+   TOGGLE/SWITCH STATES
+   ============================================================================= */
+
+.toggle-interactive {
+  cursor: pointer;
+  transition:
+    background-color 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    border-color 200ms ease-out;
+}
+
+.toggle-interactive:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.toggle-interactive:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px hsl(199, 89%, 48%);
+}
+
+.toggle-interactive:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Toggle thumb animation */
+.toggle-thumb {
+  transition: transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* =============================================================================
+   SLIDER STATES
+   ============================================================================= */
+
+.slider-interactive {
+  cursor: pointer;
+}
+
+.slider-interactive:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Slider thumb */
+.slider-thumb {
+  transition:
+    transform 100ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+.slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px hsla(199, 89%, 48%, 0.4);
+}
+
+.slider-thumb:active {
+  transform: scale(1.05);
+}
+
+.slider-thumb:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px hsl(199, 89%, 48%),
+    0 0 10px hsla(199, 89%, 48%, 0.4);
+}
+
+/* =============================================================================
+   STATUS INDICATOR STATES
+   ============================================================================= */
+
+/* Safe status */
+.status-safe {
+  background-color: hsl(142, 76%, 12%);
+  border-color: hsl(142, 76%, 25%);
+  color: hsl(142, 76%, 65%);
+}
+
+.status-safe-solid {
+  background-color: hsl(142, 76%, 36%);
+  color: white;
+}
+
+.status-safe-glow {
+  box-shadow: 0 0 15px hsla(142, 76%, 50%, 0.3);
+}
+
+/* Warning status */
+.status-warning {
+  background-color: hsl(38, 92%, 12%);
+  border-color: hsl(38, 92%, 30%);
+  color: hsl(38, 92%, 65%);
+}
+
+.status-warning-solid {
+  background-color: hsl(38, 92%, 50%);
+  color: black;
+}
+
+.status-warning-glow {
+  box-shadow: 0 0 15px hsla(38, 92%, 50%, 0.3);
+}
+
+/* Danger status */
+.status-danger {
+  background-color: hsl(0, 84%, 12%);
+  border-color: hsl(0, 84%, 30%);
+  color: hsl(0, 84%, 65%);
+}
+
+.status-danger-solid {
+  background-color: hsl(0, 84%, 60%);
+  color: white;
+}
+
+.status-danger-glow {
+  box-shadow: 0 0 15px hsla(0, 84%, 50%, 0.4);
+}
+
+/* Critical status (animated) */
+.status-critical {
+  background-color: hsl(0, 100%, 10%);
+  border-color: hsl(0, 100%, 40%);
+  color: hsl(0, 100%, 70%);
+  animation: critical-pulse 1.5s ease-in-out infinite;
+}
+
+.status-critical-solid {
+  background-color: hsl(0, 100%, 50%);
+  color: white;
+  animation: breaking-flash 1s ease-in-out infinite;
+}
+
+/* Info status */
+.status-info {
+  background-color: hsl(199, 89%, 12%);
+  border-color: hsl(199, 89%, 30%);
+  color: hsl(199, 89%, 65%);
+}
+
+.status-info-solid {
+  background-color: hsl(199, 89%, 48%);
+  color: white;
+}
+
+/* =============================================================================
+   SKELETON/LOADING STATES
+   ============================================================================= */
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: hsl(217, 33%, 20%);
+  border-radius: 4px;
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsla(217, 33%, 30%, 0.4),
+    transparent
+  );
+  animation: shimmer 2s linear infinite;
+}
+
+.skeleton-text {
+  height: 1em;
+  border-radius: 4px;
+}
+
+.skeleton-circle {
+  border-radius: 50%;
+}
+
+.skeleton-card {
+  border-radius: 8px;
+}
+
+/* =============================================================================
+   REDUCED MOTION
+   ============================================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .interactive,
+  .btn-interactive,
+  .card-interactive,
+  .input-interactive,
+  .toggle-interactive,
+  .slider-thumb,
+  .toggle-thumb {
+    transition: none !important;
+  }
+
+  .state-loading,
+  .skeleton::after,
+  .status-critical,
+  .status-critical-solid {
+    animation: none !important;
+  }
+
+  .state-error {
+    animation: none !important;
+  }
+}
+
+/* =============================================================================
+   HIGH CONTRAST MODE
+   ============================================================================= */
+
+@media (prefers-contrast: high) {
+  .interactive:focus-visible,
+  .btn-interactive:focus-visible,
+  .card-interactive:focus-visible,
+  .input-interactive:focus {
+    box-shadow: 0 0 0 3px currentColor !important;
+  }
+
+  .state-disabled {
+    opacity: 0.7;
+    border-style: dashed !important;
+  }
+
+  .status-safe,
+  .status-warning,
+  .status-danger,
+  .status-critical,
+  .status-info {
+    border-width: 2px;
+  }
+}
+
+/* =============================================================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ============================================================================= */
+
+@media (hover: none) and (pointer: coarse) {
+  /* Remove hover effects on touch devices */
+  .interactive-scale:hover:not(:disabled),
+  .card-interactive:hover:not(.state-disabled) {
+    transform: none;
+  }
+
+  .interactive-glow:hover:not(:disabled),
+  .card-glow:hover:not(.state-disabled) {
+    box-shadow: none;
+  }
+
+  /* Ensure touch targets are at least 44px */
+  .interactive,
+  .btn-interactive {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* =============================================================================
+   KEYFRAME ANIMATIONS (referenced in states)
+   ============================================================================= */
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes critical-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 20px hsla(0, 100%, 50%, 0.4);
+    border-color: hsl(0, 100%, 50%);
+  }
+  50% {
+    box-shadow: 0 0 40px hsla(0, 100%, 50%, 0.7);
+    border-color: hsl(0, 100%, 60%);
+  }
+}
+
+@keyframes breaking-flash {
+  0%,
+  100% {
+    background-color: hsl(0, 84%, 60%);
+  }
+  50% {
+    background-color: hsl(0, 100%, 50%);
+  }
+}

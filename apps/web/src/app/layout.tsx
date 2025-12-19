@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, JetBrains_Mono } from 'next/font/google';
+import { ClerkProvider } from '@clerk/nextjs';
 import { Toaster } from 'sonner';
 import './globals.css';
 
@@ -91,12 +92,33 @@ const jsonLd = {
   },
 };
 
+// Clerk appearance configuration
+const clerkAppearance = {
+  baseTheme: undefined, // Uses dark mode from html class
+  variables: {
+    colorPrimary: '#0ea5e9', // sky-500
+    colorBackground: '#0f172a', // slate-900
+    colorInputBackground: '#1e293b', // slate-800
+    colorInputText: '#f8fafc', // slate-50
+  },
+  elements: {
+    card: 'bg-slate-900 border-slate-700',
+    headerTitle: 'text-slate-100',
+    headerSubtitle: 'text-slate-400',
+    socialButtonsBlockButton: 'bg-slate-800 border-slate-700 hover:bg-slate-700',
+    formButtonPrimary: 'bg-sky-500 hover:bg-sky-600',
+    footerActionLink: 'text-sky-400 hover:text-sky-300',
+  },
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
+  const hasClerkKey = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+  const content = (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         <script
@@ -120,4 +142,15 @@ export default function RootLayout({
       </body>
     </html>
   );
+
+  // Only wrap with ClerkProvider if key is available (skip during static build)
+  if (hasClerkKey) {
+    return (
+      <ClerkProvider appearance={clerkAppearance}>
+        {content}
+      </ClerkProvider>
+    );
+  }
+
+  return content;
 }

@@ -84,6 +84,28 @@ export class ParishState extends Schema {
 }
 
 /**
+ * Dilemma option for client display
+ */
+export class DilemmaOption extends Schema {
+  @type('string') id: string = '';
+  @type('string') label: string = '';
+  @type('string') description: string = '';
+}
+
+/**
+ * Current dilemma presented to a team
+ */
+export class DilemmaSnapshot extends Schema {
+  @type('string') id: string = '';
+  @type('string') title: string = '';
+  @type('string') setupNarrative: string = '';
+  @type('string') presenterPersona: string = '';
+  @type('number') presentedAt: number = 0;
+  @type('number') expiresAt: number = 0;
+  @type([DilemmaOption]) options = new ArraySchema<DilemmaOption>();
+}
+
+/**
  * Team state (one team per parish)
  */
 export class TeamState extends Schema {
@@ -95,6 +117,16 @@ export class TeamState extends Schema {
   @type('string') decisionProcess: string = 'consensus'; // 'consensus', 'majority', 'leader'
   @type('string') commitmentStatement: string = '';
   @type('boolean') ready: boolean = false;
+
+  // AI Team properties
+  @type('boolean') isAI: boolean = false;
+  @type('string') aiArchetype: string = ''; // AIArchetypeId if isAI
+  @type('number') aiDrift: number = 0; // Current drift level (0-1)
+  @type('string') aiCooperation: string = 'neutral'; // AICooperationLevel
+
+  // Dilemma state - current dilemma presented to team
+  @type(DilemmaSnapshot) currentDilemma: DilemmaSnapshot | null = null;
+  @type(['string']) presentedDilemmaIds = new ArraySchema<string>();
 }
 
 /**
@@ -163,6 +195,56 @@ export class CMDirective extends Schema {
 }
 
 /**
+ * CM Intervention State - Values check-ins triggered by CM
+ * Types: 'flash' (10s), 'moment' (2min), 'mirror' (3min)
+ */
+export class InterventionState extends Schema {
+  @type('string') id: string = '';
+  @type('string') teamId: string = '';
+  @type('string') interventionType: string = ''; // 'flash' | 'moment' | 'mirror'
+  @type('number') startedAt: number = 0;
+  @type('number') expiresAt: number = 0;
+  @type('string') commitmentText: string = ''; // For mirror type, shows team's commitment
+}
+
+/**
+ * Production State - Celaritrin manufacturing metrics
+ *
+ * This creates the authentic values pressure:
+ * - Workers at risk vs patients affected
+ * - Revenue impact vs safety
+ * - Quarterly targets vs human cost
+ */
+export class ProductionState extends Schema {
+  // Current batch tracking
+  @type('string') currentBatchId: string = 'KS-0001';
+  @type('number') batchProgress: number = 0; // 0-100%
+  @type('number') batchValue: number = 8_200_000; // $8.2M
+  @type('number') batchEtaHours: number = 48;
+
+  // Pipeline status
+  @type('string') pipelineStatus: string = 'flowing'; // 'flowing' | 'blocked' | 'degraded'
+  @type('string') bottleneck: string = ''; // Parish causing blockage
+
+  // Cumulative impact
+  @type('number') revenueImpact: number = 0; // Running total (negative when losing)
+  @type('number') productionHoursLost: number = 0;
+  @type('boolean') burnRateActive: boolean = false; // True when losing money
+
+  // Quarterly tracking
+  @type('number') quarterlyTarget: number = 4_200_000_000; // $4.2B
+  @type('number') quarterlyProgress: number = 2_600_000_000; // 62% start
+  @type('number') daysRemainingInQuarter: number = 18;
+
+  // THE DUAL MORAL COUNTERS
+  @type('number') patientsAffected: number = 0;
+  @type('number') childrenAffected: number = 0;
+  @type('number') workersAtRisk: number = 0;
+  @type('number') workersEvacuated: number = 0;
+  @type('number') globalStockpileWeeks: number = 6.0;
+}
+
+/**
  * Main Crucible State - the root schema synchronized to all clients
  */
 export class CrucibleState extends Schema {
@@ -171,12 +253,15 @@ export class CrucibleState extends Schema {
   @type(SessionPhase) phase = new SessionPhase();
   @type(WeatherState) weather = new WeatherState();
   @type(IntensityState) intensity = new IntensityState();
+  @type(ProductionState) production = new ProductionState(); // Business metrics backbone
   @type({ map: ParishState }) parishes = new MapSchema<ParishState>();
   @type({ map: TeamState }) teams = new MapSchema<TeamState>();
   @type([Decision]) decisions = new ArraySchema<Decision>();
   @type([StreamingContent]) feed = new ArraySchema<StreamingContent>();
   @type([CMDirective]) directives = new ArraySchema<CMDirective>();
+  @type({ map: InterventionState }) interventions = new MapSchema<InterventionState>(); // Active CM interventions by team
   @type('number') simulationTime: number = 0; // Minutes since storm watch
   @type('number') lastUpdate: number = 0;
   @type('string') scenarioSeed: string = '';
+  @type('string') crucibleMaster: string = ''; // Clerk user ID of the CM
 }
