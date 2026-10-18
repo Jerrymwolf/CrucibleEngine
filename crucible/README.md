@@ -39,4 +39,6 @@ Time advances in 15-minute ticks from T-72h to T+24h. Each tick: the hurricane w
 
 ## Status
 
+Live replay of the seed-42 run: https://claude.ai/artifact/B2cRJHXFbukqSPyMUBBg2E (private to the owner until shared).
+
 Built overnight on 2026-10-18 in a 90-minute ultracode session. See `../CrucibleDocumentInventory/decision-2026-10-18-restart.md` for the decision and `../CrucibleDocumentInventory/2026-10-18-overnight-build-log.md` for what was and was not finished.
