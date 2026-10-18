@@ -2,7 +2,7 @@
 title: "Decision: REA, reference strategy games, and Rust for the Crucible Engine"
 date: 2026-10-18
 type: decision-record
-status: proposed
+status: superseded
 project: Crucible Engine (The Values Crucible)
 tags: [crucible-engine, decision, architecture, rust, reverse-engineering, strategy-games]
 related:
@@ -13,6 +13,8 @@ related:
 ---
 
 # Decision: REA, reference strategy games, and Rust
+
+> **Superseded 2026-10-18 (evening).** Jerry judged the existing TypeScript codebase unusable and chose a full restart. See [[decision-2026-10-18-restart]]. The analysis of REA and candidate games below still stands; the "do not rewrite" recommendation does not.
 
 **Question asked (2026-10-18):** Can we use REA (morluto/rea) to reverse engineer a strategy game that fits our purposes? Which game? Can we build with Rust?
 
