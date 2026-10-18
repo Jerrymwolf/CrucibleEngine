@@ -8,26 +8,29 @@ use std::collections::BTreeMap;
 
 /// Constants. `morale_pressure` is an
 /// accumulator in -MORALE_PRESSURE_RANGE..+MORALE_PRESSURE_RANGE updated every
-/// hour by `(service_index - 1) * 600 + leadership`, where service_index is
-/// the mean level of the parish's present systems divided by 80 (parity at
-/// OPERATIONAL) and leadership is 50 x the summed value signals of each
-/// decision. Morale moves a quarter of the way toward
+/// hour by `(service_index - 1) * MORALE_SERVICE_GAIN + leadership`, where
+/// service_index is the parish's total level over its initial total (parity
+/// at the pre-storm baseline, so morale holds until the storm bites) and
+/// leadership is 50 x the summed value signals of each decision. The gain is
+/// a quarter of the reference's 600: our integrator updates hourly over a
+/// 96-hour run, the reference's valves saturate over game-years. Morale moves a quarter of the way toward
 /// `50 + pressure / 40` every tick (pressure +-2000 maps to morale 0..100).
 const MORALE_PRESSURE_RANGE: f64 = 2000.0;
 const MORALE_PER_PRESSURE_INV: f64 = 40.0;
-const MORALE_SERVICE_GAIN: f64 = 600.0;
+const MORALE_SERVICE_GAIN: f64 = 150.0;
 const MORALE_LEADERSHIP_GAIN: f64 = 50.0;
 const MORALE_ALPHA: f64 = 0.25;
 const MORALE_UPDATE_MINUTES: i64 = 60;
 
-/// Mean level of the parish's present systems over 80: 1.0 at OPERATIONAL.
+/// Total level of the parish's present systems over its initial total: 1.0
+/// at the pre-storm baseline.
 pub fn service_index(content: &Content, state: &SimState, parish: &str) -> f64 {
     let init = content.infrastructure.initial_infrastructure_status.get(parish);
-    let present: Vec<&str> = SYSTEMS.iter().copied().filter(|s| init.and_then(|m| m.get(*s)).copied().unwrap_or(0.0) > 0.0).collect();
-    if present.is_empty() {
+    let baseline: f64 = SYSTEMS.iter().map(|s| init.and_then(|m| m.get(*s)).copied().unwrap_or(0.0)).sum();
+    if baseline <= 0.0 {
         return 1.0;
     }
-    present.iter().map(|s| state.level(parish, s)).sum::<f64>() / present.len() as f64 / 80.0
+    SYSTEMS.iter().map(|s| state.level(parish, s)).sum::<f64>() / baseline
 }
 
 /// Hourly integrator step and per-tick smoothing of morale toward its target.
@@ -71,7 +74,7 @@ mod tests {
         let c = Content::load(&PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../content")).unwrap();
         let mut rng = SimRng::new(9);
         let mut state = test_state(&c, &mut rng);
-        assert!((service_index(&c, &state, "haven") - 1.0).abs() < 0.5);
+        assert!((service_index(&c, &state, "haven") - 1.0).abs() < 1e-9);
         for s in SYSTEMS {
             state.apply("haven", s, -100.0);
         }

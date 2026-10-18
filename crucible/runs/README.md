@@ -5,7 +5,7 @@ Concordia, seed 42, six `ai` teams with default stated values, the default
 intensity curve, no scripted decisions. Its shape follows
 `docs/RUN_LOG_SCHEMA.md`; fields beyond the contract (`t_minutes`,
 `timeline_phase`, `wind_mph`, `rain_in_per_hour`, `pressure`, `expired`,
-`final_infrastructure`, `cascade_rules_fired`) are optional extras.
+`final_infrastructure`, `cascade_rules_fired`, per-tick `rng_draws`) are optional extras.
 
 Regenerate it from the workspace root (`crucible/`):
 

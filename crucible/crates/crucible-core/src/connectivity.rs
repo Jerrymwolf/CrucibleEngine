@@ -29,7 +29,10 @@ pub const BACKUP_HOURS_PRIORITY: f64 = 24.0;
 pub const BACKUP_HOURS_OTHER: f64 = 12.0;
 /// Power is held at or below this level while a parish runs on generators.
 pub const BACKUP_POWER_CAP: f64 = 60.0;
-/// Each 20 points of the source's own power level serves one parish.
+/// Each 20 points of the source's own power level serves one parish. The
+/// unit count is ceil(level / 20) rather than the brief's floor so that a dam
+/// at 99 still carries the island; capacity then steps down at 80, 60, 40 and
+/// 20, in line with INFRASTRUCTURE_THRESHOLDS.
 pub const POWER_POINTS_PER_UNIT: f64 = 20.0;
 
 /// Backup generator hours a parish starts the run with (0 without generators).
@@ -56,10 +59,10 @@ pub fn power_priority(content: &Content) -> Vec<String> {
     priority.into_iter().chain(rest.into_iter().map(|(_, p)| p)).collect()
 }
 
-/// e.1 capacity rule: the source serves floor(level / 20) reached parishes
+/// e.1 capacity rule: the source serves ceil(level / 20) reached parishes
 /// beyond itself, in `power_priority` order; the rest count as unreached.
 fn apply_power_capacity(content: &Content, state: &SimState, source: &str, reached: &mut BTreeSet<String>) {
-    let units = (state.level(source, "power").round() / POWER_POINTS_PER_UNIT).floor().max(0.0) as usize;
+    let units = (state.level(source, "power").round() / POWER_POINTS_PER_UNIT).ceil().max(0.0) as usize;
     let mut keep = BTreeSet::new();
     if reached.contains(source) {
         keep.insert(source.to_string());
@@ -320,7 +323,7 @@ mod tests {
         let mut reached: BTreeSet<String> = c.parish_ids().into_iter().collect();
         apply_power_capacity(&c, &state, "heartland", &mut reached);
         assert_eq!(reached.len(), 6);
-        state.apply("heartland", "power", -21.0); // 79 -> 3 units
+        state.apply("heartland", "power", -41.0); // 59 -> 3 units
         let mut reached: BTreeSet<String> = c.parish_ids().into_iter().collect();
         apply_power_capacity(&c, &state, "heartland", &mut reached);
         assert!(reached.contains("heartland") && reached.contains("keystone") && reached.contains("summit") && reached.contains("sterling"));
