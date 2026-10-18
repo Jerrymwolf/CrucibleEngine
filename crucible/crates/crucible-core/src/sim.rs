@@ -7,6 +7,7 @@ use crate::connectivity;
 use crate::content::Content;
 use crate::controller::{self, ScriptedDecision};
 use crate::dilemma;
+use crate::morale;
 use crate::log::{clock, state_hash, Event, HashedState, MapPoint, ParishMeta, ParishOutcome, RunLog, Summary, Tick, WindowMeta};
 use crate::rng::SimRng;
 use crate::state::{DecisionRecord, Scheduled, ScheduledSource, SimState};
@@ -68,6 +69,7 @@ fn init_state(content: &Content, rng: &mut SimRng, t_start: i64) -> SimState {
     let (track_strength, track_shift) = weather::draw_track(rng);
     let mut infra = BTreeMap::new();
     let mut morale = BTreeMap::new();
+    let mut morale_pressure = BTreeMap::new();
     let mut generator_hours = BTreeMap::new();
     for p in content.parish_ids() {
         let init = content.infrastructure.initial_infrastructure_status.get(&p);
@@ -75,6 +77,7 @@ fn init_state(content: &Content, rng: &mut SimRng, t_start: i64) -> SimState {
             SYSTEMS.iter().map(|s| (s.to_string(), init.and_then(|m| m.get(*s)).copied().unwrap_or(0.0))).collect();
         infra.insert(p.clone(), row);
         morale.insert(p.clone(), 80.0);
+        morale_pressure.insert(p.clone(), morale::initial_pressure(80.0));
         generator_hours.insert(p.clone(), connectivity::backup_hours(content, &p));
     }
     SimState {
@@ -83,6 +86,7 @@ fn init_state(content: &Content, rng: &mut SimRng, t_start: i64) -> SimState {
         intensity: 3,
         infra,
         morale,
+        morale_pressure,
         isolated: BTreeSet::new(),
         // Every parish starts connected to every utility; the first tick's
         // flood fill only reports real losses.
@@ -190,11 +194,12 @@ fn decide_all(content: &Content, state: &mut SimState, rng: &mut SimRng, teams: 
             option_label: option.label.clone(),
             rationale: choice.rationale.clone(),
             controller: choice.controller.clone(),
-            values_signaled: signals,
+            values_signaled: signals.clone(),
             expired: if choice.expired { Some(true) } else { None },
             pressure: Some((choice.pressure * 1000.0).round() / 1000.0),
         });
         apply_consequences(content, state, &parish, &d.id, option, events);
+        morale::add_leadership(state, &parish, &signals);
     }
 }
 
@@ -219,6 +224,7 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
     while t <= t_end {
         state.t = t;
         let mut events: Vec<Event> = Vec::new();
+        let draws_before = rng.draws();
         // 1. window and weather
         let idx = weather::window_index(content, t);
         if first || idx != state.window_idx {
@@ -265,11 +271,9 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
         }
         // 7 + 8. decisions and consequences
         decide_all(content, &mut state, &mut rng, &teams, cfg, &mut events);
-        // morale drift: hardship erodes it, recovery rebuilds it
+        // morale integrator (e.3) and per-parish bookkeeping
         for p in content.parish_ids() {
-            let failed = connectivity::failed_threshold(content);
-            let d = if state.isolated.contains(&p) || state.level(&p, "power") <= failed { -0.2 } else if repairing { 0.5 } else { 0.0 };
-            state.apply(&p, "morale", d);
+            morale::step(content, &mut state, &p);
             if state.isolated.contains(&p) {
                 *state.isolated_ticks.entry(p.clone()).or_insert(0) += 1;
             }
@@ -278,7 +282,7 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
             *m = m.min(pw);
         }
         // 9. snapshot
-        ticks.push(Tick { t, window_id: windows[idx].id.clone(), phase: phase.into(), intensity: state.intensity, weather: w, infrastructure: state.infra_rounded(), morale: state.morale_rounded(), isolated: state.isolated.iter().cloned().collect(), events });
+        ticks.push(Tick { t, window_id: windows[idx].id.clone(), phase: phase.into(), intensity: state.intensity, weather: w, infrastructure: state.infra_rounded(), morale: state.morale_rounded(), isolated: state.isolated.iter().cloned().collect(), events, rng_draws: rng.draws() - draws_before });
         t += STEP_MINUTES;
     }
     let summary = summarize(content, &state, &teams, ticks.len());
@@ -362,6 +366,9 @@ pub fn first_divergence(a: &RunLog, b: &RunLog) -> Option<String> {
         if x.infrastructure != y.infrastructure || x.isolated != y.isolated || x.morale != y.morale {
             return Some(format!("{} ({}): infrastructure/morale/isolation differ", clock(x.t), x.t));
         }
+        if x.rng_draws != y.rng_draws {
+            return Some(format!("{} ({}): {} rng draws vs {}", clock(x.t), x.t, x.rng_draws, y.rng_draws));
+        }
         if x.events.len() != y.events.len() {
             return Some(format!("{} ({}): {} events vs {}", clock(x.t), x.t, x.events.len(), y.events.len()));
         }
@@ -371,3 +378,4 @@ pub fn first_divergence(a: &RunLog, b: &RunLog) -> Option<String> {
     }
     None
 }
+

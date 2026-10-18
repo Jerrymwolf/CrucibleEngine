@@ -9,6 +9,7 @@ pub mod content;
 pub mod controller;
 pub mod dilemma;
 pub mod log;
+pub mod morale;
 pub mod rng;
 pub mod sim;
 pub mod state;

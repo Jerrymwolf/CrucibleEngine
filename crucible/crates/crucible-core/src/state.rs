@@ -48,6 +48,8 @@ pub struct SimState {
     /// parish -> system -> level 0..100 (f64 internally, rounded on output).
     pub infra: BTreeMap<String, BTreeMap<String, f64>>,
     pub morale: BTreeMap<String, f64>,
+    /// REA brief e.3: per-parish morale integrator in -2000..2000.
+    pub morale_pressure: BTreeMap<String, f64>,
     pub isolated: BTreeSet<String>,
     /// system -> parishes currently reached from a live source.
     pub connected: BTreeMap<String, BTreeSet<String>>,
@@ -134,6 +136,7 @@ mod tests {
             intensity: 3,
             infra,
             morale: BTreeMap::new(),
+            morale_pressure: BTreeMap::new(),
             isolated: BTreeSet::new(),
             connected: BTreeMap::new(),
             generator_hours: BTreeMap::new(),

@@ -99,6 +99,9 @@ pub struct Tick {
     pub morale: BTreeMap<String, i64>,
     pub isolated: Vec<String>,
     pub events: Vec<Event>,
+    /// Optional extra: primitive RNG draws made during this tick (REA brief e.5).
+    #[serde(default)]
+    pub rng_draws: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

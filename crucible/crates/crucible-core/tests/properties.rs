@@ -48,6 +48,15 @@ proptest! {
             let rule = c.infrastructure.cascade_rules.iter().find(|r| &r.id == rule_id).unwrap();
             prop_assert!(*n <= rule.effects.len());
         }
+        // each rule fires at most once: the fired list has no duplicates
+        let fired: BTreeSet<&String> = log.summary.cascade_rules_fired.iter().collect();
+        prop_assert_eq!(fired.len(), log.summary.cascade_rules_fired.len());
+        prop_assert_eq!(fired.len(), log.summary.cascades_fired);
+        // e.5: the rng draw count per tick is identical across two runs of the same seed
+        let twin = run(&c, &RunConfig { seed, ..Default::default() });
+        let draws: Vec<u64> = log.ticks.iter().map(|t| t.rng_draws).collect();
+        let twin_draws: Vec<u64> = twin.ticks.iter().map(|t| t.rng_draws).collect();
+        prop_assert_eq!(draws, twin_draws);
         prop_assert!(log.summary.cascades_fired <= c.infrastructure.cascade_rules.len());
         let again = replay(&c, &log);
         prop_assert_eq!(again.summary.state_hash, log.summary.state_hash);
