@@ -38,6 +38,10 @@ The earlier advice rested on not discarding working code. Jerry's hands-on judgm
 - The REA brief with evidence, and the adaptations it suggests for the cascade and connectivity model.
 - This record, the overnight build log, and a root `CLAUDE.md` so every future session starts with context.
 
+## Outcome
+
+Delivered overnight; see [[2026-10-18-overnight-build-log]] and the live page https://claude.ai/artifact/B2cRJHXFbukqSPyMUBBg2E. Branch `claude/crucible-rs-restart`, not merged.
+
 ## Next steps after the morning review
 
 1. Adopt or reject the REA brief's adaptations to the connectivity and spread model.

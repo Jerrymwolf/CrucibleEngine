@@ -8,4 +8,6 @@ Read this first. It is the handoff between sessions.
 - **Content is data:** `crucible/content/*.json` holds parishes, timeline, cascade rules, dilemmas, personas, values, intensity levers. Edit content there, never embed it in Rust.
 - **Contracts:** `crucible/docs/ENGINE_SPEC.md` (model), `crucible/docs/RUN_LOG_SCHEMA.md` (output). Changing either is a decision; record it.
 - **Determinism is non-negotiable:** one seeded RNG, ordered maps, no wall clock in the core. `crucible run --seed N` twice must be byte-identical; `crucible replay` must reproduce the state hash.
+- **Replay viewer:** `crucible/viewer/template.html` plus `build.mjs`; the built page is published as a claude.ai Artifact (link in `crucible/README.md`). Republish the same file to keep the URL.
+- **Build logs:** `CrucibleDocumentInventory/YYYY-MM-DD-*-build-log.md` record what was done, measured, and left undone in each long session.
 - **Memory strategy:** Jerry keeps decisions in Obsidian. Write new decision records with YAML frontmatter and wikilinks so they drop into the vault unchanged.

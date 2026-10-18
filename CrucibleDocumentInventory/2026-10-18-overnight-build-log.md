@@ -13,7 +13,7 @@ related:
 # Overnight build log, 2026-10-18
 
 **Instruction:** 90 minutes, Claude Fable ultracode, REA on a strategy game, to become the Crucible Engine. Be creative and build something.
-**Clock:** started 02:57:54 UTC, closed __CLOSE__ UTC.
+**Clock:** started 02:57:54 UTC, closed 03:53 UTC at 56 minutes. The remaining time in the 90 was left unused on purpose: every deliverable was verified and further changes carried more regression risk than value.
 
 ## What to look at first
 
@@ -24,7 +24,9 @@ related:
 
 ## Results
 
-### The engine, measured by the orchestrator at 03:22 UTC, not reported by the builder
+### The engine as first delivered, measured by the orchestrator at 03:22 UTC, not reported by the builder
+
+Historical: these are the numbers before the verify phase adopted the REA adaptations and before the run was extended to T+48h. The final numbers are in the verification section below.
 
 | Check | Result |
 |---|---|
@@ -46,6 +48,8 @@ https://claude.ai/artifact/B2cRJHXFbukqSPyMUBBg2E replays the seed-42 run: sim c
 Two viewers were built in parallel because the container's four CPUs limited the workflow to two concurrent agents. The published one won on a side-by-side of real-run screenshots in both themes: clearer storm rendering, a parish detail panel, and no clipped tables at desktop width. The runner-up is kept at `crucible/viewer/alternates/plex/` with a note on what is worth porting from it (phase bands on the decision strip, an evidence column in the values gap).
 
 ### Verification pass
+
+A fact-check agent later corrected ten statements across the README, spec, schema, runs README and this log (run length, intensity curve, module list, CLI flags, mph versus knots, and the blackout timing), and added an "Optional fields emitted by v0" section to the run-log schema listing exactly what the engine emits beyond the contract.
 
 A second workflow ran two adversarial agents against the first workflow's output.
 
@@ -71,7 +75,12 @@ Final measured state of the engine after all changes: 19 unit tests, 7 integrati
 | 03:30 | Alternate viewer finished; judged on real-run screenshots in both themes; archived under `viewer/alternates/plex/` |
 | 03:34 | Verify complete with REA adaptations adopted; engine committed; page version 3 |
 | 03:36 | Run extended to T+48h and morale gain tuned; page version 4 |
-| __CLOSE__ | Build log written, final commit and push |
+| 03:38 | Polish workflow launched: viewer map labels and phase bands, plus an independent fact-check of every document against the repository |
+| 03:47 | Both done: per-parish label placement with isolation badges, phase bands and landfall marker on the strip; ten documentation corrections applied; page version 5 |
+| 03:49 | Seed variance table added to `crucible/runs/README.md` (five seeds, category 3 to 4, every row reproducible by hash) |
+| 03:50 | In-map storm label hidden while the eye is over the island; page version 6 |
+| 03:51 | Fresh clone of the pushed branch: tests pass from scratch, committed run reproduced byte for byte, page build reproducible |
+| 03:53 | Build log closed, final commit and push |
 
 ## What REA did and did not do
 
@@ -90,7 +99,7 @@ License hygiene: the brief is descriptive; the Rust implementers did not read th
 - The engine is headless. There is no server, no live team console, no Crucible Master console, and no LLM agent in the loop. The page is a replay of a finished run, not the product. The AI teams are a seeded drift model, not language models.
 - Content is the December 2025 corpus exported as data, unchanged. Numeric consequences are derived from each option's value signals because the content only carries narrative sketches; authoring real per-option effects is content work that remains.
 - Calibration is first-cut and deliberately harsh: a category 4 direct hit blacks out the whole island by T-2h. The knobs are named in `crucible/runs/README.md` and the spec amendments.
-- The map's isolation labels crowd the parish names at Summit and Heartland. Left alone rather than risk the hero panel late in the clock; noted for the next session.
+- The map's isolation labels crowded the parish names at Summit and Heartland in versions 1 to 4 of the page; a polish pass replaced them with badges on the isolation rings and hid the storm label while the eye is over the island. At phone width the map text is small because the whole island scales to the panel; readable, not comfortable.
 - REA produced structure and provenance, not semantics, on an open-source target. The mechanics came from reading source. That is the expected outcome and the brief says so.
 - The published page was briefly broken (version 1, about two minutes) by a patch I made without scoping a helper correctly. Version 2 onward is verified by screenshot in both themes.
 - Four work-in-progress snapshot commits sit in the branch history because the repository's stop hook asks for every change to be committed and pushed. Squash them if you prefer a clean history.
