@@ -1,0 +1,622 @@
+{
+  "CRATER_ROADS": {
+    "segments": [
+      {
+        "from": "ring",
+        "to": "summit",
+        "km": 4,
+        "normalMin": 8,
+        "stormPassable": false
+      },
+      {
+        "from": "ring",
+        "to": "heartland",
+        "km": 3,
+        "normalMin": 6,
+        "stormPassable": false
+      },
+      {
+        "from": "summit",
+        "to": "heartland",
+        "km": 2,
+        "normalMin": 4,
+        "floodRisk": true
+      }
+    ]
+  },
+  "INFRASTRUCTURE": {
+    "power": {
+      "source": "heartland",
+      "priority": [
+        "keystone",
+        "summit"
+      ],
+      "backupGenerators": {
+        "summit": true,
+        "keystone": true,
+        "sterling": false,
+        "haven": false,
+        "gateway": true,
+        "heartland": true
+      }
+    },
+    "water": {
+      "source": "heartland",
+      "ultrapureRequired": [
+        "keystone"
+      ],
+      "treatment": "heartland"
+    },
+    "comms": {
+      "primary": "summit",
+      "external": "gateway",
+      "backup": "sterling"
+    }
+  },
+  "PARISHES": {
+    "KEYSTONE": {
+      "id": "keystone",
+      "name": "Keystone",
+      "position": {
+        "x": 70,
+        "y": 60
+      },
+      "population": 3200,
+      "meridianPercent": 95,
+      "supplyChainRole": "manufacture",
+      "description": "Biotech manufacturing facility and research center",
+      "classCharacter": {
+        "whoLivesHere": "Technicians, researchers, clean room operators. Highly skilled workforce.",
+        "whatTheyFear": "Contamination, facility shutdown, losing specialized jobs with no local alternatives.",
+        "whatTheyWant": "Recognition for critical work, fair treatment during emergencies."
+      },
+      "keyAssets": [
+        {
+          "type": "facility",
+          "name": "Biotech Manufacturing Plant",
+          "capacity": "200 workers/shift"
+        },
+        {
+          "type": "cleanroom",
+          "name": "Class 100 Clean Rooms",
+          "capacity": "12 production lines"
+        },
+        {
+          "type": "lab",
+          "name": "Quality Control Laboratory",
+          "capacity": "24/7 operations"
+        },
+        {
+          "type": "storage",
+          "name": "Cold Storage Facility",
+          "capacity": "500,000 units"
+        }
+      ],
+      "resources": {
+        "generators": 6,
+        "medicalSupplies": "low",
+        "fuel": "medium",
+        "food": "low",
+        "water": "high",
+        "shelterCapacity": 1200
+      },
+      "dependencies": [
+        "heartland",
+        "haven"
+      ],
+      "vulnerabilities": [
+        "power failure",
+        "contamination",
+        "ultrapure water disruption"
+      ],
+      "valuesTested": [
+        "production",
+        "worker-safety",
+        "quality",
+        "financial-responsibility"
+      ]
+    },
+    "HAVEN": {
+      "id": "haven",
+      "name": "Haven",
+      "position": {
+        "x": 85,
+        "y": 50
+      },
+      "population": 5400,
+      "meridianPercent": 85,
+      "supplyChainRole": "process",
+      "description": "Port and processing hub with strong union presence",
+      "classCharacter": {
+        "whoLivesHere": "Port workers, processing plant employees, union members. Working-class community.",
+        "whatTheyFear": "Layoffs, safety violations, being treated as expendable.",
+        "whatTheyWant": "Fair treatment, safe working conditions, job security."
+      },
+      "keyAssets": [
+        {
+          "type": "port",
+          "name": "Main Shipping Port",
+          "capacity": "500 TEU/day"
+        },
+        {
+          "type": "plant",
+          "name": "Processing Facility",
+          "capacity": "300 workers"
+        },
+        {
+          "type": "warehouse",
+          "name": "Cold Chain Warehouse",
+          "capacity": "50,000 sq ft"
+        },
+        {
+          "type": "station",
+          "name": "Coast Guard Station",
+          "capacity": 45
+        }
+      ],
+      "resources": {
+        "generators": 8,
+        "medicalSupplies": "low",
+        "fuel": "medium",
+        "food": "high",
+        "water": "medium",
+        "shelterCapacity": 2000
+      },
+      "dependencies": [
+        "gateway",
+        "heartland"
+      ],
+      "vulnerabilities": [
+        "storm surge",
+        "port flooding",
+        "processing shutdown"
+      ],
+      "valuesTested": [
+        "worker-safety",
+        "solidarity",
+        "livelihood",
+        "dignity"
+      ]
+    },
+    "GATEWAY": {
+      "id": "gateway",
+      "name": "Gateway",
+      "position": {
+        "x": 15,
+        "y": 50
+      },
+      "population": 3800,
+      "meridianPercent": 70,
+      "supplyChainRole": "harvest",
+      "description": "Airport and harvest operations hub, first to see approaching storms",
+      "classCharacter": {
+        "whoLivesHere": "Harvest crews, airport staff, hospitality workers. Transient population.",
+        "whatTheyFear": "Being forgotten during evacuation, stranded crews, airport closure.",
+        "whatTheyWant": "Evacuation priority, clear communication, crew safety."
+      },
+      "keyAssets": [
+        {
+          "type": "airport",
+          "name": "International Airport",
+          "capacity": "2 runways"
+        },
+        {
+          "type": "fleet",
+          "name": "Harvest Fleet Base",
+          "capacity": "12 vessels"
+        },
+        {
+          "type": "depot",
+          "name": "Aviation Fuel Depot",
+          "capacity": "2,000,000 gallons"
+        },
+        {
+          "type": "hotels",
+          "name": "Resort District",
+          "capacity": "3,500 rooms"
+        }
+      ],
+      "resources": {
+        "generators": 15,
+        "medicalSupplies": "medium",
+        "fuel": "high",
+        "food": "medium",
+        "water": "low",
+        "shelterCapacity": 4000
+      },
+      "dependencies": [
+        "heartland",
+        "sterling"
+      ],
+      "vulnerabilities": [
+        "runway flooding",
+        "wind damage",
+        "fuel depot fire",
+        "stranded vessels"
+      ],
+      "valuesTested": [
+        "crew-safety",
+        "quota-pressure",
+        "equity",
+        "economics"
+      ]
+    },
+    "HEARTLAND": {
+      "id": "heartland",
+      "name": "Heartland",
+      "position": {
+        "x": 45,
+        "y": 35
+      },
+      "population": 3400,
+      "meridianPercent": 90,
+      "supplyChainRole": "power",
+      "description": "Dam, utilities, and essential infrastructure in the crater",
+      "classCharacter": {
+        "whoLivesHere": "Dam operators, utility workers, essential infrastructure staff. Critical workforce.",
+        "whatTheyFear": "Being blamed for failures, impossible demands, dam failure.",
+        "whatTheyWant": "Autonomy to make safety decisions, respect for expertise."
+      },
+      "keyAssets": [
+        {
+          "type": "dam",
+          "name": "Heartland Dam",
+          "capacity": "200 MW"
+        },
+        {
+          "type": "reservoir",
+          "name": "Freshwater Reservoir",
+          "capacity": "50,000,000 gallons"
+        },
+        {
+          "type": "plant",
+          "name": "Water Treatment Plant",
+          "capacity": "10,000,000 GPD"
+        },
+        {
+          "type": "substation",
+          "name": "Power Distribution Hub",
+          "capacity": "island-wide"
+        }
+      ],
+      "resources": {
+        "generators": 25,
+        "medicalSupplies": "low",
+        "fuel": "high",
+        "food": "low",
+        "water": "high",
+        "shelterCapacity": 800
+      },
+      "dependencies": [
+        "summit"
+      ],
+      "vulnerabilities": [
+        "dam stress",
+        "flooding",
+        "cascading power failure",
+        "isolated during storm"
+      ],
+      "valuesTested": [
+        "system-integrity",
+        "safety",
+        "demand-pressure",
+        "expertise"
+      ]
+    },
+    "SUMMIT": {
+      "id": "summit",
+      "name": "Summit",
+      "position": {
+        "x": 50,
+        "y": 20
+      },
+      "population": 2100,
+      "meridianPercent": 95,
+      "supplyChainRole": "coordinate",
+      "description": "Executive headquarters and communications hub on high ground",
+      "classCharacter": {
+        "whoLivesHere": "Executives, scientists, corporate leadership. Safest location on island.",
+        "whatTheyFear": "Exposure of decisions, liability, loss of control.",
+        "whatTheyWant": "Control over narrative, protection of company interests."
+      },
+      "keyAssets": [
+        {
+          "type": "hq",
+          "name": "Meridian Corporate HQ",
+          "capacity": "500 executives"
+        },
+        {
+          "type": "tower",
+          "name": "Emergency Radio Tower",
+          "capacity": "island-wide"
+        },
+        {
+          "type": "bunker",
+          "name": "Executive Emergency Shelter",
+          "capacity": 200
+        },
+        {
+          "type": "lab",
+          "name": "Research Campus",
+          "capacity": "150 scientists"
+        }
+      ],
+      "resources": {
+        "generators": 12,
+        "medicalSupplies": "high",
+        "fuel": "low",
+        "food": "high",
+        "water": "medium",
+        "shelterCapacity": 1500
+      },
+      "dependencies": [
+        "heartland",
+        "gateway"
+      ],
+      "vulnerabilities": [
+        "communications tower collapse",
+        "road isolation",
+        "information blackout"
+      ],
+      "valuesTested": [
+        "shareholder-value",
+        "transparency",
+        "equity",
+        "accountability"
+      ]
+    },
+    "STERLING": {
+      "id": "sterling",
+      "name": "Sterling",
+      "position": {
+        "x": 50,
+        "y": 85
+      },
+      "population": 6200,
+      "meridianPercent": 35,
+      "supplyChainRole": "ship",
+      "description": "Government center with hospital, schools, and non-Meridian families",
+      "classCharacter": {
+        "whoLivesHere": "Service workers, teachers, healthcare staff, non-Meridian families. Most vulnerable population.",
+        "whatTheyFear": "Abandonment, being deprioritized, inequality in emergency response.",
+        "whatTheyWant": "Equality, fair access to resources, community-first decisions."
+      },
+      "keyAssets": [
+        {
+          "type": "hospital",
+          "name": "Sterling General Hospital",
+          "capacity": "200 beds"
+        },
+        {
+          "type": "complex",
+          "name": "Government Complex",
+          "capacity": 2000
+        },
+        {
+          "type": "broadcast",
+          "name": "Emergency Broadcast Center",
+          "capacity": "100% island coverage"
+        },
+        {
+          "type": "schools",
+          "name": "School District",
+          "capacity": "3,000 students"
+        }
+      ],
+      "resources": {
+        "generators": 10,
+        "medicalSupplies": "high",
+        "fuel": "medium",
+        "food": "medium",
+        "water": "medium",
+        "shelterCapacity": 3500
+      },
+      "dependencies": [
+        "haven",
+        "summit",
+        "gateway",
+        "heartland"
+      ],
+      "vulnerabilities": [
+        "shelter overflow",
+        "hospital overwhelm",
+        "communications failure",
+        "flooding"
+      ],
+      "valuesTested": [
+        "community",
+        "equity",
+        "compassion",
+        "accountability"
+      ]
+    }
+  },
+  "PARISH_DEPENDENCIES": {
+    "KEYSTONE": {
+      "dependsOn": [
+        "HEARTLAND",
+        "HAVEN"
+      ],
+      "providesTo": [
+        "HAVEN"
+      ],
+      "criticalResources": [
+        "biotech-manufacturing",
+        "quality-control",
+        "cold-storage"
+      ]
+    },
+    "HAVEN": {
+      "dependsOn": [
+        "GATEWAY",
+        "HEARTLAND",
+        "KEYSTONE"
+      ],
+      "providesTo": [
+        "KEYSTONE",
+        "STERLING"
+      ],
+      "criticalResources": [
+        "port-access",
+        "processing",
+        "cold-chain"
+      ]
+    },
+    "GATEWAY": {
+      "dependsOn": [
+        "HEARTLAND",
+        "STERLING"
+      ],
+      "providesTo": [
+        "HAVEN",
+        "SUMMIT",
+        "HEARTLAND"
+      ],
+      "criticalResources": [
+        "air-evacuation",
+        "harvest",
+        "external-supplies",
+        "fuel"
+      ]
+    },
+    "HEARTLAND": {
+      "dependsOn": [
+        "SUMMIT"
+      ],
+      "providesTo": [
+        "KEYSTONE",
+        "HAVEN",
+        "GATEWAY",
+        "STERLING",
+        "SUMMIT"
+      ],
+      "criticalResources": [
+        "power",
+        "freshwater",
+        "ultrapure-water"
+      ]
+    },
+    "SUMMIT": {
+      "dependsOn": [
+        "HEARTLAND",
+        "GATEWAY"
+      ],
+      "providesTo": [
+        "HEARTLAND",
+        "STERLING",
+        "KEYSTONE",
+        "HAVEN",
+        "GATEWAY"
+      ],
+      "criticalResources": [
+        "coordination",
+        "radio-communications",
+        "corporate-authority"
+      ]
+    },
+    "STERLING": {
+      "dependsOn": [
+        "HAVEN",
+        "SUMMIT",
+        "GATEWAY",
+        "HEARTLAND"
+      ],
+      "providesTo": [
+        "HAVEN",
+        "GATEWAY"
+      ],
+      "criticalResources": [
+        "medical-care",
+        "emergency-broadcast",
+        "government-coordination",
+        "shelter"
+      ]
+    }
+  },
+  "PARISH_IDS": [
+    "KEYSTONE",
+    "HAVEN",
+    "GATEWAY",
+    "HEARTLAND",
+    "SUMMIT",
+    "STERLING"
+  ],
+  "PARISH_IDS_LOWER": [
+    "keystone",
+    "haven",
+    "gateway",
+    "heartland",
+    "summit",
+    "sterling"
+  ],
+  "RING_ROAD": {
+    "segments": [
+      {
+        "from": "gateway",
+        "to": "sterling",
+        "km": 12,
+        "normalMin": 15,
+        "degradedMin": 45
+      },
+      {
+        "from": "sterling",
+        "to": "haven",
+        "km": 10,
+        "normalMin": 12,
+        "degradedMin": 40
+      },
+      {
+        "from": "haven",
+        "to": "keystone",
+        "km": 8,
+        "normalMin": 10,
+        "degradedMin": 30
+      },
+      {
+        "from": "keystone",
+        "to": "gateway",
+        "km": 12,
+        "normalMin": 15,
+        "degradedMin": 45
+      }
+    ],
+    "totalKm": 42
+  },
+  "SUPPLY_CHAIN": {
+    "steps": [
+      {
+        "stage": "harvest",
+        "parish": "gateway",
+        "hoursToNext": 4
+      },
+      {
+        "stage": "transport-in",
+        "parish": "haven",
+        "hoursToNext": 2
+      },
+      {
+        "stage": "process",
+        "parish": "haven",
+        "hoursToNext": 8
+      },
+      {
+        "stage": "manufacture",
+        "parish": "keystone",
+        "hoursToNext": 12
+      },
+      {
+        "stage": "transport-out",
+        "parish": "haven",
+        "hoursToNext": 2
+      },
+      {
+        "stage": "ship",
+        "parish": "haven",
+        "hoursToNext": 0
+      }
+    ],
+    "totalCycleHours": 28,
+    "interruptionCostPerHour": 2400000,
+    "productName": "BioCore-7 pharmaceutical compound"
+  }
+}

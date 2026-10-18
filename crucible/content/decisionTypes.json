@@ -1,0 +1,240 @@
+{
+  "DECISION_CATEGORIES": {
+    "RESOURCE_ALLOCATION": {
+      "id": "resource-allocation",
+      "name": "Resource Allocation",
+      "description": "How to distribute limited resources within your parish",
+      "decisions": [
+        {
+          "id": "generator-deployment",
+          "name": "Generator Deployment",
+          "prompt": "Where should generators be deployed?",
+          "options": [
+            "hospital",
+            "shelters",
+            "communications",
+            "water-pumps",
+            "hoard"
+          ]
+        },
+        {
+          "id": "medical-triage",
+          "name": "Medical Triage Priority",
+          "prompt": "Who receives medical attention first?",
+          "options": [
+            "most-critical",
+            "most-likely-to-survive",
+            "first-come",
+            "essential-workers"
+          ]
+        },
+        {
+          "id": "shelter-assignment",
+          "name": "Shelter Assignment",
+          "prompt": "How should shelter space be allocated?",
+          "options": [
+            "vulnerable-first",
+            "lottery",
+            "residence-proximity",
+            "employment-essential"
+          ]
+        },
+        {
+          "id": "food-distribution",
+          "name": "Food Distribution",
+          "prompt": "How should food supplies be distributed?",
+          "options": [
+            "equal-per-person",
+            "need-based",
+            "rationed-over-time",
+            "priority-groups"
+          ]
+        }
+      ]
+    },
+    "INTER_PARISH": {
+      "id": "inter-parish",
+      "name": "Inter-Parish Coordination",
+      "description": "Decisions involving other parishes",
+      "decisions": [
+        {
+          "id": "resource-sharing",
+          "name": "Resource Sharing Request",
+          "prompt": "Request or offer resources to another parish",
+          "requiresTarget": true,
+          "options": [
+            "request-generators",
+            "offer-generators",
+            "request-medical",
+            "offer-medical",
+            "request-fuel",
+            "offer-fuel"
+          ]
+        },
+        {
+          "id": "evacuation-acceptance",
+          "name": "Evacuation Acceptance",
+          "prompt": "Accept evacuees from another parish?",
+          "requiresTarget": true,
+          "options": [
+            "accept-all",
+            "accept-limited",
+            "refuse-capacity",
+            "refuse-resources"
+          ]
+        },
+        {
+          "id": "coordination-request",
+          "name": "Coordination Request",
+          "prompt": "Request joint operation with another parish",
+          "requiresTarget": true,
+          "options": [
+            "joint-rescue",
+            "shared-shelter",
+            "supply-convoy",
+            "communication-relay"
+          ]
+        }
+      ]
+    },
+    "EVACUATION": {
+      "id": "evacuation",
+      "name": "Evacuation Orders",
+      "description": "Population movement decisions",
+      "decisions": [
+        {
+          "id": "evacuation-order",
+          "name": "Issue Evacuation Order",
+          "prompt": "Should you order evacuation?",
+          "options": [
+            "mandatory-full",
+            "mandatory-coastal",
+            "voluntary-recommended",
+            "shelter-in-place"
+          ]
+        },
+        {
+          "id": "evacuation-timing",
+          "name": "Evacuation Timing",
+          "prompt": "When should evacuation begin?",
+          "options": [
+            "immediate",
+            "staged-over-hours",
+            "wait-for-confirmation",
+            "too-late-shelter"
+          ]
+        },
+        {
+          "id": "evacuation-route",
+          "name": "Evacuation Route",
+          "prompt": "Which routes should evacuees use?",
+          "options": [
+            "primary-highway",
+            "secondary-roads",
+            "split-traffic",
+            "contraflow"
+          ]
+        }
+      ]
+    },
+    "INFRASTRUCTURE": {
+      "id": "infrastructure",
+      "name": "Infrastructure Protection",
+      "description": "Protecting critical assets",
+      "decisions": [
+        {
+          "id": "asset-protection",
+          "name": "Asset Protection Priority",
+          "prompt": "Which infrastructure should be protected first?",
+          "options": [
+            "hospital",
+            "power-plant",
+            "communications",
+            "water-system",
+            "roads"
+          ]
+        },
+        {
+          "id": "preemptive-shutdown",
+          "name": "Preemptive Shutdown",
+          "prompt": "Should systems be shut down preemptively?",
+          "options": [
+            "power-grid-down",
+            "port-closure",
+            "airport-closure",
+            "maintain-operations"
+          ]
+        }
+      ]
+    },
+    "COMMUNICATION": {
+      "id": "communication",
+      "name": "Public Communication",
+      "description": "Information management",
+      "decisions": [
+        {
+          "id": "information-release",
+          "name": "Information Release",
+          "prompt": "What information should be shared publicly?",
+          "options": [
+            "full-transparency",
+            "essential-only",
+            "reassuring-message",
+            "silence-for-now"
+          ]
+        },
+        {
+          "id": "rumor-response",
+          "name": "Rumor Response",
+          "prompt": "How should you respond to spreading rumors?",
+          "options": [
+            "official-denial",
+            "acknowledge-uncertainty",
+            "ignore",
+            "investigate-first"
+          ]
+        }
+      ]
+    },
+    "SPECIAL": {
+      "id": "special",
+      "name": "Special Situations",
+      "description": "Unique ethical dilemmas",
+      "decisions": [
+        {
+          "id": "rescue-priority",
+          "name": "Rescue Priority",
+          "prompt": "Limited rescue capacity—who gets rescued?",
+          "options": [
+            "closest-first",
+            "most-endangered",
+            "largest-group",
+            "known-individuals"
+          ]
+        },
+        {
+          "id": "resource-seizure",
+          "name": "Resource Seizure",
+          "prompt": "Should private resources be seized for public good?",
+          "options": [
+            "seize-with-compensation",
+            "seize-emergency-powers",
+            "request-voluntary",
+            "respect-property"
+          ]
+        },
+        {
+          "id": "lawbreaker-response",
+          "name": "Lawbreaker Response",
+          "prompt": "How should you respond to looting/curfew violations?",
+          "options": [
+            "strict-enforcement",
+            "warnings-only",
+            "focus-on-safety",
+            "distinguish-need-vs-greed"
+          ]
+        }
+      ]
+    }
+  }
+}

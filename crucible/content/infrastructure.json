@@ -1,0 +1,472 @@
+{
+  "CASCADE_RULES": [
+    {
+      "id": "heartland-dam-keystone-power",
+      "trigger": {
+        "system": "power",
+        "parishId": "heartland",
+        "threshold": 50
+      },
+      "effects": [
+        {
+          "system": "power",
+          "parishId": "keystone",
+          "degradation": 30,
+          "delayMinutes": 15
+        }
+      ],
+      "narrative": "Dam output dropping. Keystone manufacturing facility switching to backup generators, but clean room power fluctuations detected."
+    },
+    {
+      "id": "heartland-dam-critical",
+      "trigger": {
+        "system": "power",
+        "parishId": "heartland",
+        "threshold": 30
+      },
+      "effects": [
+        {
+          "system": "power",
+          "parishId": "keystone",
+          "degradation": 50,
+          "delayMinutes": 5
+        },
+        {
+          "system": "power",
+          "parishId": "haven",
+          "degradation": 40,
+          "delayMinutes": 10
+        },
+        {
+          "system": "power",
+          "parishId": "sterling",
+          "degradation": 35,
+          "delayMinutes": 15
+        },
+        {
+          "system": "power",
+          "parishId": "gateway",
+          "degradation": 25,
+          "delayMinutes": 20
+        }
+      ],
+      "narrative": "CRITICAL: Heartland Dam output at dangerous levels. Rolling blackouts beginning across the island. Priority power to Keystone failing."
+    },
+    {
+      "id": "heartland-dam-failure",
+      "trigger": {
+        "system": "power",
+        "parishId": "heartland",
+        "threshold": 20
+      },
+      "effects": [
+        {
+          "system": "power",
+          "parishId": "keystone",
+          "degradation": 80,
+          "delayMinutes": 0
+        },
+        {
+          "system": "power",
+          "parishId": "haven",
+          "degradation": 70,
+          "delayMinutes": 0
+        },
+        {
+          "system": "power",
+          "parishId": "sterling",
+          "degradation": 60,
+          "delayMinutes": 0
+        },
+        {
+          "system": "power",
+          "parishId": "gateway",
+          "degradation": 50,
+          "delayMinutes": 0
+        },
+        {
+          "system": "water",
+          "parishId": "keystone",
+          "degradation": 40,
+          "delayMinutes": 30
+        }
+      ],
+      "narrative": "EMERGENCY: Heartland Dam offline. Island-wide blackout. Only facilities with backup generators operational. Ultrapure water production halted at Keystone."
+    },
+    {
+      "id": "keystone-power-cleanroom",
+      "trigger": {
+        "system": "power",
+        "parishId": "keystone",
+        "threshold": 50
+      },
+      "effects": [
+        {
+          "system": "hospital",
+          "parishId": "keystone",
+          "degradation": 25,
+          "delayMinutes": 120
+        }
+      ],
+      "narrative": "Keystone backup generators running. Clean room air handling on emergency power. Contamination risk increases every hour without grid power."
+    },
+    {
+      "id": "keystone-power-critical",
+      "trigger": {
+        "system": "power",
+        "parishId": "keystone",
+        "threshold": 30
+      },
+      "effects": [
+        {
+          "system": "hospital",
+          "parishId": "keystone",
+          "degradation": 50,
+          "delayMinutes": 60
+        }
+      ],
+      "narrative": "ALERT: Keystone clean room positive pressure failing. Batch contamination imminent if power not restored within 60 minutes."
+    },
+    {
+      "id": "heartland-water-keystone",
+      "trigger": {
+        "system": "water",
+        "parishId": "heartland",
+        "threshold": 50
+      },
+      "effects": [
+        {
+          "system": "water",
+          "parishId": "keystone",
+          "degradation": 40,
+          "delayMinutes": 60
+        }
+      ],
+      "narrative": "Water treatment capacity reduced. Ultrapure water supply to Keystone manufacturing at risk."
+    },
+    {
+      "id": "heartland-water-critical",
+      "trigger": {
+        "system": "water",
+        "parishId": "heartland",
+        "threshold": 30
+      },
+      "effects": [
+        {
+          "system": "water",
+          "parishId": "keystone",
+          "degradation": 60,
+          "delayMinutes": 30
+        },
+        {
+          "system": "water",
+          "parishId": "sterling",
+          "degradation": 30,
+          "delayMinutes": 45
+        },
+        {
+          "system": "hospital",
+          "parishId": "sterling",
+          "degradation": 20,
+          "delayMinutes": 90
+        }
+      ],
+      "narrative": "CRITICAL: Water treatment failing. Boil water advisory for Sterling. Hospital sterilization protocols compromised."
+    },
+    {
+      "id": "summit-comms-island",
+      "trigger": {
+        "system": "communications",
+        "parishId": "summit",
+        "threshold": 50
+      },
+      "effects": [
+        {
+          "system": "communications",
+          "parishId": "keystone",
+          "degradation": 20,
+          "delayMinutes": 0
+        },
+        {
+          "system": "communications",
+          "parishId": "haven",
+          "degradation": 20,
+          "delayMinutes": 0
+        },
+        {
+          "system": "communications",
+          "parishId": "sterling",
+          "degradation": 15,
+          "delayMinutes": 0
+        },
+        {
+          "system": "communications",
+          "parishId": "gateway",
+          "degradation": 25,
+          "delayMinutes": 0
+        }
+      ],
+      "narrative": "Summit communication tower damaged. Radio coverage degraded across all parishes. Coordination between teams becoming difficult."
+    },
+    {
+      "id": "summit-comms-failure",
+      "trigger": {
+        "system": "communications",
+        "parishId": "summit",
+        "threshold": 20
+      },
+      "effects": [
+        {
+          "system": "communications",
+          "parishId": "keystone",
+          "degradation": 50,
+          "delayMinutes": 0
+        },
+        {
+          "system": "communications",
+          "parishId": "haven",
+          "degradation": 50,
+          "delayMinutes": 0
+        },
+        {
+          "system": "communications",
+          "parishId": "heartland",
+          "degradation": 40,
+          "delayMinutes": 0
+        },
+        {
+          "system": "communications",
+          "parishId": "gateway",
+          "degradation": 60,
+          "delayMinutes": 0
+        }
+      ],
+      "narrative": "EMERGENCY: Summit tower collapsed. Island-wide communications blackout. Only Sterling emergency broadcast remains operational. Parishes isolated."
+    },
+    {
+      "id": "gateway-roads-isolation",
+      "trigger": {
+        "system": "roads",
+        "parishId": "gateway",
+        "threshold": 30
+      },
+      "effects": [
+        {
+          "system": "airport",
+          "parishId": "gateway",
+          "degradation": 30,
+          "delayMinutes": 0
+        }
+      ],
+      "narrative": "Gateway access roads flooded. Airport runways accessible only by helicopter. Ground evacuation routes compromised."
+    },
+    {
+      "id": "heartland-roads-isolation",
+      "trigger": {
+        "system": "roads",
+        "parishId": "heartland",
+        "threshold": 30
+      },
+      "effects": [
+        {
+          "system": "power",
+          "parishId": "heartland",
+          "degradation": 10,
+          "delayMinutes": 120
+        }
+      ],
+      "narrative": "Crater roads impassable. Dam maintenance crews unable to reach Heartland. Remote monitoring only."
+    },
+    {
+      "id": "haven-roads-port",
+      "trigger": {
+        "system": "roads",
+        "parishId": "haven",
+        "threshold": 40
+      },
+      "effects": [
+        {
+          "system": "port",
+          "parishId": "haven",
+          "degradation": 25,
+          "delayMinutes": 30
+        }
+      ],
+      "narrative": "Haven port access roads flooded. Shipping containers cannot be moved. Cold chain integrity at risk."
+    },
+    {
+      "id": "haven-port-supply",
+      "trigger": {
+        "system": "port",
+        "parishId": "haven",
+        "threshold": 50
+      },
+      "effects": [
+        {
+          "system": "hospital",
+          "parishId": "sterling",
+          "degradation": 10,
+          "delayMinutes": 360
+        }
+      ],
+      "narrative": "Haven port operations limited. Medical supply shipments delayed. Sterling General may need to ration certain supplies."
+    },
+    {
+      "id": "haven-port-failure",
+      "trigger": {
+        "system": "port",
+        "parishId": "haven",
+        "threshold": 20
+      },
+      "effects": [
+        {
+          "system": "hospital",
+          "parishId": "sterling",
+          "degradation": 30,
+          "delayMinutes": 720
+        }
+      ],
+      "narrative": "CRITICAL: Haven port offline. No external supply deliveries possible. Island must survive on existing stockpiles."
+    },
+    {
+      "id": "sterling-hospital-crisis",
+      "trigger": {
+        "system": "hospital",
+        "parishId": "sterling",
+        "threshold": 40
+      },
+      "effects": [
+        {
+          "system": "hospital",
+          "parishId": "keystone",
+          "degradation": 15,
+          "delayMinutes": 60
+        },
+        {
+          "system": "hospital",
+          "parishId": "haven",
+          "degradation": 15,
+          "delayMinutes": 60
+        }
+      ],
+      "narrative": "Sterling General overwhelmed. Diverting critical cases to parish clinics. Medical resources stretched thin island-wide."
+    },
+    {
+      "id": "gateway-airport-evacuation",
+      "trigger": {
+        "system": "airport",
+        "parishId": "gateway",
+        "threshold": 30
+      },
+      "effects": [
+        {
+          "system": "communications",
+          "parishId": "gateway",
+          "degradation": 20,
+          "delayMinutes": 0
+        }
+      ],
+      "narrative": "Gateway Airport closed. External flights cancelled. Island isolated from mainland support. Satellite communications only."
+    }
+  ],
+  "DEGRADATION_RATES": {
+    "watch": {
+      "power": 2,
+      "communications": 1,
+      "roads": 3,
+      "water": 1,
+      "hospital": 0,
+      "port": 2,
+      "airport": 3
+    },
+    "warning": {
+      "power": 5,
+      "communications": 3,
+      "roads": 8,
+      "water": 2,
+      "hospital": 1,
+      "port": 6,
+      "airport": 10
+    },
+    "crisis": {
+      "power": 10,
+      "communications": 8,
+      "roads": 15,
+      "water": 5,
+      "hospital": 3,
+      "port": 12,
+      "airport": 20
+    },
+    "recovery": {
+      "power": -5,
+      "communications": -3,
+      "roads": -2,
+      "water": -4,
+      "hospital": -2,
+      "port": -3,
+      "airport": -5
+    }
+  },
+  "INFRASTRUCTURE_THRESHOLDS": {
+    "FAILED": 20,
+    "DEGRADED": 50,
+    "OPERATIONAL": 80,
+    "CRITICAL": 30
+  },
+  "INITIAL_INFRASTRUCTURE_STATUS": {
+    "keystone": {
+      "power": 100,
+      "communications": 100,
+      "roads": 100,
+      "water": 100,
+      "hospital": 100,
+      "port": 0,
+      "airport": 0
+    },
+    "haven": {
+      "power": 100,
+      "communications": 100,
+      "roads": 100,
+      "water": 100,
+      "hospital": 80,
+      "port": 100,
+      "airport": 0
+    },
+    "gateway": {
+      "power": 100,
+      "communications": 100,
+      "roads": 100,
+      "water": 100,
+      "hospital": 70,
+      "port": 80,
+      "airport": 100
+    },
+    "heartland": {
+      "power": 100,
+      "communications": 100,
+      "roads": 90,
+      "water": 100,
+      "hospital": 60,
+      "port": 0,
+      "airport": 0
+    },
+    "summit": {
+      "power": 100,
+      "communications": 100,
+      "roads": 85,
+      "water": 100,
+      "hospital": 90,
+      "port": 0,
+      "airport": 0
+    },
+    "sterling": {
+      "power": 100,
+      "communications": 100,
+      "roads": 100,
+      "water": 100,
+      "hospital": 100,
+      "port": 70,
+      "airport": 0
+    }
+  }
+}

@@ -1,0 +1,400 @@
+{
+  "HURRICANE_MIDAS": {
+    "id": "midas",
+    "name": "Hurricane Midas",
+    "category": 4,
+    "windows": [
+      {
+        "id": "watch-72",
+        "phase": "watch",
+        "tMinusHours": -72,
+        "label": "Watch Issued",
+        "certaintyPercent": 40,
+        "decisionType": "Pre-positioning",
+        "weather": {
+          "windMph": 15,
+          "rainfallInchesPerHour": 0,
+          "stormSurgeFeet": 0,
+          "visibility": "clear"
+        },
+        "infrastructureState": {
+          "roadsPassable": [
+            "haven",
+            "summit",
+            "gateway",
+            "heartland",
+            "keystone",
+            "sterling"
+          ],
+          "powerAvailable": [
+            "haven",
+            "summit",
+            "gateway",
+            "heartland",
+            "keystone",
+            "sterling"
+          ],
+          "commsOperational": [
+            "haven",
+            "summit",
+            "gateway",
+            "heartland",
+            "keystone",
+            "sterling"
+          ]
+        },
+        "unavailableActions": [],
+        "emergingPressures": [
+          "Tourists requesting early flights",
+          "Supply orders need confirmation",
+          "Workers asking about contingency plans"
+        ],
+        "narrativeBeats": [
+          "First weather advisory appears",
+          "Corporate asks for status update",
+          "\"Should we or shouldn't we\" tension begins",
+          "Production targets remain unchanged"
+        ]
+      },
+      {
+        "id": "watch-48",
+        "phase": "watch",
+        "tMinusHours": -48,
+        "label": "Track Solidifies",
+        "certaintyPercent": 65,
+        "decisionType": "Early release",
+        "weather": {
+          "windMph": 25,
+          "rainfallInchesPerHour": 0.1,
+          "stormSurgeFeet": 0,
+          "visibility": "clear"
+        },
+        "infrastructureState": {
+          "roadsPassable": [
+            "haven",
+            "summit",
+            "gateway",
+            "heartland",
+            "keystone",
+            "sterling"
+          ],
+          "powerAvailable": [
+            "haven",
+            "summit",
+            "gateway",
+            "heartland",
+            "keystone",
+            "sterling"
+          ],
+          "commsOperational": [
+            "haven",
+            "summit",
+            "gateway",
+            "heartland",
+            "keystone",
+            "sterling"
+          ]
+        },
+        "unavailableActions": [
+          "Order new supplies from mainland (too late for delivery)"
+        ],
+        "emergingPressures": [
+          "Workers asking about evacuation",
+          "Last commercial flights filling up",
+          "Production targets still active",
+          "Union meeting called"
+        ],
+        "narrativeBeats": [
+          "Executives book flights \"just in case\"",
+          "First resource conflict emerges",
+          "Workers notice who gets to leave",
+          "Frank Reeves faces impossible choice"
+        ]
+      },
+      {
+        "id": "warning-24",
+        "phase": "warning",
+        "tMinusHours": -24,
+        "label": "Warning Issued",
+        "certaintyPercent": 85,
+        "decisionType": "Evacuation",
+        "weather": {
+          "windMph": 45,
+          "rainfallInchesPerHour": 0.5,
+          "stormSurgeFeet": 1,
+          "visibility": "reduced"
+        },
+        "infrastructureState": {
+          "roadsPassable": [
+            "haven",
+            "summit",
+            "gateway",
+            "heartland",
+            "keystone",
+            "sterling"
+          ],
+          "powerAvailable": [
+            "haven",
+            "summit",
+            "gateway",
+            "heartland",
+            "keystone",
+            "sterling"
+          ],
+          "commsOperational": [
+            "haven",
+            "summit",
+            "gateway",
+            "heartland",
+            "keystone",
+            "sterling"
+          ]
+        },
+        "unavailableActions": [
+          "Order new supplies",
+          "Evacuate by sea (conditions too rough)",
+          "Continue harvest operations"
+        ],
+        "emergingPressures": [
+          "Airport closing in 12 hours",
+          "Who gets evacuation priority?",
+          "Production shutdown decision urgent",
+          "Sterling shelter capacity concerns"
+        ],
+        "narrativeBeats": [
+          "Mandatory evacuation debates begin",
+          "Class divisions become visible",
+          "First \"we should have acted sooner\" regrets",
+          "Maria Santos threatens work stoppage"
+        ]
+      },
+      {
+        "id": "approach-12",
+        "phase": "approach",
+        "tMinusHours": -12,
+        "label": "Outer Bands",
+        "certaintyPercent": 95,
+        "decisionType": "Last movement",
+        "weather": {
+          "windMph": 65,
+          "rainfallInchesPerHour": 2,
+          "stormSurgeFeet": 3,
+          "visibility": "poor"
+        },
+        "infrastructureState": {
+          "roadsPassable": [
+            "haven",
+            "gateway",
+            "keystone",
+            "sterling"
+          ],
+          "powerAvailable": [
+            "haven",
+            "summit",
+            "gateway",
+            "heartland",
+            "keystone",
+            "sterling"
+          ],
+          "commsOperational": [
+            "haven",
+            "summit",
+            "gateway",
+            "heartland",
+            "keystone",
+            "sterling"
+          ]
+        },
+        "unavailableActions": [
+          "Evacuate by air",
+          "Move between crater and ring road",
+          "Continue any production",
+          "Transfer heavy equipment"
+        ],
+        "emergingPressures": [
+          "People who didn't evacuate need shelter",
+          "Power demand spiking",
+          "Last chance to position resources",
+          "Summit and Heartland now isolated"
+        ],
+        "narrativeBeats": [
+          "Airport closes",
+          "Summit/Heartland cut off from ring road",
+          "Shelter capacity decisions forced",
+          "Tanaka warns about dam stress"
+        ]
+      },
+      {
+        "id": "approach-6",
+        "phase": "approach",
+        "tMinusHours": -6,
+        "label": "Hurricane Conditions",
+        "certaintyPercent": null,
+        "decisionType": "Shelter only",
+        "weather": {
+          "windMph": 95,
+          "rainfallInchesPerHour": 4,
+          "stormSurgeFeet": 6,
+          "visibility": "zero"
+        },
+        "infrastructureState": {
+          "roadsPassable": [],
+          "powerAvailable": [
+            "summit",
+            "keystone"
+          ],
+          "commsOperational": [
+            "summit"
+          ]
+        },
+        "unavailableActions": [
+          "Any movement between parishes",
+          "Most communications",
+          "Resource transfers",
+          "Rescue operations"
+        ],
+        "emergingPressures": [
+          "Medical emergencies with no transport",
+          "Power failures cascading",
+          "Communication blackouts",
+          "People trapped in wrong locations"
+        ],
+        "narrativeBeats": [
+          "Total isolation begins",
+          "Life-or-death decisions",
+          "Earlier choices have consequences",
+          "Sterling hospital overwhelmed"
+        ]
+      },
+      {
+        "id": "landfall-0",
+        "phase": "landfall",
+        "tMinusHours": 0,
+        "label": "Landfall",
+        "certaintyPercent": null,
+        "decisionType": "Life safety",
+        "weather": {
+          "windMph": 130,
+          "rainfallInchesPerHour": 6,
+          "stormSurgeFeet": 12,
+          "visibility": "zero"
+        },
+        "infrastructureState": {
+          "roadsPassable": [],
+          "powerAvailable": [
+            "summit"
+          ],
+          "commsOperational": []
+        },
+        "unavailableActions": [
+          "Everything except immediate shelter decisions"
+        ],
+        "emergingPressures": [
+          "Structural failures",
+          "Flooding deaths",
+          "Complete information blackout",
+          "Dam at critical stress"
+        ],
+        "narrativeBeats": [
+          "Peak crisis",
+          "Survival mode",
+          "No more decisions - consequences play out",
+          "Each parish faces their worst fear"
+        ]
+      },
+      {
+        "id": "eye-6",
+        "phase": "eye",
+        "tMinusHours": 6,
+        "label": "Eye Passage / Easing",
+        "certaintyPercent": null,
+        "decisionType": "Rescue priority",
+        "weather": {
+          "windMph": 40,
+          "rainfallInchesPerHour": 1,
+          "stormSurgeFeet": 4,
+          "visibility": "poor"
+        },
+        "infrastructureState": {
+          "roadsPassable": [
+            "summit",
+            "heartland"
+          ],
+          "powerAvailable": [
+            "summit",
+            "heartland"
+          ],
+          "commsOperational": [
+            "summit"
+          ]
+        },
+        "unavailableActions": [
+          "Ring road travel",
+          "External communication",
+          "Full operations"
+        ],
+        "emergingPressures": [
+          "Rescue vs. assessment",
+          "Who do we reach first?",
+          "Damage reports flooding in",
+          "Body count unknown"
+        ],
+        "narrativeBeats": [
+          "First survey of damage",
+          "Rescue triage begins",
+          "Accountability questions emerge",
+          "Who made it and who did not"
+        ]
+      },
+      {
+        "id": "recovery-24",
+        "phase": "recovery",
+        "tMinusHours": 24,
+        "label": "Recovery Begins",
+        "certaintyPercent": null,
+        "decisionType": "Accountability",
+        "weather": {
+          "windMph": 20,
+          "rainfallInchesPerHour": 0.2,
+          "stormSurgeFeet": 1,
+          "visibility": "reduced"
+        },
+        "infrastructureState": {
+          "roadsPassable": [
+            "haven",
+            "summit",
+            "gateway",
+            "heartland",
+            "keystone",
+            "sterling"
+          ],
+          "powerAvailable": [
+            "summit",
+            "heartland",
+            "keystone"
+          ],
+          "commsOperational": [
+            "summit",
+            "gateway"
+          ]
+        },
+        "unavailableActions": [
+          "Pretend nothing happened"
+        ],
+        "emergingPressures": [
+          "Media arriving",
+          "Families demanding answers",
+          "Insurance assessments",
+          "Blame assignment",
+          "Board demanding explanation"
+        ],
+        "narrativeBeats": [
+          "Reporter asks \"why did you...\"",
+          "Body count known",
+          "Redemption or deflection choice",
+          "Values tested one final time"
+        ]
+      }
+    ]
+  }
+}
