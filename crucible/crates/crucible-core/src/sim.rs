@@ -16,6 +16,9 @@ use crate::weather::{self, degradation_key, log_phase, window_t};
 use crate::{STEP_MINUTES, SYSTEMS};
 use std::collections::{BTreeMap, BTreeSet};
 
+/// Simulation minutes of play after the final timeline window begins (24 h).
+pub const RECOVERY_PLAY_MINUTES: i64 = 24 * 60;
+
 pub use crate::log::Team;
 
 /// Inputs beyond the content: seed, teams, scripted decisions and intensity.
@@ -211,7 +214,10 @@ fn default_teams(content: &Content, rng: &mut SimRng) -> Vec<Team> {
 pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
     let windows = &content.timeline.hurricane_midas.windows;
     let t_start = window_t(&windows[0]);
-    let t_end = window_t(&windows[windows.len() - 1]);
+    // The run continues one day past the start of the final (recovery) window so that
+    // recovery-phase dilemmas can be presented and decided; ending exactly at the window
+    // start left the recovery phase a single tick long.
+    let t_end = window_t(&windows[windows.len() - 1]) + RECOVERY_PLAY_MINUTES;
     let mut rng = SimRng::new(cfg.seed);
     let mut state = init_state(content, &mut rng, t_start);
     // Default teams are always drawn so the RNG stream does not depend on

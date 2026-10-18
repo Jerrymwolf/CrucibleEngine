@@ -17,7 +17,7 @@ use std::collections::BTreeMap;
 /// `50 + pressure / 40` every tick (pressure +-2000 maps to morale 0..100).
 const MORALE_PRESSURE_RANGE: f64 = 2000.0;
 const MORALE_PER_PRESSURE_INV: f64 = 40.0;
-const MORALE_SERVICE_GAIN: f64 = 150.0;
+const MORALE_SERVICE_GAIN: f64 = 60.0; // 150 saturated the integrator within a day of landfall; 60 keeps parishes distinguishable through recovery
 const MORALE_LEADERSHIP_GAIN: f64 = 50.0;
 const MORALE_ALPHA: f64 = 0.25;
 const MORALE_UPDATE_MINUTES: i64 = 60;

@@ -59,8 +59,8 @@ fn log_rules_hold_for_seed_42() {
     let c = content();
     let log = run(&c, &RunConfig { seed: 42, ..Default::default() });
     assert_eq!(log.t_start, -4320);
-    assert_eq!(log.t_end, 1440);
-    assert_eq!(log.ticks.len(), 385);
+    assert_eq!(log.t_end, 1440 + 24 * 60);
+    assert_eq!(log.ticks.len(), 481);
     assert_eq!(log.parishes.len(), 6);
     let mut presented: BTreeSet<(String, String)> = BTreeSet::new();
     let mut cascade_events: BTreeMap<String, usize> = BTreeMap::new();

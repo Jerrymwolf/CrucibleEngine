@@ -68,3 +68,11 @@ Values observation: for every decision, record the option's value signals on the
 ## What is out of scope for v0
 
 Server, websockets, persistence beyond the run log, any UI, any LLM call, authentication, reports. Those come after the headless core replays a session identically.
+
+## Amendments, 2026-10-18 overnight build
+
+1. **Run length.** The run continues 24 hours past the start of the final timeline window (T+48h with the current content), so recovery-phase dilemmas are presented and decided. Ending at the window start left recovery one tick long. Constant `RECOVERY_PLAY_MINUTES` in `sim.rs`.
+2. **Connectivity capacity (from the REA brief, e.1).** Power is served from the source in content priority order, then by population; the number of parishes carried is `ceil(source_power / 20)`. Parishes with backup generators hold power at or below 60 for 24 hours (priority parishes) or 12 hours (others) while disconnected. Constants live in `connectivity.rs` until content carries them.
+3. **Morale integrator (e.3).** Per-parish pressure in -2000..2000 updated hourly from `(service_index - 1) * 60` plus 50 times each decision's summed value signals; morale tracks `50 + pressure / 40` with smoothing 0.25 per tick; isolated parishes do not recover. The gain was lowered from the reference's 150 after it saturated within a day of landfall.
+4. **RNG draw counts (e.5).** Each tick logs `rng_draws`; a property test asserts the per-tick counts are identical across two runs of the same seed.
+5. **Known limits.** No directive or narrative events yet; the timeline's authored infrastructure states are not used as forcing inputs; numeric consequences are derived from value signals because content carries only narrative sketches; calibration is first-cut.
