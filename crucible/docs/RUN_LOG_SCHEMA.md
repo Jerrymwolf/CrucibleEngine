@@ -10,7 +10,7 @@ The simulation core writes one JSON document per run. The viewer and all analysi
   "content_hash": "sha256 hex of the concatenated content files",
   "step_minutes": 15,               // simulation minutes per tick
   "t_start": -4320,                 // sim minutes relative to landfall (T-72h)
-  "t_end": 1440,                    // T+24h
+  "t_end": 2880,                    // 24h past the start of the last timeline window; T+48h with current content
   "systems": ["power","communications","roads","water","hospital","port","airport"],
   "parishes": [
     { "id": "keystone", "name": "Keystone", "population": 3200,
@@ -67,3 +67,17 @@ Rules:
 - Infrastructure levels are integers 0..100. 0 means failed. Systems a parish does not have are 0 and listed in `parishes[].absent_systems` (optional).
 - Every `decision` event references a prior `dilemma_presented` with the same `dilemma_id` and `parish_id`.
 - `values_signaled` scores are integers in -3..3, the ABCD alignment scale from the design corpus.
+
+## Optional fields emitted by v0
+
+Observed in `runs/seed-42.run.json` beyond the fields above. Readers must tolerate them and must not require them.
+
+- `windows[]`: `t_minutes` (sim minutes relative to landfall) and `timeline_phase` (the phase name as authored in `timeline.json`).
+- `ticks[]`: `rng_draws` (count of RNG primitive draws that tick); `morale` and `isolated` are present on every tick.
+- `ticks[].weather`: `wind_mph` and `rain_in_per_hour` beside `wind_kts` and `rain`.
+- `window_transition`: `from` is `null` on the first tick.
+- `decision`: `pressure` (the drift model's 0..1 pressure at the decision). `log.rs` also defines an optional `expired: true` for a dilemma that ran to its deadline; seed 42 has none, so it does not appear in that file.
+- `connectivity.status`: `backup` and `backup_exhausted` beside `lost` and `restored`.
+- `isolation`: `ended: true` marks the end of an isolation; absent on its start.
+- `consequence.system` may be `morale`.
+- `summary`: `cascade_rules_fired` (sorted list of rule ids); `per_parish[].final_infrastructure` (per-system levels at the last tick).

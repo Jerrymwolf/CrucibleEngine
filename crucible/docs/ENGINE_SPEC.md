@@ -32,7 +32,7 @@ Time: discrete ticks of 15 simulation minutes from T-72h (t = -4320) to T+24h (t
 8. **Consequences.** Apply the chosen option's immediate effects; schedule ripple and delayed effects; emit `consequence` events as they land.
 9. **Snapshot.** Append the tick to the run log with infrastructure levels, morale, isolation, and the tick's events.
 
-Intensity: the Crucible Master dial, 1..10. Default curve derives from the timeline (watch 3 to 4, crisis 7 to 9, recovery 5) unless scripted. Intensity multiplies degradation and dilemma cadence as described in `intensity.json` levers.
+Intensity: the Crucible Master dial, 1..10. Default curve derives from the timeline (watch 3 to 4, crisis 5 to 9, recovery 5) unless scripted. Intensity multiplies degradation and dilemma cadence as described in `intensity.json` levers.
 
 Values observation: for every decision, record the option's value signals on the -3..3 ABCD scale. If the content provides explicit per-option value signals, use them. If it only provides `valuesTested` for the dilemma and qualitative option text, derive signals with a documented, deterministic rule and say so in the code. At the end, compute `summary.values_gap` per parish: for each stated value, the mean enacted signal across that parish's decisions.
 
@@ -52,7 +52,7 @@ Values observation: for every decision, record the option's value signals on the
 
 ## CLI
 
-- `crucible run --seed <u64> [--content <dir>] [--decisions <file>] [--intensity <file>] --out <file>` prints a readable timeline table (time as T-72:00 style, window, intensity, notable events) and writes the run log.
+- `crucible run --seed <u64> [--content <dir>] [--decisions <file>] [--intensity <file>] [--teams <file>] --out <file>` prints a readable timeline table (time as T-72:00 style, window, intensity, notable events) and writes the run log.
 - `crucible replay <run.json>` re-executes and prints OK with the hash, or a diff of the first divergence.
 - `crucible validate [--content <dir>]` checks referential integrity: dilemma parish ids exist, cascade rule parish and system ids exist, timeline windows are monotonic, persona ids referenced by dilemmas exist. Exit non-zero on failure.
 - `crucible summary <run.json>` prints per-parish outcomes and the values gap table.
@@ -60,7 +60,7 @@ Values observation: for every decision, record the option's value signals on the
 ## Code shape
 
 - Cargo workspace at `crucible/` with crates `crucible-core` (library) and `crucible-cli` (binary).
-- Modules in core: `content`, `state`, `rng`, `weather`, `connectivity`, `cascade`, `dilemma`, `controller`, `values`, `sim`, `log`. No file over 400 lines. Unit tests beside the code, integration tests in `tests/`.
+- Modules in core: `content`, `state`, `rng`, `weather`, `connectivity`, `cascade`, `dilemma`, `controller`, `values`, `sim`, `log`, plus `morale` (amendment 3) and `validate`. No file over 400 lines. Unit tests beside the code, integration tests in `tests/`.
 - Dependencies: serde, serde_json, rand, rand_chacha, sha2, thiserror, anyhow, clap, proptest. Nothing else without a reason stated in a comment.
 - `cargo test` and `cargo clippy --all-targets -- -D warnings` must pass.
 - Content is never embedded in Rust source. The core reads the JSON directory at runtime. Facilitators edit content, not code.

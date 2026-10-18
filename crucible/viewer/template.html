@@ -74,9 +74,13 @@ h1,h2,h3{margin:0;font-weight:600}
 .tbtns button svg{width:14px;height:14px;fill:currentColor}
 #btn-play{width:44px;background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
 .scrub{position:relative;min-width:0}
-.strip{position:relative;height:14px;margin-bottom:2px}
-.strip .ph{position:absolute;top:5px;height:4px;opacity:.55}
-.strip .dm{position:absolute;top:0;width:3px;height:14px;transform:translateX(-1px);border-radius:1px}
+.strip{position:relative;height:22px;margin-bottom:2px;overflow:hidden;border-bottom:1px solid var(--line-2)}
+.strip .ph{position:absolute;top:0;bottom:0;opacity:.13}
+.strip .phl,.strip .lfl{position:absolute;top:1px;padding-left:4px;font-size:9px;line-height:1;letter-spacing:.1em;text-transform:uppercase;font-weight:600;white-space:nowrap;pointer-events:none}
+.strip .phl{opacity:.85}
+.strip .lf{position:absolute;top:0;bottom:0;width:1px;background:var(--fg);opacity:.8}
+.strip .lfl{color:var(--fg-2)}
+.strip .dm{position:absolute;top:11px;width:3px;height:11px;transform:translateX(-1px);border-radius:1px}
 .dm.pos{background:var(--pos)}.dm.neg{background:var(--neg)}.dm.zero{background:var(--fg-3)}
 input[type=range]{width:100%;margin:0;accent-color:var(--accent);height:22px}
 .ticks-lbl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--fg-3);margin-top:2px}
@@ -106,10 +110,12 @@ input[type=range]{width:100%;margin:0;accent-color:var(--accent);height:22px}
 .node .dot{fill:var(--panel-2);stroke:var(--fg-2);stroke-width:.6}
 .node.sel .dot{stroke:var(--accent);stroke-width:1.1}
 .node text{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:4.2px;font-weight:600;fill:var(--fg);letter-spacing:.04em;text-transform:uppercase}
-.node .pop{font-family:"JetBrains Mono",monospace;font-size:2.6px;fill:var(--fg-3);text-transform:none;letter-spacing:0}
+.node .nm{paint-order:stroke;stroke:var(--land);stroke-width:1.1;stroke-linejoin:round}
 .node .iso{fill:none;stroke:var(--st-failed);stroke-width:.6;stroke-dasharray:1.2 .8;display:none}
-.node .isot{font-size:2.8px;fill:var(--st-failed);display:none}
-.node.isolated .iso,.node.isolated .isot{display:block}
+.node .isob{display:none}
+.node .isob rect{fill:var(--panel-2);stroke:var(--st-failed);stroke-width:.4}
+.node .isob text{font-family:"JetBrains Mono",monospace;font-size:2.3px;font-weight:700;fill:var(--st-failed);letter-spacing:.08em}
+.node.isolated .iso,.node.isolated .isob{display:block}
 .sb{stroke-width:0}
 .s-ok{fill:var(--st-ok)}.s-reduced{fill:var(--st-reduced)}.s-degraded{fill:var(--st-degraded)}.s-critical{fill:var(--st-critical)}.s-failed{fill:var(--st-failed)}.s-na{fill:none;stroke:var(--st-na);stroke-width:.3;stroke-dasharray:.4 .4}
 .b-ok{background:var(--st-ok)}.b-reduced{background:var(--st-reduced)}.b-degraded{background:var(--st-degraded)}.b-critical{background:var(--st-critical)}.b-failed{background:var(--st-failed)}
@@ -396,8 +402,11 @@ var meterSegs=[];(function(){var m=$('meter');for(var i=0;i<10;i++){var s=docume
   var segStart=0,ph=TICKS[0].phase;
   for(var i=1;i<=N;i++){
     var p=i<N?TICKS[i].phase:null;
-    if(p!==ph||i===N){var d=document.createElement('div');d.className='ph';d.style.left=pct(segStart)+'%';d.style.width=((i<N?pct(i):100)-pct(segStart))+'%';d.style.background='var(--phase-'+(ph||'watch')+')';d.title=ph||'';st.appendChild(d);segStart=i;ph=p}
+    if(p!==ph||i===N){var d=document.createElement('div');d.className='ph';d.style.left=pct(segStart)+'%';d.style.width=((i<N?pct(i):100)-pct(segStart))+'%';d.style.background='var(--phase-'+(ph||'watch')+')';d.title=ph||'';st.appendChild(d);
+      if(ph){var l=document.createElement('div');l.className='phl';l.style.left=pct(segStart)+'%';l.style.color='var(--phase-'+ph+')';l.textContent=ph;st.appendChild(l)}
+      segStart=i;ph=p}
   }
+  if(landfallIdx>=0){var lf=document.createElement('div');lf.className='lf';lf.style.left=pct(landfallIdx)+'%';lf.title='landfall';st.appendChild(lf);var ll=document.createElement('div');ll.className='lfl';ll.style.left=pct(landfallIdx)+'%';ll.textContent='landfall';st.appendChild(ll)}
   decisions.forEach(function(d){var m=document.createElement('div');m.className='dm '+(d.sum>0?'pos':d.sum<0?'neg':'zero');m.style.left=pct(d.i)+'%';m.title=pName(d.e.parish_id)+': '+(d.e.option_label||d.e.dilemma_id||'decision')+' ('+(d.sum>0?'+':'')+d.sum+')';st.appendChild(m)});
 })();
 
@@ -408,7 +417,7 @@ var map=$('map'),nodeEls={},nodeBars={},stormG,stormRings=[],stormCat,stormWind,
 (function(){
   el('path',{"class":"island",d:"M7 48C8 30 28 10 50 9C73 8 93 28 95 48C97 66 82 86 62 96C52 101 40 99 29 91C13 80 6 64 7 48Z"},map);
   el('circle',{"class":"crater",cx:50,cy:38,r:23},map);
-  el('text',{x:50,y:44,"text-anchor":"middle",style:"font-size:2.6px;fill:var(--land-line);letter-spacing:.3em;font-family:'JetBrains Mono',monospace"},map).textContent="CRATER";
+  el('text',{x:50,y:45.8,"text-anchor":"middle",style:"font-size:2.6px;fill:var(--land-line);letter-spacing:.3em;font-family:'JetBrains Mono',monospace"},map).textContent="CRATER";
   var P={};PARISHES.forEach(function(p){P[p.id]=p.position||{x:50,y:50}});
   function pt(id,dx,dy){var p=P[id]||{x:50,y:50};return (p.x+(dx||0))+" "+(p.y+(dy||0))}
   if(P.gateway&&P.sterling&&P.haven&&P.keystone){
@@ -427,21 +436,29 @@ var map=$('map'),nodeEls={},nodeBars={},stormG,stormRings=[],stormCat,stormWind,
   el('circle',{"class":"eye",r:1.6},stormG);
   stormCat=el('text',{x:0,y:-1,"text-anchor":"start","class":"cat"},stormG);
   stormWind=el('text',{x:0,y:3.4,"text-anchor":"start"},stormG);
-  /* nodes */
+  /* nodes. Label placement is a per-parish table (name side, bars side, badge angle in degrees, 0 = east, -90 = north)
+     tuned for the canonical positions, where Summit/Heartland/Keystone/Sterling stack in a column: the isolation badge
+     hugs the dashed ring on the side away from neighbours, and population is shown in the parish panels, not on the map. */
+  var PLACE={gateway:{name:'below',bars:'above',badge:180},haven:{name:'below',bars:'above',badge:0},summit:{name:'above',bars:'right',badge:180},heartland:{name:'right',bars:'under',badge:180},keystone:{name:'below',bars:'left',badge:-120},sterling:{name:'below',bars:'above',badge:0}};
+  var bw=1.6,bgap=.6,btot=SYSTEMS.length*bw+(SYSTEMS.length-1)*bgap;
+  var NAMEPOS={below:{x:0,y:7.4,a:'middle'},above:{x:0,y:-4.6,a:'middle'},right:{x:4.6,y:1.5,a:'start'},left:{x:-4.6,y:1.5,a:'end'}};
+  var BARPOS={above:{x:-btot/2,y:-8.6},below:{x:-btot/2,y:3.6},right:{x:4.5,y:-2.5},left:{x:-4.5-btot,y:-2.5},under:{x:4.6,y:2.2}};
   PARISHES.forEach(function(p){
     var pos=P[p.id];var g=el('g',{"class":"node",transform:"translate("+pos.x+" "+pos.y+")",tabindex:0,role:"button","aria-label":(p.name||p.id)+" parish"},map);
     g.dataset.pid=p.id;
     el('circle',{"class":"hit",r:12},g);
     el('circle',{"class":"iso",r:9.5},g);
     el('circle',{"class":"dot",r:2.2},g);
-    var above=pos.y>50; /* southern nodes: label above, bars to the right, to avoid stacking collisions */
-    var ty=above?-4.4:7.4;
-    var t=el('text',{x:0,y:ty,"text-anchor":"middle"},g);t.textContent=p.name||p.id;
-    var pp=el('text',{x:above?4.5:0,y:above?5.8:ty+3.2,"text-anchor":above?"start":"middle","class":"pop"},g);pp.textContent=p.population!=null?p.population.toLocaleString()+" pop":"";
-    var it=el('text',{x:above?-4.2:0,y:above?1:-10.4,"text-anchor":above?"end":"middle","class":"isot"},g);it.textContent="ISOLATED";
-    var bars=[];var bw=1.6,gap=.6,tot=SYSTEMS.length*bw+(SYSTEMS.length-1)*gap;var bx=above?4.5:-tot/2;var by=above?-2.5:-8.6;
-    SYSTEMS.forEach(function(s,i){var r=el('rect',{"class":"sb s-na",x:bx+i*(bw+gap),y:by,width:bw,height:5,rx:.2},g);r.dataset.sys=s;bars.push(r)});
-    bars.by=by;nodeBars[p.id]=bars;nodeEls[p.id]=g;
+    var pl=PLACE[p.id]||(pos.y>50?{name:'above',bars:'right',badge:180}:{name:'below',bars:'above',badge:0});
+    var np=NAMEPOS[pl.name]||NAMEPOS.below,bp=BARPOS[pl.bars]||BARPOS.above;
+    var t=el('text',{x:np.x,y:np.y,"text-anchor":np.a,"class":"nm"},g);t.textContent=p.name||p.id;
+    var bars=[];
+    SYSTEMS.forEach(function(s,i){var r=el('rect',{"class":"sb s-na",x:bp.x+i*(bw+bgap),y:bp.y,width:bw,height:5,rx:.2},g);r.dataset.sys=s;bars.push(r)});
+    var ang=(+pl.badge||0)*Math.PI/180,bcx=+(9.5*Math.cos(ang)).toFixed(2),bcy=+(9.5*Math.sin(ang)).toFixed(2);
+    var badge=el('g',{"class":"isob"},g);
+    el('rect',{x:(bcx-7).toFixed(2),y:(bcy-1.8).toFixed(2),width:14,height:3.6,rx:.4},badge);
+    el('text',{x:bcx,y:(bcy+.85).toFixed(2),"text-anchor":"middle"},badge).textContent="ISOLATED";
+    bars.by=bp.y;nodeBars[p.id]=bars;nodeEls[p.id]=g;
     g.addEventListener('click',function(){select(p.id)});
     g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();select(p.id)}});
   });
