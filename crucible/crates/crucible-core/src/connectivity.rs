@@ -129,7 +129,9 @@ pub struct ConnectivityChange {
 }
 
 /// One tick of utility connectivity. Returns the changes to log.
-pub fn step(content: &Content, state: &mut SimState, step_minutes: i64) -> Vec<ConnectivityChange> {
+/// `repairing` (eye and recovery windows) suspends the drain: crews are
+/// reconnecting, so a disconnected parish holds its level instead of losing it.
+pub fn step(content: &Content, state: &mut SimState, step_minutes: i64, repairing: bool) -> Vec<ConnectivityChange> {
     let adj = utility_links(content);
     let failed = failed_threshold(content);
     let parishes = content.parish_ids();
@@ -142,7 +144,7 @@ pub fn step(content: &Content, state: &mut SimState, step_minutes: i64) -> Vec<C
         for p in &parishes {
             let now = reached.contains(p);
             let was = before.contains(p);
-            if now && !was && state.t > -4320 {
+            if now && !was {
                 changes.push(ConnectivityChange { parish_id: p.clone(), system: system.into(), status: "restored".into(), source: source_name.clone() });
             }
             if !now {
@@ -154,7 +156,7 @@ pub fn step(content: &Content, state: &mut SimState, step_minutes: i64) -> Vec<C
                         status = if *hours > 0.0 { "backup" } else { "backup_exhausted" };
                     }
                 }
-                if status == "lost" || status == "backup_exhausted" {
+                if (status == "lost" || status == "backup_exhausted") && !repairing {
                     state.apply(p, system, -loss_per_tick(system));
                 }
                 if was || (status == "backup_exhausted") {
@@ -213,4 +215,32 @@ pub fn roads_step(content: &Content, state: &mut SimState, wind_mph: f64, rain_i
         }
     }
     (newly, restored)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::content::Content;
+    use std::path::PathBuf;
+
+    fn content() -> Content {
+        Content::load(&PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../content")).unwrap()
+    }
+
+    #[test]
+    fn ring_node_expands_to_ring_parishes() {
+        let c = content();
+        let adj = utility_links(&c);
+        // summit reaches the ring through the crater road and heartland directly
+        let summit = &adj["summit"];
+        assert!(summit.contains("heartland"));
+        assert!(summit.contains("gateway") && summit.contains("haven"));
+        assert!(!adj.contains_key("ring"));
+    }
+
+    #[test]
+    fn loss_rates_are_bounded_and_zero_for_local_systems() {
+        assert!(loss_per_tick("power") > 0.0 && loss_per_tick("power") <= 5.0);
+        assert_eq!(loss_per_tick("hospital"), 0.0);
+    }
 }

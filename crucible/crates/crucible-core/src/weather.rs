@@ -149,9 +149,9 @@ pub fn weather_at(content: &Content, t: i64, strength: f64, shift: f64) -> Weath
     }
 }
 
-/// Storm severity 0..1 used to scale degradation: (wind/130 mph)^1.5.
+/// Storm severity 0..1.44 used to scale degradation: (wind/130 mph)^2.
 pub fn severity(wind_mph: f64) -> f64 {
-    (wind_mph / 130.0).clamp(0.0, 1.2).powf(1.5)
+    (wind_mph / 130.0).clamp(0.0, 1.2).powi(2)
 }
 
 #[cfg(test)]

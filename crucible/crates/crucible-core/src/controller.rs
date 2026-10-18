@@ -18,6 +18,14 @@ pub struct ScriptedDecision {
     pub t: Option<i64>,
 }
 
+/// Who decides for a parish and with what.
+#[derive(Clone, Copy)]
+pub struct TeamInput<'a> {
+    pub controller: &'a str,
+    pub stated: &'a [String],
+    pub scripted: &'a BTreeMap<String, ScriptedDecision>,
+}
+
 pub struct Choice {
     pub option_id: String,
     pub rationale: String,
@@ -82,16 +90,8 @@ fn rationale(dilemma: &Dilemma, option: &DilemmaOption, stated: &[String], p: f6
 /// Decides the open dilemma for `parish` if its controller is ready this tick.
 /// The AI noise draw happens for every controller so the RNG stream does not
 /// depend on who decides; that is what makes replay reproduce the run.
-pub fn decide(
-    content: &Content,
-    state: &SimState,
-    rng: &mut SimRng,
-    parish: &str,
-    controller: &str,
-    stated: &[String],
-    scripted: &BTreeMap<String, ScriptedDecision>,
-    open: &OpenDilemma,
-) -> Option<Choice> {
+pub fn decide(content: &Content, state: &SimState, rng: &mut SimRng, parish: &str, team: &TeamInput, open: &OpenDilemma) -> Option<Choice> {
+    let TeamInput { controller, stated, scripted } = *team;
     let dilemma = content.dilemmas.all_dilemmas.iter().find(|d| d.id == open.dilemma_id)?;
     let p = pressure(state, parish, open);
     let noise: Vec<f64> = dilemma.options.iter().map(|_| rng.range(-0.05, 0.05)).collect();
@@ -149,4 +149,40 @@ pub fn decide(
 /// Whether a canonical value id is one of the costly, other-regarding values.
 pub fn is_costly(id: &str) -> bool {
     COSTLY.contains(&id)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    fn content() -> Content {
+        Content::load(&PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../content")).unwrap()
+    }
+
+    #[test]
+    fn pressure_rises_with_intensity_and_loss() {
+        let c = content();
+        let mut rng = SimRng::new(5);
+        let mut state = crate::sim::test_state(&c, &mut rng);
+        let open = OpenDilemma { dilemma_id: "x".into(), presented_t: state.t, deadline_t: state.t + 120 };
+        let calm = pressure(&state, "keystone", &open);
+        state.intensity = 9;
+        let tense = pressure(&state, "keystone", &open);
+        state.apply("keystone", "power", -100.0);
+        let dark = pressure(&state, "keystone", &open);
+        assert!(calm < tense && tense < dark);
+        assert!((0.0..=1.0).contains(&dark));
+    }
+
+    #[test]
+    fn expedience_and_alignment_have_expected_signs() {
+        let c = content();
+        let d = c.dilemmas.all_dilemmas.iter().find(|d| d.id == "watch-keystone-01").unwrap();
+        let cont = d.options.iter().find(|o| o.id == "continue").unwrap();
+        let halt = d.options.iter().find(|o| o.id == "halt-now").unwrap();
+        assert!(expedience(&c, cont) > expedience(&c, halt));
+        let safety_first = vec!["safety".to_string()];
+        assert!(alignment(&c, halt, &safety_first) > alignment(&c, cont, &safety_first));
+    }
 }

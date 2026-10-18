@@ -1,3 +1,4 @@
 target/
 node_modules/
 *.run.json
+!runs/seed-42.run.json

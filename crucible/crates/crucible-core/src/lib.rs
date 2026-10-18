@@ -12,6 +12,7 @@ pub mod log;
 pub mod rng;
 pub mod sim;
 pub mod state;
+pub mod validate;
 pub mod values;
 pub mod weather;
 

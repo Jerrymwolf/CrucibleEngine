@@ -34,3 +34,32 @@ pub fn evaluate(content: &Content, state: &mut SimState) -> Vec<String> {
     }
     fired
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::rng::SimRng;
+    use std::path::PathBuf;
+
+    #[test]
+    fn a_rule_fires_at_most_once() {
+        let c = Content::load(&PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../content")).unwrap();
+        let mut rng = SimRng::new(1);
+        let mut state = crate::sim::test_state(&c, &mut rng);
+        // Drive the dam below every power threshold.
+        state.apply("heartland", "power", -100.0);
+        let first = evaluate(&c, &mut state);
+        assert!(first.contains(&"heartland-dam-failure".to_string()));
+        assert!(first.contains(&"heartland-dam-keystone-power".to_string()));
+        let second = evaluate(&c, &mut state);
+        assert!(second.is_empty());
+        let scheduled: usize = c
+            .infrastructure
+            .cascade_rules
+            .iter()
+            .filter(|r| first.contains(&r.id))
+            .map(|r| r.effects.len())
+            .sum();
+        assert_eq!(state.scheduled.len(), scheduled);
+    }
+}

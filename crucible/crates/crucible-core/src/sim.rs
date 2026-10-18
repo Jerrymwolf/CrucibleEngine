@@ -87,7 +87,9 @@ fn init_state(content: &Content, rng: &mut SimRng, t_start: i64) -> SimState {
         infra,
         morale,
         isolated: BTreeSet::new(),
-        connected: BTreeMap::new(),
+        // Every parish starts connected to every utility; the first tick's
+        // flood fill only reports real losses.
+        connected: ["power", "water", "communications"].iter().map(|s| (s.to_string(), content.parish_ids().into_iter().collect())).collect(),
         generator_hours,
         fired_rules: BTreeSet::new(),
         scheduled: vec![],
@@ -103,6 +105,13 @@ fn init_state(content: &Content, rng: &mut SimRng, t_start: i64) -> SimState {
         track_strength,
         track_shift,
     }
+}
+
+/// Fresh state at T-72 for unit tests in sibling modules.
+#[doc(hidden)]
+pub fn test_state(content: &Content, rng: &mut SimRng) -> SimState {
+    let t_start = window_t(&content.timeline.hurricane_midas.windows[0]);
+    init_state(content, rng, t_start)
 }
 
 fn degrade(content: &Content, state: &mut SimState, key: &str, w: &weather::Weather, events: &mut Vec<Event>) {
@@ -169,7 +178,8 @@ fn decide_all(content: &Content, state: &mut SimState, rng: &mut SimRng, teams: 
     for (parish, od) in open {
         let team = teams.iter().find(|t| t.parish_id == parish);
         let (ctrl, stated): (&str, &[String]) = team.map(|t| (t.controller.as_str(), t.stated_values.as_slice())).unwrap_or(("ai", &[]));
-        let Some(choice) = controller::decide(content, state, rng, &parish, ctrl, stated, &cfg.decisions, &od) else { continue };
+        let team_input = controller::TeamInput { controller: ctrl, stated, scripted: &cfg.decisions };
+        let Some(choice) = controller::decide(content, state, rng, &parish, &team_input, &od) else { continue };
         let Some(d) = content.dilemmas.all_dilemmas.iter().find(|d| d.id == od.dilemma_id) else { continue };
         let Some(option) = d.options.iter().find(|o| o.id == choice.option_id) else { continue };
         let signals = option_signals(content, option);
@@ -202,7 +212,10 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
     let t_end = window_t(&windows[windows.len() - 1]);
     let mut rng = SimRng::new(cfg.seed);
     let mut state = init_state(content, &mut rng, t_start);
-    let teams = cfg.teams.clone().unwrap_or_else(|| default_teams(content, &mut rng));
+    // Default teams are always drawn so the RNG stream does not depend on
+    // whether teams were supplied; replay passes the logged teams explicitly.
+    let drawn = default_teams(content, &mut rng);
+    let teams = cfg.teams.clone().unwrap_or(drawn);
     let mut ticks: Vec<Tick> = Vec::new();
     let mut t = t_start;
     let mut first = true;
@@ -223,7 +236,8 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
         // 2. degradation
         degrade(content, &mut state, degradation_key(&windows[idx].phase), &w, &mut events);
         // 3. connectivity and roads
-        for c in connectivity::step(content, &mut state, STEP_MINUTES) {
+        let repairing = degradation_key(&windows[idx].phase) == "recovery";
+        for c in connectivity::step(content, &mut state, STEP_MINUTES, repairing) {
             let narrative = format!("{} {} {} (source {})", c.parish_id, c.system, c.status.replace('_', " "), c.source);
             events.push(Event::Connectivity { parish_id: c.parish_id, system: c.system, status: c.status, source: c.source, narrative });
         }
@@ -257,7 +271,7 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
         // morale drift: hardship erodes it, recovery rebuilds it
         for p in content.parish_ids() {
             let failed = connectivity::failed_threshold(content);
-            let d = if state.isolated.contains(&p) || state.level(&p, "power") <= failed { -0.4 } else if phase == "recovery" { 0.3 } else { 0.0 };
+            let d = if state.isolated.contains(&p) || state.level(&p, "power") <= failed { -0.2 } else if repairing { 0.5 } else { 0.0 };
             state.apply(&p, "morale", d);
             if state.isolated.contains(&p) {
                 *state.isolated_ticks.entry(p.clone()).or_insert(0) += 1;

@@ -228,6 +228,7 @@ dependencies = [
  "anyhow",
  "clap",
  "crucible-core",
+ "serde",
  "serde_json",
 ]
 
