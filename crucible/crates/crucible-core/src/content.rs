@@ -56,6 +56,9 @@ pub struct Parish {
 #[serde(rename_all = "camelCase")]
 pub struct PowerInfra {
     pub source: String,
+    /// Parishes served first when the source cannot carry the whole grid.
+    #[serde(default)]
+    pub priority: Vec<String>,
     #[serde(default)]
     pub backup_generators: BTreeMap<String, bool>,
 }

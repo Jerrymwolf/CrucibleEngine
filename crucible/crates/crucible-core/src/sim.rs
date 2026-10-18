@@ -69,16 +69,13 @@ fn init_state(content: &Content, rng: &mut SimRng, t_start: i64) -> SimState {
     let mut infra = BTreeMap::new();
     let mut morale = BTreeMap::new();
     let mut generator_hours = BTreeMap::new();
-    let backup = &content.concordia.infrastructure.power.backup_generators;
     for p in content.parish_ids() {
         let init = content.infrastructure.initial_infrastructure_status.get(&p);
         let row: BTreeMap<String, f64> =
             SYSTEMS.iter().map(|s| (s.to_string(), init.and_then(|m| m.get(*s)).copied().unwrap_or(0.0))).collect();
         infra.insert(p.clone(), row);
         morale.insert(p.clone(), 80.0);
-        let gens = content.parish(&p).map(|x| x.resources.generators).unwrap_or(0) as f64;
-        let hours = if backup.get(&p).copied().unwrap_or(false) { gens * connectivity::HOURS_PER_GENERATOR } else { 0.0 };
-        generator_hours.insert(p, hours);
+        generator_hours.insert(p.clone(), connectivity::backup_hours(content, &p));
     }
     SimState {
         t: t_start,

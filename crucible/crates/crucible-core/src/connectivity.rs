@@ -22,8 +22,60 @@ pub fn loss_per_tick(system: &str) -> f64 {
     }
 }
 
-/// Hours of backup per generator unit in `resources.generators`.
-pub const HOURS_PER_GENERATOR: f64 = 1.5;
+/// REA brief e.1: fuel hours for a parish with `backupGenerators`. Priority
+/// parishes (INFRASTRUCTURE.power.priority) carry 24 h, the others 12 h.
+/// Constants live here because content is frozen for v0.
+pub const BACKUP_HOURS_PRIORITY: f64 = 24.0;
+pub const BACKUP_HOURS_OTHER: f64 = 12.0;
+/// Power is held at or below this level while a parish runs on generators.
+pub const BACKUP_POWER_CAP: f64 = 60.0;
+/// Each 20 points of the source's own power level serves one parish.
+pub const POWER_POINTS_PER_UNIT: f64 = 20.0;
+
+/// Backup generator hours a parish starts the run with (0 without generators).
+pub fn backup_hours(content: &Content, parish: &str) -> f64 {
+    let power = &content.concordia.infrastructure.power;
+    if !power.backup_generators.iter().any(|(k, v)| k.eq_ignore_ascii_case(parish) && *v) {
+        return 0.0;
+    }
+    if power.priority.iter().any(|p| p.eq_ignore_ascii_case(parish)) { BACKUP_HOURS_PRIORITY } else { BACKUP_HOURS_OTHER }
+}
+
+/// Service order for power: the content priority list, then population
+/// descending, then id. Deterministic so the "last traced region blacks
+/// out" rule of the reference engine does not depend on scan order.
+pub fn power_priority(content: &Content) -> Vec<String> {
+    let priority: Vec<String> = content.concordia.infrastructure.power.priority.iter().map(|p| p.to_lowercase()).collect();
+    let mut rest: Vec<(u64, String)> = content
+        .parish_ids()
+        .into_iter()
+        .filter(|p| !priority.contains(p))
+        .map(|p| (content.parish(&p).map(|x| x.population).unwrap_or(0), p))
+        .collect();
+    rest.sort_by(|a, b| b.0.cmp(&a.0).then_with(|| a.1.cmp(&b.1)));
+    priority.into_iter().chain(rest.into_iter().map(|(_, p)| p)).collect()
+}
+
+/// e.1 capacity rule: the source serves floor(level / 20) reached parishes
+/// beyond itself, in `power_priority` order; the rest count as unreached.
+fn apply_power_capacity(content: &Content, state: &SimState, source: &str, reached: &mut BTreeSet<String>) {
+    let units = (state.level(source, "power").round() / POWER_POINTS_PER_UNIT).floor().max(0.0) as usize;
+    let mut keep = BTreeSet::new();
+    if reached.contains(source) {
+        keep.insert(source.to_string());
+    }
+    let mut served = 0;
+    for p in power_priority(content) {
+        if p == source || !reached.contains(&p) {
+            continue;
+        }
+        if served < units {
+            keep.insert(p);
+            served += 1;
+        }
+    }
+    *reached = keep;
+}
 
 /// Undirected utility links: every road segment between real parishes plus
 /// every `providesTo` dependency edge. Ring/crater virtual nodes are expanded
@@ -138,7 +190,12 @@ pub fn step(content: &Content, state: &mut SimState, step_minutes: i64, repairin
     let mut changes = Vec::new();
     for system in ["power", "water", "communications"] {
         let srcs = sources(content, state, system);
-        let reached = flood_fill(&adj, &srcs, |p| state.level(p, system) > failed);
+        let mut reached = flood_fill(&adj, &srcs, |p| state.level(p, system) > failed);
+        if system == "power" {
+            if let Some(src) = srcs.first() {
+                apply_power_capacity(content, state, src, &mut reached);
+            }
+        }
         let before = state.connected.get(system).cloned().unwrap_or_default();
         let source_name = srcs.first().cloned().unwrap_or_default();
         for p in &parishes {
@@ -154,6 +211,11 @@ pub fn step(content: &Content, state: &mut SimState, step_minutes: i64, repairin
                     if *hours > 0.0 {
                         *hours = (*hours - step_minutes as f64 / 60.0).max(0.0);
                         status = if *hours > 0.0 { "backup" } else { "backup_exhausted" };
+                        // Generators carry essential load only: hold power at the cap.
+                        let over = state.level(p, "power") - BACKUP_POWER_CAP;
+                        if over > 0.0 {
+                            state.apply(p, "power", -over);
+                        }
                     }
                 }
                 if (status == "lost" || status == "backup_exhausted") && !repairing {
@@ -236,6 +298,33 @@ mod tests {
         assert!(summit.contains("heartland"));
         assert!(summit.contains("gateway") && summit.contains("haven"));
         assert!(!adj.contains_key("ring"));
+    }
+
+    #[test]
+    fn power_priority_and_backup_hours_follow_content() {
+        let c = content();
+        let order = power_priority(&c);
+        assert_eq!(&order[..2], &["keystone".to_string(), "summit".to_string()]);
+        assert_eq!(order[2], "sterling"); // largest population after the priority list
+        assert_eq!(order.len(), 6);
+        assert_eq!(backup_hours(&c, "keystone"), BACKUP_HOURS_PRIORITY);
+        assert_eq!(backup_hours(&c, "gateway"), BACKUP_HOURS_OTHER);
+        assert_eq!(backup_hours(&c, "haven"), 0.0);
+    }
+
+    #[test]
+    fn capacity_drops_lowest_priority_first() {
+        let c = content();
+        let mut rng = crate::rng::SimRng::new(2);
+        let mut state = crate::sim::test_state(&c, &mut rng);
+        let mut reached: BTreeSet<String> = c.parish_ids().into_iter().collect();
+        apply_power_capacity(&c, &state, "heartland", &mut reached);
+        assert_eq!(reached.len(), 6);
+        state.apply("heartland", "power", -21.0); // 79 -> 3 units
+        let mut reached: BTreeSet<String> = c.parish_ids().into_iter().collect();
+        apply_power_capacity(&c, &state, "heartland", &mut reached);
+        assert!(reached.contains("heartland") && reached.contains("keystone") && reached.contains("summit") && reached.contains("sterling"));
+        assert!(!reached.contains("gateway") && !reached.contains("haven"));
     }
 
     #[test]
