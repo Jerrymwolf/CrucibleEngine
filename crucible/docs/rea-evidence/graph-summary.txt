@@ -1,0 +1,42 @@
+FULL LIMITATIONS (top-level):
+ - CommonJS and ESM binding relationships were recovered from inert syntax and resolved only within the inventoried artifact container.
+ - Graph coverage is incomplete; unavailable facts remain explicit and must not be read as absence.
+ - JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed.
+ - Static imports, entrypoints, workers, endpoints, and storage relationships do not prove runtime execution.
+ - Static paths and relationships may remain unresolved when expressions are dynamic or obfuscated.
+ - Webpack/Rspack factories were recovered from AST literals; REA did not invoke push handlers or bundle bootstrap code.
+ - index.html has 2 inline JavaScript bodies starting at lines 140, 480 that were not analyzed; endpoints, storage, imports and other facts in them are absent from the evidence.
+confidence: derived authority: shipped-artifact
+relationship_coverage: null
+semantic_graph nodes/edges: 40852 0
+semantic node kinds: [('expression', 27936), ('call-site', 3808), ('property-slot', 3010), ('binding', 2492), ('parameter', 1038), ('literal', 1033), ('function', 907), ('return-site', 441), ('module', 99), ('listener', 41)]
+edge relations: Counter({'imports': 897, 'exposes': 397, 'contains': 208, 'persists_to': 2})
+import resolution statuses: Counter({'resolved': 793, 'external': 62, 'not-found': 42})
+src/simulation.js -> []
+src/powerManager.js -> []
+src/disasterManager.js -> []
+src/miscTiles.js -> []
+src/evaluation.js -> []
+src/census.js -> []
+src/valves.js -> []
+src/budget.js -> []
+src/emergencyServices.js -> []
+src/repairManager.js -> []
+src/mapScanner.js -> []
+src/blockMapUtils.js -> []
+src/residential.js -> []
+src/random.ts -> []
+modules importing random.ts: 0 []
+artifact : index.html
+artifact : name_license.html
+artifact : .vscode/tasks.json
+package : micropolisJS
+artifact : artifact root
+artifact : package.json
+unknown : index.html parse scope
+storage : local-storage
+artifact : about.html
+artifact : package-lock.json
+artifact : tsconfig.json
+artifact : tslint.json
+storage : local-storage

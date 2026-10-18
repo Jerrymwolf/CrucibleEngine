@@ -1,0 +1,17 @@
+sample import edge: {"source_node_id": "jag_node_d5b24984b9a2250bca6b6339bf331ceb9471ffa674f777e2618b046031d697bf", "target_node_id": "jag_node_3917b75ffaf1b80467bfc7c7f193ab996132d91ad7f708e56d98dcef06d18be4", "relation": "imports", "properties": {"module_link_kind": "import", "resolution_mode": "import", "specifier": "./tileFlags.ts", "imported_name": "BULLBIT", "imported_path": ["BULLBIT"], "local_name": "BULLBIT", "exported_name": null, "resolved_path": "src/tileFlags.ts", "resolution_status": "resolved", "target_file_kind": "javascript", "target_json_status": null}, "evidence": {"authority": "static-relationship-inference", "state": "inferred", "confidence": "high", "artifact": {"available": true, "artifact_id": "art_223614c38fc4836248eef6a8cac21932ad23e2783b0cb5abac6b9ff101f4d5f2", "sha256": "223614c38fc4836248eef6a8cac21932ad23e2783b0cb5abac6b9ff101f4d5f2"}, "location": {"available": true, "value": {
+src/simulation.js -> blockMap.ts, blockMapUtils.js, budget.js, census.js, commercial.js, disasterManager.js, emergencyServices.js, evaluation.js, eventEmitter.js, industrial.js, mapScanner.js, messages.ts, miscTiles.js, miscUtils.js, powerManager.js, repairManager.js, residential.js, road.js, spriteManager.js, stadia.js, traffic.js, transport.js, valves.js
+src/powerManager.js -> blockMap.ts, direction.ts, eventEmitter.js, messages.ts, position.ts, random.ts, tileFlags.ts, tileValues.ts
+src/disasterManager.js -> eventEmitter.js, messages.ts, miscUtils.js, random.ts, spriteConstants.ts, tileUtils.js, tileValues.ts, zoneUtils.js
+src/miscTiles.js -> random.ts, tileUtils.js, tileValues.ts, zoneUtils.js
+src/evaluation.js -> eventEmitter.js, messages.ts, miscUtils.js, random.ts
+src/census.js -> miscUtils.js
+src/valves.js -> eventEmitter.js, messages.ts, miscUtils.js
+src/budget.js -> eventEmitter.js, messages.ts, miscUtils.js
+src/emergencyServices.js -> position.ts, tileValues.ts
+src/repairManager.js -> tileFlags.ts, tileValues.ts
+src/mapScanner.js -> tile.ts, tileValues.ts
+src/blockMapUtils.js -> blockMap.ts, commercial.js, industrial.js, miscUtils.js, random.ts, residential.js, tileValues.ts
+src/residential.js -> config.js, random.ts, tile.ts, tileFlags.ts, tileUtils.js, tileValues.ts, traffic.js, zoneUtils.js
+src/zoneUtils.js -> miscUtils.js, tileFlags.ts, tileValues.ts
+modules importing random.ts (24): airplaneSprite.js, blockMapUtils.js, boatSprite.js, bulldozerTool.js, commercial.js, copterSprite.js, disasterManager.js, evaluation.js, explosionSprite.js, game.js, industrial.js, mapGenerator.js, miscTiles.js, monsterSprite.js, parkTool.js, powerManager.js, residential.js, road.js, spriteManager.js, tileUtils.js, tornadoSprite.js, traffic.js, trainSprite.js, transport.js
+not-found imports sample: [('test/bounds.ts', '../src/position'), ('test/position.ts', '../src/direction'), ('test/tile.ts', '../src/tile'), ('src/tile.ts', './tileValues'), ('test/random.ts', '../src/random'), ('src/position.ts', './direction'), ('test/tile.ts', '../src/tileValues'), ('src/tile.ts', './tileValues')]
