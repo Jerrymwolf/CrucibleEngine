@@ -27,8 +27,8 @@ related:
 | Full seed-42 run, release build | 63 ms for all 481 ticks |
 | WebAssembly build of `crucible-core` | Fails only because `rand` pulls `getrandom` with OS entropy; the core never uses it. Fix: `default-features = false` on `rand`. |
 | Live play | Not possible yet. `sim::run` is a single batch call; dilemmas are decided by script or by the drift model, never by waiting for a person. |
-| CI | `.github/workflows/ci.yml` builds only the TypeScript app. No Rust job. |
-| Merged to main | PR #1 opened 2026-10-19, waiting on Jerry. |
+| CI | Was TypeScript only and red since Dec 2025. Now a single Rust engine job: tests, clippy, content validation, seed-42 determinism and replay. |
+| Merged to main | PR #1 squash-merged 2026-10-19. |
 
 The engine is sound and fast. What a room needs that it lacks is a way to pause for human decisions, a short-session content profile, an input path from tables, and a projected live view.
 
@@ -56,7 +56,7 @@ Four decisions per table. That is fewer than the 45-dilemma full arc, which is t
 3. **WebAssembly build** so the projected page runs the engine in the browser with no server. Needs the `rand` feature fix above.
 4. **Facilitator live page**, built from the existing viewer: round controls, a lock-in panel per table, and the debrief screen.
 5. **Phone input (stretch).** Phones need a server: a small room service that holds the decisions and serves a join page by QR code. This is the part most exposed to conference wifi. Built only after 1 to 4 work offline.
-6. **Rust CI job** so the engine is guarded on every pull request.
+6. ~~Rust CI job~~ done 2026-10-19 in PR #1.
 
 Steps 1 to 4 give a session that works with no network: table captains call their choice and the facilitator enters it. Phones are layered on top, not depended on.
 
