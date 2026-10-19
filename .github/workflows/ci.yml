@@ -7,6 +7,36 @@ on:
     branches: [main]
 
 jobs:
+  crucible-engine:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: crucible
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Test
+        run: cargo test --locked
+
+      - name: Clippy
+        run: cargo clippy --locked --all-targets -- -D warnings
+
+      - name: Validate content
+        run: cargo run --locked -q -p crucible-cli -- validate --content ./content
+
+      - name: Determinism and replay
+        run: |
+          cargo run --locked -q -p crucible-cli -- run --seed 42 --content ./content --out /tmp/a.json > /dev/null
+          cargo run --locked -q -p crucible-cli -- run --seed 42 --content ./content --out /tmp/b.json > /dev/null
+          cmp /tmp/a.json /tmp/b.json
+          cargo run --locked -q -p crucible-cli -- replay /tmp/a.json
+
   build-and-test:
     runs-on: ubuntu-latest
 
