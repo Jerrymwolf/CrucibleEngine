@@ -1,0 +1,17 @@
+[package]
+name = "crucible-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Command line for the Crucible Engine: run, replay, validate, summary"
+
+[[bin]]
+name = "crucible"
+path = "src/main.rs"
+
+[dependencies]
+crucible-core = { path = "../crucible-core" }
+anyhow = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

@@ -364,7 +364,7 @@ export function SessionRecovery({
                     <ul className="text-sm text-muted-foreground space-y-1">
                       <li>• Simulation is auto-paused</li>
                       <li>• All team progress is saved</li>
-                      <li>• Participants see "Facilitator reconnecting..."</li>
+                      <li>• Participants see &ldquo;Facilitator reconnecting...&rdquo;</li>
                     </ul>
                   </div>
 

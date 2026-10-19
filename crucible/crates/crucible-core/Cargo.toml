@@ -1,0 +1,17 @@
+[package]
+name = "crucible-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Deterministic simulation core of the Crucible Engine (Hurricane Midas on Concordia)"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+rand = { workspace = true }
+rand_chacha = { workspace = true }
+sha2 = { workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }

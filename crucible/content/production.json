@@ -1,0 +1,63 @@
+{
+  "PRODUCTION_ECONOMICS": {
+    "BATCH_VALUE": 8200000,
+    "BATCHES_PER_DAY": 6,
+    "BATCH_DURATION_HOURS": 48,
+    "CLEAN_ROOMS": 12,
+    "DAILY_REVENUE": 49200000,
+    "HOURLY_REVENUE": 2050000,
+    "MINUTE_REVENUE": 34166,
+    "QUARTERLY_TARGET": 4200000000,
+    "STARTING_PROGRESS": 2600000000,
+    "DAYS_REMAINING": 18,
+    "TOTAL_PATIENTS": 340000,
+    "CHILDREN_PERCENTAGE": 0.14,
+    "PATIENTS_PER_HOUR": 39,
+    "PATIENTS_PER_DAY": 932,
+    "STOCKPILE_WEEKS": 6,
+    "WORKERS_BY_PARISH": {
+      "keystone": 247,
+      "haven": 186,
+      "gateway": 142,
+      "heartland": 89,
+      "summit": 34,
+      "sterling": 12
+    },
+    "TOTAL_WORKERS": 710,
+    "PIPELINE": [
+      {
+        "parish": "gateway",
+        "stage": "harvest",
+        "durationHours": 4
+      },
+      {
+        "parish": "haven",
+        "stage": "process",
+        "durationHours": 10
+      },
+      {
+        "parish": "keystone",
+        "stage": "manufacture",
+        "durationHours": 12
+      },
+      {
+        "parish": "haven",
+        "stage": "ship",
+        "durationHours": 2
+      }
+    ],
+    "BONUS": {
+      "WORKER_PERCENTAGE": 0.15,
+      "WORKER_AVERAGE_BONUS": 12000,
+      "MANAGER_PERCENTAGE": 0.25,
+      "EXECUTIVE_PERCENTAGE": 0.4,
+      "TOTAL_AT_STAKE": 204000000
+    },
+    "INFRASTRUCTURE_THRESHOLDS": {
+      "POWER_MIN": 30,
+      "ROADS_MIN": 20,
+      "PORT_MIN": 30,
+      "AIRPORT_MIN": 30
+    }
+  }
+}
