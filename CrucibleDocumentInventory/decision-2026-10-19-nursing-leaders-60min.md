@@ -16,7 +16,7 @@ related:
 # Proposal: a 60-minute live Crucible for nursing leaders
 
 **Asked by:** Jerry Wolf, 2026-10-19: get the Crucible running for a one-hour session at a Jefferson Nursing Leaders conference.
-**Status:** proposed. Every content choice below is Jerry's call as designer. Nothing here is built yet.
+**Status:** proposed. Every content choice below is Jerry's call as designer. Engine, browser build and a first board are built (see Built so far); content is still draft.
 **Unknowns:** conference date, room size, table count, wifi. Assumed: participants at 6 tables with their own phones, one facilitator laptop on a projector.
 
 ## Where the engine stands (checked 2026-10-19 on `claude/crucible-rs-restart`)
@@ -101,9 +101,18 @@ Real-world anchors worth checking before the session (from memory, not verified 
 - 2026-10-20, Jerry asked that this stay facilitator friendly. Design response: the session runs on a prepared arc by default, so the DM's only required move is "next"; each turn the screen suggests the next move and shows the persona's lines to read aloud; levers are limited to three (heat up, cool down, swap dilemma); a rehearsal mode replays the session beforehand; a one-page printed DM card covers the flow.
 - 2026-10-19, Jerry: retire the TypeScript CI jobs. CI now runs only the Rust engine job (tests, clippy, content validation, seed-42 determinism and replay). The TypeScript code stays in the repo, unchecked.
 
+## Built so far (2026-10-20, branch `claude/nursing-leaders-session-paejj1`)
+
+- Live mode, session profile (`RunConfig.ask`) and the browser build of the engine; spec amendments in `crucible/docs/ENGINE_SPEC.md`.
+- `crucible/content/sessions/nursing-60.json`: a draft that asks each table four existing dilemmas (one Watch, two Landfall, one Recovery). These are the corporate-frame dilemmas, used until the nursing ones are written.
+- `crucible/board/`: the offline live board on the Concordia art, published as a claude.ai Artifact. Four decision beats show all six tables' questions at once, because the engine accepts a table's choice before its dilemma appears; that keeps the room on one clock instead of ten separate pauses.
+- Found while building: with the 12-card deck, the 24 drafted questions rarely test candor, courage, duty, integrity or respect, so tables that pick those see "not tested" in the debrief. The nursing dilemmas should be written to test the deck.
+- Found while building: on the island art the dense city grid is in the north and the industrial district in the south, while the content puts Sterling (hospital, government) in the south and Summit (executives) in the north.
+
 ## Questions for Jerry
 
 1. Conference date and room: how many tables, phones allowed, wifi?
 2. ~~Input path~~ decided 2026-10-20: cards plus private vote. DM power decided 2026-10-20 (shapes questions, never consequences).
 3. Content: reframe parishes around care sites as above, or keep the Meridian corporate frame?
-4. Which 12 values go in the nursing deck? Candidates from `values.json`: safety, fairness, candor, courage, accountability, compassion, integrity, loyalty, stewardship, respect, honesty, duty.
+4. The art places the city north and industry south; move the parishes to match the art, or keep the content positions?
+5. Which 12 values go in the nursing deck? Candidates from `values.json`: safety, fairness, candor, courage, accountability, compassion, integrity, loyalty, stewardship, respect, honesty, duty.
