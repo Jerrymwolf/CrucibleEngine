@@ -96,12 +96,14 @@ Real-world anchors worth checking before the session (from memory, not verified 
 
 - 2026-10-20, Jerry: **input is option cards plus a private phone vote.** Tables raise A/B/C/D cards at once for the public choice; each person votes privately on a phone first. The debrief adds a second gap, private conviction against the table's public choice ("you knew, and didn't say"). Build the offline card-and-laptop version first; phones layer on top, so bad wifi only loses the private votes.
 - 2026-10-20, Jerry: **a virtual game board on the existing Concordia island art** (`Concordia.png`, 2048 px). Parishes are territories on the real island; storm rings, outages, isolation and decision tokens are drawn over it.
-- 2026-10-20, Jerry: **frame it like a live Dungeons and Dragons game.** The facilitator is the Dungeon Master (the corpus's Crucible Master): narrates, voices personas as NPCs, works the intensity dial from a private DM screen. The engine is the rulebook and dice; tables are the parties. Open: whether the DM can override the engine.
+- 2026-10-20, Jerry: **frame it like a live Dungeons and Dragons game.** The facilitator is the Dungeon Master (the corpus's Crucible Master): narrates, voices personas as NPCs, works the intensity dial from a private DM screen. The engine is the rulebook and dice; tables are the parties. 
+- 2026-10-20, Jerry: **the DM shapes the questions; the dice decide the consequences.** Before a choice the DM controls which dilemma lands where and when, the heat (intensity and clock), and which persona presses whom. After a choice the engine alone resolves what it sets off. Every DM move is logged beside the decisions and can be shown in the debrief, and replay stays exact because DM moves are recorded inputs.
+- 2026-10-20, Jerry asked that this stay facilitator friendly. Design response: the session runs on a prepared arc by default, so the DM's only required move is "next"; each turn the screen suggests the next move and shows the persona's lines to read aloud; levers are limited to three (heat up, cool down, swap dilemma); a rehearsal mode replays the session beforehand; a one-page printed DM card covers the flow.
 - 2026-10-19, Jerry: retire the TypeScript CI jobs. CI now runs only the Rust engine job (tests, clippy, content validation, seed-42 determinism and replay). The TypeScript code stays in the repo, unchecked.
 
 ## Questions for Jerry
 
 1. Conference date and room: how many tables, phones allowed, wifi?
-2. ~~Input path~~ decided 2026-10-20: cards plus private vote. Open instead: can the DM override the engine?
+2. ~~Input path~~ decided 2026-10-20: cards plus private vote. DM power decided 2026-10-20 (shapes questions, never consequences).
 3. Content: reframe parishes around care sites as above, or keep the Meridian corporate frame?
 4. Which 12 values go in the nursing deck? Candidates from `values.json`: safety, fairness, candor, courage, accountability, compassion, integrity, loyalty, stewardship, respect, honesty, duty.
