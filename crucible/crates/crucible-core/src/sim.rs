@@ -8,7 +8,7 @@ use crate::content::Content;
 use crate::controller::{self, ScriptedDecision};
 use crate::dilemma;
 use crate::morale;
-use crate::log::{clock, state_hash, Event, HashedState, MapPoint, ParishMeta, ParishOutcome, RunLog, Summary, Tick, WindowMeta};
+use crate::log::{clock, state_hash, Event, HashedState, MapPoint, ParishMeta, ParishOutcome, PendingDilemma, PendingOption, RunLog, Summary, Tick, WindowMeta};
 use crate::rng::SimRng;
 use crate::state::{DecisionRecord, Scheduled, ScheduledSource, SimState};
 use crate::values::{self, option_signals};
@@ -30,6 +30,11 @@ pub struct RunConfig {
     pub decisions: BTreeMap<String, ScriptedDecision>,
     /// (t, intensity) points; a step function. Empty: the default curve.
     pub intensity: Vec<(i64, i64)>,
+    /// Live mode: halt at the first tick where a human team has an open
+    /// dilemma with no scripted decision, and report it as `pending`.
+    /// Re-running with that decision scripted at the reported tick
+    /// reproduces the halted run as an exact prefix.
+    pub live: bool,
 }
 
 fn scripted_intensity(curve: &[(i64, i64)], t: i64) -> Option<i64> {
@@ -227,6 +232,7 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
     let mut ticks: Vec<Tick> = Vec::new();
     let mut t = t_start;
     let mut first = true;
+    let mut halted: Vec<PendingDilemma> = Vec::new();
     while t <= t_end {
         state.t = t;
         let mut events: Vec<Event> = Vec::new();
@@ -275,6 +281,13 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
                 events.push(Event::DilemmaPresented { dilemma_id: d.id.clone(), parish_id: parish, title: d.title.clone(), setup: d.setup.clone(), values_tested: d.values_tested.clone(), persona_id: d.persona_ids().first().cloned(), deadline_t });
             }
         }
+        if cfg.live {
+            let pending = pending_human(content, &state, &teams, cfg);
+            if !pending.is_empty() {
+                halted = pending;
+                break;
+            }
+        }
         // 7 + 8. decisions and consequences
         decide_all(content, &mut state, &mut rng, &teams, cfg, &mut events);
         // morale integrator (e.3) and per-parish bookkeeping
@@ -306,7 +319,29 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
         teams,
         ticks,
         summary,
+        pending: halted,
     }
+}
+
+/// Open dilemmas of human teams that no scripted decision answers yet.
+fn pending_human(content: &Content, state: &SimState, teams: &[Team], cfg: &RunConfig) -> Vec<PendingDilemma> {
+    state
+        .open
+        .iter()
+        .filter(|(p, od)| teams.iter().any(|t| &t.parish_id == *p && t.controller == "human") && !cfg.decisions.contains_key(&od.dilemma_id))
+        .filter_map(|(p, od)| {
+            let d = content.dilemmas.all_dilemmas.iter().find(|d| d.id == od.dilemma_id)?;
+            Some(PendingDilemma {
+                t: state.t,
+                parish_id: p.clone(),
+                dilemma_id: d.id.clone(),
+                title: d.title.clone(),
+                setup: d.setup.clone(),
+                deadline_t: od.deadline_t,
+                options: d.options.iter().map(|o| PendingOption { id: o.id.clone(), label: o.label.clone(), description: o.description.clone() }).collect(),
+            })
+        })
+        .collect()
 }
 
 fn parish_meta(content: &Content) -> Vec<ParishMeta> {
@@ -362,7 +397,7 @@ fn summarize(content: &Content, state: &SimState, teams: &[Team], ticks: usize) 
 /// Re-executes a logged run from its seed, teams, intensity curve and
 /// recorded decisions. Returns the new log; the caller compares hashes.
 pub fn replay(content: &Content, log: &RunLog) -> RunLog {
-    let cfg = RunConfig { seed: log.seed, teams: Some(log.teams.clone()), decisions: log.recorded_decisions(), intensity: log.recorded_intensity() };
+    let cfg = RunConfig { seed: log.seed, teams: Some(log.teams.clone()), decisions: log.recorded_decisions(), intensity: log.recorded_intensity(), live: false };
     run(content, &cfg)
 }
 

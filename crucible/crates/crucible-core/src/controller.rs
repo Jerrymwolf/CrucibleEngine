@@ -106,7 +106,8 @@ pub fn decide(content: &Content, state: &SimState, rng: &mut SimRng, parish: &st
         return Some(Choice {
             option_id: option.id.clone(),
             rationale: s.rationale.clone().unwrap_or_else(|| rationale(dilemma, option, stated, p)),
-            controller: "script".into(),
+            // A human team's entered decision arrives as a script; keep its label.
+            controller: if controller == "human" { "human".into() } else { "script".into() },
             expired: false,
             pressure: p,
         });

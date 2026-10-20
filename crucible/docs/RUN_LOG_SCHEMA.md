@@ -81,3 +81,7 @@ Observed in `runs/seed-42.run.json` beyond the fields above. Readers must tolera
 - `isolation`: `ended: true` marks the end of an isolation; absent on its start.
 - `consequence.system` may be `morale`.
 - `summary`: `cascade_rules_fired` (sorted list of rule ids); `per_parish[].final_infrastructure` (per-system levels at the last tick).
+
+## Optional field added 2026-10-20: `pending` (live mode)
+
+Present only on a run halted in live mode, absent otherwise. An array of `{t, parish_id, dilemma_id, title, setup, deadline_t, options: [{id, label, description}]}`. All entries share the same `t`: the tick the run stopped before. `ticks` ends at the tick before `t`, and `summary` describes that partial state. Decision events from human teams carry `controller: "human"`.

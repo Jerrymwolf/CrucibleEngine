@@ -36,6 +36,10 @@ enum Cmd {
         /// Print every tick instead of only ticks with notable events.
         #[arg(long)]
         verbose: bool,
+        /// Halt at the first human dilemma that has no decision yet and list
+        /// it; add the decision (with its `t`) and run again to continue.
+        #[arg(long)]
+        live: bool,
     },
     /// Re-execute a run log from its seed and recorded decisions; compare hashes.
     Replay {
@@ -145,7 +149,7 @@ fn main() -> Result<()> {
                 }
             }
         }
-        Cmd::Run { seed, content, decisions, intensity, teams, out, verbose } => {
+        Cmd::Run { seed, content, decisions, intensity, teams, out, verbose, live } => {
             let c = load_content(&content)?;
             c.validate()?;
             let decisions: BTreeMap<String, ScriptedDecision> = match decisions {
@@ -160,10 +164,18 @@ fn main() -> Result<()> {
                 Some(p) => Some(read_json(&p)?),
                 None => None,
             };
-            let log = run(&c, &RunConfig { seed, teams, decisions, intensity });
+            let log = run(&c, &RunConfig { seed, teams, decisions, intensity, live });
             print_timeline(&log, verbose);
             println!();
-            print_summary(&log);
+            if log.pending.is_empty() {
+                print_summary(&log);
+            } else {
+                println!("halted at {}: waiting on {} decision(s)", clock(log.pending[0].t), log.pending.len());
+                for p in &log.pending {
+                    let opts: Vec<String> = p.options.iter().map(|o| format!("{} ({})", o.id, o.label)).collect();
+                    println!("  {:<10} {:<22} t={}  {}", p.parish_id, p.dilemma_id, p.t, opts.join(" | "));
+                }
+            }
             if let Some(dir) = out.parent() {
                 if !dir.as_os_str().is_empty() {
                     std::fs::create_dir_all(dir)?;

@@ -76,3 +76,12 @@ Server, websockets, persistence beyond the run log, any UI, any LLM call, authen
 3. **Morale integrator (e.3).** Per-parish pressure in -2000..2000 updated hourly from `(service_index - 1) * 60` plus 50 times each decision's summed value signals; morale tracks `50 + pressure / 40` with smoothing 0.25 per tick; isolated parishes do not recover. The gain was lowered from the reference's 150 after it saturated within a day of landfall.
 4. **RNG draw counts (e.5).** Each tick logs `rng_draws`; a property test asserts the per-tick counts are identical across two runs of the same seed.
 5. **Known limits.** No directive or narrative events yet; the timeline's authored infrastructure states are not used as forcing inputs; numeric consequences are derived from value signals because content carries only narrative sketches; calibration is first-cut.
+
+## Amendment, 2026-10-20: live mode
+
+Decided with Jerry for the nursing leaders session; see `../../CrucibleDocumentInventory/decision-2026-10-19-nursing-leaders-60min.md`.
+
+- `RunConfig.live` (CLI `run --live`). Teams with controller `human` never decide headlessly. In live mode the run halts at the first tick where a human team has an open dilemma with no scripted decision, before that tick's decisions are taken, and returns the log so far with `pending` listing those dilemmas.
+- To continue, add each pending decision to the scripted decisions with `t` set to the reported tick and run again from the seed. Because a run costs about 60 ms, re-running from the seed is the whole mechanism: no hidden session state, and the halted log is an exact prefix of the continued one (tested in `tests/live.rs`).
+- A human team's entered decision is logged with controller `human`, not `script`.
+- Runs without `live` are unchanged: the committed seed-42 run is reproduced byte for byte.

@@ -141,6 +141,29 @@ pub struct RunLog {
     pub teams: Vec<Team>,
     pub ticks: Vec<Tick>,
     pub summary: Summary,
+    /// Live mode only: the run halted before tick `t` because these human
+    /// dilemmas are waiting for a decision. Absent from complete runs.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub pending: Vec<PendingDilemma>,
+}
+
+/// A dilemma open for a human team that has no decision yet (live mode).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct PendingDilemma {
+    pub t: i64,
+    pub parish_id: String,
+    pub dilemma_id: String,
+    pub title: String,
+    pub setup: String,
+    pub deadline_t: i64,
+    pub options: Vec<PendingOption>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct PendingOption {
+    pub id: String,
+    pub label: String,
+    pub description: String,
 }
 
 /// What the state hash covers: the canonical final state.
