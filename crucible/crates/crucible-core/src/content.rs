@@ -17,6 +17,8 @@ pub enum ContentError {
     Parse { path: String, source: serde_json::Error },
     #[error("content validation failed:\n{0}")]
     Invalid(String),
+    #[error("content file {0} is missing")]
+    Missing(String),
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -303,7 +305,7 @@ pub struct Content {
     pub content_hash: String,
 }
 
-const FILES: [&str; 9] = [
+pub const FILES: [&str; 9] = [
     "concordia.json",
     "decisionTypes.json",
     "dilemmas.json",
@@ -326,12 +328,21 @@ fn parse<T: for<'de> Deserialize<'de>>(name: &str, bytes: &[u8]) -> Result<T, Co
 
 impl Content {
     pub fn load(dir: &Path) -> Result<Content, ContentError> {
-        let mut hasher = Sha256::new();
         let mut raw: BTreeMap<&str, Vec<u8>> = BTreeMap::new();
         for name in FILES {
-            let bytes = read_file(dir, name)?;
-            hasher.update(&bytes);
-            raw.insert(name, bytes);
+            raw.insert(name, read_file(dir, name)?);
+        }
+        Self::from_files(&raw)
+    }
+
+    /// Builds content from file name to bytes, for hosts without a file
+    /// system (the browser build embeds the files). Every content file must
+    /// be present; the hash is the same as `load` gives for the same bytes.
+    pub fn from_files(raw: &BTreeMap<&str, Vec<u8>>) -> Result<Content, ContentError> {
+        let mut hasher = Sha256::new();
+        for name in FILES {
+            let bytes = raw.get(name).ok_or_else(|| ContentError::Missing(name.to_string()))?;
+            hasher.update(bytes);
         }
         let content_hash = format!("{:x}", hasher.finalize());
         Ok(Content {
