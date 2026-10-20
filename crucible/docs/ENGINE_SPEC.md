@@ -85,3 +85,10 @@ Decided with Jerry for the nursing leaders session; see `../../CrucibleDocumentI
 - To continue, add each pending decision to the scripted decisions with `t` set to the reported tick and run again from the seed. Because a run costs about 60 ms, re-running from the seed is the whole mechanism: no hidden session state, and the halted log is an exact prefix of the continued one (tested in `tests/live.rs`).
 - A human team's entered decision is logged with controller `human`, not `script`.
 - Runs without `live` are unchanged: the committed seed-42 run is reproduced byte for byte.
+
+## Amendment, 2026-10-20: session profile and the browser build
+
+- `RunConfig.ask` (CLI `run --ask <file>`, a JSON list of dilemma ids). When set, a human team is asked only those dilemmas; its other dilemmas are decided by the drift model exactly as for an `ai` team and logged with controller `ai`. This is how a 60-minute session asks each table four questions while the island keeps its full arc. Replay needs nothing new: it scripts every recorded decision. Tested in `tests/live.rs`.
+- A table may decide an asked dilemma before it is presented (a scripted decision with no `t`); it lands on the tick the dilemma appears. The board uses this to put all six tables' questions on the screen at once.
+- `crates/crucible-wasm` builds the core for `wasm32-unknown-unknown` with the content embedded at compile time (`Content::from_files`, same content hash as the directory). It exposes `crucible_run` over a plain C ABI, JSON in and run-log JSON out. `rand` and `rand_chacha` are built without default features so no OS entropy source is linked; seed-42 output is unchanged.
+- Session profiles live in `content/sessions/*.json`. They are not part of the content hash; they choose what the board asks and are read only by `board/build.mjs`.

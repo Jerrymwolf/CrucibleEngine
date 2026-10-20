@@ -47,6 +47,8 @@ struct Request {
     intensity: Vec<(i64, i64)>,
     #[serde(default)]
     live: bool,
+    #[serde(default)]
+    ask: Option<std::collections::BTreeSet<String>>,
 }
 
 /// Runs one request and returns the run log as JSON, or `{"error": ...}`.
@@ -54,7 +56,7 @@ pub fn run_json(request: &str) -> String {
     let result = (|| {
         let req: Request = serde_json::from_str(request).map_err(|e| format!("bad request: {e}"))?;
         let c = content()?;
-        let cfg = RunConfig { seed: req.seed, teams: req.teams, decisions: req.decisions, intensity: req.intensity, live: req.live };
+        let cfg = RunConfig { seed: req.seed, teams: req.teams, decisions: req.decisions, intensity: req.intensity, live: req.live, ask: req.ask };
         Ok::<String, String>(run(&c, &cfg).to_json())
     })();
     result.unwrap_or_else(|e| serde_json::json!({ "error": e }).to_string())

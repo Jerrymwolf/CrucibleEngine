@@ -20,6 +20,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy
+          targets: wasm32-unknown-unknown
 
       - name: Test
         run: cargo test --locked
@@ -36,3 +37,8 @@ jobs:
           cargo run --locked -q -p crucible-cli -- run --seed 42 --content ./content --out /tmp/b.json > /dev/null
           cmp /tmp/a.json /tmp/b.json
           cargo run --locked -q -p crucible-cli -- replay /tmp/a.json
+
+      - name: Browser board builds
+        run: |
+          cargo build --locked -q -p crucible-wasm --target wasm32-unknown-unknown --release
+          node board/build.mjs nursing-60 /tmp/board.html

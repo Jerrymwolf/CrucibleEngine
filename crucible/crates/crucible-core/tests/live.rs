@@ -3,7 +3,7 @@
 
 use crucible_core::log::Event;
 use crucible_core::{replay, run, Content, RunConfig, ScriptedDecision, Team};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
 fn content() -> Content {
@@ -25,10 +25,14 @@ fn teams(c: &Content) -> Vec<Team> {
 /// Plays a whole session in live mode, always picking the last option.
 /// Returns the final log and every halted log on the way.
 fn play(c: &Content, seed: u64) -> (crucible_core::RunLog, Vec<crucible_core::RunLog>) {
+    play_asking(c, seed, None)
+}
+
+fn play_asking(c: &Content, seed: u64, ask: Option<BTreeSet<String>>) -> (crucible_core::RunLog, Vec<crucible_core::RunLog>) {
     let mut decisions: BTreeMap<String, ScriptedDecision> = BTreeMap::new();
     let mut halts = vec![];
     loop {
-        let log = run(c, &RunConfig { seed, teams: Some(teams(c)), decisions: decisions.clone(), live: true, ..Default::default() });
+        let log = run(c, &RunConfig { seed, teams: Some(teams(c)), decisions: decisions.clone(), live: true, ask: ask.clone(), ..Default::default() });
         if log.pending.is_empty() {
             return (log, halts);
         }
@@ -70,6 +74,22 @@ fn halted_runs_are_exact_prefixes() {
 fn finished_live_session_replays() {
     let c = content();
     let (fin, _) = play(&c, 42);
+    assert_eq!(replay(&c, &fin).summary.state_hash, fin.summary.state_hash);
+}
+
+#[test]
+fn a_session_profile_asks_only_its_dilemmas() {
+    let c = content();
+    let ask: BTreeSet<String> = ["watch-sterling-02", "crisis-sterling-02", "crisis-haven-01"].iter().map(|s| s.to_string()).collect();
+    let (fin, halts) = play_asking(&c, 42, Some(ask.clone()));
+    let asked: Vec<&str> = halts.iter().flat_map(|h| h.pending.iter().map(|p| p.dilemma_id.as_str())).collect();
+    assert!(!asked.is_empty() && asked.iter().all(|d| ask.contains(*d)), "asked {asked:?}");
+    let by_table: Vec<_> = fin.ticks.iter().flat_map(|t| &t.events).filter_map(|e| match e {
+        Event::Decision { parish_id, controller, dilemma_id, .. } if parish_id == "sterling" || parish_id == "haven" => Some((dilemma_id.clone(), controller.clone())),
+        _ => None,
+    }).collect();
+    assert!(by_table.iter().any(|(_, ctl)| ctl == "ai"), "unasked dilemmas fall to the drift model");
+    assert!(by_table.iter().all(|(d, ctl)| (ctl == "human") == ask.contains(d)));
     assert_eq!(replay(&c, &fin).summary.state_hash, fin.summary.state_hash);
 }
 

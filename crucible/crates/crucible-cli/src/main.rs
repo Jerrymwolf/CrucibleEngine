@@ -40,6 +40,10 @@ enum Cmd {
         /// it; add the decision (with its `t`) and run again to continue.
         #[arg(long)]
         live: bool,
+        /// JSON: ["dilemma-id", ...]; human tables are asked only these, the
+        /// drift model decides their other dilemmas.
+        #[arg(long)]
+        ask: Option<PathBuf>,
     },
     /// Re-execute a run log from its seed and recorded decisions; compare hashes.
     Replay {
@@ -149,7 +153,7 @@ fn main() -> Result<()> {
                 }
             }
         }
-        Cmd::Run { seed, content, decisions, intensity, teams, out, verbose, live } => {
+        Cmd::Run { seed, content, decisions, intensity, teams, out, verbose, live, ask } => {
             let c = load_content(&content)?;
             c.validate()?;
             let decisions: BTreeMap<String, ScriptedDecision> = match decisions {
@@ -164,7 +168,11 @@ fn main() -> Result<()> {
                 Some(p) => Some(read_json(&p)?),
                 None => None,
             };
-            let log = run(&c, &RunConfig { seed, teams, decisions, intensity, live });
+            let ask: Option<std::collections::BTreeSet<String>> = match ask {
+                Some(p) => Some(read_json(&p)?),
+                None => None,
+            };
+            let log = run(&c, &RunConfig { seed, teams, decisions, intensity, live, ask });
             print_timeline(&log, verbose);
             println!();
             if log.pending.is_empty() {

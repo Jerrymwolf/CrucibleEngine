@@ -35,6 +35,9 @@ pub struct RunConfig {
     /// Re-running with that decision scripted at the reported tick
     /// reproduces the halted run as an exact prefix.
     pub live: bool,
+    /// Session profile: when set, a human team is asked only these dilemma
+    /// ids; its other dilemmas are decided by the drift model as for `ai`.
+    pub ask: Option<BTreeSet<String>>,
 }
 
 fn scripted_intensity(curve: &[(i64, i64)], t: i64) -> Option<i64> {
@@ -187,6 +190,7 @@ fn decide_all(content: &Content, state: &mut SimState, rng: &mut SimRng, teams: 
     for (parish, od) in open {
         let team = teams.iter().find(|t| t.parish_id == parish);
         let (ctrl, stated): (&str, &[String]) = team.map(|t| (t.controller.as_str(), t.stated_values.as_slice())).unwrap_or(("ai", &[]));
+        let ctrl = if ctrl == "human" && !asked(cfg, &od.dilemma_id) { "ai" } else { ctrl };
         let team_input = controller::TeamInput { controller: ctrl, stated, scripted: &cfg.decisions };
         let Some(choice) = controller::decide(content, state, rng, &parish, &team_input, &od) else { continue };
         let Some(d) = content.dilemmas.all_dilemmas.iter().find(|d| d.id == od.dilemma_id) else { continue };
@@ -324,11 +328,15 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
 }
 
 /// Open dilemmas of human teams that no scripted decision answers yet.
+fn asked(cfg: &RunConfig, dilemma_id: &str) -> bool {
+    cfg.ask.as_ref().is_none_or(|a| a.contains(dilemma_id))
+}
+
 fn pending_human(content: &Content, state: &SimState, teams: &[Team], cfg: &RunConfig) -> Vec<PendingDilemma> {
     state
         .open
         .iter()
-        .filter(|(p, od)| teams.iter().any(|t| &t.parish_id == *p && t.controller == "human") && !cfg.decisions.contains_key(&od.dilemma_id))
+        .filter(|(p, od)| teams.iter().any(|t| &t.parish_id == *p && t.controller == "human") && asked(cfg, &od.dilemma_id) && !cfg.decisions.contains_key(&od.dilemma_id))
         .filter_map(|(p, od)| {
             let d = content.dilemmas.all_dilemmas.iter().find(|d| d.id == od.dilemma_id)?;
             Some(PendingDilemma {
@@ -397,7 +405,7 @@ fn summarize(content: &Content, state: &SimState, teams: &[Team], ticks: usize) 
 /// Re-executes a logged run from its seed, teams, intensity curve and
 /// recorded decisions. Returns the new log; the caller compares hashes.
 pub fn replay(content: &Content, log: &RunLog) -> RunLog {
-    let cfg = RunConfig { seed: log.seed, teams: Some(log.teams.clone()), decisions: log.recorded_decisions(), intensity: log.recorded_intensity(), live: false };
+    let cfg = RunConfig { seed: log.seed, teams: Some(log.teams.clone()), decisions: log.recorded_decisions(), intensity: log.recorded_intensity(), ..Default::default() };
     run(content, &cfg)
 }
 

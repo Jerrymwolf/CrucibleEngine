@@ -15,6 +15,9 @@ This directory is a restart. The previous TypeScript application in `../apps` an
 | `crates/crucible-core` | The deterministic headless core. |
 | `crates/crucible-cli` | The `crucible` command: `run`, `replay`, `validate`, `summary`. |
 | `viewer/` | A single-file replay viewer built from a run log. `node viewer/build.mjs <run.json> <out.html>`. |
+| `crates/crucible-wasm` | The core compiled for the browser, content embedded. |
+| `board/` | The live board for running a session in the room. See `board/README.md`. |
+| `content/sessions/` | Session profiles: which dilemmas each table is asked, the values deck, the rounds. |
 | `runs/` | Sample runs and how to regenerate them. |
 
 ## Quick start
