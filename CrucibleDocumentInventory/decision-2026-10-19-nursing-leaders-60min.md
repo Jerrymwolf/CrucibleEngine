@@ -94,11 +94,14 @@ Real-world anchors worth checking before the session (from memory, not verified 
 
 ## Decided so far
 
+- 2026-10-20, Jerry: **input is option cards plus a private phone vote.** Tables raise A/B/C/D cards at once for the public choice; each person votes privately on a phone first. The debrief adds a second gap, private conviction against the table's public choice ("you knew, and didn't say"). Build the offline card-and-laptop version first; phones layer on top, so bad wifi only loses the private votes.
+- 2026-10-20, Jerry: **a virtual game board on the existing Concordia island art** (`Concordia.png`, 2048 px). Parishes are territories on the real island; storm rings, outages, isolation and decision tokens are drawn over it.
+- 2026-10-20, Jerry: **frame it like a live Dungeons and Dragons game.** The facilitator is the Dungeon Master (the corpus's Crucible Master): narrates, voices personas as NPCs, works the intensity dial from a private DM screen. The engine is the rulebook and dice; tables are the parties. Open: whether the DM can override the engine.
 - 2026-10-19, Jerry: retire the TypeScript CI jobs. CI now runs only the Rust engine job (tests, clippy, content validation, seed-42 determinism and replay). The TypeScript code stays in the repo, unchecked.
 
 ## Questions for Jerry
 
 1. Conference date and room: how many tables, phones allowed, wifi?
-2. Input path: facilitator laptop first with phones layered on (recommended), or phones from the start?
+2. ~~Input path~~ decided 2026-10-20: cards plus private vote. Open instead: can the DM override the engine?
 3. Content: reframe parishes around care sites as above, or keep the Meridian corporate frame?
 4. Which 12 values go in the nursing deck? Candidates from `values.json`: safety, fairness, candor, courage, accountability, compassion, integrity, loyalty, stewardship, respect, honesty, duty.
