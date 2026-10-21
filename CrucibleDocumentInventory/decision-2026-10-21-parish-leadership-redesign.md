@@ -25,4 +25,4 @@ Decided by Jerry Wolf in a grilling session, 2026-10-20 to 21. Replaces the nurs
 6. **Resources.** Each parish has competing needs and unique and overlapping resources. Preparation is an allocation round: tables split resource tokens between keep and send-to-a-parish; open negotiation, only entries count. During the storm, calls for aid: a parish sends a mayday, the holder grants or refuses, and delivery fails if the route is cut.
 7. **The values gap** counts dilemma choices, allocations and aid answers.
 8. **Session: 90 minutes.** A 15-minute brief, a 60-minute simulation in four 15-minute quarters (preparation, approach, landfall, recovery), and a 15-minute debrief. Dilemma intensity follows the storm: rising to landfall, then a more positive recovery about repair, giving back and credit.
-9. **Next.** One full lore revision of the design corpus and draft content with Fable at max effort, briefed by this record; engine work for allocation and aid follows Jerry's review.
+9. **Next.** One full lore revision of the design corpus and draft content in one dedicated pass, briefed by this record; engine work for allocation and aid follows Jerry's review.
