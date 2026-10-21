@@ -1,0 +1,41 @@
+[package]
+name = "crucible-host"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Session host of the Crucible Engine: HTTP and WebSocket server, join codes and QR, the input log, per-client filtering, restore and export"
+publish = false
+
+[[bin]]
+name = "crucible-host"
+path = "src/main.rs"
+
+[dependencies]
+crucible-core = { path = "../crucible-core" }
+anyhow = { workspace = true }
+clap = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+# sha2 (already in the workspace): the bundle hash that stale clients are checked against.
+sha2 = { workspace = true }
+# tokio: the async runtime. The host multiplexes forty browser connections and one
+# tick timer in one process. Real time lives here and nowhere in the core.
+tokio = { version = "1.44", features = ["rt-multi-thread", "macros", "net", "time", "sync", "signal"] }
+# axum: the HTTP and WebSocket server that serves the client bundle, the join QR
+# and /ws. Its `ws` feature carries tokio-tungstenite, so one crate speaks both
+# protocols. TLS stays with the proxy in cloud mode (docs/PROTOCOL.md).
+axum = { version = "0.8", default-features = false, features = ["http1", "tokio", "ws", "query", "json"] }
+# futures-util: splits a WebSocket into its read and write halves so each
+# connection's reader and writer run as separate tasks.
+futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+# qrcode: the join QR, printed to the terminal and served as SVG at /join. Built
+# without the `image` feature: the terminal and SVG renderers need no raster.
+qrcode = { version = "0.14", default-features = false, features = ["svg"] }
+# getrandom: OS entropy for session codes and tokens. Secrets must never come
+# from the core's seeded RNG, whose whole point is to be reproducible.
+getrandom = "0.3"
+
+[dev-dependencies]
+# tokio-tungstenite: a real WebSocket client for the integration test's six
+# tables and DM; the version axum's `ws` feature uses, so one tungstenite links.
+tokio-tungstenite = { version = "0.29", default-features = false, features = ["connect", "handshake"] }

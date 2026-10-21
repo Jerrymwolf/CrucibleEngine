@@ -451,12 +451,18 @@ impl RunLog {
         serde_json::from_str(s)
     }
 
-    /// Scripted decisions recovered from the log, pinned to their ticks.
+    /// Scripted decisions recovered from the log, pinned to their ticks. The
+    /// storm's defaults are left out: the replay reaches the same deadline
+    /// with no decision and applies the same default, keeping `decided_by`
+    /// and `expired` as the live run recorded them.
     pub fn recorded_decisions(&self) -> BTreeMap<String, crate::controller::ScriptedDecision> {
         let mut out = BTreeMap::new();
         for tick in &self.ticks {
             for e in &tick.events {
-                if let Event::Decision { dilemma_id, option_id, rationale, .. } = e {
+                if let Event::Decision { dilemma_id, option_id, rationale, decided_by, .. } = e {
+                    if decided_by.as_deref() == Some("storm") {
+                        continue;
+                    }
                     out.insert(
                         dilemma_id.clone(),
                         crate::controller::ScriptedDecision { option_id: option_id.clone(), rationale: Some(rationale.clone()), t: Some(tick.t) },

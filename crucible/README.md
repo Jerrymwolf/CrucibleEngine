@@ -16,6 +16,7 @@ This directory is a restart. The previous TypeScript application in `../apps` an
 | `crates/crucible-cli` | The `crucible` command: `run` (`--seed`, `--session`, `--inputs`, `--until`, `--teams`, `--decisions`, `--intensity`, `--live`), `replay`, `validate`, `summary`. |
 | `viewer/` | A single-file replay viewer built from a run log. `node viewer/build.mjs <run.json> <out.html>`. |
 | `crates/crucible-wasm` | The core compiled for the browser, content embedded. |
+| `crates/crucible-host` | The `crucible-host` session server for the room: HTTP for the client bundle and the join QR, WebSockets for six tables, their phones, the projector and the DM, the ordered input log, the clock, per-client filtering, restore and export. Protocol in `docs/PROTOCOL.md`. |
 | `board/` | The live board for running a session in the room. See `board/README.md`. |
 | `content/sessions/` | Session profiles: which cards each table is asked and when, the deadlines, the allocation lock, the scheduled maydays, the intensity curve. Read by the core (`run --session`) and by the board builds. |
 | `runs/` | Sample runs and how to regenerate them. |
@@ -31,6 +32,9 @@ cargo run -p crucible-cli -- replay runs/seed-42.run.json
 cargo run -p crucible-cli -- summary runs/seed-42.run.json
 cargo run -p crucible-cli -- run --seed 42 --content ./content --session parish-90 --until -3000 --out /tmp/parish-90.json
 node viewer/build.mjs runs/seed-42.run.json viewer/index.html
+cargo run -p crucible-host -- --content ./content --session parish-90 --bundle board-rts/index.html   # the LAN host: prints the join QR, links and the DM PIN
+cargo run -p crucible-host -- --restore sessions/<date>-<CODE>                                         # resume a session, paused at its horizon
+cargo run -p crucible-host -- --restore sessions/<date>-<CODE> --export-only /tmp/run.json             # the run log, for `crucible replay`
 ```
 
 ## Determinism

@@ -110,7 +110,8 @@ Identical in both deployments.
 
 ```jsonc
 { "v": 1, "type": "welcome", "client_id": "c_…", "resume_token": "<32 hex>", "role": "console", "parish": "haven",
-  "bundle_hash": "<64 hex>", "snapshot": { … } }                          // section 8
+  "bundle_hash": "<64 hex>", "snapshot": { … } }                          // section 8; the answer to hello, and sent again unasked
+                                                                          // when the DM's reassign or admit changes this device's role
 
 { "v": 1, "type": "lobby", "seats": [ { "parish": "haven", "name": "Haven", "console": "free", "phones": 2 } ] }
                                       // console: "free" | "held" (a connected device) | "offline" (held by a disconnected device)
@@ -232,7 +233,7 @@ The host sends a client only what its role and parish may see. The data never re
 - **Secret briefs** go to the owning table's `console` and to the `dm`, in `private.secret_brief` / `private.briefs`, and to everyone in the `debrief_open` phase frame. Never in a `state` frame's `public`, never to a phone, never to the projector before the debrief.
 - **Allocation entries** before the lock are private to the owning table and the DM. At the lock the core emits public `allocation` events.
 - **Private votes** never leave the host except as counts to the owning console and as counts and split to the DM. The export carries them keyed by anonymous `client_id`.
-- **Fog** applies to `console` and `phone`. A table always sees its own parish. It sees another parish `Q` at a tick only while both can talk: `infrastructure[P].communications > 0` and `infrastructure[Q].communications > 0` at that tick. A parish it cannot see is omitted from `infrastructure`, `morale`, `isolated` and `stock` and listed in `fogged`; the client keeps showing its last report, stamped with the tick it last saw.
+- **Fog** applies to `console` and `phone`. A table always sees its own parish. It sees another parish `Q` at a tick only while both can talk: `infrastructure[P].communications` and `infrastructure[Q].communications` are both above the content's FAILED threshold (`INFRASTRUCTURE_THRESHOLDS.FAILED` in `infrastructure.json`, 20) at that tick. A parish whose communications have failed is out of contact and sees only itself. A parish it cannot see is omitted from `infrastructure`, `morale`, `isolated` and `stock` and listed in `fogged`; the client keeps showing its last report, stamped with the tick it last saw.
 - **Events** in a fogged client's frame: an event is kept when it has no `parish_id` (island-wide: `window_transition`, routes, convoys, the ship, the doses), when its `parish_id` is a visible parish, or when its kind is radio or public by design: `mayday`, `aid_answer`, `aid_expired`, `values_locked`, `decision`, `allocation`, `credit_line`, `token_returned`. `degradation`, `cascade`, `connectivity`, `isolation`, `dilemma_presented`, `consequence`, `resident_state` and `chance` of a fogged parish are dropped. `rejected` events are private: a table sees its own, the DM sees all, the projector none.
 - **Projector** receives every public field with no fog and no `private`. **DM** receives everything.
 
@@ -240,7 +241,8 @@ The host sends a client only what its role and parish may see. The data never re
 
 - Clients `ack { seq }` the frames they apply; the host uses acks only for its connection view (the DM's roster).
 - A client that sees a gap in `seq` sends `resync { from_seq }` with the last seq it applied. The host answers with every buffered sequenced frame whose `seq` is greater, in order, filtered for that client; or, when the buffer cannot serve it, with one `snapshot` frame.
-- A disconnected client reconnects with `hello { client_id, resume_token, last_seq }`. The answer is `welcome` with a full snapshot; the client applies it and discards its stale view (snapshots are small enough at one tick per four seconds). Then it re-sends every intent that has no `intent_result` yet, with its original `client_seq`; the host de-duplicates. An intent whose deadline passed while the device was offline is rejected `expired`: the console says "the storm decided". A phone vote flushed after its table raised the card is recorded with `late: true` and still counts for the second gap, marked.
+- The first frame on a connection is always the answer to `hello` (`welcome`, `lobby`, `waiting`, `reload` or `error`); the `roster` and `lobby` broadcasts a join causes go to the other devices. A `welcome` can also arrive unasked: when the DM's `reassign` or `admit` gives a console seat away, the former holder receives a new `welcome` with `role: "phone"` and a fresh snapshot, and drops its console view.
+- A disconnected client reconnects with `hello { client_id, resume_token, last_seq }`. The answer is `welcome` with a full snapshot; the client applies it and discards its stale view (snapshots are small enough at one tick per four seconds). `last_seq` is accepted and ignored: a client that wants the frames it missed sends `resync { from_seq }` after the welcome and gets them in order. Then it re-sends every intent that has no `intent_result` yet, with its original `client_seq`; the host de-duplicates. An intent whose deadline passed while the device was offline is rejected `expired`: the console says "the storm decided". A phone vote flushed after its table raised the card is recorded with `late: true` and still counts for the second gap, marked.
 - Clients retry with exponential backoff (1 s doubling to 30 s) and keep `client_id`, `resume_token` and the role token in local storage.
 - Late joins: a console joining in Q2 gets the snapshot and plays from there; its Q1 allocation was "keep everything" unless the DM entered a sheet for it. A phone joining mid-quarter sees the open card and may vote until the table raises its card.
 
@@ -360,3 +362,6 @@ Every `state` frame carries `hash`, the core's `state_hash` for that tick (what 
 4. DM kinds `advance`, `skip_ahead`, `open_island`, `debrief` and `export` are added: rehearsal, overruns and the end of the session need them. `manual_decide` and `manual_allocate` are the console kinds sent by the DM with `parish_id`.
 5. With a table token, a console seat whose holder is disconnected is taken by the next device that asks; only a seat held by a connected device waits for the DM.
 6. `heat` and `cool` are ±2 on the profile's curve, as the DM console description reads ("Heat up twice: intensity jumps four").
+7. Fog is keyed to the content's FAILED threshold for communications (`INFRASTRUCTURE_THRESHOLDS.FAILED`, 20), not to zero: a parish whose communications the engine calls failed is out of contact, which is how the cascade rules already read the number.
+8. `hello.last_seq` does not make the host push a delta; the client asks with `resync` after the `welcome`. One path for catching up.
+9. A device whose console seat the DM gives away gets a second, unasked `welcome` as a phone, so no device keeps a console view it no longer holds.

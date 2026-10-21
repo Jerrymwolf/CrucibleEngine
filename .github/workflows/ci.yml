@@ -19,8 +19,11 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          components: clippy
+          components: clippy, rustfmt
           targets: wasm32-unknown-unknown
+
+      - name: Format
+        run: cargo fmt --all --check
 
       - name: Test
         run: cargo test --locked
@@ -37,6 +40,11 @@ jobs:
           cargo run --locked -q -p crucible-cli -- run --seed 42 --content ./content --out /tmp/b.json > /dev/null
           cmp /tmp/a.json /tmp/b.json
           cargo run --locked -q -p crucible-cli -- replay /tmp/a.json
+
+      - name: Session host
+        run: |
+          cargo run --locked -q -p crucible-host -- --help > /dev/null
+          cargo run --locked -q -p crucible-host -- --mode cloud --no-store && exit 1 || test $? -eq 2
 
       - name: Browser board builds
         run: |
