@@ -44,6 +44,13 @@ Move to **Godot** if the Crucible becomes an installed app, or if we need its ed
 - Using our Rust core on its web build is experimental today.
 - Its web build is about ten times larger.
 
+## Update, same day: the Crucible as an app
+
+Jerry, 2026-10-21 19:01: "Long term I think this could be an APP". That tips the choice to **Godot**:
+- One Godot project exports to Windows, macOS, iPad, Android and the web, so the prototype is not thrown away.
+- The Rust core does not need to run on the tablets. It stays on the facilitator's laptop as the host (crucible-host, a desktop build where Rust works natively). Tablets become Godot clients that draw the host's state and send orders over the room's local network. That still survives venue Wi-Fi failure on a travel router.
+- Phaser stays the fallback if Godot's web build proves too heavy for a browser-only session.
+
 ## Limits
 
 - Several sources are vendor or comparison blogs. Version dates were taken from official download pages where the searches surfaced them; the network policy blocked direct fetches of phaser.io, bevy.org and godot-rust.github.io.
