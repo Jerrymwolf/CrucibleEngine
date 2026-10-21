@@ -32,6 +32,8 @@ pub struct Choice {
     pub controller: String,
     pub expired: bool,
     pub pressure: f64,
+    /// "storm" when the deadline passed and the card's default option was applied.
+    pub decided_by: Option<String>,
 }
 
 /// Keys whose positive alignment reads as expedient under pressure, and keys
@@ -131,19 +133,22 @@ pub fn decide(content: &Content, state: &SimState, rng: &mut SimRng, parish: &st
             controller: if controller == "human" { "human".into() } else { "script".into() },
             expired: false,
             pressure: p,
+            decided_by: None,
         });
     }
     if controller == "human" || (controller == "script" && script.is_none()) {
         if !expired {
             return None;
         }
-        let option = &dilemma.options[0];
+        // The storm decides: the option the persona would have taken alone.
+        let option = dilemma.default_option();
         return Some(Choice {
             option_id: option.id.clone(),
-            rationale: "Deadline passed with no decision; default option applied.".into(),
+            rationale: "Deadline passed with no decision; the storm applied the card's default option.".into(),
             controller: controller.into(),
             expired: true,
             pressure: p,
+            decided_by: Some("storm".into()),
         });
     }
     // ai: decide once half the window has elapsed (or at the deadline).
@@ -159,7 +164,14 @@ pub fn decide(content: &Content, state: &SimState, rng: &mut SimRng, parish: &st
         }
     }
     let (_, option) = best?;
-    Some(Choice { option_id: option.id.clone(), rationale: rationale(dilemma, option, stated, p), controller: "ai".into(), expired: false, pressure: p })
+    Some(Choice {
+        option_id: option.id.clone(),
+        rationale: rationale(dilemma, option, stated, p),
+        controller: "ai".into(),
+        expired: false,
+        pressure: p,
+        decided_by: None,
+    })
 }
 
 /// Whether a canonical value id is one of the costly, other-regarding values.

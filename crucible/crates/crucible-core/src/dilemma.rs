@@ -5,6 +5,7 @@ use crate::content::{Content, Dilemma};
 use crate::rng::SimRng;
 use crate::state::{OpenDilemma, SimState};
 use crate::weather::log_phase;
+use std::collections::BTreeSet;
 
 /// Minimum ticks between dilemmas for one parish; shrinks as intensity rises.
 pub fn cadence_ticks(intensity: i64) -> i64 {
@@ -41,11 +42,12 @@ pub fn eligible<'a>(content: &'a Content, state: &SimState, parish: &str) -> Vec
 }
 
 /// Presents at most one new dilemma per parish that has none open and whose
-/// cadence allows. Returns (parish, dilemma id) pairs presented this tick.
-pub fn present(content: &Content, state: &mut SimState, rng: &mut SimRng, step_minutes: i64) -> Vec<(String, String)> {
+/// cadence allows. Parishes in `scheduled` are skipped: the session profile
+/// presents their cards. Returns (parish, dilemma id) pairs presented this tick.
+pub fn present(content: &Content, state: &mut SimState, rng: &mut SimRng, step_minutes: i64, scheduled: &BTreeSet<String>) -> Vec<(String, String)> {
     let mut out = Vec::new();
     for parish in content.parish_ids() {
-        if state.open.contains_key(&parish) {
+        if state.open.contains_key(&parish) || scheduled.contains(&parish) {
             continue;
         }
         if let Some(last) = state.last_dilemma_t.get(&parish) {

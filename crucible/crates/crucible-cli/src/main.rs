@@ -3,7 +3,7 @@
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
 use crucible_core::log::{clock, Event, RunLog};
-use crucible_core::{replay, run, Content, RunConfig, ScriptedDecision, Team};
+use crucible_core::{replay, run, Content, InputRecord, RunConfig, ScriptedDecision, Session, Team};
 use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 
@@ -44,8 +44,17 @@ enum Cmd {
         /// drift model decides their other dilemmas.
         #[arg(long)]
         ask: Option<PathBuf>,
+        /// JSON: [{"t": -3000, "seq": 0, "kind": "allocate", "parish_id": "haven", "token": "FUEL", "to": "summit", "count": 1}, ...]
+        #[arg(long)]
+        inputs: Option<PathBuf>,
+        /// Stop after this tick (signed minutes from landfall).
+        #[arg(long)]
+        until: Option<i64>,
+        /// Session profile: an id under content/sessions (parish-90) or a path to a profile.
+        #[arg(long)]
+        session: Option<String>,
     },
-    /// Re-execute a run log from its seed and recorded decisions; compare hashes.
+    /// Re-execute a run log from its seed, inputs and recorded decisions; compare hashes.
     Replay {
         run: PathBuf,
         #[arg(long, default_value = "content")]
@@ -56,7 +65,7 @@ enum Cmd {
         #[arg(long, default_value = "content")]
         content: PathBuf,
     },
-    /// Print per-parish outcomes and the values gap table of a run log.
+    /// Print per-parish outcomes, the counters and the values gap table of a run log.
     Summary { run: PathBuf },
 }
 
@@ -67,6 +76,13 @@ fn load_content(dir: &Path) -> Result<Content> {
 fn read_json<T: serde::de::DeserializeOwned>(path: &Path) -> Result<T> {
     let s = std::fs::read_to_string(path).with_context(|| format!("reading {}", path.display()))?;
     serde_json::from_str(&s).with_context(|| format!("parsing {}", path.display()))
+}
+
+fn load_session(content_dir: &Path, arg: &str) -> Result<Session> {
+    let path = PathBuf::from(arg);
+    let path = if path.is_file() { path } else { content_dir.join("sessions").join(format!("{arg}.json")) };
+    let profile: serde_json::Value = read_json(&path)?;
+    Session::from_profile(&profile).map_err(|e| anyhow::anyhow!("session {}: {e}", path.display()))
 }
 
 #[derive(serde::Deserialize)]
@@ -88,7 +104,20 @@ fn notable(e: &Event) -> Option<String> {
         }
         Event::Connectivity { parish_id, system, status, .. } if status == "lost" || status == "restored" => format!("{parish_id} {system} {status}"),
         Event::DilemmaPresented { parish_id, dilemma_id, .. } => format!("{parish_id} faces {dilemma_id}"),
-        Event::Decision { parish_id, option_id, controller, dilemma_id, .. } => format!("{parish_id} decides {dilemma_id} -> {option_id} ({controller})"),
+        Event::Decision { parish_id, option_id, controller, dilemma_id, decided_by, .. } => match decided_by {
+            Some(by) => format!("{parish_id} lets the {by} decide {dilemma_id} -> {option_id}"),
+            None => format!("{parish_id} decides {dilemma_id} -> {option_id} ({controller})"),
+        },
+        Event::RouteCut { route_id, .. } => format!("route {route_id} cut"),
+        Event::RouteReopened { route_id, .. } => format!("route {route_id} open"),
+        Event::ConvoyTurnedBack { token, from, to, route_id, .. } => format!("{token} {from}->{to} turned back at {route_id}"),
+        Event::Allocation { parish_id, entry, token, to, count, .. } => format!("{parish_id} {entry} {token} x{count} -> {to}"),
+        Event::Mayday { call_id, asker, holder, .. } => format!("MAYDAY {call_id} {asker} -> {holder}"),
+        Event::AidAnswer { call_id, holder, answer, controller, .. } => format!("{holder} answers {call_id}: {answer} ({controller})"),
+        Event::ShipSailed { consignment, doses } => format!("ship sails ({consignment}) with {doses} doses"),
+        Event::ConsignmentMissed { reason, .. } => format!("consignment missed: {reason}"),
+        Event::DosesLost { doses, reason } => format!("{doses} doses lost: {reason}"),
+        Event::Rejected { source, parish_id, reason } => format!("rejected {source} from {parish_id}: {reason}"),
         _ => return None,
     })
 }
@@ -116,13 +145,25 @@ fn print_summary(log: &RunLog) {
     let s = &log.summary;
     println!("seed {}  ticks {}  decisions {}  cascades fired {}", log.seed, s.ticks, s.decisions, s.cascades_fired);
     println!("state_hash {}", s.state_hash);
+    let c = &s.counters;
+    println!(
+        "doses shipped {}  people safe {}  (vault {}, at risk {}, injured {}, lost {})",
+        c.doses_shipped, c.people_safe, c.vault_doses, c.at_risk, c.injured, c.lost
+    );
+    if let Some(u) = log.until {
+        println!("stopped at {} ({u}); {} dilemma(s) and {} call(s) open", clock(u), log.pending.len(), log.open_calls.len());
+    }
     println!();
-    println!("{:<10} {:>9} {:>12} {:>9} {:>12}  final power/comms/roads/water/hospital", "parish", "min_power", "isolated_min", "decisions", "final_morale");
+    println!(
+        "{:<10} {:>9} {:>12} {:>9} {:>12}  final power/comms/roads/water/hospital  tokens",
+        "parish", "min_power", "isolated_min", "decisions", "final_morale"
+    );
     for (p, o) in &s.per_parish {
         let f = &o.final_infrastructure;
         let g = |k: &str| f.get(k).copied().unwrap_or(0);
+        let tokens: Vec<String> = s.stock.get(p).map(|m| m.iter().map(|(k, v)| format!("{k}:{v}")).collect()).unwrap_or_default();
         println!(
-            "{:<10} {:>9} {:>12} {:>9} {:>12}  {}/{}/{}/{}/{}",
+            "{:<10} {:>9} {:>12} {:>9} {:>12}  {}/{}/{}/{}/{}  {}",
             p,
             o.min_power,
             o.minutes_isolated,
@@ -132,7 +173,8 @@ fn print_summary(log: &RunLog) {
             g("communications"),
             g("roads"),
             g("water"),
-            g("hospital")
+            g("hospital"),
+            tokens.join(" ")
         );
     }
     println!();
@@ -151,12 +193,15 @@ fn main() -> Result<()> {
             match c.validate() {
                 Ok(()) => {
                     println!(
-                        "content OK: {} parishes, {} windows, {} dilemmas, {} cascade rules, {} values (hash {})",
+                        "content OK: {} parishes, {} windows, {} dilemmas, {} cascade rules, {} values, {} routes, {} calls, {} resident groups (hash {})",
                         c.parish_ids().len(),
                         c.timeline.hurricane_midas.windows.len(),
                         c.dilemmas.all_dilemmas.len(),
                         c.infrastructure.cascade_rules.len(),
                         c.values.values_deck.len(),
+                        c.routes.routes.len(),
+                        c.aid.calls.len(),
+                        c.residents.groups.len(),
                         &c.content_hash[..12]
                     );
                 }
@@ -166,7 +211,7 @@ fn main() -> Result<()> {
                 }
             }
         }
-        Cmd::Run { seed, content, decisions, intensity, teams, out, verbose, live, ask } => {
+        Cmd::Run { seed, content, decisions, intensity, teams, out, verbose, live, ask, inputs, until, session } => {
             let c = load_content(&content)?;
             c.validate()?;
             let decisions: BTreeMap<String, ScriptedDecision> = match decisions {
@@ -185,13 +230,27 @@ fn main() -> Result<()> {
                 Some(p) => Some(read_json(&p)?),
                 None => None,
             };
-            let log = run(&c, &RunConfig { seed, teams, decisions, intensity, live, ask });
+            let inputs: Vec<InputRecord> = match inputs {
+                Some(p) => read_json(&p)?,
+                None => vec![],
+            };
+            let session = match session {
+                Some(s) => load_session(&content, &s)?,
+                None => Session::default(),
+            };
+            let log = run(&c, &RunConfig { seed, teams, decisions, intensity, live, ask, inputs, until, session });
             print_timeline(&log, verbose);
             println!();
-            if log.pending.is_empty() {
+            if log.pending.is_empty() || log.until.is_some() {
                 print_summary(&log);
-            } else {
-                println!("halted at {}: waiting on {} decision(s)", clock(log.pending[0].t), log.pending.len());
+            }
+            if !log.pending.is_empty() {
+                println!(
+                    "{} at {}: waiting on {} decision(s)",
+                    if log.until.is_some() { "stopped" } else { "halted" },
+                    clock(log.pending[0].t),
+                    log.pending.len()
+                );
                 for p in &log.pending {
                     let opts: Vec<String> = p.options.iter().map(|o| format!("{} ({})", o.id, o.label)).collect();
                     println!("  {:<10} {:<22} t={}  {}", p.parish_id, p.dilemma_id, p.t, opts.join(" | "));

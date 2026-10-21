@@ -21,6 +21,7 @@ fn teams(c: &Content) -> Vec<Team> {
                 controller: if human { "human" } else { "ai" }.into(),
                 stated_values: vec!["safety".into(), "honesty".into(), "fairness".into()],
                 parish_id: p,
+                statement: None,
             }
         })
         .collect()

@@ -120,11 +120,11 @@ pub fn canonical(content: &Content, key: &str) -> String {
     ALIASES.iter().find(|(k, _)| *k == key).map(|(_, v)| v.to_string()).unwrap_or_else(|| key.to_string())
 }
 
-/// Option signals on the -3..3 scale, keyed by canonical value id. When two
+/// A signal table on the -3..3 scale, keyed by canonical value id. When two
 /// keys collapse onto one id the larger magnitude wins (ties: first in key order).
-pub fn option_signals(content: &Content, option: &DilemmaOption) -> BTreeMap<String, i64> {
+pub fn canonical_signals(content: &Content, raw: &BTreeMap<String, i64>) -> BTreeMap<String, i64> {
     let mut out: BTreeMap<String, i64> = BTreeMap::new();
-    for (k, v) in &option.value_alignment {
+    for (k, v) in raw {
         let id = canonical(content, k);
         let v = (*v).clamp(-3, 3);
         let e = out.entry(id).or_insert(v);
@@ -133,6 +133,11 @@ pub fn option_signals(content: &Content, option: &DilemmaOption) -> BTreeMap<Str
         }
     }
     out
+}
+
+/// Option signals: the option's `valueAlignment` made canonical.
+pub fn option_signals(content: &Content, option: &DilemmaOption) -> BTreeMap<String, i64> {
+    canonical_signals(content, &option.value_alignment)
 }
 
 /// Default stated values for a parish: its `valuesTested` mapped to deck ids,
@@ -161,11 +166,23 @@ pub fn default_stated_values(content: &Content, parish_id: &str, rng: &mut SimRn
     out
 }
 
+/// One scored choice behind a values-gap row. `kind` says what `dilemma_id`
+/// names: a dilemma, an allocation entry (`allocate:TOKEN`), a call for aid,
+/// a repair send or a line of credit.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Evidence {
+    #[serde(default = "dilemma_kind")]
+    pub kind: String,
     pub dilemma_id: String,
     pub option_id: String,
     pub signal: i64,
+    /// "storm" when the deadline passed and the default option was applied.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub decided_by: Option<String>,
+}
+
+fn dilemma_kind() -> String {
+    "dilemma".into()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -187,7 +204,15 @@ pub fn values_gap(teams: &[(String, Vec<String>)], decisions: &[DecisionRecord])
             let evidence: Vec<Evidence> = decisions
                 .iter()
                 .filter(|d| &d.parish_id == parish_id)
-                .filter_map(|d| d.values_signaled.get(value).map(|s| Evidence { dilemma_id: d.dilemma_id.clone(), option_id: d.option_id.clone(), signal: *s }))
+                .filter_map(|d| {
+                    d.values_signaled.get(value).map(|s| Evidence {
+                        kind: d.kind.clone(),
+                        dilemma_id: d.dilemma_id.clone(),
+                        option_id: d.option_id.clone(),
+                        signal: *s,
+                        decided_by: d.decided_by.clone(),
+                    })
+                })
                 .collect();
             let n = evidence.len();
             let score = if n == 0 {
