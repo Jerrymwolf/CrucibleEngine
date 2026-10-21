@@ -42,7 +42,7 @@ otherwise.
 
 | # | Question | Assumed (recommended) | If he picks otherwise | Status |
 |---|---|---|---|---|
-| D1 | How a storm-decided card or silent mayday is rated | Capitulating (−2), marked "the storm decided"; effects still play | S1.2 takes −1 or no rating; nothing else moves | pending |
+| D1 | How a storm-decided card or silent mayday is rated | No rating, marked "the storm decided" and examined in the debrief; effects still play (revised 2026-10-21 to match the revised audit: a timeout shows no answer was given, not that a value was surrendered) | S1.2 emits −2 (or −1) instead; nothing else moves | pending (card re-posted) |
 | D2 | What the wall shows about each table's values | Room pattern on the wall; each table's evidence only on its own console | S4 steps 2 and 4 swap screens | pending |
 | D3 | How far to recode the deck | Full recode into the mortal middle | "Worst only" drops S2.1 and S2.5; "keep" drops S2 except S2.2 | pending |
 | D4 | When tables see the Authority charter clause | During play | S5.9 dropped; S4 step 4 reveals it instead | pending |
@@ -78,7 +78,7 @@ Each item has an id, the files it touches, and a check that proves it.
 | Id | Requirement | Check |
 |---|---|---|
 | S1.1 | Every decision record carries `decided_by`: `table`, `storm` or `dm`. The field exists today only on `Evidence` as `"storm"`; move it onto `DecisionRecord` and set it everywhere a record is made (`sim.rs`, `aid.rs`, `resources.rs`). A mayday with no answer is `storm` and is labeled "no answer (the storm decided)", never REFUSE. | Unit test per record kind |
-| S1.2 | A `storm` record emits one signal per value the card tests, at −2 (D1), not the default option's `valueAlignment`. The default option's effects still apply. | Test: a silent run's records carry only −2 signals |
+| S1.2 | A `storm` record emits no values signal (D1), never the default option's `valueAlignment`. It is kept as a `storm` moment, shown in the debrief as "the storm decided" beside the values the card tested. The default option's effects still apply. | Test: a silent run carries no option signals; every stated value it touched reads "not tested" with its storm moments listed |
 | S1.3 | **One signal per value per moment.** A moment is a card, a mayday, the allocation round, or a quarter's credit lines and repair sends. Within a moment keep the largest magnitude per value; on a tie keep the negative. Today each move is its own record, so many cost-free moves dilute or inflate the mean (30 credit lines moved respect from −3.0 to +0.87). | Test: 30 credit lines in one quarter give one piece of evidence |
 | S1.4 | Cost-free moves are capped. An allocation keep rates 0. Credit lines, declares and repair sends rate at most +1, unless the move spends a token the table's own open need required, which may rate +2. No cost-free move rates +3. | Property test over all allocation and aid inputs |
 | S1.5 | A move the engine rejects (declaring fuel the table does not hold) records the rejection and no signal, even when its option is accepted. | Test from the audit's exploit |
@@ -89,11 +89,11 @@ Each item has an id, the files it touches, and a check that proves it.
 | Id | Requirement | Check |
 |---|---|---|
 | S2.1 | Most options move into −1..+1. At most one ±3 per card; every +3 has a visible cost in its text and effects. *Measured:* 35 of 96 v3 options carry a ±3 today. | Validator in `validate.rs` fails a card with two ±3s or a costless +3 (`costTag` required) |
-| S2.2 | Compliance with a coercer (Chicago, the Governor, the security chief, the board) rates −2 at most. Known cases: prep-sterling B, approach-heartland D, approach-sterling B, landfall-heartland C, and the rest of the nine in the coding table. Keep genuine −3s where the table itself coerces or deceives (approach-keystone B, landfall-keystone A). *Measured:* 18 −3 signals today. | Coding table diff reviewed by Jerry |
+| S2.2 | Compliance with a coercer (Chicago, the Governor, the security chief, the board) rates −2 at most. Nine of the 18 −3s are recoded: eight for complying with an unscored coercer (including prep-sterling B, approach-heartland D, approach-sterling B, landfall-heartland C) and landfall-gateway D (−3 loyalty for saving 200 strangers). Four genuine −3s stay: approach-keystone B, landfall-keystone A, landfall-heartland D, recovery-keystone C. The other five go to Jerry to review. *Measured:* 18 −3 signals today. | Coding table diff reviewed by Jerry |
 | S2.3 | New per-option field `pressure: { form, actor }`. `form` is one of the dissertation's four social forms (`coercive_authority`, `conditional_belonging`, `enforced_silence`, `shame_devaluation`) or `situational` (time, scarcity, odds, named residents). | Validator: every option rated ≤ −2 names a pressure |
 | S2.4 | Fix drifted mappings: integrity is not contract-keeping; respect is not deference to the Governor; no stewardship for signing a false sentence. Rewrite the four hindsight debrief lines. | Listed diffs |
 | S2.5 | Defaults are picked as what an institution does by doing nothing, not for virtue (S1.2 strips their values anyway). Known virtue defaults: prep-gateway c, prep-keystone c, prep-haven b, approach-gateway c, approach-haven b, approach-summit a, landfall-gateway a, landfall-keystone b, landfall-haven b. *Measured:* 21 of 24 defaults carry a +2 or +3 on some value. | Coding table |
-| S2.6 | Add three or four live pressure moments where HQ or another table applies a social form during play (for example, HQ makes aid conditional on silence about a shortfall). | Each form enacted at least once per session |
+| S2.6 | Add three or four live pressure moments where an off-board voice (HQ, the Governor, Chicago) applies a social form during play, for example HQ making aid conditional on silence about a shortfall. Never script one real table to pressure another. | Each form enacted at least once per session |
 | S2.7 | Coverage: candor, courage, duty, integrity and respect are each tested at least twice per table over the session. | Validator counts per parish |
 | S2.8 | **Two-coder method.** Two independent coders rate every option on the seven anchors from the dissertation definitions. Exact agreement ≥ 80% and every disagreement within one anchor; Jerry settles the rest. The table is committed as `crucible/content/coding/dilemmas-anchors-v4.csv` beside the content. | Agreement figures in the commit message |
 
@@ -225,7 +225,7 @@ with the legacy consequences and pacing.
 | Recode makes every option feel the same | Keep the heavy effects the audit praised (Summit's order 2,865 people, A5 600, Keystone's landfall ±17,250 doses); costs carry the drama, ratings stay honest |
 | Conditional rescues make counters swing too far | Tune in the S3.6 sweep; cap one table's swing at a fixed share of island total |
 | Landfall windows of ~95 s are too short for six executives | Rehearse with humans in phase 7; heat and cool give the DM ±14 s |
-| −2 for storm defaults reads as blame | Read-aloud places the moment, not the people (S7.2); D1 can move to −1 without other changes |
+| Unrated storm moments let a table hide by stalling | The debrief shows each storm moment next to the value it tested (S4 step 2) and the room pattern counts them (step 4); D1 can move to −2 without other changes |
 | Coding table and dissertation note are blocked on Jerry's card in the advisor thread | Phase 2 cannot start without them; phases 1, 3 to 6 can |
 
 **Out of scope.** Island art versus parish data positions; the cloud relay;
