@@ -1,1271 +1,408 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Crucible Command Board</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Values Crucible</title>
 <style>
 /* Command-center shell over a WebGL map. Dark only: the room is dark and the projector is bright.
-   System fonts on purpose: the page must look the same with no network. */
+   System fonts on purpose: the page must look the same with no network. One bundle, four roles;
+   the role is a class on <body> (role-table, role-phone, role-projector, role-dm, role-print). */
 :root{
-  --bg:#0a0e14;--panel:rgba(13,18,25,.86);--panel-2:#151c25;--line:#273141;--line-2:#1c2430;
+  --bg:#0a0e14;--panel:rgba(13,18,25,.9);--panel-2:#151c25;--panel-3:#1b2430;--line:#273141;--line-2:#1c2430;
   --fg:#e6ebf0;--fg-2:#a9b4c1;--fg-3:#6f7c8b;
-  --accent:#e8893d;--accent-fg:#101418;
+  --accent:#e8893d;--accent-fg:#101418;--accent-2:#f0a861;
   --ok:#4fb06f;--reduced:#b4b44a;--degraded:#e0a93a;--critical:#ec7a44;--failed:#e0524f;
-  --watch:#5d93d1;--crisis:#ea6b5b;--recovery:#4fb06f;--storm:#ee7d6a;--mock:#c084fc;--focus:#6ea4f2;
+  --watch:#5d93d1;--crisis:#ea6b5b;--recovery:#4fb06f;--storm:#ee7d6a;--focus:#6ea4f2;--private:#8fb8ff;
+  --safe:#4fb06f;--sheltered:#5d93d1;--at_risk:#e0a93a;--rescued:#35c4b2;--injured:#ec7a44;--lost:#e0524f;
   --ui:"Segoe UI",Inter,Roboto,"Helvetica Neue",Arial,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
   --cond:Bahnschrift,"DIN Alternate","Roboto Condensed","Arial Narrow","Segoe UI",sans-serif;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--fg);font-family:var(--ui);font-size:14px;line-height:1.35}
-button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:var(--ui);font-size:14px;line-height:1.35}
+body{overflow:hidden}
+body.role-print,body.role-phone{overflow:auto}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0;touch-action:manipulation}
 button:disabled{opacity:.4;cursor:not-allowed}
+input,textarea,select{font:inherit;color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:3px;padding:7px 9px}
+textarea{resize:none;width:100%}
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+h1,h2,h3,p{margin:0}
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .lbl{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3);font-weight:600}
+.cond{font-family:var(--cond);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.muted{color:var(--fg-2)}.dim{color:var(--fg-3)}
+.sr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 #gl{position:fixed;inset:0;display:block;touch-action:none}
-#hud{position:fixed;inset:0;pointer-events:none}
-#hud>*{pointer-events:auto}
-.panel{background:var(--panel);border:1px solid var(--line)} /* no backdrop blur: it costs a full-screen pass per panel on weak GPUs */
+body.role-phone #gl,body.role-print #gl{display:none}
+#app{position:fixed;inset:0;pointer-events:none}
+#app>*{pointer-events:auto}
+body.role-phone #app,body.role-print #app{position:static;pointer-events:auto}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:4px}
+.panel>header,.ph{padding:8px 12px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:8px}
+.panel>header h2,.ph h2{font-family:var(--cond);font-size:13px;letter-spacing:.14em;text-transform:uppercase;margin:0;flex:1}
+.body{padding:10px 12px;display:flex;flex-direction:column;gap:10px}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.spacer{flex:1}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
-/* top bar */
-#top{position:absolute;left:0;right:0;top:0;height:58px;display:flex;align-items:stretch;gap:0;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(13,18,25,.96),rgba(13,18,25,.84))}
-#top>div{display:flex;align-items:center;padding:0 14px;border-right:1px solid var(--line-2)}
-#brand{flex-direction:column;align-items:flex-start!important;justify-content:center;gap:2px;min-width:210px}
-#brand h1{margin:0;font-family:var(--cond);font-size:17px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;line-height:1}
-#view-badge{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:1px 6px;border:1px solid currentColor;border-radius:2px}
-#phase{gap:14px;min-width:300px;max-width:470px}
-#quarter{font-family:var(--cond);font-size:28px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;line-height:1}
-#phase .sub{display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--fg-2);min-width:0}
-#win-label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}
-#simclock{font-size:22px;font-weight:700;line-height:1;letter-spacing:.02em}
-.chip{display:inline-flex;align-items:center;gap:5px;padding:0 7px;border:1px solid var(--line);border-radius:2px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;line-height:1.7;white-space:nowrap}
-.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+/* buttons: one primary per screen */
+.btn{background:var(--panel-2);border:1px solid var(--line);border-radius:3px;padding:7px 12px;font-weight:600;font-size:13px;letter-spacing:.02em;white-space:nowrap;min-height:38px}
+.btn:hover:not(:disabled){border-color:var(--fg-3)}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-family:var(--cond);font-size:16px;min-height:48px;padding:10px 20px}
+.btn.primary:hover:not(:disabled){background:var(--accent-2)}
+.btn.on{border-color:var(--accent);color:var(--accent)}
+.btn.tiny{padding:3px 8px;font-size:11px;min-height:0}
+.btn.wide{width:100%}
+.btn.danger{border-color:var(--failed);color:#ffb4ad}
+.btn.ghost{background:none}
+.btn.big{min-height:56px;font-size:18px}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:0 7px;border:1px solid var(--line);border-radius:2px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;line-height:1.8;white-space:nowrap}
+.chip.dot::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
 .phase-watch{color:var(--watch)}.phase-crisis{color:var(--crisis)}.phase-recovery{color:var(--recovery)}
+.tag{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;padding:1px 5px;border-radius:2px;background:var(--panel-3);color:var(--fg-2)}
+.tag.private{color:var(--private);border:1px solid var(--private);background:none}
+.tag.storm{color:var(--storm)}
+.tag.ok{color:var(--ok)}.tag.warn{color:var(--degraded)}.tag.bad{color:var(--failed)}
+
+/* top bar, shared by table, projector and dm */
+.topbar{position:absolute;left:0;right:0;top:0;height:60px;display:flex;align-items:stretch;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(13,18,25,.97),rgba(13,18,25,.88))}
+.topbar>div{display:flex;align-items:center;padding:0 14px;border-right:1px solid var(--line-2);gap:12px;min-width:0}
+.topbar>div:last-child{border-right:0}
+.brand{flex-direction:column;align-items:flex-start!important;justify-content:center;gap:3px!important;min-width:200px}
+.brand h1{font-family:var(--cond);font-size:16px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;line-height:1;white-space:nowrap}
+.brand .who{font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;padding:1px 6px;border:1px solid currentColor;border-radius:2px;white-space:nowrap}
+.qname{font-family:var(--cond);font-size:clamp(18px,2vw,26px);letter-spacing:.08em;text-transform:uppercase;font-weight:700;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34vw}
+.sub{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--fg-2);min-width:0}
+.simclock{font-size:22px;font-weight:700;line-height:1;letter-spacing:.02em;color:var(--fg);white-space:nowrap}
 .meter{display:flex;gap:2px;align-items:flex-end;height:16px}
 .meter i{width:4px;background:var(--line);display:block}
 .meter i.on{background:var(--storm)}
-#res{flex:1;gap:2px;padding:0 8px!important;overflow:hidden;min-width:0}
-.tile{display:flex;flex-direction:column;gap:3px;flex:1 1 0;min-width:0;max-width:124px;padding:5px 8px;border:1px solid transparent}
-.tile .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tile .v{font-family:var(--mono);font-size:17px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.counters{gap:18px!important}
+.counter{display:flex;flex-direction:column;gap:2px;min-width:120px}
+.counter .v{font-family:var(--mono);font-size:22px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;white-space:nowrap}
+.counter .v.doses{color:#8fd3ff}.counter .v.people{color:#9be3b0}
+.counter .bar{height:3px;background:var(--line-2);position:relative;overflow:hidden;margin-top:2px}
+.counter .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--fg-2)}
+.tiles{display:flex;gap:6px}
+.tile{display:flex;flex-direction:column;gap:3px;min-width:52px;padding:4px 6px}
+.tile .v{font-family:var(--mono);font-size:14px;font-weight:700;line-height:1}
 .tile .bar{height:3px;background:var(--line-2);position:relative;overflow:hidden}
-.tile .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--ok)}
-.tile.mock .lbl::after{content:"mock";margin-left:5px;color:var(--mock);font-size:9px;letter-spacing:.06em}
-#timer{flex-direction:column;align-items:flex-end!important;justify-content:center;gap:2px;min-width:140px;border-right:0!important;flex-shrink:0}
-#qt{font-size:26px;font-weight:700;line-height:1}
-#qt.low{color:var(--failed)}
-#timer .row{display:flex;gap:6px;align-items:center}
+.tile .bar i{position:absolute;left:0;top:0;bottom:0}
+.conn{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--fg-3)}
+.conn.off{color:var(--failed)}
 
-/* buttons */
-.btn{background:var(--panel-2);border:1px solid var(--line);border-radius:2px;padding:5px 10px;font-weight:600;font-size:12px;letter-spacing:.04em;white-space:nowrap}
-.btn:hover:not(:disabled){border-color:var(--fg-3)}
-.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);text-transform:uppercase;letter-spacing:.08em;font-family:var(--cond);font-size:14px}
-.btn.on{border-color:var(--accent);color:var(--accent)}
-.btn.tiny{padding:2px 7px;font-size:11px}
+/* the one line that says what to do now */
+.now{display:flex;align-items:center;gap:12px;padding:10px 14px;border-left:4px solid var(--accent);background:rgba(232,137,61,.08);font-size:15px;line-height:1.3}
+.now b{font-family:var(--cond);letter-spacing:.08em;text-transform:uppercase;font-size:12px;color:var(--accent);white-space:nowrap}
+.now.quiet{border-left-color:var(--line);background:none;color:var(--fg-2)}
+.now.urgent{border-left-color:var(--failed);background:rgba(224,82,79,.1)}
 
-/* alert feed */
-#feed{position:absolute;right:12px;top:70px;width:340px;max-height:calc(100% - 170px);display:flex;flex-direction:column}
-#feed header{padding:8px 12px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:8px}
-#feed header h2{margin:0;font-family:var(--cond);font-size:14px;letter-spacing:.14em;text-transform:uppercase}
-#feed header .spacer{flex:1}
-#feed-list{overflow:auto;padding:4px 0;scrollbar-width:thin}
-.al{display:grid;grid-template-columns:52px 8px minmax(0,1fr);gap:8px;align-items:start;padding:5px 12px;border-bottom:1px solid var(--line-2);font-size:12.5px}
+/* feed */
+.feed{display:flex;flex-direction:column;min-height:0}
+.feed-list{overflow:auto;scrollbar-width:thin;padding:2px 0}
+.al{display:grid;grid-template-columns:56px 8px minmax(0,1fr);gap:8px;align-items:start;padding:5px 12px;border-bottom:1px solid var(--line-2);font-size:12.5px}
 .al .t{color:var(--fg-3);font-size:11px;padding-top:2px}
 .al .dot{width:8px;height:8px;border-radius:50%;margin-top:5px;background:var(--fg-3)}
 .al.critical .dot{background:var(--failed);box-shadow:0 0 6px var(--failed)}
 .al.warn .dot{background:var(--degraded)}
 .al.good .dot{background:var(--ok)}
 .al.human .dot{background:var(--accent)}
-.al.mock .dot{background:var(--mock)}
+.al.private .dot{background:var(--private)}
 .al .x{color:var(--fg-2)}
 .al.critical .x,.al.human .x{color:var(--fg)}
-.al .who{font-weight:700;color:var(--fg)}
-.al .tag{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--mock);margin-left:5px;vertical-align:middle}
 @keyframes fadein{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.al{animation:fadein .25s ease-out}
 
-/* parish panel */
-#panel{position:absolute;left:12px;top:70px;width:300px;max-height:calc(100% - 300px);overflow:auto;scrollbar-width:thin}
-#panel header{padding:10px 12px 8px;border-bottom:1px solid var(--line-2);display:flex;align-items:center;gap:10px}
-#panel header .sw{width:10px;height:10px;border-radius:2px}
-#panel header h2{margin:0;font-family:var(--cond);font-size:18px;letter-spacing:.1em;text-transform:uppercase;flex:1}
-#panel .body{padding:10px 12px;display:flex;flex-direction:column;gap:10px}
-#panel .desc{color:var(--fg-2);font-size:12.5px}
-.lv{display:grid;grid-template-columns:72px minmax(0,1fr) 36px;gap:8px;align-items:center;font-size:12px}
-.lv .bar{height:7px;background:var(--line-2);position:relative}
-.lv .bar i{position:absolute;left:0;top:0;bottom:0}
-.lv .n{text-align:right;color:var(--fg-2)}
-.tokens{display:flex;gap:6px;flex-wrap:wrap}
-.tok{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);padding:2px 7px;font-size:11.5px;border-radius:2px}
-.tok b{font-family:var(--mono);color:var(--mock)}
-.fogged{border:1px dashed var(--line);padding:8px 10px;color:var(--fg-2);font-size:12.5px}
-.mini-feed{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--fg-2)}
-.mini-feed span.t{color:var(--fg-3);font-size:11px;margin-right:6px}
+/* dilemma card, options, timers */
+.dcard{display:flex;flex-direction:column;gap:10px}
+.dcard .title{font-family:var(--cond);font-size:22px;letter-spacing:.06em;text-transform:uppercase;line-height:1.1}
+.dcard .setup{color:var(--fg-2);font-size:13.5px;line-height:1.45;max-height:30vh;overflow:auto;scrollbar-width:thin}
+.persona{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:flex-start;border-left:3px solid var(--fg-3);padding:4px 10px;color:var(--fg);font-style:italic;font-size:13.5px}
+.persona b{font-style:normal;color:var(--fg-2);white-space:nowrap;font-size:12px}
+.persona span{flex:1 1 240px;min-width:0}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:var(--panel-2);min-height:56px;line-height:1.3}
+.opt .letter{font-family:var(--cond);font-size:20px;font-weight:700;width:30px;height:30px;border-radius:3px;display:flex;align-items:center;justify-content:center;background:var(--panel-3);flex-shrink:0}
+.opt.on{border-color:var(--accent);background:rgba(232,137,61,.12)}
+.opt.on .letter{background:var(--accent);color:var(--accent-fg)}
+.opt.chosen{border-color:var(--ok)}
+.opt .d{font-size:12px;color:var(--fg-2)}
+.deadline{display:flex;align-items:center;gap:10px}
+.radial{width:54px;height:54px;flex-shrink:0}
+.radial circle{fill:none;stroke-width:5}
+.radial .bg{stroke:var(--line)}
+.radial .fg{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+.radial.low .fg{stroke:var(--failed)}
+.radial text{fill:var(--fg);font-family:var(--mono);font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.votes{font-size:12.5px;color:var(--fg-2)}
+.confirm{display:flex;gap:8px;align-items:center;padding:10px;border:1px dashed var(--accent);border-radius:4px}
 
-/* dock */
-#dock{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:8px 10px;max-width:calc(100% - 260px - 364px)}
-#dock .grp{display:flex;align-items:center;gap:4px;padding-right:8px;border-right:1px solid var(--line-2)}
-#dock .grp:last-child{border-right:0;padding-right:0}
-#scrub{width:260px;accent-color:var(--accent)}
-#speed{background:var(--panel-2);border:1px solid var(--line);border-radius:2px;padding:4px 6px;color:var(--fg);font:inherit;font-size:12px}
-#viewsel{background:var(--panel-2);border:1px solid var(--line);border-radius:2px;padding:4px 6px;color:var(--fg);font:inherit;font-size:12px}
-.qbtn{padding:5px 9px;border:1px solid var(--line);border-radius:2px;font-family:var(--cond);font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--fg-2)}
-.qbtn.on{color:var(--fg);border-color:var(--accent);background:rgba(232,137,61,.12)}
+/* values */
+.vgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.vcard{display:flex;flex-direction:column;gap:3px;text-align:left;padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:var(--panel-2);min-height:62px}
+.vcard b{font-family:var(--cond);letter-spacing:.06em;text-transform:uppercase;font-size:14px}
+.vcard small{color:var(--fg-2);font-size:11px;line-height:1.3}
+.vcard.on{border-color:var(--accent);background:rgba(232,137,61,.12)}
+.vcard .rank{position:absolute}
+.vcard{position:relative}
+.vcard .rk{position:absolute;right:6px;top:6px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--accent-fg);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+.gallery{display:flex;flex-direction:column;gap:4px}
+.gallery .g{display:grid;grid-template-columns:110px 1fr 24px;gap:8px;align-items:center;font-size:12px}
+.gallery .g .bar{height:8px;background:var(--line-2);position:relative}
+.gallery .g .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--private)}
+.statement{font-size:16px;line-height:1.35;padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:var(--panel-2);min-height:64px}
+.count{font-size:11px;color:var(--fg-3);text-align:right}
 
-/* tooltip, veil, help */
-#tip{position:absolute;display:none;padding:6px 9px;font-size:12px;pointer-events:none;max-width:260px}
-#tip b{font-family:var(--cond);letter-spacing:.08em;text-transform:uppercase;font-size:13px}
-#veil{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:var(--bg);z-index:5;transition:opacity .5s}
+/* tokens */
+.tray{display:flex;flex-direction:column;gap:6px}
+.trow{display:grid;grid-template-columns:92px 1fr auto;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--line-2);border-radius:3px;background:var(--panel-2)}
+.trow .tk{font-family:var(--cond);font-size:16px;letter-spacing:.08em}
+.trow .tk small{display:block;font-family:var(--ui);font-size:10.5px;letter-spacing:0;text-transform:none;color:var(--fg-3);font-weight:400}
+.pill{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;border:1px solid var(--line);font-size:12px;background:var(--panel-3)}
+.pill.send{border-color:var(--accent);color:var(--accent-2)}
+.pill.keep{color:var(--fg-2)}
+.needs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.need{padding:6px 8px;border:1px solid var(--line-2);border-radius:3px;font-size:12px;text-align:left;background:var(--panel-2)}
+.need.on{border-color:var(--accent)}
+.need b{display:block;font-family:var(--cond);letter-spacing:.06em;text-transform:uppercase}
+.need small{color:var(--fg-2);display:block}
+.tokchips{display:flex;gap:6px;flex-wrap:wrap}
+.tok{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);padding:2px 8px;font-size:12px;border-radius:2px;background:var(--panel-2)}
+.tok b{font-family:var(--mono)}
+
+/* people */
+.people{display:flex;flex-direction:column;gap:5px}
+.person{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--line-2);border-radius:3px;background:var(--panel-2)}
+.person .n{font-weight:600;font-size:13px}
+.person .l{color:var(--fg-2);font-size:11.5px}
+.person .st{font-family:var(--cond);letter-spacing:.1em;text-transform:uppercase;font-size:11px;padding:2px 7px;border-radius:2px;border:1px solid currentColor}
+.person.changed{border-color:var(--accent)}
+.st-safe{color:var(--safe)}.st-sheltered{color:var(--sheltered)}.st-at_risk{color:var(--at_risk)}.st-rescued{color:var(--rescued)}.st-injured{color:var(--injured)}.st-lost{color:var(--lost)}
+.person .why{grid-column:1/-1;font-size:11.5px;color:var(--fg-2)}
+
+/* mayday */
+.mayday{border:1px solid var(--failed);border-radius:4px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:rgba(224,82,79,.07)}
+.mayday .from{font-family:var(--cond);letter-spacing:.08em;text-transform:uppercase;font-size:14px;color:#ffb4ad}
+.mayday .ask{font-size:13px}
+.mayday .route{font-size:12px;color:var(--fg-2)}
+.answers{display:flex;gap:8px;flex-wrap:wrap}
+.answers .btn{flex:1 1 160px;min-width:140px;white-space:normal;line-height:1.25;text-align:center;font-family:var(--cond);letter-spacing:.08em;text-transform:uppercase;font-size:14px}
+.answers .btn[data-answer=grant]{border-color:var(--ok)}
+.answers .btn[data-answer=refuse],.answers .btn[data-answer=refuse_silent]{border-color:var(--failed)}
+.answers .btn.on{background:var(--panel-3)}
+.reasons{display:flex;gap:6px;flex-wrap:wrap}
+.reasons .btn{font-size:12px;min-height:30px;padding:3px 9px}
+.sealed{border:1px dashed var(--line);padding:14px;text-align:center;color:var(--fg-2);border-radius:4px}
+.secret{border:1px solid var(--private);border-radius:4px;padding:12px;background:rgba(143,184,255,.06);font-size:13.5px;line-height:1.45}
+
+/* mirror (after-action card) */
+.mirror{display:flex;flex-direction:column;gap:10px}
+.mirror .vals{display:flex;gap:8px;flex-wrap:wrap}
+.mirror .val{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px;padding:8px 10px;border:1px solid var(--line);border-radius:4px;background:var(--panel-2)}
+.mirror .val b{font-family:var(--cond);letter-spacing:.08em;text-transform:uppercase;font-size:14px}
+.gapbar{position:relative;height:10px;background:var(--line-2);border-radius:5px}
+.gapbar::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--fg-3)}
+.gapbar i{position:absolute;top:0;bottom:0;border-radius:5px}
+.gapbar i.pos{background:var(--ok)}.gapbar i.neg{background:var(--failed)}
+.gaplbl{display:flex;justify-content:space-between;font-size:10px;color:var(--fg-3);letter-spacing:.08em;text-transform:uppercase}
+.evid{display:flex;gap:4px;flex-wrap:wrap}
+.evid span{font-size:11px;padding:1px 6px;border-radius:2px;background:var(--panel-3);color:var(--fg-2)}
+.evid span.pos{color:#9be3b0}.evid span.neg{color:#ffb4ad}
+.evid span.storm{border:1px dashed var(--storm)}
+
+/* layout: table console (landscape tablet) */
+.role-table .side{position:absolute;right:12px;top:72px;bottom:118px;width:min(46vw,620px);display:flex;flex-direction:column;gap:10px;min-height:0}
+.role-table .side .action{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
+.role-table .side .action .body{overflow:auto;scrollbar-width:thin;flex:1}
+.role-table .side .lower{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-height:34%}
+.role-table .side .lower .panel{display:flex;flex-direction:column;min-height:0}
+.role-table .side .lower .body{overflow:auto;scrollbar-width:thin}
+.role-table .bottom{position:absolute;left:12px;right:12px;bottom:12px;height:96px;display:flex;gap:10px}
+.role-table .bottom .feed{flex:1}
+.role-table .bottom .own{width:min(46vw,620px);display:flex;flex-direction:column}
+.role-table .bottom .own .body{flex-direction:row;align-items:center;flex-wrap:wrap;gap:6px;overflow:auto}
+.role-table .mm-label{position:absolute;left:12px;bottom:118px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-3);font-weight:700}
+.role-table .parishtag{position:absolute;left:12px;top:72px;display:flex;flex-direction:column;gap:4px}
+.role-table .routes{display:flex;flex-direction:column;gap:3px;font-size:11.5px}
+.role-table .routes .r{display:flex;gap:8px;align-items:center}
+.role-table .routes .r i{width:8px;height:8px;border-radius:50%;background:var(--ok);flex-shrink:0}
+.role-table .routes .r.cut i{background:var(--failed)}
+.role-table .routes .r.cut{color:#ffb4ad}
+
+/* layout: projector */
+.role-projector .topbar{height:72px}
+.role-projector .brand h1{font-size:19px}
+.role-projector .qname{font-size:34px}
+.role-projector .simclock{font-size:30px}
+.role-projector .counter .v{font-size:32px}
+.role-projector .counter{min-width:180px}
+.role-projector .strip{position:absolute;left:12px;right:12px;bottom:12px;display:flex;gap:10px;align-items:stretch}
+.role-projector .strip .feed{flex:1;max-height:150px;font-size:15px}
+.role-projector .strip .al{font-size:15px;grid-template-columns:72px 8px 1fr}
+.role-projector .strip .al .t{font-size:13px}
+.role-projector .tables{display:flex;gap:8px}
+.role-projector .tcard{display:flex;flex-direction:column;gap:4px;min-width:150px;padding:8px 12px;border-top:3px solid var(--line)}
+.role-projector .tcard b{font-family:var(--cond);letter-spacing:.1em;text-transform:uppercase;font-size:15px}
+.role-projector .tcard .s{font-size:13px;color:var(--fg-2)}
+.role-projector .tcard .s.card{color:var(--fg);font-weight:700}
+.role-projector .eye{position:absolute;left:50%;top:84px;transform:translateX(-50%);padding:10px 22px;font-family:var(--cond);font-size:34px;letter-spacing:.12em;text-transform:uppercase;border:1px solid #fff;background:rgba(10,14,20,.8);border-radius:4px}
+.role-projector .eye small{display:block;font-family:var(--ui);font-size:13px;letter-spacing:.04em;text-transform:none;color:var(--fg-2);font-weight:400;text-align:center}
+.role-projector .mm-label{display:none}
+.full{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;padding:40px;background:rgba(10,14,20,.86);text-align:center}
+.full .kicker{font-family:var(--cond);letter-spacing:.3em;text-transform:uppercase;font-size:18px;color:var(--accent)}
+.full h1{font-family:var(--cond);font-size:64px;letter-spacing:.14em;text-transform:uppercase;line-height:1}
+.full h2{font-family:var(--cond);font-size:44px;letter-spacing:.1em;text-transform:uppercase;line-height:1.05}
+.full p{font-size:24px;line-height:1.4;max-width:60ch;color:var(--fg)}
+.full p.small{font-size:17px;color:var(--fg-2)}
+.full .bigcounters{display:flex;gap:60px}
+.full .bigcounters .v{font-family:var(--mono);font-size:72px;font-weight:700;line-height:1}
+.full .bigcounters .l{font-family:var(--cond);letter-spacing:.2em;text-transform:uppercase;font-size:16px;color:var(--fg-2);margin-top:8px}
+.full .bigcounters .b{font-size:14px;color:var(--fg-3);margin-top:4px}
+.statements{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:min(1500px,96vw)}
+.stm{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-top:4px solid var(--line);background:rgba(21,28,37,.9);text-align:left;min-height:150px}
+.stm b{font-family:var(--cond);letter-spacing:.12em;text-transform:uppercase;font-size:20px}
+.stm .vals{display:flex;gap:6px;flex-wrap:wrap}
+.stm .vals span{font-family:var(--cond);letter-spacing:.08em;text-transform:uppercase;font-size:14px;padding:2px 8px;border:1px solid var(--line);border-radius:2px}
+.stm .vals span:first-child{border-color:var(--accent);color:var(--accent-2)}
+.stm .txt{font-size:17px;line-height:1.35}
+.stm .pending{color:var(--fg-3);font-style:italic;font-size:15px}
+.columns{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;width:min(1800px,97vw)}
+.col{display:flex;flex-direction:column;gap:6px;padding:10px;border-top:4px solid var(--line);background:rgba(21,28,37,.92);text-align:left}
+.col b.pn{font-family:var(--cond);letter-spacing:.12em;text-transform:uppercase;font-size:17px}
+.col .person{font-size:12px}
+.col .person .n{font-size:13px}
+.mirrors{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:min(1800px,97vw);text-align:left}
+.mirrors .mirror{padding:10px 12px;border-top:4px solid var(--line);background:rgba(21,28,37,.92);font-size:12.5px}
+.mirrors .mirror .val{min-width:0;padding:6px 8px}
+.secretcard{max-width:64ch;text-align:left;font-size:20px;line-height:1.5;padding:22px 26px;border-left:5px solid var(--private);background:rgba(21,28,37,.95)}
+.secretcard .kicker{text-align:left;font-size:15px}
+.touched{display:flex;flex-direction:column;gap:6px;font-size:16px;text-align:left;max-width:70ch}
+.touched span.t{color:var(--fg-2)}
+.credits{display:flex;flex-direction:column;gap:12px;max-width:70ch;text-align:left}
+.credits .c{padding:10px 14px;border-left:4px solid var(--ok);background:rgba(21,28,37,.9);font-size:20px;line-height:1.4}
+.credits .c b{display:block;font-family:var(--cond);letter-spacing:.1em;text-transform:uppercase;font-size:14px;color:var(--fg-2)}
+.scrub{width:min(1200px,90vw);display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.scrub input[type=range]{width:100%;accent-color:var(--accent)}
+.scrub .marks{display:flex;justify-content:space-between;font-size:12px;color:var(--fg-3);font-family:var(--mono)}
+
+/* layout: DM console */
+.role-dm .rail{position:absolute;left:12px;top:72px;bottom:12px;width:230px;display:flex;flex-direction:column}
+.role-dm .rail .body{overflow:auto;scrollbar-width:thin;flex:1;gap:4px}
+.role-dm .step{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:center;padding:6px 6px;border-radius:3px;font-size:12.5px;color:var(--fg-2)}
+.role-dm .step i{width:18px;height:18px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-family:var(--mono)}
+.role-dm .step.done{color:var(--fg-3)}
+.role-dm .step.done i{background:var(--ok);border-color:var(--ok);color:#0a0e14}
+.role-dm .step.now{color:var(--fg);background:rgba(232,137,61,.12)}
+.role-dm .step.now i{border-color:var(--accent);color:var(--accent)}
+.role-dm .right{position:absolute;right:12px;top:72px;bottom:12px;width:min(40vw,560px);display:flex;flex-direction:column;gap:10px;min-height:0}
+.role-dm .right .panel{display:flex;flex-direction:column;min-height:0}
+.role-dm .right .body{overflow:auto;scrollbar-width:thin}
+.role-dm .right .tables{flex:0 0 auto}
+.role-dm .right .levers{flex:0 0 auto}
+.role-dm .right .nextup{flex:1 1 0}
+.role-dm .right .feed{flex:1 1 0}
+.role-dm .trow2{display:grid;grid-template-columns:86px 1fr auto;gap:8px;align-items:center;padding:5px 6px;border-bottom:1px solid var(--line-2);font-size:12.5px}
+.role-dm .trow2 b{font-family:var(--cond);letter-spacing:.08em;text-transform:uppercase;font-size:13px}
+.role-dm .trow2 .st{color:var(--fg-2)}
+.role-dm .trow2 .st.hot{color:#ffb4ad}
+.role-dm .trow2 .st.ok{color:var(--ok)}
+.role-dm .next{display:grid;grid-template-columns:62px 1fr;gap:8px;font-size:12px;padding:3px 0;border-bottom:1px solid var(--line-2)}
+.role-dm .next .t{color:var(--fg-3);font-family:var(--mono)}
+.role-dm .readaloud{position:absolute;left:254px;bottom:12px;right:calc(min(40vw,560px) + 24px);max-height:170px;display:flex;flex-direction:column}
+.role-dm .readaloud .body{overflow:auto;scrollbar-width:thin;font-size:13.5px;gap:6px}
+.role-dm .center-top{position:absolute;left:254px;top:72px;right:calc(min(40vw,560px) + 24px);display:flex;gap:10px;align-items:flex-start;pointer-events:none}
+.role-dm .center-top>*{pointer-events:auto}
+.role-dm .mm-label{position:absolute;left:254px;bottom:194px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-3);font-weight:700}
+.role-dm .lever{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;padding:4px 0}
+.dialog{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,8,12,.6)}
+.dialog .box{width:min(560px,92vw);padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.dialog .box h2{font-family:var(--cond);font-size:20px;letter-spacing:.1em;text-transform:uppercase}
+.qr{display:flex;flex-direction:column;align-items:center;gap:10px}
+.qr canvas{image-rendering:pixelated;background:#fff;padding:12px;border-radius:4px}
+.qr .code{font-family:var(--mono);font-size:34px;letter-spacing:.3em;font-weight:700}
+.list{display:flex;flex-direction:column;gap:4px}
+.list .it{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:6px 8px;border:1px solid var(--line-2);border-radius:3px;background:var(--panel-2);font-size:12.5px}
+
+/* layout: phone (portrait) */
+.role-phone{background:var(--bg)}
+.role-phone #app{display:flex;flex-direction:column;min-height:100%;max-width:520px;margin:0 auto;padding:12px 14px 28px;gap:12px}
+.role-phone .ptop{display:flex;align-items:center;gap:10px;padding:6px 0}
+.role-phone .ptop h1{font-family:var(--cond);font-size:15px;letter-spacing:.14em;text-transform:uppercase}
+.role-phone .ptop .who{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:1px 6px;border:1px solid currentColor;border-radius:2px}
+.role-phone .pclock{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:8px 12px}
+.role-phone .pclock .v{font-family:var(--mono);font-size:16px;font-weight:700}
+.role-phone .pclock .l{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-3);display:block}
+.role-phone .now{font-size:16px}
+.role-phone .vgrid{grid-template-columns:1fr 1fr}
+.role-phone .vcard{min-height:68px}
+.role-phone .opts{grid-template-columns:1fr}
+.role-phone .btn.primary{width:100%}
+.role-phone .dcard .setup{max-height:none}
+.role-phone .mine{display:flex;flex-direction:column;gap:6px}
+.role-phone .mine .m{display:grid;grid-template-columns:1fr auto auto;gap:10px;padding:6px 8px;border:1px solid var(--line-2);border-radius:3px;font-size:13px}
+.role-phone .mine .m .diff{color:var(--degraded)}
+
+/* join / veil */
+#veil{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:var(--bg);z-index:5;transition:opacity .4s;padding:24px;text-align:center}
 #veil.off{opacity:0;pointer-events:none}
-#veil h1{margin:0;font-family:var(--cond);font-size:34px;letter-spacing:.2em;text-transform:uppercase;font-weight:700}
-#veil p{margin:0;color:var(--fg-2)}
-#veil .err{color:var(--failed);max-width:60ch;text-align:center}
-#help{position:absolute;left:224px;bottom:12px;width:300px;padding:10px 12px;font-size:12px;color:var(--fg-2);display:none}
-#help.on{display:block}
-#help kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:2px;padding:0 4px;color:var(--fg)}
-#help p{margin:0 0 4px}
-#help .fps{color:var(--fg-3);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
-#mm-label{position:absolute;left:12px;bottom:214px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-3);font-weight:700}
-@media (max-width:1400px){#res .tile{min-width:78px}.tile .v{font-size:15px}#feed{width:280px}#dock{max-width:calc(100% - 240px - 300px)}#scrub{width:160px}}
-@media (prefers-reduced-motion:reduce){.al{animation:none}}
+#veil h1{font-family:var(--cond);font-size:34px;letter-spacing:.2em;text-transform:uppercase;font-weight:700}
+#veil p{color:var(--fg-2);max-width:60ch}
+#veil .err{color:var(--failed)}
+.join{display:flex;flex-direction:column;gap:12px;width:min(440px,92vw);text-align:left}
+.join .roles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.join .roles .btn{min-height:54px;flex-direction:column;display:flex;align-items:flex-start;justify-content:center;gap:2px}
+.join .roles .btn small{color:var(--fg-3);font-weight:400;font-size:11px}
+.join .roles .btn.on{border-color:var(--accent)}
+.join .parishes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.join input.code{font-family:var(--mono);font-size:22px;letter-spacing:.3em;text-transform:uppercase;text-align:center}
+.hint{font-size:12px;color:var(--fg-3)}
+
+/* print pack */
+.role-print #app{max-width:900px;margin:0 auto;padding:20px 16px 60px;display:flex;flex-direction:column;gap:18px;color:#111;background:#fff}
+.role-print{background:#fff;color:#111}
+.sheet{border:1px solid #bbb;padding:18px 22px;display:flex;flex-direction:column;gap:10px;break-after:page;background:#fff;color:#111;border-radius:0}
+.sheet h2{font-family:var(--cond);font-size:26px;letter-spacing:.06em;text-transform:uppercase}
+.sheet h3{font-family:var(--cond);font-size:16px;letter-spacing:.06em;text-transform:uppercase;margin-top:6px}
+.sheet .k{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#555;font-weight:700}
+.sheet p{font-size:13.5px;line-height:1.45}
+.sheet table{border-collapse:collapse;width:100%;font-size:13px}
+.sheet td,.sheet th{border:1px solid #999;padding:6px 8px;text-align:left;vertical-align:top}
+.sheet th{background:#eee;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.sheet .cardgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sheet .pcard{border:1px solid #777;padding:12px 14px;min-height:150px;display:flex;flex-direction:column;gap:6px}
+.sheet .pcard b{font-size:16px}
+.sheet .pcard .l{font-size:12px;color:#444}
+.sheet .bigletter{display:flex;align-items:center;justify-content:center;border:2px solid #333;height:300px;font-family:var(--cond);font-size:170px;font-weight:700}
+.sheet .bigword{display:flex;align-items:center;justify-content:center;border:2px solid #333;height:200px;font-family:var(--cond);font-size:72px;letter-spacing:.1em;font-weight:700;text-transform:uppercase}
+.sheet .tent{display:flex;align-items:center;justify-content:space-between;gap:24px;border:2px solid #333;padding:30px}
+.sheet .tent>div>b{font-family:var(--cond);font-size:56px;letter-spacing:.1em;text-transform:uppercase}
+.sheet .tent p{max-width:520px}.sheet .tent p b{font-family:var(--mono);font-size:13px;font-weight:700;overflow-wrap:anywhere}
+.sheet .tent .code{font-family:var(--mono);font-size:30px;letter-spacing:.3em}
+.sheet .seal{border:3px double #333;padding:60px 20px;text-align:center;font-family:var(--cond);font-size:28px;letter-spacing:.14em;text-transform:uppercase;break-after:page}
+.sheet .vdeck{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sheet .vdeck .v{border:1px solid #555;padding:16px 12px;min-height:120px;display:flex;flex-direction:column;gap:6px}
+.sheet .vdeck .v b{font-family:var(--cond);font-size:22px;letter-spacing:.08em;text-transform:uppercase}
+.printbar{position:sticky;top:0;display:flex;gap:10px;align-items:center;padding:10px 12px;background:#f3f3f3;border:1px solid #ccc;color:#111;z-index:2}
+.printbar .btn{color:#111;background:#fff;border-color:#888}
+@media print{.printbar{display:none}.sheet{border:0;padding:0}.role-print #app{padding:0;max-width:none}}
+@media (prefers-reduced-motion:reduce){.al{animation:none}.radial .fg{transition:none}#veil{transition:none}}
+@media (max-width:1400px){.counter{min-width:100px}.counter .v{font-size:19px}.brand{min-width:170px}.simclock{font-size:20px}.qname{font-size:22px}}
+@media (max-width:1100px){.role-table .side{width:52vw}.role-table .bottom .own{width:52vw}.counter{min-width:96px}.counter .v{font-size:18px}.qname{font-size:20px}}
 </style>
 <body>
 <canvas id="gl" aria-label="Concordia command map"></canvas>
-<div id="hud">
-  <header id="top">
-    <div id="brand"><h1>Values Crucible · Concordia</h1><span id="view-badge">Facilitator</span></div>
-    <div id="phase">
-      <div id="quarter">Preparation</div>
-      <div class="sub"><span id="win-label" class="lbl">Watch Issued</span><span id="simclock" class="num">T-72:00</span></div>
-      <div class="sub"><span class="chip" id="phase-chip">watch</span><span class="lbl">Intensity <span class="num" id="int-val">3</span></span><div class="meter" id="meter" title="Storm intensity dial"></div></div>
-    </div>
-    <div id="res"></div>
-    <div id="timer"><span class="lbl">Quarter clock</span><div class="row"><span id="qt" class="num">15:00</span><button class="btn tiny" id="qt-toggle" type="button" title="Start or pause the 15-minute quarter clock">Start</button><button class="btn tiny" id="qt-reset" type="button" title="Reset to 15:00">Reset</button></div></div>
-  </header>
-  <aside id="feed" class="panel" aria-live="polite">
-    <header><h2>Alerts</h2><span class="spacer"></span><span class="lbl" id="feed-scope">Island</span></header>
-    <div id="feed-list"></div>
-  </aside>
-  <aside id="panel" class="panel" hidden></aside>
-  <span id="mm-label">Concordia · minimap</span>
-  <div id="dock" class="panel">
-    <div class="grp" id="qjump"></div>
-    <div class="grp">
-      <button class="btn" id="play" type="button" title="Play or pause (space)">Play</button>
-      <button class="btn" id="play-next" type="button" title="Play the storm forward to the next quarter">To next quarter</button>
-      <select id="speed" title="Playback speed: room pace is the session's real tempo, 4 to 14 seconds per tick"><option value="room">Room pace</option><option value="1">0.5×</option><option value="2" selected>1×</option><option value="4">2×</option><option value="8">4×</option><option value="16">8×</option></select>
-      <input id="scrub" type="range" min="0" max="480" value="0" step="1" title="Scrub the simulation">
-    </div>
-    <div class="grp" id="facil-grp">
-      <button class="btn" id="fog-btn" type="button" title="Fog of war (F): show only what the selected table sees">Fog</button>
-      <select id="viewsel" title="Which client this window is"></select>
-    </div>
-    <div class="grp">
-      <button class="btn" id="fit" type="button" title="Fit the island (H)">Fit</button>
-      <button class="btn" id="help-btn" type="button" title="Keyboard help">?</button>
-    </div>
-  </div>
-  <div id="help" class="panel">
-    <p><kbd>Space</kbd> play/pause · <kbd>1</kbd>–<kbd>4</kbd> jump to quarter · <kbd>[</kbd> <kbd>]</kbd> speed</p>
-    <p><kbd>Drag</kbd> pan · <kbd>Wheel</kbd> zoom · <kbd>Arrows</kbd>/<kbd>WASD</kbd> pan · <kbd>H</kbd> fit</p>
-    <p><kbd>Click</kbd> a parish to inspect · <kbd>Double-click</kbd> to focus · <kbd>Esc</kbd> clear</p>
-    <p><kbd>F</kbd> fog of war (facilitator) · <kbd>M</kbd> hide the HUD for a clean projection</p>
-    <p class="fps" id="fps">render —</p>
-  </div>
-  <div id="tip" class="panel"></div>
-  <div id="veil"><h1>Values Crucible</h1><p id="veil-msg">Loading the engine…</p></div>
-</div>
-
+<div id="app"></div>
+<div id="veil"><h1>Values Crucible</h1><p id="veil-msg">Loading the engine…</p><div id="veil-join"></div></div>
 <script>__PIXI_JS__</script>
 <script type="application/json" id="board-data">__BOARD_DATA__</script>
 <script type="application/octet-stream" id="wasm-b64">__WASM_B64__</script>
+<script type="text/plain" id="island-src">__ISLAND_JPG__</script>
 <script>
 "use strict";
-/* ============================================================================
-   Crucible command board
-   engine (WASM) → stream source → session.ingest(message) → World.applySnapshot / applyEvent → renderer + HUD
-
-   The renderer never reads the run log. It reads World, and World changes only through the two apply
-   calls, so the same page renders a local run (today), a LAN host or a cloud relay (tomorrow): a
-   transport is anything that calls session.ingest({type:'snapshot'|'event'|'batch', ...}).
-   ============================================================================ */
-const DATA = JSON.parse(document.getElementById('board-data').textContent);
-const PARISHES = DATA.parishes;
-const PIDS = PARISHES.map(p => p.id);
-const PARISH = Object.fromEntries(PARISHES.map(p => [p.id, p]));
-const Q = new URLSearchParams(location.search);
-const REDUCE = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const LITE = Q.get('lite') === '1'; // fewer full-screen layers for weak integrated GPUs: no vignette, no rain shield, fewer wind streaks
-const AA = Q.get('aa') !== '0';     // multisampling on by default; ?aa=0 for machines that struggle
-const $ = id => document.getElementById(id);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const lerp = (a, b, f) => a + (b - a) * f;
-const fmt = n => Math.round(n).toLocaleString('en-US');
-const clockStr = t => { const s = t < 0 ? '-' : '+'; const a = Math.abs(Math.round(t)); return 'T' + s + String(Math.floor(a / 60)).padStart(2, '0') + ':' + String(a % 60).padStart(2, '0'); };
-const pname = id => (PARISH[id] || { name: id }).name;
-const SYSTEMS = ['power', 'communications', 'roads', 'water', 'hospital'];
-const SYS_LABEL = { power: 'Power', communications: 'Comms', roads: 'Roads', water: 'Water', hospital: 'Hospital', port: 'Port', airport: 'Airport' };
-const SYS_SHORT = { power: 'PWR', communications: 'COM', roads: 'RDS', water: 'H2O', hospital: 'MED' };
-const status = v => v >= 80 ? 'ok' : v >= 60 ? 'reduced' : v >= 40 ? 'degraded' : v >= 20 ? 'critical' : 'failed';
-const STATUS_HEX = { ok: 0x4fb06f, reduced: 0xb4b44a, degraded: 0xe0a93a, critical: 0xec7a44, failed: 0xe0524f };
-const FAILED = 20; // INFRASTRUCTURE_THRESHOLDS.FAILED: the engine's passability cut-off for roads
-const QUARTERS = [
-  { id: 'preparation', name: 'Preparation', from: -4320 }, { id: 'approach', name: 'Approach', from: -2160 },
-  { id: 'landfall', name: 'Landfall', from: -360 }, { id: 'recovery', name: 'Recovery', from: 360 },
-];
-const quarterOf = t => QUARTERS.reduce((q, x) => t >= x.from ? x : q, QUARTERS[0]);
-function mulberry32(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
-
-/* ---------- engine (WebAssembly, embedded) ---------- */
-let wasm = null;
-async function initEngine() {
-  const b64 = $('wasm-b64').textContent.trim();
-  const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-  wasm = (await WebAssembly.instantiate(bytes, {})).instance.exports;
-}
-function engineRun(req) {
-  const enc = new TextEncoder().encode(JSON.stringify(req));
-  const p = wasm.crucible_alloc(enc.length);
-  new Uint8Array(wasm.memory.buffer, p, enc.length).set(enc);
-  const r = wasm.crucible_run(p, enc.length);
-  wasm.crucible_free(p, enc.length);
-  const rp = Number(r >> 32n), rl = Number(r & 0xffffffffn);
-  const text = new TextDecoder().decode(new Uint8Array(wasm.memory.buffer, rp, rl));
-  wasm.crucible_free(rp, rl);
-  const out = JSON.parse(text);
-  if (out.error) throw new Error(out.error);
-  return out;
-}
-
-/* ---------- geography (board-owned) ----------
-   The island art is 1400 px square inside a 2800 px world (700 px of sea on every side so the storm is
-   visible as it approaches). Territories follow canon v3 and the art: the capital (Summit) on the west
-   bank of the river in the north, Meridian's campus (Sterling) on the east bank, the port (Haven) east,
-   the plant (Keystone) south, the airport and the Strand (Gateway) west, the crater (Heartland) centre.
-   Sectors are compass bearings clockwise from north; anchors and label points are image pixels.
-   The engine's content positions are not used for placement; the storm track is (see toWorld). */
-const IMG = 1400, PAD = 700, WORLD = IMG + 2 * PAD;
-const CENTER = { x: PAD + 700, y: PAD + 700 };
-const R_RING = 350; // the ring road's radius on the art; Heartland is the disc inside it
-const GEO = {
-  gateway:   { sector: [228, 322], anchor: [268, 700],  labelAt: [268, 640],  color: 0x35c4b2, tag: 'Airport · fleet · the Strand' },
-  summit:    { sector: [322, 360], anchor: [600, 235],  labelAt: [585, 195],  color: 0xb3a4ff, tag: 'Capital · hospital · government' },
-  sterling:  { sector: [0, 46],    anchor: [870, 225],  labelAt: [905, 190],  color: 0xe86ab0, tag: 'Meridian campus · uplink' },
-  haven:     { sector: [46, 118],  anchor: [1160, 600], labelAt: [1172, 536], color: 0xf05d5d, tag: 'Port · fuel terminal · union hall' },
-  keystone:  { sector: [118, 228], anchor: [780, 1130], labelAt: [780, 1182], color: 0x4fb0ff, tag: 'Celarithin plant · cold vault' },
-  heartland: { crater: true,       anchor: [700, 545],  labelAt: [700, 690],  color: 0xe9b949, tag: 'Dam · water · kelp works' },
-};
-const rad = b => (b - 90) * Math.PI / 180;
-const polar = (b, r) => ({ x: CENTER.x + r * Math.cos(rad(b)), y: CENTER.y + r * Math.sin(rad(b)) });
-const ringPt = b => polar(b, R_RING);
-const W = ([x, y]) => ({ x: x + PAD, y: y + PAD });
-const anchorOf = id => W(GEO[id].anchor);
-const bearingOf = p => (Math.atan2(p.x - CENTER.x, -(p.y - CENTER.y)) * 180 / Math.PI + 360) % 360;
-const bearingOfParish = id => bearingOf(anchorOf(id));
-// Content coordinates (0..100 across the island, from concordia.json and the engine's storm track) to
-// world pixels: the island disc fills 8%..92% of the art, as the first board established.
-const toWorld = c => ({ x: PAD + (8 + 0.84 * c.x) / 100 * IMG, y: PAD + (8 + 0.84 * c.y) / 100 * IMG });
-const hexColor = n => '#' + n.toString(16).padStart(6, '0');
-
-// Shoreline: traced from the art at load time (sea is the only uniformly blue thing outside the crater),
-// so territory fills end at the beach. Falls back to a plain disc.
-const SHORE_N = 120;
-let SHORE = Array(SHORE_N).fill(592);
-let SEA_RGB = null; // the art's own sea colour, so the world's sea continues the picture
-function traceShore(img) {
-  const S = 0.5, cv = document.createElement('canvas'); cv.width = cv.height = Math.round(IMG * S);
-  const ctx = cv.getContext('2d', { willReadFrequently: true });
-  ctx.drawImage(img, 0, 0, cv.width, cv.height);
-  const d = ctx.getImageData(0, 0, cv.width, cv.height).data;
-  { const i = (6 * cv.width + 6) * 4; SEA_RGB = [d[i], d[i + 1], d[i + 2]]; }
-  const sea = (x, y) => { x |= 0; y |= 0; if (x < 0 || y < 0 || x >= cv.width || y >= cv.height) return true; const i = (y * cv.width + x) * 4; const r = d[i], g = d[i + 1], b = d[i + 2]; return b > 60 && b > r + 28 && b >= g - 4 && r < 120; };
-  const out = [];
-  for (let k = 0; k < SHORE_N; k++) {
-    const th = rad(k * 360 / SHORE_N), cx = 700 * S, cy = 700 * S; let found = 0;
-    for (let r = 690; r >= 480; r -= 2) {
-      if (sea(cx + r * S * Math.cos(th), cy + r * S * Math.sin(th))) continue;
-      let land = 0;
-      for (let q = 2; q <= 16; q += 2) if (!sea(cx + (r - q) * S * Math.cos(th), cy + (r - q) * S * Math.sin(th))) land++;
-      if (land >= 7) { found = r; break; }
-    }
-    out.push(found);
-  }
-  for (let k = 0; k < SHORE_N; k++) if (!out[k]) { // river mouths and basins: borrow the nearest traced neighbour
-    let j = 1; while (j < SHORE_N && !out[(k + j) % SHORE_N] && !out[(k - j + SHORE_N) % SHORE_N]) j++;
-    out[k] = out[(k + j) % SHORE_N] || out[(k - j + SHORE_N) % SHORE_N] || 592;
-  }
-  const med = out.map((_, k) => { const w = [-2, -1, 0, 1, 2].map(o => out[(k + o + SHORE_N) % SHORE_N]).sort((a, b) => a - b); return w[2]; });
-  return med.map(r => clamp(r + 6, 500, 700));
-}
-function shoreR(b) { const f = ((b % 360) + 360) % 360 / 360 * SHORE_N, i = Math.floor(f), t = f - i; return lerp(SHORE[i % SHORE_N], SHORE[(i + 1) % SHORE_N], t); }
-function sectorPoly(b0, b1) {
-  const pts = [], step = 2;
-  for (let b = b0; b < b1 - 1e-9; b += step) { const p = polar(b, shoreR(b)); pts.push(p.x, p.y); }
-  { const p = polar(b1, shoreR(b1)); pts.push(p.x, p.y); }
-  for (let b = b1; b > b0 + 1e-9; b -= step) { const p = ringPt(b); pts.push(p.x, p.y); }
-  { const p = ringPt(b0); pts.push(p.x, p.y); }
-  return pts;
-}
-function discPoly(r, n = 72) { const pts = []; for (let k = 0; k < n; k++) { const p = polar(k * 360 / n, r); pts.push(p.x, p.y); } return pts; }
-function territoryPoly(id) { const g = GEO[id]; return g.crater ? discPoly(R_RING - 4) : sectorPoly(g.sector[0], g.sector[1]); }
-function pointInPoly(pts, x, y) {
-  let inside = false;
-  for (let i = 0, j = pts.length - 2; i < pts.length; j = i, i += 2) {
-    const xi = pts[i], yi = pts[i + 1], xj = pts[j], yj = pts[j + 1];
-    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
-  }
-  return inside;
-}
-
-/* ---------- routes (from content, drawn on the art) ----------
-   Pieces are the drawable parts of the road network: the ring road's arcs between consecutive ring
-   parishes, each coastal parish's spur from the ring to its centre, and the crater roads. Each piece
-   knows whether it is open for a given snapshot, mirroring connectivity::roads_step in the core:
-   a road is passable while both ends' roads level is above FAILED; crater roads marked not storm
-   passable close at 65 mph, flood-risk roads at 2 in/h of rain. "ring" endpoints mean every ring parish. */
-const RING_SEGS = DATA.roads.ring, CRATER_SEGS = DATA.roads.crater;
-const RING_PARISHES = [...new Set(RING_SEGS.flatMap(s => [s.from, s.to]))];
-const lv = (s, p, sys) => ((s.parishes[p] || {}).levels || {})[sys] ?? 0;
-const roadsOk = (s, p) => lv(s, p, 'roads') > FAILED;
-// How each crater segment looks on the art. Keyed by from-to as content names it. Unknown segments draw straight.
-const CRATER_VISUAL = {
-  'ring-heartland': { name: 'South Switchbacks', junction: 150, points: [[875, 1003], [790, 940], [722, 892], [688, 846], [604, 782], [590, 690], [622, 600], [700, 545]] },
-  'ring-summit': { name: 'Summit approach', junction: () => bearingOfParish('summit'), points: () => [[ringPt(bearingOfParish('summit')).x - PAD, ringPt(bearingOfParish('summit')).y - PAD], GEO.summit.anchor] },
-  'summit-heartland': { name: 'Gorge Road', points: [[600, 235], [690, 322], [706, 440], [700, 545]] },
-};
-const PIECES = {};
-const pathLen = pts => { let l = 0; for (let i = 1; i < pts.length; i++) l += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); return l; };
-function arcPts(b0, b1) { const pts = [], n = Math.max(2, Math.ceil(Math.abs(b1 - b0) / 4)); for (let k = 0; k <= n; k++) pts.push(ringPt(lerp(b0, b1, k / n))); return pts; }
-function cwContains(bf, bt, b) { const span = (bt - bf + 360) % 360; return (b - bf + 360) % 360 <= span; }
-function ringSegAt(b) { return RING_SEGS.find(s => cwContains(bearingOfParish(s.from), bearingOfParish(s.to), b)) || RING_SEGS[0]; }
-const ringPieceId = s => `ring:${s.from}-${s.to}`;
-// The short arc from bearing b0 to b1, split at ring parishes so each part carries its segment's status.
-function arcPieces(b0, b1) {
-  const d = ((b1 - b0 + 540) % 360) - 180, dir = d < 0 ? -1 : 1, total = Math.abs(d);
-  const cuts = RING_PARISHES.map(bearingOfParish).map(b => ((b - b0) * dir + 720) % 360).filter(x => x > 0.5 && x < total - 0.5).sort((a, b) => a - b);
-  const stops = [0, ...cuts, total], out = [];
-  for (let k = 0; k + 1 < stops.length; k++) {
-    const from = b0 + dir * stops[k], to = b0 + dir * stops[k + 1], mid = ((b0 + dir * (stops[k] + stops[k + 1]) / 2) % 360 + 360) % 360;
-    out.push({ id: ringPieceId(ringSegAt(mid)), points: arcPts(from, to) });
-  }
-  return out;
-}
-function buildRoutes() {
-  for (const s of RING_SEGS) {
-    const b0 = bearingOfParish(s.from), b1 = bearingOfParish(s.to), d = (b1 - b0 + 360) % 360;
-    PIECES[ringPieceId(s)] = { id: ringPieceId(s), name: `${pname(s.from)}–${pname(s.to)} ring road`, kind: 'ring', points: arcPts(b0, b0 + d), open: snap => roadsOk(snap, s.from) && roadsOk(snap, s.to) };
-  }
-  for (const p of RING_PARISHES) PIECES[`spur:${p}`] = { id: `spur:${p}`, name: `${pname(p)} access road`, kind: 'spur', points: [ringPt(bearingOfParish(p)), anchorOf(p)], open: snap => roadsOk(snap, p) };
-  for (const s of CRATER_SEGS) {
-    const key = `${s.from}-${s.to}`, vis = CRATER_VISUAL[key] || CRATER_VISUAL[`${s.to}-${s.from}`];
-    const ends = [s.from, s.to].map(e => e === 'ring' ? RING_PARISHES : [e]);
-    const points = vis ? (typeof vis.points === 'function' ? vis.points() : vis.points).map(W) : [anchorOf(ends[0][0]), anchorOf(ends[1][0])];
-    const junction = vis && vis.junction != null ? (typeof vis.junction === 'function' ? vis.junction() : vis.junction) : bearingOf(points[0]);
-    const open = snap => {
-      if (s.stormPassable === false && (snap.weather.wind_mph ?? 0) >= 65) return false;
-      if (s.floodRisk === true && (snap.weather.rain_in_per_hour ?? 0) >= 2) return false;
-      return ends.every(list => list.some(p => roadsOk(snap, p)));
-    };
-    PIECES[`crater:${key}`] = { id: `crater:${key}`, name: vis ? vis.name : `${s.from}–${s.to} crater road`, kind: 'crater', points, junction, ringEnd: s.from === 'ring' ? 0 : s.to === 'ring' ? 1 : -1, open };
-  }
-  for (const p of Object.values(PIECES)) p.len = pathLen(p.points);
-}
-const rev = pts => [...pts].reverse();
-// Engine edges (undirected) with their drawable pieces oriented a→b, like road_edges in the core.
-function edgePieces(a, b) {
-  const ring = RING_SEGS.find(s => (s.from === a && s.to === b) || (s.from === b && s.to === a));
-  if (ring) return [{ id: `spur:${a}`, points: rev(PIECES[`spur:${a}`].points) }, ...arcPieces(bearingOfParish(a), bearingOfParish(b)), { id: `spur:${b}`, points: PIECES[`spur:${b}`].points }];
-  for (const s of CRATER_SEGS) {
-    const key = `crater:${s.from}-${s.to}`, piece = PIECES[key];
-    const ends = [s.from, s.to].map(e => e === 'ring' ? RING_PARISHES : [e]);
-    const forward = ends[0].includes(a) && ends[1].includes(b), backward = ends[1].includes(a) && ends[0].includes(b);
-    if (!forward && !backward) continue;
-    const ringSide = piece.ringEnd; // which content end is "ring"
-    const viaRing = ringSide === 0 ? (forward ? a : b) : ringSide === 1 ? (forward ? b : a) : null;
-    const crater = { id: key, points: ringSide === 1 ? rev(piece.points) : piece.points }; // oriented ring → far end
-    if (!viaRing) return forward ? [{ id: key, points: piece.points }] : [{ id: key, points: rev(piece.points) }];
-    const approach = [{ id: `spur:${viaRing}`, points: rev(PIECES[`spur:${viaRing}`].points) }, ...arcPieces(bearingOfParish(viaRing), piece.junction)];
-    const seq = [...approach, crater];
-    const ringIsA = viaRing === a;
-    return ringIsA ? seq : rev(seq).map(x => ({ id: x.id, points: rev(x.points) }));
-  }
-  return null;
-}
-function engineEdges() {
-  const out = [];
-  for (const s of RING_SEGS) out.push([s.from, s.to]);
-  for (const s of CRATER_SEGS) { const ends = [s.from, s.to].map(e => e === 'ring' ? RING_PARISHES : [e]); for (const a of ends[0]) for (const b of ends[1]) if (a !== b) out.push([a, b]); }
-  return out;
-}
-const EDGES = engineEdges();
-function edgeOpen(a, b, snap) { const pcs = edgePieces(a, b); return !!pcs && pcs.every(p => PIECES[p.id].open(snap)); }
-// Fewest-hops route over edges open in the snapshot; returns a list of parishes or null.
-function findRoute(from, to, snap) {
-  const prev = { [from]: null }, queue = [from];
-  while (queue.length) {
-    const u = queue.shift(); if (u === to) break;
-    for (const [a, b] of EDGES) { const v = a === u ? b : b === u ? a : null; if (!v || v in prev || !edgeOpen(u, v, snap)) continue; prev[v] = u; queue.push(v); }
-  }
-  if (!(to in prev)) return null;
-  const path = []; for (let v = to; v !== null; v = prev[v]) path.unshift(v); return path;
-}
-// The drawable path of a convoy along a parish list: concatenated edge pieces, without the detour into
-// intermediate towns, plus cumulative distances for animation.
-function convoyPath(nodes) {
-  let pieces = [];
-  for (let k = 0; k + 1 < nodes.length; k++) {
-    const pcs = edgePieces(nodes[k], nodes[k + 1]);
-    if (pieces.length && pcs.length && pieces[pieces.length - 1].id === pcs[0].id && pcs[0].id.startsWith('spur:')) { pieces.pop(); pcs.shift(); }
-    pieces = pieces.concat(pcs);
-  }
-  const out = []; let d = 0;
-  for (const p of pieces) { const len = pathLen(p.points); out.push({ id: p.id, points: p.points, start: d, len }); d += len; }
-  return { pieces: out, len: d };
-}
-function pointAlong(path, dist) {
-  dist = clamp(dist, 0, path.len);
-  for (const pc of path.pieces) {
-    if (dist > pc.start + pc.len + 1e-6) continue;
-    let d = dist - pc.start;
-    for (let i = 1; i < pc.points.length; i++) {
-      const a = pc.points[i - 1], b = pc.points[i], l = Math.hypot(b.x - a.x, b.y - a.y);
-      if (d <= l || i === pc.points.length - 1) { const f = l ? clamp(d / l, 0, 1) : 1; return { x: lerp(a.x, b.x, f), y: lerp(a.y, b.y, f), angle: Math.atan2(b.y - a.y, b.x - a.x), piece: pc.id }; }
-      d -= l;
-    }
-  }
-  const last = path.pieces[path.pieces.length - 1], p = last.points[last.points.length - 1];
-  return { x: p.x, y: p.y, angle: 0, piece: last.id };
-}
-
-/* ---------- stream source: the run log as snapshots and events ----------
-   A snapshot is the whole visible state at one tick; an event is one thing that happened during it.
-   Readers tolerate absent fields and unknown kinds (RUN_LOG_SCHEMA.md). */
-class LocalRunSource {
-  constructor(log, mock) {
-    this.log = log; this.mock = mock; this.n = log.ticks.length; this.cache = new Map();
-    this.windows = Object.fromEntries((log.windows || []).map(w => [w.id, w]));
-    // Route state per tick from the engine's road levels and weather through the content rule, with the tick
-    // each cut began, so the board can say "CUT T-18:00" beside the red. Cuts and reopenings become derived
-    // events (not mock: the engine's data, the content's rule) for the alert feed.
-    this.routeStatus = []; this.routeCutAt = []; this.routeEvents = Array.from({ length: this.n }, () => []);
-    let prevOpen = null; const cutAt = {};
-    for (let i = 0; i < this.n; i++) {
-      const tk = log.ticks[i], s = { weather: tk.weather || {}, parishes: Object.fromEntries(PIDS.map(p => [p, { levels: (tk.infrastructure || {})[p] || {} }])) };
-      const open = {}, at = {}, cuts = [], reopens = [];
-      for (const [id, pc] of Object.entries(PIECES)) {
-        open[id] = pc.open(s);
-        if (!open[id]) {
-          if (!prevOpen || prevOpen[id]) { cutAt[id] = tk.t; if (prevOpen) cuts.push({ id, name: pc.name }); }
-          at[id] = cutAt[id];
-        } else if (prevOpen && !prevOpen[id]) reopens.push({ id, name: pc.name });
-      }
-      // one line per tick each way, so a storm that cuts nine pieces at once says so once
-      if (cuts.length) this.routeEvents[i].push({ kind: 'route_cut', t: tk.t, routes: cuts, derived: true });
-      if (reopens.length) this.routeEvents[i].push({ kind: 'route_reopened', t: tk.t, routes: reopens, derived: true });
-      this.routeStatus.push(open); this.routeCutAt.push(at); prevOpen = open;
-    }
-  }
-  indexOf(t) { return clamp(Math.round((t - this.log.t_start) / this.log.step_minutes), 0, this.n - 1); }
-  tAt(i) { return this.log.ticks[clamp(i, 0, this.n - 1)].t; }
-  snapshot(i) {
-    i = clamp(i, 0, this.n - 1);
-    if (this.cache.has(i)) return this.cache.get(i);
-    const tk = this.log.ticks[i], w = tk.weather || {};
-    const s = {
-      seq: i, i, t: tk.t, n: this.n, phase: tk.phase, window_id: tk.window_id, window_label: (this.windows[tk.window_id] || {}).label || tk.window_id,
-      quarter: quarterOf(tk.t).id, intensity: tk.intensity,
-      weather: { wind_kts: w.wind_kts ?? 0, wind_mph: w.wind_mph ?? (w.wind_kts ?? 0) * 1.151, rain: w.rain, rain_in_per_hour: w.rain_in_per_hour ?? 0, surge_ft: w.surge_ft ?? 0 },
-      storm: w.hurricane_position ? { ...w.hurricane_position } : null,
-      forecast: [], parishes: {}, routes: {}, counters: null, tokens: null,
-    };
-    for (let k = i + 4; k <= i + 40 && k < this.n; k += 4) { const hp = (this.log.ticks[k].weather || {}).hurricane_position; if (hp) s.forecast.push({ ...hp }); }
-    for (const p of PIDS) s.parishes[p] = { levels: { ...(tk.infrastructure || {})[p] }, morale: (tk.morale || {})[p] ?? null, isolated: (tk.isolated || []).includes(p) };
-    s.routes = this.routeStatus[i]; s.route_cut_at = this.routeCutAt[i];
-    if (this.mock) { s.counters = this.mock.counters[i]; s.tokens = this.mock.tokens[i]; }
-    this.cache.set(i, s);
-    return s;
-  }
-  events(i) { const tk = this.log.ticks[i]; return [...tk.events.map(e => ({ ...e, t: tk.t })), ...this.routeEvents[i], ...((this.mock && this.mock.events[i]) || [])]; }
-  // What a late joiner needs to catch up to tick i: the snapshot and the events that still matter.
-  history(i) {
-    const keep = new Set(['window_transition', 'cascade', 'isolation', 'route_cut', 'route_reopened', 'aid_call', 'aid_answer', 'allocation', 'convoy_departed', 'convoy_turned_back', 'convoy_arrived', 'dilemma_presented', 'decision']);
-    const out = [];
-    for (let k = 0; k <= i; k++) for (const e of this.events(k)) if (keep.has(e.kind)) out.push(e);
-    return out.slice(-60);
-  }
-}
-
-/* ---------- MOCK EVENT LAYER (allocations, calls for aid, convoys, counters) ----------
-   The engine has no allocation round, no calls for aid and no dose/people counters yet (decision
-   2026-10-21, items 3 and 6). Everything in this section is invented so the visuals can be shown:
-   deterministic from the run seed, tagged mock:true, and to be deleted when the core emits the real
-   events. Nothing here feeds back into the engine. */
-const RESOURCES = { generators: { glyph: 'G', name: 'generators', color: 0xe9b949 }, fuel: { glyph: 'F', name: 'fuel', color: 0xf0763c }, medical: { glyph: 'M', name: 'medical supplies', color: 0xf05d7a }, water: { glyph: 'W', name: 'water', color: 0x4fb0ff }, crew: { glyph: 'C', name: 'repair crew', color: 0x4fb06f } };
-const CONVOY_PX_PER_MIN = 6, LOAD_MIN = 30;
-function buildMock(log, seed) {
-  const n = log.ticks.length, step = log.step_minutes, rng = mulberry32(seed ^ 0x9e3779b9);
-  const pick = arr => arr[Math.floor(rng() * arr.length)];
-  const idx = t => clamp(Math.round((t - log.t_start) / step), 0, n - 1);
-  const raw = i => { const tk = log.ticks[i]; return { weather: tk.weather || {}, parishes: Object.fromEntries(PIDS.map(p => [p, { levels: (tk.infrastructure || {})[p] || {}, isolated: (tk.isolated || []).includes(p) }])) }; };
-  const events = Array.from({ length: n }, () => []);
-  const level = { low: 1, medium: 2, high: 3 };
-  const ledger = Object.fromEntries(PIDS.map(p => { const r = PARISH[p].resources || {}; return [p, { generators: Math.max(1, Math.round((r.generators || 6) / 3)), fuel: level[r.fuel] || 2, medical: level[r.medicalSupplies] || 2, water: level[r.water] || 2, crew: 1 }]; }));
-  const convoys = []; let cid = 0;
-  const emit = (i, e) => { if (i >= 0 && i < n) events[i].push({ ...e, t: log.ticks[i].t, mock: true }); };
-  // A transfer: route it, then walk the ticks to find out whether the storm cuts it.
-  function transfer(i0, from, to, resource, why) {
-    const route = findRoute(from, to, raw(i0));
-    if (!route) { emit(i0, { kind: 'aid_answer', parish_id: from, to, resource, granted: false, reason: `no open road from ${pname(from)} to ${pname(to)}` }); return null; }
-    const path = convoyPath(route), depart_t = log.ticks[i0].t, travel = path.len / CONVOY_PX_PER_MIN, arrive_t = depart_t + LOAD_MIN + travel + LOAD_MIN;
-    const c = { id: 'c' + (++cid), from, to, resource, route, depart_t, arrive_t, len: path.len, pieces: path.pieces.map(p => ({ id: p.id, start: p.start, len: p.len })), fate: 'arrived', block_t: null, block_dist: null, why };
-    for (let i = i0; i < n && log.ticks[i].t < arrive_t; i++) {
-      const t = log.ticks[i].t, dist = clamp((t - depart_t - LOAD_MIN) * CONVOY_PX_PER_MIN, 0, path.len);
-      if (dist <= 0) continue;
-      const s = raw(i), at = pointAlong(path, dist), piece = PIECES[at.piece];
-      const cut = (piece && !piece.open(s)) || (s.parishes[to].isolated && dist < path.len);
-      if (cut) { c.fate = 'blocked'; c.block_t = t; c.block_dist = dist; c.block_piece = at.piece; c.return_t = t + 15 + dist / CONVOY_PX_PER_MIN; emit(i, { kind: 'convoy_turned_back', convoy_id: c.id, parish_id: to, from, resource, piece: piece ? piece.name : 'the road' }); break; }
-    }
-    if (c.fate === 'arrived') { const ia = idx(arrive_t); emit(ia, { kind: 'convoy_arrived', convoy_id: c.id, parish_id: to, from, resource }); c.arrive_i = ia; }
-    emit(i0, { kind: 'convoy_departed', convoy: c, parish_id: from });
-    convoys.push(c);
-    return c;
-  }
-  // Preparation: the allocation round. Each table sends one token to the parish that holds least of it.
-  const prepOrder = [...PIDS].sort(() => rng() - 0.5);
-  prepOrder.forEach((from, k) => {
-    const i0 = idx(-66 * 60 + k * 4 * 60 + Math.floor(rng() * 90));
-    const have = Object.entries(ledger[from]).filter(([r, v]) => r !== 'crew' && v >= 2);
-    if (!have.length) return;
-    const [resource] = pick(have);
-    const to = PIDS.filter(p => p !== from).sort((a, b) => ledger[a][resource] - ledger[b][resource] || (rng() - 0.5))[0];
-    emit(i0, { kind: 'allocation', parish_id: from, to, resource, amount: 1 });
-    const c = transfer(i0, from, to, resource, 'allocation');
-    if (c) { ledger[from][resource]--; c.onArrive = () => { ledger[to][resource]++; }; }
-  });
-  // Approach and landfall: calls for aid. The parish in most trouble calls; the biggest holder answers.
-  let t = -36 * 60 + Math.floor(rng() * 120);
-  while (t < 12 * 60) {
-    const i0 = idx(t), s = raw(i0);
-    const need = PIDS.map(p => { const L = s.parishes[p].levels; const worst = SYSTEMS.map(sys => [sys, L[sys] ?? 100]).sort((a, b) => a[1] - b[1])[0]; return { p, sys: worst[0], v: worst[1] }; }).sort((a, b) => a.v - b.v);
-    const caller = need[Math.floor(rng() * Math.min(3, need.length))];
-    const resource = caller.sys === 'power' ? 'generators' : caller.sys === 'water' ? 'water' : caller.sys === 'hospital' ? 'medical' : 'fuel';
-    const holder = PIDS.filter(p => p !== caller.p).sort((a, b) => ledger[b][resource] - ledger[a][resource] || (rng() - 0.5))[0];
-    emit(i0, { kind: 'aid_call', parish_id: caller.p, resource, system: caller.sys, level: Math.round(caller.v), holder });
-    const routeOpen = !!findRoute(holder, caller.p, s);
-    const grant = ledger[holder][resource] >= 1 && rng() < (routeOpen ? 0.7 : 0.45);
-    if (grant) {
-      emit(i0 + 1, { kind: 'aid_answer', parish_id: holder, to: caller.p, resource, granted: true });
-      const c = transfer(i0 + 2, holder, caller.p, resource, 'aid');
-      if (c) { ledger[holder][resource]--; c.onArrive = () => { ledger[caller.p][resource]++; }; }
-    } else {
-      const reasons = [`keeping it for ${pname(holder)}'s own people`, 'nothing to spare', 'will decide after the storm', `route to ${pname(caller.p)} looks cut`];
-      emit(i0 + 1, { kind: 'aid_answer', parish_id: holder, to: caller.p, resource, granted: false, reason: pick(reasons) });
-    }
-    t += 240 + Math.floor(rng() * 240);
-  }
-  // Recovery: repair crews move as roads reopen.
-  for (const [tt, from, to] of [[14 * 60, 'heartland', 'summit'], [20 * 60, 'haven', 'keystone'], [30 * 60, 'summit', 'gateway']]) {
-    const i0 = idx(tt + Math.floor(rng() * 60));
-    emit(i0, { kind: 'allocation', parish_id: from, to, resource: 'crew', amount: 1 });
-    transfer(i0, from, to, 'crew', 'repair');
-  }
-  // Per-tick token ledger and the two counters.
-  const tokens = [], counters = [];
-  const live = Object.fromEntries(PIDS.map(p => [p, { ...ledger[p] }]));
-  // Rebuild the ledger over time from the recorded transfers (departures and arrivals in tick order).
-  const start = Object.fromEntries(PIDS.map(p => { const r = PARISH[p].resources || {}; return [p, { generators: Math.max(1, Math.round((r.generators || 6) / 3)), fuel: level[r.fuel] || 2, medical: level[r.medicalSupplies] || 2, water: level[r.water] || 2, crew: 1 }]; }));
-  for (const p of PIDS) Object.assign(live[p], start[p]);
-  const sailed = idx(-30 * 60), second = idx(40 * 60);
-  for (let i = 0; i < n; i++) {
-    for (const c of convoys) { if (idx(c.depart_t) === i) live[c.from][c.resource] = Math.max(0, live[c.from][c.resource] - 1); if (c.fate === 'arrived' && c.arrive_i === i) live[c.to][c.resource]++; if (c.fate === 'blocked' && idx(c.return_t) === i) live[c.from][c.resource]++; }
-    tokens.push(Object.fromEntries(PIDS.map(p => [p, { ...live[p] }])));
-    const tk = log.ticks[i];
-    let doses = i >= sailed ? 96000 : 0;
-    if (i >= second && ((log.ticks[idx(36 * 60)].infrastructure || {}).haven || {}).port > 50) doses += 48000;
-    let unsafe = 0;
-    for (const p of PIDS) { const L = (tk.infrastructure || {})[p] || {}, pop = PARISH[p].population || 0; if ((tk.isolated || []).includes(p)) unsafe += pop * 0.08; if ((L.hospital ?? 100) < 30) unsafe += pop * 0.03; if (((tk.morale || {})[p] ?? 80) < 40) unsafe += pop * 0.02; }
-    counters.push({ doses, people: Math.round((PIDS.reduce((a, p) => a + (PARISH[p].population || 0), 0) - unsafe) / 10) * 10 });
-  }
-  return { events, convoys, tokens, counters };
-}
-
-/* ---------- World: the only thing the renderer reads ---------- */
-const routeList = (e, verb) => { const r = e.routes || []; if (r.length === 1) return `${r[0].name} ${verb}`; const names = r.slice(0, 3).map(x => x.name).join(', '); return `${r.length} routes ${verb}: ${names}${r.length > 3 ? ` and ${r.length - 3} more` : ''}`; };
-function describe(e) {
-  const who = e.parish_id ? pname(e.parish_id) : '';
-  switch (e.kind) {
-    case 'window_transition': return { sev: 'info', text: e.narrative || `${e.to}`, pids: [] };
-    case 'cascade': return { sev: 'critical', text: e.narrative || `${who} ${e.system} ${e.delta}`, pids: [e.parish_id], ping: 'damage' };
-    case 'isolation': return e.ended ? { sev: 'good', text: `${who} reconnected by road`, pids: [e.parish_id] } : { sev: 'critical', text: `${who} isolated: ${e.narrative || 'no passable road out'}`, pids: [e.parish_id], ping: 'alert' };
-    case 'connectivity': {
-      const map = { lost: ['critical', `${who} lost ${e.system} from ${pname(e.source)}`], restored: ['good', `${who} ${e.system} restored`], backup: ['warn', `${who} on backup generators`], backup_exhausted: ['critical', `${who} backup generators exhausted`] };
-      const m = map[e.status]; return m ? { sev: m[0], text: m[1], pids: [e.parish_id] } : null;
-    }
-    case 'dilemma_presented': return { sev: 'warn', text: `${who} faces: ${e.title}`, pids: [e.parish_id], ping: 'alert' };
-    case 'decision': return { sev: e.controller === 'human' ? 'human' : 'info', text: `${who} chose ${e.option_label}`, pids: [e.parish_id] };
-    case 'consequence': return (Math.abs(e.delta || 0) >= 10 && e.system !== 'morale') ? { sev: 'warn', text: `${who} ${SYS_LABEL[e.system] || e.system} ${e.delta > 0 ? '+' : ''}${e.delta}: ${e.narrative || ''}`, pids: [e.parish_id] } : null;
-    case 'directive': return { sev: 'warn', text: e.narrative || `Directive: ${e.lever} ${e.direction}`, pids: [] };
-    case 'narrative': return { sev: 'info', text: e.text, pids: e.parish_id ? [e.parish_id] : [] };
-    case 'allocation': return { sev: 'mock', text: `${who} sends ${RESOURCES[e.resource].name} to ${pname(e.to)}${e.resource === 'crew' ? '' : ' (allocation round)'}`, pids: [e.parish_id, e.to] };
-    case 'aid_call': return { sev: 'critical', mock: true, text: `MAYDAY from ${who} to ${pname(e.holder)}: ${RESOURCES[e.resource].name} (${SYS_LABEL[e.system].toLowerCase()} at ${e.level}%)`, pids: [e.parish_id, e.holder], ping: 'mayday', pingTo: e.holder };
-    case 'route_cut': return { sev: 'critical', text: routeList(e, 'cut'), pids: [] };
-    case 'route_reopened': return { sev: 'good', text: routeList(e, 'reopened'), pids: [] };
-    case 'aid_answer': return e.granted ? { sev: 'good', mock: true, text: `${who} grants ${pname(e.to)} ${RESOURCES[e.resource].name}`, pids: [e.parish_id, e.to] } : { sev: 'warn', mock: true, text: `${who} refuses ${pname(e.to)} ${RESOURCES[e.resource].name}: ${e.reason}`, pids: [e.parish_id, e.to] };
-    case 'convoy_departed': return { sev: 'info', mock: true, text: `Convoy ${RESOURCES[e.convoy.resource].glyph}: ${pname(e.convoy.from)} → ${pname(e.convoy.to)}${e.convoy.route.length > 2 ? ' via ' + e.convoy.route.slice(1, -1).map(pname).join(', ') : ''}`, pids: [e.convoy.from, e.convoy.to] };
-    case 'convoy_turned_back': return { sev: 'critical', mock: true, text: `Convoy to ${who} turned back: ${e.piece} cut`, pids: [e.parish_id, e.from], ping: 'blocked' };
-    case 'convoy_arrived': return { sev: 'good', mock: true, text: `${RESOURCES[e.resource].name} from ${pname(e.from)} arrived at ${who}`, pids: [e.parish_id, e.from] };
-    default: return null;
-  }
-}
-class World {
-  constructor(view) {
-    this.view = view; this.fogEnabled = view !== 'facilitator';
-    this.cur = null; this.prev = null; this.feed = []; this.pings = []; this.convoys = new Map(); this.recent = Object.fromEntries(PIDS.map(p => [p, []]));
-    this.lastSeen = {}; this.contactSig = '';
-    this.selected = null; this.hover = null; this.listeners = { snapshot: [], event: [], feed: [], fog: [] };
-  }
-  on(k, f) { this.listeners[k].push(f); }
-  emit(k, x) { for (const f of this.listeners[k]) f(x); }
-  // Fog of war follows communications, as the experience flow specifies: a table always sees its own parish and
-  // sees another only while both can talk; the room's broadcast view (the facilitator with fog on) hears a
-  // parish while that parish's comms hold. A parish out of contact keeps showing its last report, stamped.
-  contact(pid, s = this.cur) {
-    if (!this.fogEnabled || !s) return true;
-    const talks = q => (((s.parishes[q] || {}).levels || {}).communications ?? 0) > FAILED;
-    if (this.view === 'facilitator') return talks(pid);
-    if (pid === this.view) return true;
-    return talks(this.view) && talks(pid);
-  }
-  fogged(pid) { return !this.contact(pid); }
-  // What this client may read in the feed: island-wide lines, radio traffic (maydays and answers), and lines
-  // about parishes it is in contact with.
-  concerns(pids, kind) {
-    if (!this.fogEnabled || !pids || !pids.length) return true;
-    if (kind === 'aid_call' || kind === 'aid_answer') return true;
-    return pids.some(p => this.contact(p));
-  }
-  reset() { this.cur = null; this.prev = null; this.feed = []; this.pings = []; this.convoys.clear(); for (const p of PIDS) this.recent[p] = []; this.lastSeen = {}; this.contactSig = ''; this.emit('feed'); }
-  // opts.silent: catch-up (a jump or a late join replaying history), no pings and no listeners.
-  // A host's welcome snapshot may carry last_report {pid: {t, levels...}} for parishes already out of contact.
-  applySnapshot(s, opts = {}) {
-    this.prev = this.cur || s; this.cur = s;
-    if (s.last_report) Object.assign(this.lastSeen, s.last_report);
-    let sig = '';
-    for (const p of PIDS) {
-      const inContact = this.contact(p, s); sig += inContact ? '1' : '0';
-      if (inContact) this.lastSeen[p] = { t: s.t, ...s.parishes[p] };
-      if (this.prev === s || !inContact || opts.silent) continue;
-      const a = this.prev.parishes[p], b = s.parishes[p]; if (!a || !b) continue;
-      let worst = 0, sys = null;
-      for (const k of SYSTEMS) { const d = (a.levels[k] ?? 0) - (b.levels[k] ?? 0); if (d > worst) { worst = d; sys = k; } }
-      if (worst >= 8) this.ping(p, (b.levels[sys] ?? 0) < FAILED ? 'failure' : 'damage');
-    }
-    const fogChanged = sig !== this.contactSig; this.contactSig = sig;
-    for (const c of this.convoys.values()) if (s.t >= c.arrive_t + LOAD_MIN + 1 || (c.fate === 'blocked' && s.t >= c.return_t + 30)) this.convoys.delete(c.id);
-    if (opts.silent) return;
-    this.emit('snapshot', s);
-    if (fogChanged) this.emit('fog');
-  }
-  applyEvent(e, opts = {}) {
-    if (e.kind === 'convoy_departed' && e.convoy) this.convoys.set(e.convoy.id, { ...e.convoy });
-    if (e.kind === 'convoy_turned_back') { const c = this.convoys.get(e.convoy_id); if (c) c.blocked = true; }
-    if (e.kind === 'convoy_arrived') { const c = this.convoys.get(e.convoy_id); if (c) c.arrived = true; }
-    const d = describe(e); if (!d) return;
-    const line = { t: e.t, sev: d.sev, text: d.text, pids: d.pids, mock: !!(e.mock || d.mock), kind: e.kind };
-    for (const p of d.pids) if (this.recent[p]) { this.recent[p].unshift(line); this.recent[p].length = Math.min(this.recent[p].length, 6); }
-    // One cascade lands on several parishes with the same narrative: say it once per tick.
-    const dup = this.feed[0] && this.feed[0].t === line.t && this.feed[0].text === line.text;
-    if (this.concerns(d.pids, e.kind) && !dup) { this.feed.unshift(line); this.feed.length = Math.min(this.feed.length, 80); this.emit('feed', line); }
-    if (d.ping && !opts.silent && d.pids[0] && !this.fogged(d.pids[0])) this.ping(d.pids[0], d.ping, d.pingTo);
-    this.emit('event', e);
-  }
-  ping(pid, kind, to) { if (REDUCE && kind === 'damage') return; const a = anchorOf(pid), b = to && GEO[to] ? anchorOf(to) : null; this.pings.push({ x: a.x, y: a.y, to: b, kind, age: 0, pid }); if (this.pings.length > 40) this.pings.shift(); }
-}
-
-/* ---------- session: the transport-agnostic seam ---------- */
-const session = {
-  source: null, world: null, log: null,
-  ingest(msg) { // local run, LAN host and cloud relay all enter here
-    if (!msg) return;
-    if (msg.type === 'snapshot') this.world.applySnapshot(msg.snapshot, msg.opts || {});
-    else if (msg.type === 'event') this.world.applyEvent(msg.event, msg.opts || {});
-    else if (msg.type === 'batch') for (const m of msg.items) this.ingest(m);
-  },
-};
-// Real seconds per tick in the room, per quarter (experience flow, section 4). "Room pace" plays at this tempo.
-const ROOM_PACE = { preparation: 4.6, approach: 5.5, landfall: 13.8, recovery: 3.9 };
-const clock = {
-  i: -1, f: 0, playing: false, speed: 2, stopAt: null, external: false,
-  n() { return session.source ? session.source.n : 0; },
-  ticksPerSecond() { if (this.speed !== 'room') return this.speed; const w = session.world, q = w.cur ? w.cur.quarter : 'preparation'; return 1 / (ROOM_PACE[q] || 5); },
-  applyIndex(i) {
-    session.ingest({ type: 'snapshot', snapshot: session.source.snapshot(i) });
-    session.ingest({ type: 'batch', items: session.source.events(i).map(event => ({ type: 'event', event })) });
-    this.i = i;
-  },
-  advance(dt) {
-    if (!this.playing || this.external) return;
-    this.f += dt * this.ticksPerSecond();
-    const target = Math.min(Math.floor(this.f), this.n() - 1);
-    while (this.i < target) { this.applyIndex(this.i + 1); if (this.stopAt != null && this.i >= this.stopAt) { this.f = this.i; this.pause(); this.stopAt = null; break; } }
-    if (this.i >= this.n() - 1) { this.f = this.n() - 1; this.pause(); }
-    hud.onTick();
-  },
-  jump(i) {
-    i = clamp(i, 0, this.n() - 1);
-    const w = session.world; w.reset();
-    // Catch up silently through the earlier ticks so "last report" stamps are right, then land on tick i.
-    const src = session.source, items = [];
-    for (let k = Math.max(0, i - 400); k < i; k++) items.push({ type: 'snapshot', snapshot: src.snapshot(k), opts: { silent: true } });
-    items.push({ type: 'snapshot', snapshot: src.snapshot(i) });
-    for (const event of src.history(i)) items.push({ type: 'event', event, opts: { silent: true } });
-    session.ingest({ type: 'batch', items });
-    w.prev = w.cur; this.i = i; this.f = i; this.stopAt = null;
-    hud.onTick(); hud.refreshFeed();
-  },
-  alpha() { return this.i < 0 ? 0 : clamp(this.f - this.i, 0, 1); },
-  play() { if (this.i >= this.n() - 1) return; this.playing = true; hud.syncPlay(); },
-  pause() { this.playing = false; hud.syncPlay(); },
-  toggle() { this.playing ? this.pause() : this.play(); },
-};
-
-/* ---------- renderer (PixiJS, WebGL) ---------- */
-const R = { app: null, ready: false };
-function makeTextures() {
-  const tex = {};
-  const canvas = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
-  // Storm bands: a soft spiral of cloud blobs with a clear eye, masked to a circle.
-  { const S = 512, c = S / 2, cv = canvas(S, S), ctx = cv.getContext('2d'), rng = mulberry32(7);
-    for (let arm = 0; arm < 3; arm++) for (let k = 0; k < 260; k++) {
-      const th = k / 260 * 2.35 * Math.PI, r = 34 + th / Math.PI * 92, a = th + arm * 2 * Math.PI / 3 + (rng() - 0.5) * 0.25, rr = r + (rng() - 0.5) * 26;
-      const x = c + rr * Math.cos(a), y = c + rr * Math.sin(a), rad = 12 + rng() * 18, g = ctx.createRadialGradient(x, y, 0, x, y, rad);
-      const al = 0.16 * (1 - th / (2.4 * Math.PI)) + 0.05; g.addColorStop(0, `rgba(235,240,245,${al})`); g.addColorStop(1, 'rgba(235,240,245,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.fill();
-    }
-    ctx.globalCompositeOperation = 'destination-in';
-    const m = ctx.createRadialGradient(c, c, 0, c, c, c); m.addColorStop(0, 'rgba(0,0,0,1)'); m.addColorStop(0.78, 'rgba(0,0,0,1)'); m.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = m; ctx.fillRect(0, 0, S, S);
-    ctx.globalCompositeOperation = 'destination-out';
-    const eye = ctx.createRadialGradient(c, c, 0, c, c, 30); eye.addColorStop(0, 'rgba(0,0,0,1)'); eye.addColorStop(0.6, 'rgba(0,0,0,1)'); eye.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = eye; ctx.beginPath(); ctx.arc(c, c, 30, 0, Math.PI * 2); ctx.fill();
-    tex.bands = PIXI.Texture.from(cv); }
-  // Rain shield: a soft dark-blue disc that darkens the island under the storm.
-  { const S = 256, cv = canvas(S, S), ctx = cv.getContext('2d'), g = ctx.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
-    g.addColorStop(0, 'rgba(14,30,56,0.9)'); g.addColorStop(0.55, 'rgba(14,30,56,0.55)'); g.addColorStop(1, 'rgba(14,30,56,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, S, S); tex.shield = PIXI.Texture.from(cv); }
-  // Ring: the storm front.
-  { const S = 256, cv = canvas(S, S), ctx = cv.getContext('2d'); ctx.strokeStyle = 'rgba(255,255,255,1)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(S / 2, S / 2, S / 2 - 3, 0, Math.PI * 2); ctx.stroke(); tex.ring = PIXI.Texture.from(cv); }
-  // Streak: one wind particle.
-  { const cv = canvas(48, 6), ctx = cv.getContext('2d'), g = ctx.createLinearGradient(0, 0, 48, 0); g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(0.5, 'rgba(255,255,255,1)'); g.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = g; ctx.fillRect(0, 1, 48, 4); tex.streak = PIXI.Texture.from(cv); }
-  // Glow dot for pings and convoys.
-  { const S = 64, cv = canvas(S, S), ctx = cv.getContext('2d'), g = ctx.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.35, 'rgba(255,255,255,0.55)'); g.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = g; ctx.fillRect(0, 0, S, S); tex.glow = PIXI.Texture.from(cv); }
-  // Vignette: clear over the island, darkening toward the edge of the world, which also hides the art's square edge.
-  { const S = 512, cv = canvas(S, S), ctx = cv.getContext('2d'), g = ctx.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2); g.addColorStop(0, 'rgba(6,10,16,0)'); g.addColorStop(0.5, 'rgba(6,10,16,0)'); g.addColorStop(0.62, 'rgba(6,10,16,0.35)'); g.addColorStop(1, 'rgba(6,10,16,0.7)'); ctx.fillStyle = g; ctx.fillRect(0, 0, S, S); tex.vignette = PIXI.Texture.from(cv); }
-  return tex;
-}
-const LABEL_FONT = 'Bahnschrift, "DIN Alternate", "Roboto Condensed", "Arial Narrow", "Segoe UI", Arial, sans-serif';
-const MONO_FONT = '"JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace';
-async function createRenderer(islandImg) {
-  const app = new PIXI.Application();
-  await app.init({ canvas: $('gl'), preference: 'webgl', antialias: AA, resolution: Math.min(window.devicePixelRatio || 1, 2), autoDensity: true, backgroundColor: 0x0a0e14, resizeTo: window, powerPreference: 'high-performance' });
-  R.app = app;
-  const tex = makeTextures();
-  const islandTex = PIXI.Texture.from(islandImg);
-  try { islandTex.source.autoGenerateMipmaps = true; islandTex.source.update(); } catch (e) { /* mipmaps are a nicety */ }
-  const scene = new PIXI.Container({ isRenderGroup: true }); // the camera transform is applied on the GPU
-  // sea and the command grid: the sea takes the art's own colour under the same tint as the island sprite
-  const ISLAND_TINT = 0xbcc8d4;
-  const seaColor = SEA_RGB ? ((Math.round(SEA_RGB[0] * 0xbc / 255) << 16) | (Math.round(SEA_RGB[1] * 0xc8 / 255) << 8) | Math.round(SEA_RGB[2] * 0xd4 / 255)) : 0x0b1420;
-  const sea = new PIXI.Graphics();
-  sea.rect(0, 0, WORLD, WORLD).fill(seaColor);
-  for (let x = 0; x <= WORLD; x += 200) sea.moveTo(x, 0).lineTo(x, WORLD);
-  for (let y = 0; y <= WORLD; y += 200) sea.moveTo(0, y).lineTo(WORLD, y);
-  sea.stroke({ width: 1, color: 0x5d93d1, alpha: 0.07 });
-  for (const r of [720, 900, 1080, 1260]) sea.circle(CENTER.x, CENTER.y, r).stroke({ width: 1, color: 0x5d93d1, alpha: 0.1 });
-  for (let b = 0; b < 360; b += 30) { const a = polar(b, 705), c = polar(b, 1290); sea.moveTo(a.x, a.y).lineTo(c.x, c.y); }
-  sea.stroke({ width: 1, color: 0x5d93d1, alpha: 0.05 });
-  const island = new PIXI.Sprite(islandTex); island.position.set(PAD, PAD); island.width = IMG; island.height = IMG; island.tint = ISLAND_TINT;
-  const vignette = new PIXI.Sprite(tex.vignette); vignette.width = WORLD; vignette.height = WORLD; vignette.visible = !LITE;
-  const terrC = new PIXI.Container(), roadsG = new PIXI.Graphics(), fogG = new PIXI.Graphics(), hiG = new PIXI.Graphics();
-  const stormC = new PIXI.Container(), convoyC = new PIXI.Container(), pingG = new PIXI.Graphics(), labelC = new PIXI.Container();
-  scene.addChild(sea, island, vignette, terrC, roadsG, fogG, hiG, stormC, convoyC, pingG, labelC);
-  // territories
-  const polys = {}, terr = {};
-  for (const p of PIDS) { polys[p] = territoryPoly(p); const g = new PIXI.Graphics(); terr[p] = g; terrC.addChild(g); }
-  function drawTerritory(p, state) {
-    const g = terr[p], c = GEO[p].color, fogged = session.world && session.world.fogged(p);
-    g.clear();
-    const fill = fogged ? 0.04 : state === 'selected' ? 0.24 : state === 'hover' ? 0.18 : 0.12;
-    g.poly(polys[p], true).fill({ color: c, alpha: fill }).stroke({ width: state === 'selected' ? 2.5 : 1.5, color: c, alpha: fogged ? 0.3 : state === 'selected' ? 1 : 0.6, join: 'round' });
-  }
-  function drawAllTerritories() { const w = session.world; for (const p of PIDS) drawTerritory(p, w && w.selected === p ? 'selected' : w && w.hover === p ? 'hover' : 'idle'); drawFog(); drawHighlight(); }
-  function drawFog() {
-    fogG.clear(); const w = session.world; if (!w) return;
-    for (const p of PIDS) if (w.fogged(p)) fogG.poly(polys[p], true).fill({ color: 0x05080c, alpha: 0.64 });
-  }
-  // The selection outline is tessellated once per selection; the pulse only changes its alpha.
-  function drawHighlight() { hiG.clear(); const w = session.world; if (!w || !w.selected) return; hiG.poly(polys[w.selected], true).stroke({ width: 3, color: GEO[w.selected].color, alpha: 1, join: 'round' }); }
-  // roads
-  function dashed(g, pts, dash, gap) {
-    let carry = 0, on = true;
-    for (let i = 1; i < pts.length; i++) {
-      const a = pts[i - 1], b = pts[i], L = Math.hypot(b.x - a.x, b.y - a.y); if (!L) continue;
-      let d = 0;
-      while (d < L) {
-        const seg = Math.min(L - d, (on ? dash : gap) - carry), f0 = d / L, f1 = (d + seg) / L;
-        if (on) g.moveTo(lerp(a.x, b.x, f0), lerp(a.y, b.y, f0)).lineTo(lerp(a.x, b.x, f1), lerp(a.y, b.y, f1));
-        d += seg; carry += seg; if (carry >= (on ? dash : gap) - 1e-6) { carry = 0; on = !on; }
-      }
-    }
-  }
-  // Routes say it in words beside the colour: a cut piece carries "CUT T-18:00" at its midpoint.
-  const routeLabels = {};
-  const midOf = pts => { const total = pathLen(pts); let d = total / 2; for (let i = 1; i < pts.length; i++) { const a = pts[i - 1], b = pts[i], l = Math.hypot(b.x - a.x, b.y - a.y); if (d <= l) { const f = l ? d / l : 0; return { x: lerp(a.x, b.x, f), y: lerp(a.y, b.y, f) }; } d -= l; } return pts[pts.length - 1]; };
-  for (const pc of Object.values(PIECES)) {
-    const t = new PIXI.Text({ text: '', resolution: 2, style: { fontFamily: MONO_FONT, fontSize: 10, fontWeight: '700', fill: '#ffb4ad', letterSpacing: 1, stroke: { color: '#0a0e14', width: 3 } } });
-    t.anchor.set(0.5); const m = midOf(pc.points); t.position.set(m.x, m.y); t.visible = false; routeLabels[pc.id] = t; labelC.addChild(t);
-  }
-  function drawRoads(snap) {
-    roadsG.clear();
-    for (const pc of Object.values(PIECES)) {
-      const open = snap ? snap.routes[pc.id] !== false : true, pts = pc.points, lab = routeLabels[pc.id];
-      if (open) { roadsG.moveTo(pts[0].x, pts[0].y); for (let i = 1; i < pts.length; i++) roadsG.lineTo(pts[i].x, pts[i].y); roadsG.stroke({ width: pc.kind === 'ring' ? 4 : 3, color: 0xdfe6ee, alpha: 0.5, cap: 'round', join: 'round' }); lab.visible = false; }
-      else {
-        dashed(roadsG, pts, 10, 8); roadsG.stroke({ width: pc.kind === 'ring' ? 4 : 3, color: 0xe0524f, alpha: 0.85, cap: 'butt' });
-        const at = snap && snap.route_cut_at ? snap.route_cut_at[pc.id] : null;
-        const text = at != null ? `CUT ${clockStr(at)}` : 'CUT'; if (lab.text !== text) lab.text = text; lab.visible = pc.kind !== 'spur';
-      }
-    }
-  }
-  // labels: name, role line, five bars, a chip
-  const labels = {};
-  for (const p of PIDS) {
-    const c = new PIXI.Container(), at = W(GEO[p].labelAt); c.position.set(at.x, at.y);
-    // Labels keep a constant screen size (counter-scaled per frame), so their textures are rendered at 2x to stay crisp.
-    const name = new PIXI.Text({ text: PARISH[p].name.toUpperCase(), resolution: 2, style: { fontFamily: LABEL_FONT, fontSize: 17, fontWeight: '700', fill: '#ffffff', letterSpacing: 3, stroke: { color: '#0a0e14', width: 3.5, join: 'round' } } });
-    name.anchor.set(0.5, 1); name.position.set(0, -4);
-    const tag = new PIXI.Text({ text: GEO[p].tag, resolution: 2, style: { fontFamily: LABEL_FONT, fontSize: 10.5, fontWeight: '600', fill: '#e2e8ee', letterSpacing: 1, stroke: { color: '#0a0e14', width: 2.5, join: 'round' } } });
-    tag.anchor.set(0.5, 0); tag.position.set(0, 0); tag.alpha = 0.92;
-    const bars = new PIXI.Graphics(); bars.position.set(0, 16);
-    const chip = new PIXI.Container(); chip.position.set(0, 30); chip.visible = false;
-    const chipBg = new PIXI.Graphics(), chipTx = new PIXI.Text({ text: 'ISOLATED', resolution: 2, style: { fontFamily: MONO_FONT, fontSize: 9.5, fontWeight: '700', fill: '#ffffff', letterSpacing: 1.5 } });
-    chipTx.anchor.set(0.5); chip.addChild(chipBg, chipTx);
-    const swatch = new PIXI.Graphics(); swatch.roundRect(-5, -2, 10, 4, 1).fill(GEO[p].color); swatch.position.set(0, -27);
-    // the system initials under the bars, so the colour has a word when zoomed in
-    const keys = new PIXI.Container(); const n = SYSTEMS.length, bw = 11, gap = 3, x0 = -(n * bw + (n - 1) * gap) / 2;
-    SYSTEMS.forEach((k, i) => { const kt = new PIXI.Text({ text: k[0].toUpperCase(), resolution: 2, style: { fontFamily: MONO_FONT, fontSize: 7, fontWeight: '700', fill: '#aab3bf' } }); kt.anchor.set(0.5, 0); kt.position.set(x0 + i * (bw + gap) + bw / 2, 0); keys.addChild(kt); });
-    keys.position.set(0, 24);
-    c.addChild(swatch, name, tag, bars, keys, chip);
-    labels[p] = { c, name, tag, bars, keys, chip, chipBg, chipTx };
-    labelC.addChild(c);
-  }
-  function setChip(l, text, color) { l.chip.visible = true; l.chipTx.text = text; const w = l.chipTx.width + 12; l.chipBg.clear(); l.chipBg.roundRect(-w / 2, -8, w, 16, 2).fill({ color, alpha: 0.92 }); }
-  function drawLabels(snap) {
-    const w = session.world;
-    for (const p of PIDS) {
-      const l = labels[p], fogged = w.fogged(p), st = snap && snap.parishes[p], seen = w.lastSeen[p];
-      const show = fogged ? seen : st; // out of contact: the last report, dimmed and stamped
-      l.name.alpha = fogged ? 0.6 : 1; l.tag.visible = !fogged; l.bars.visible = !!show; l.keys.visible = !!show; l.bars.alpha = l.keys.alpha = fogged ? 0.45 : 1;
-      l.bars.clear();
-      if (show) {
-        const n = SYSTEMS.length, bw = 11, gap = 3, x0 = -(n * bw + (n - 1) * gap) / 2;
-        l.bars.roundRect(x0 - 4, -3, n * bw + (n - 1) * gap + 8, 12, 2).fill({ color: 0x0a0e14, alpha: 0.75 });
-        SYSTEMS.forEach((k, i) => { const v = show.levels[k] ?? 0, h = 6 * v / 100; l.bars.rect(x0 + i * (bw + gap), 0, bw, 6).fill({ color: 0x2a3340 }); if (h > 0) l.bars.rect(x0 + i * (bw + gap), 6 - h, bw, h).fill(STATUS_HEX[status(v)]); });
-      }
-      if (fogged) setChip(l, seen ? 'LAST REPORT ' + clockStr(seen.t) : 'NO CONTACT', 0x3a434e); else if (st && st.isolated) setChip(l, 'ISOLATED', 0xb3322f); else l.chip.visible = false;
-    }
-  }
-  // storm
-  const shield = new PIXI.Sprite(tex.shield), bands = new PIXI.Sprite(tex.bands), front = new PIXI.Sprite(tex.ring), eye = new PIXI.Graphics(), trailG = new PIXI.Graphics(), forecastG = new PIXI.Graphics();
-  for (const s of [shield, bands, front]) s.anchor.set(0.5);
-  front.alpha = 0.45; front.tint = 0xee7d6a;
-  const streaks = []; const streakC = new PIXI.Container();
-  shield.visible = !LITE;
-  for (let k = 0; k < (LITE ? 24 : 56); k++) { const s = new PIXI.Sprite(tex.streak); s.anchor.set(0.5); s.alpha = 0; streakC.addChild(s); streaks.push({ s, phi: Math.random() * Math.PI * 2, rho: 0.3 + Math.random() * 0.85, speed: 0.6 + Math.random() * 0.8 }); }
-  const stormLabel = new PIXI.Text({ text: '', resolution: 2, style: { fontFamily: MONO_FONT, fontSize: 12, fontWeight: '700', fill: '#ffe1da', letterSpacing: 1.5, stroke: { color: '#0a0e14', width: 3 } } }); stormLabel.anchor.set(0.5, 1);
-  stormC.addChild(trailG, forecastG, shield, bands, streakC, front, eye, stormLabel);
-  let stormAngle = 0;
-  function stormParams(wind) { return { outer: 70 + wind * 3.3, eye: wind >= 64 ? 14 + (wind - 64) * 0.55 : 0 }; }
-  function drawTrail(snap) {
-    trailG.clear(); forecastG.clear();
-    const src = session.source; if (!src || !snap) return;
-    for (let k = Math.max(0, snap.i - 160); k <= snap.i; k += 4) { const hp = (src.log.ticks[k].weather || {}).hurricane_position; if (!hp) continue; const p = toWorld(hp); trailG.circle(p.x, p.y, 2.2).fill({ color: 0xee7d6a, alpha: 0.35 + 0.5 * (k - snap.i + 160) / 160 }); }
-    if (session.world.view === 'facilitator' && snap.forecast) { let prev = snap.storm ? toWorld(snap.storm) : null; for (const f of snap.forecast) { const p = toWorld(f); if (prev) { dashed(forecastG, [prev, p], 6, 6); } prev = p; } forecastG.stroke({ width: 1.5, color: 0xee7d6a, alpha: 0.35 }); }
-  }
-  function updateStorm(dt) {
-    const w = session.world, a = w.cur, b = w.prev || a, f = clock.alpha();
-    if (!a || !a.storm) { stormC.visible = false; return; }
-    stormC.visible = true;
-    const pa = toWorld(b.storm || a.storm), pb = toWorld(a.storm), x = lerp(pa.x, pb.x, f), y = lerp(pa.y, pb.y, f);
-    const wind = lerp(b.weather.wind_kts, a.weather.wind_kts, f), P = stormParams(wind);
-    bands.position.set(x, y); bands.scale.set(P.outer / 256 * 1.1); bands.alpha = 0.45 + 0.4 * clamp(wind / 100, 0, 1);
-    if (!REDUCE) stormAngle -= dt * (0.25 + 0.35 * clamp(wind / 100, 0, 1)); bands.rotation = stormAngle;
-    shield.position.set(x, y); shield.scale.set(P.outer / 128 * 1.5); shield.alpha = 0.55 * clamp(wind / 90, 0, 1);
-    front.position.set(x, y); front.scale.set(P.outer / 128); front.alpha = 0.25 + 0.3 * clamp(wind / 100, 0, 1);
-    eye.clear(); if (P.eye) { eye.circle(x, y, P.eye).fill({ color: 0x0b1420, alpha: 0.55 }).stroke({ width: 1.5, color: 0xffffff, alpha: 0.45 }); }
-    const sv = clamp(wind / 70, 0, 1);
-    for (const st of streaks) {
-      if (!REDUCE) st.phi -= dt * st.speed * (0.4 + sv) / st.rho;
-      const rr = st.rho * P.outer, sx = x + rr * Math.cos(st.phi), sy = y + rr * Math.sin(st.phi);
-      st.s.position.set(sx, sy); st.s.rotation = st.phi + Math.PI / 2; st.s.alpha = 0.4 * sv * (1 - st.rho / 1.25); st.s.scale.set(0.6 + 0.6 * sv, 1);
-    }
-    // The label rides above the front at sea and sits by the eye once the storm is over the island.
-    // With an eye the label sits off its upper-left shoulder, clear of whichever parish label the eye is crossing.
-    if (P.eye) { stormLabel.anchor.set(1, 1); stormLabel.position.set(x - P.eye - 22, y - P.eye - 10); } else { stormLabel.anchor.set(0.5, 1); stormLabel.position.set(x, y - P.outer - 8); }
-    stormLabel.scale.set(clamp(1 / cam.z, 0.55, 1.7));
-    stormLabel.visible = wind >= 20; // the text itself changes per snapshot, not per frame (a text change re-renders its texture)
-  }
-  // convoys
-  const convoySprites = new Map();
-  function convoySprite(c) {
-    const col = GEO[c.from].color, cc = new PIXI.Container(), g = new PIXI.Graphics();
-    g.roundRect(-13, -8, 26, 16, 3).fill({ color: 0x0a0e14, alpha: 0.9 }).stroke({ width: 2, color: col, alpha: 1 });
-    g.moveTo(13, -4).lineTo(19, 0).lineTo(13, 4).fill({ color: col });
-    const t = new PIXI.Text({ text: RESOURCES[c.resource].glyph, resolution: 2, style: { fontFamily: MONO_FONT, fontSize: 11, fontWeight: '700', fill: hexColor(col) } }); t.anchor.set(0.5); t.position.set(-1, 0);
-    const glow = new PIXI.Sprite(tex.glow); glow.anchor.set(0.5); glow.scale.set(0.9); glow.tint = col; glow.alpha = 0.35; glow.blendMode = 'add';
-    const x = new PIXI.Text({ text: '✕', style: { fontFamily: MONO_FONT, fontSize: 14, fontWeight: '700', fill: '#ff6b61', stroke: { color: '#0a0e14', width: 3 } } }); x.anchor.set(0.5); x.position.set(0, -17); x.visible = false;
-    cc.addChild(glow, g, t, x); cc.body = g; cc.glow = glow; cc.cross = x; cc.col = col;
-    return cc;
-  }
-  function updateConvoys(simT, zoom, now) {
-    const w = session.world;
-    for (const [id, sp] of convoySprites) if (!w.convoys.has(id)) { convoyC.removeChild(sp); sp.destroy({ children: true }); convoySprites.delete(id); }
-    for (const c of w.convoys.values()) {
-      let sp = convoySprites.get(c.id);
-      if (!sp) { sp = convoySprite(c); sp.path = convoyPath(c.route); convoySprites.set(c.id, sp); convoyC.addChild(sp); }
-      const travelled = (simT - c.depart_t - LOAD_MIN) * CONVOY_PX_PER_MIN;
-      let dist = clamp(travelled, 0, sp.path.len), blocked = false, returning = false;
-      // A convoy that meets a cut stops at the barrier for a quarter hour, then turns back the way it came.
-      if (c.fate === 'blocked' && simT >= c.block_t) { blocked = true; returning = simT > c.block_t + 15; dist = returning ? Math.max(0, c.block_dist - (simT - c.block_t - 15) * CONVOY_PX_PER_MIN) : c.block_dist; }
-      const at = pointAlong(sp.path, dist);
-      sp.position.set(at.x, at.y); sp.scale.set(clamp(1.15 / zoom, 0.7, 2));
-      const moving = (travelled > 0 && travelled < sp.path.len && !blocked) || (returning && dist > 0);
-      sp.body.rotation = moving ? at.angle + (returning ? Math.PI : 0) : 0;
-      sp.glow.alpha = moving ? 0.3 : 0.5 + 0.3 * Math.sin(now * 5);
-      sp.cross.visible = blocked && !returning; sp.body.tint = blocked ? 0xff8a80 : 0xffffff;
-      sp.alpha = blocked ? (simT > c.return_t ? clamp(1 - (simT - c.return_t) / 30, 0, 1) : 1) : simT > c.arrive_t + LOAD_MIN - 15 ? clamp((c.arrive_t + LOAD_MIN - simT) / 15, 0, 1) : 1;
-      sp.visible = !(w.fogged(c.from) && w.fogged(c.to));
-    }
-  }
-  // pings
-  const PING = { damage: { color: 0xe0a93a, life: 1.6, r: 46 }, failure: { color: 0xe0524f, life: 2.2, r: 60 }, alert: { color: 0xffffff, life: 1.8, r: 52 }, mayday: { color: 0xff5f57, life: 3.2, r: 90 }, blocked: { color: 0xe0524f, life: 2.4, r: 40 } };
-  function updatePings(dt, zoom) {
-    const w = session.world; pingG.clear();
-    for (const p of w.pings) p.age += dt;
-    w.pings = w.pings.filter(p => p.age < PING[p.kind].life);
-    for (const p of w.pings) {
-      const P = PING[p.kind], f = p.age / P.life, rr = (P.r * f + 6) / zoom, rings = p.kind === 'mayday' ? 3 : 2;
-      for (let k = 0; k < rings; k++) { const fk = clamp(f - k * 0.18, 0, 1); if (fk <= 0) continue; pingG.circle(p.x, p.y, (P.r * fk + 6) / zoom).stroke({ width: 2 / zoom, color: P.color, alpha: (1 - fk) * 0.9 }); }
-      pingG.circle(p.x, p.y, 4 / zoom).fill({ color: P.color, alpha: 1 - f });
-      if (p.kind === 'mayday') pingG.circle(p.x, p.y, rr * 0.3).fill({ color: P.color, alpha: 0.25 * (1 - f) });
-      if (p.to) { pingG.moveTo(p.x, p.y).lineTo(p.to.x, p.to.y).stroke({ width: 1.5 / zoom, color: P.color, alpha: 0.7 * (1 - f) }); pingG.circle(p.to.x, p.to.y, 5 / zoom).stroke({ width: 1.5 / zoom, color: P.color, alpha: 0.8 * (1 - f) }); } // the thin arc to the holder
-    }
-  }
-  // minimap
-  const MM = 200, MM_FROM = 500, MM_SPAN = 1800, mmS = MM / MM_SPAN;
-  const mm = new PIXI.Container(); const mmBg = new PIXI.Graphics(); mmBg.rect(0, 0, MM, MM).fill({ color: 0x0b1420, alpha: 0.95 }).stroke({ width: 1, color: 0x273141 });
-  const mmIsland = new PIXI.Sprite(islandTex); mmIsland.position.set((PAD - MM_FROM) * mmS, (PAD - MM_FROM) * mmS); mmIsland.width = IMG * mmS; mmIsland.height = IMG * mmS; mmIsland.tint = 0x8c9aa8;
-  const mmTerr = new PIXI.Graphics(), mmDyn = new PIXI.Graphics(), mmView = new PIXI.Graphics();
-  mm.addChild(mmBg, mmIsland, mmTerr, mmDyn, mmView);
-  const mmPt = p => ({ x: (p.x - MM_FROM) * mmS, y: (p.y - MM_FROM) * mmS });
-  function drawMinimapStatic() { mmTerr.clear(); for (const p of PIDS) { const pts = polys[p].map((v, i) => (v - MM_FROM) * mmS); const fog = session.world.fogged(p); mmTerr.poly(pts, true).fill({ color: GEO[p].color, alpha: fog ? 0.05 : 0.22 }).stroke({ width: 1, color: GEO[p].color, alpha: fog ? 0.3 : 0.8 }); } }
-  function updateMinimap(now) {
-    const w = session.world, a = w.cur; mmDyn.clear();
-    if (a) {
-      for (const p of PIDS) { if (w.fogged(p)) continue; const st = a.parishes[p]; if (st && st.isolated) { const q = mmPt(anchorOf(p)); mmDyn.circle(q.x, q.y, 4).stroke({ width: 1.5, color: 0xe0524f, alpha: 0.9 }); } }
-      if (a.storm) { const q = mmPt(toWorld(a.storm)), P = stormParams(a.weather.wind_kts); mmDyn.circle(q.x, q.y, Math.max(3, P.outer * mmS)).fill({ color: 0xee7d6a, alpha: 0.22 }).stroke({ width: 1, color: 0xee7d6a, alpha: 0.8 }); mmDyn.circle(q.x, q.y, 2.5).fill(0xffd9d2); }
-      for (const p of w.pings) { const q = mmPt(p); mmDyn.circle(q.x, q.y, 3).fill({ color: PING[p.kind].color, alpha: 0.9 * (1 - p.age / PING[p.kind].life) }); }
-      for (const sp of convoySprites.values()) { const q = mmPt(sp.position); mmDyn.circle(q.x, q.y, 2).fill({ color: sp.col, alpha: sp.visible ? 1 : 0 }); }
-    }
-    const v = cam.visibleWorldRect(); mmView.clear();
-    const x0 = (v.x - MM_FROM) * mmS, y0 = (v.y - MM_FROM) * mmS, ww = v.w * mmS, hh = v.h * mmS;
-    mmView.rect(clamp(x0, 0, MM), clamp(y0, 0, MM), clamp(ww, 0, MM - clamp(x0, 0, MM)), clamp(hh, 0, MM - clamp(y0, 0, MM))).stroke({ width: 1.2, color: 0xffffff, alpha: 0.75 });
-  }
-  app.stage.addChild(scene, mm);
-  // camera
-  const cam = {
-    x: CENTER.x, y: CENTER.y, z: 0.6, tx: CENTER.x, ty: CENTER.y, tz: 0.6, minZ: 0.25, maxZ: 4, dragging: false,
-    insets() { const panel = !$('panel').hidden && !hud.hidden ? 324 : 12; return { l: panel, r: hud.hidden ? 12 : 364, t: hud.hidden ? 0 : 60, b: hud.hidden ? 0 : 70 }; },
-    safeCenter() { const i = this.insets(), w = app.screen.width, h = app.screen.height; return { x: (i.l + (w - i.r)) / 2, y: (i.t + (h - i.b)) / 2 }; },
-    fit() { const i = this.insets(), w = app.screen.width - i.l - i.r, h = app.screen.height - i.t - i.b; this.tz = clamp(Math.min(w / 1560, h / 1560), this.minZ, this.maxZ); this.tx = CENTER.x; this.ty = CENTER.y; },
-    clampTarget() {
-      const w = app.screen.width, h = app.screen.height, hw = w / 2 / this.tz, hh = h / 2 / this.tz;
-      this.tx = hw * 2 >= WORLD ? WORLD / 2 : clamp(this.tx, hw - 120, WORLD - hw + 120);
-      this.ty = hh * 2 >= WORLD ? WORLD / 2 : clamp(this.ty, hh - 120, WORLD - hh + 120);
-    },
-    zoomAt(sx, sy, factor) {
-      const c = this.safeCenter(), z0 = this.tz, z1 = clamp(z0 * factor, this.minZ, this.maxZ);
-      const wx = this.tx + (sx - c.x) / z0, wy = this.ty + (sy - c.y) / z0;
-      this.tz = z1; this.tx = wx - (sx - c.x) / z1; this.ty = wy - (sy - c.y) / z1; this.clampTarget();
-    },
-    focus(pid) { const a = anchorOf(pid); this.tx = a.x; this.ty = a.y + 40; this.tz = clamp(Math.max(this.tz, 1.5), this.minZ, this.maxZ); this.clampTarget(); },
-    update(dt) {
-      this.clampTarget();
-      const k = this.dragging ? 1 : 1 - Math.exp(-dt / 0.14);
-      this.x += (this.tx - this.x) * k; this.y += (this.ty - this.y) * k; this.z += (this.tz - this.z) * (this.dragging ? 1 - Math.exp(-dt / 0.14) : k);
-      const c = this.safeCenter();
-      scene.position.set(c.x - this.x * this.z, c.y - this.y * this.z); scene.scale.set(this.z);
-      mm.position.set(12, app.screen.height - MM - 12);
-    },
-    toWorld(sx, sy) { return { x: (sx - scene.position.x) / this.z, y: (sy - scene.position.y) / this.z }; },
-    visibleWorldRect() { const w = app.screen.width / this.z, h = app.screen.height / this.z; return { x: -scene.position.x / this.z, y: -scene.position.y / this.z, w, h }; },
-  };
-  R.cam = cam;
-  // pointer input on the canvas (DOM events; hit tests are our own polygons)
-  const cv = app.canvas; let down = null, moved = false, lastTap = 0;
-  const hitParish = (sx, sy) => { const p = cam.toWorld(sx, sy); for (const id of PIDS) if (pointInPoly(polys[id], p.x, p.y)) return id; return null; };
-  const inMinimap = (sx, sy) => sx >= mm.position.x && sx <= mm.position.x + MM && sy >= mm.position.y && sy <= mm.position.y + MM;
-  const minimapGo = (sx, sy) => { cam.tx = MM_FROM + (sx - mm.position.x) / mmS; cam.ty = MM_FROM + (sy - mm.position.y) / mmS; cam.clampTarget(); };
-  cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); down = { x: e.clientX, y: e.clientY, cx: cam.tx, cy: cam.ty, mm: inMinimap(e.clientX, e.clientY) }; moved = false; if (down.mm) minimapGo(e.clientX, e.clientY); });
-  cv.addEventListener('pointermove', e => {
-    if (down) {
-      const dx = e.clientX - down.x, dy = e.clientY - down.y;
-      if (Math.hypot(dx, dy) > 4) moved = true;
-      if (down.mm) { minimapGo(e.clientX, e.clientY); return; }
-      if (moved) { cam.dragging = true; cam.tx = down.cx - dx / cam.z; cam.ty = down.cy - dy / cam.z; cam.clampTarget(); }
-      return;
-    }
-    const h = inMinimap(e.clientX, e.clientY) ? null : hitParish(e.clientX, e.clientY);
-    if (h !== session.world.hover) { session.world.hover = h; drawAllTerritories(); cv.style.cursor = h ? 'pointer' : 'grab'; }
-    hud.tooltip(h, e.clientX, e.clientY);
-  });
-  const up = e => {
-    if (!down) return;
-    const wasMm = down.mm; down = null; cam.dragging = false;
-    if (wasMm || moved) return;
-    const h = hitParish(e.clientX, e.clientY), now = performance.now();
-    if (h && now - lastTap < 350 && session.world.selected === h) cam.focus(h);
-    lastTap = now;
-    hud.select(h);
-  };
-  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', () => { down = null; cam.dragging = false; });
-  cv.addEventListener('pointerleave', () => { if (!down) { session.world.hover = null; drawAllTerritories(); hud.tooltip(null); } });
-  cv.addEventListener('wheel', e => { e.preventDefault(); cam.zoomAt(e.clientX, e.clientY, Math.exp(-e.deltaY * 0.0014)); }, { passive: false });
-  cv.style.cursor = 'grab';
-  const keys = new Set();
-  window.addEventListener('keydown', e => { keys.add(e.key.toLowerCase()); }); window.addEventListener('keyup', e => { keys.delete(e.key.toLowerCase()); }); window.addEventListener('blur', () => keys.clear());
-  function keyPan(dt) {
-    if (document.activeElement && /input|select|textarea/i.test(document.activeElement.tagName)) return;
-    const v = 900 * dt / cam.tz; let dx = 0, dy = 0;
-    if (keys.has('arrowleft') || keys.has('a')) dx -= v; if (keys.has('arrowright') || keys.has('d')) dx += v; if (keys.has('arrowup') || keys.has('w')) dy -= v; if (keys.has('arrowdown') || keys.has('s')) dy += v;
-    if (dx || dy) { cam.tx += dx; cam.ty += dy; cam.clampTarget(); }
-    if (keys.has('+') || keys.has('=')) cam.zoomAt(app.screen.width / 2, app.screen.height / 2, 1 + dt * 1.5);
-    if (keys.has('-') || keys.has('_')) cam.zoomAt(app.screen.width / 2, app.screen.height / 2, 1 - dt * 1.2);
-  }
-  // per-snapshot redraws
-  let lastSnap = null;
-  function onSnapshot(s) {
-    if (!lastSnap || JSON.stringify(s.routes) !== JSON.stringify(lastSnap.routes)) drawRoads(s);
-    drawLabels(s); drawTrail(s);
-    stormLabel.text = `MIDAS  ${Math.round(s.weather.wind_kts)} KT`;
-    lastSnap = s;
-  }
-  // frame loop. Frame time is measured from wall-clock timestamps, not the ticker's clamped delta.
-  let measuring = null, elapsed = 0, lastFpsUpdate = 0, lastNow = performance.now(), fpsAcc = 0, fpsN = 0;
-  app.ticker.add(tk => {
-    const now = performance.now(), realMs = now - lastNow; lastNow = now;
-    const dt = Math.min(0.1, tk.deltaMS / 1000); elapsed += dt;
-    fpsAcc += realMs; fpsN++;
-    if (measuring) { measuring.samples.push(realMs); if (now >= measuring.until) { const m = measuring; measuring = null; m.resolve(m.samples); } }
-    clock.advance(dt);
-    keyPan(dt);
-    cam.update(dt);
-    const w = session.world, a = w.cur, b = w.prev || a;
-    const simT = a ? lerp(b.t, a.t, clock.alpha()) : 0;
-    const lscale = clamp(1 / cam.z, 0.55, 1.7);
-    for (const p of PIDS) labels[p].c.scale.set(lscale);
-    for (const t of Object.values(routeLabels)) if (t.visible) t.scale.set(lscale);
-    updateStorm(dt);
-    updateConvoys(simT, cam.z, elapsed);
-    updatePings(dt, cam.z);
-    hiG.alpha = REDUCE ? 1 : 0.55 + 0.45 * Math.sin(elapsed * 3);
-    updateMinimap(elapsed);
-    if (elapsed - lastFpsUpdate > 0.5) { lastFpsUpdate = elapsed; hud.fps(fpsAcc / Math.max(1, fpsN)); fpsAcc = 0; fpsN = 0; }
-    lastJsMs = performance.now() - now;
-  });
-  // CPU time of our frame logic and of Pixi's render call, so a measurement separates script cost from rasterization.
-  let lastJsMs = 0, lastRenderMs = 0;
-  const origRender = app.renderer.render.bind(app.renderer);
-  app.renderer.render = function (...args) { const t0 = performance.now(); const r = origRender(...args); lastRenderMs = performance.now() - t0; if (measuring) measuring.cpu.push(lastJsMs + lastRenderMs); return r; };
-  R.measure = ms => new Promise(resolve => { measuring = { until: performance.now() + ms, samples: [], cpu: [], resolve: samples => resolve({ samples, cpu: measuring ? measuring.cpu : [] }) }; const m = measuring; m.resolve = samples => resolve({ samples, cpu: m.cpu }); });
-  R.redraw = () => { drawAllTerritories(); drawMinimapStatic(); if (lastSnap) { drawLabels(lastSnap); drawTrail(lastSnap); } };
-  R.onSnapshot = onSnapshot; R.drawAllTerritories = drawAllTerritories; R.drawMinimapStatic = drawMinimapStatic;
-  R.ready = true;
-  return R;
-}
-
-/* ---------- HUD (HTML) ---------- */
-const hud = {
-  hidden: false, timer: { remaining: 900, running: false, last: 0 }, lastFeedCount: -1,
-  init() {
-    $('viewsel').innerHTML = '<option value="facilitator">Facilitator view</option>' + PIDS.map(p => `<option value="${p}">${esc(pname(p))} table</option>`).join('');
-    $('viewsel').value = session.world.view;
-    $('qjump').innerHTML = QUARTERS.map((q, i) => `<button class="qbtn" type="button" data-q="${q.id}" title="Jump to ${q.name} (${i + 1})">${q.name}</button>`).join('');
-    $('qjump').addEventListener('click', e => { const b = e.target.closest('[data-q]'); if (b) this.jumpQuarter(b.dataset.q); });
-    $('play').addEventListener('click', () => clock.toggle());
-    $('play-next').addEventListener('click', () => this.playToNext());
-    $('speed').addEventListener('change', e => { clock.speed = e.target.value === 'room' ? 'room' : Number(e.target.value); });
-    $('scrub').addEventListener('input', e => { clock.pause(); clock.jump(Number(e.target.value)); });
-    $('fog-btn').addEventListener('click', () => this.setFog(!session.world.fogEnabled));
-    $('viewsel').addEventListener('change', e => this.setView(e.target.value));
-    $('fit').addEventListener('click', () => R.cam.fit());
-    $('help-btn').addEventListener('click', () => $('help').classList.toggle('on'));
-    $('qt-toggle').addEventListener('click', () => this.timerToggle());
-    $('qt-reset').addEventListener('click', () => { this.timer.remaining = 900; this.timer.running = false; this.timerDraw(); });
-    $('panel').addEventListener('click', e => { if (e.target.closest('[data-close]')) this.select(null); });
-    $('res').innerHTML = '';
-    window.addEventListener('keydown', e => {
-      const tgt = e.target; if (tgt && tgt.closest && tgt.closest('input,select,textarea')) return;
-      const k = e.key;
-      if (k === ' ') { e.preventDefault(); clock.toggle(); }
-      else if (k >= '1' && k <= '4') this.jumpQuarter(QUARTERS[Number(k) - 1].id);
-      else if (k === '[') this.speedStep(-1); else if (k === ']') this.speedStep(1);
-      else if (k.toLowerCase() === 'f' && session.world.view === 'facilitator') this.setFog(!session.world.fogEnabled);
-      else if (k.toLowerCase() === 'h') R.cam.fit();
-      else if (k.toLowerCase() === 'm') this.toggleHud();
-      else if (k === 'Escape') { this.select(null); $('help').classList.remove('on'); }
-    });
-    session.world.on('snapshot', s => { this.onSnapshot(s); });
-    session.world.on('feed', line => { if (line) this.appendFeed(line); });
-    this.syncView(); this.syncPlay(); this.timerDraw();
-  },
-  speedStep(d) { const sel = $('speed'), i = clamp(sel.selectedIndex + d, 0, sel.options.length - 1); sel.selectedIndex = i; clock.speed = sel.value === 'room' ? 'room' : Number(sel.value); },
-  jumpQuarter(id) { const q = QUARTERS.find(x => x.id === id); clock.pause(); clock.jump(session.source.indexOf(q.from)); },
-  playToNext() { const t = session.source.tAt(clock.i < 0 ? 0 : clock.i); const next = QUARTERS.find(q => q.from > t); clock.stopAt = next ? session.source.indexOf(next.from) : session.source.n - 1; clock.play(); },
-  setView(v) { const w = session.world; w.view = v; w.fogEnabled = v !== 'facilitator' ? true : w.fogEnabled; this.syncView(); this.refreshAll(); },
-  setFog(on) { const w = session.world; if (w.view !== 'facilitator') return; w.fogEnabled = on; this.syncView(); this.refreshAll(); },
-  syncView() {
-    const w = session.world, fac = w.view === 'facilitator';
-    $('view-badge').textContent = fac ? 'Facilitator' : pname(w.view) + ' table';
-    $('view-badge').style.color = fac ? 'var(--accent)' : hexColor(GEO[w.view].color);
-    $('facil-grp').style.display = fac ? '' : 'none';
-    $('fog-btn').classList.toggle('on', w.fogEnabled);
-    $('fog-btn').textContent = w.fogEnabled ? 'Broadcast fog on' : 'Broadcast fog';
-    $('feed-scope').textContent = fac ? (w.fogEnabled ? 'Broadcast' : 'True state') : pname(w.view) + ' hears';
-    $('viewsel').value = w.view;
-  },
-  refreshAll() { if (R.ready) R.redraw(); this.refreshFeed(); this.panel(); if (session.world.cur) this.onSnapshot(session.world.cur); },
-  syncPlay() { $('play').textContent = clock.playing ? 'Pause' : 'Play'; $('play').classList.toggle('on', clock.playing); },
-  select(pid) { const w = session.world; w.selected = pid === w.selected ? null : pid; if (R.ready) R.redraw(); this.panel(); this.syncView(); if (w.view === 'facilitator' && w.fogEnabled) this.refreshFeed(); },
-  toggleHud() { this.hidden = !this.hidden; for (const id of ['top', 'feed', 'dock', 'mm-label']) $(id).style.display = this.hidden ? 'none' : ''; $('panel').style.display = this.hidden ? 'none' : ''; },
-  tooltip(pid, x, y) {
-    const el = $('tip'); if (!pid) { el.style.display = 'none'; return; }
-    const w = session.world, s = w.cur, st = s && s.parishes[pid], fog = w.fogged(pid);
-    let body = `<b style="color:${hexColor(GEO[pid].color)}">${esc(pname(pid))}</b><br><span style="color:var(--fg-2)">${esc(PARISH[pid].description || '')}</span>`;
-    if (st && !fog) body += `<br><span class="num">${SYSTEMS.map(k => SYS_SHORT[k] + ' ' + Math.round(st.levels[k] ?? 0)).join(' · ')}</span>${st.isolated ? ' <span style="color:var(--failed)">ISOLATED</span>' : ''}`;
-    else if (fog) body += '<br><span style="color:var(--fg-3)">No contact</span>';
-    el.innerHTML = body; el.style.display = 'block';
-    const r = el.getBoundingClientRect(); el.style.left = Math.min(x + 14, window.innerWidth - r.width - 8) + 'px'; el.style.top = Math.min(y + 14, window.innerHeight - r.height - 8) + 'px';
-  },
-  onSnapshot(s) {
-    const w = session.world;
-    $('quarter').textContent = QUARTERS.find(q => q.id === s.quarter).name;
-    $('quarter').style.color = s.quarter === 'landfall' ? 'var(--crisis)' : s.quarter === 'recovery' ? 'var(--recovery)' : s.quarter === 'approach' ? 'var(--degraded)' : 'var(--fg)';
-    $('win-label').textContent = `${s.window_label} · wind ${Math.round(s.weather.wind_kts)} kt · surge ${s.weather.surge_ft.toFixed(0)} ft`;
-    $('simclock').textContent = clockStr(s.t);
-    $('phase-chip').className = 'chip phase-' + s.phase; $('phase-chip').textContent = s.phase;
-    $('int-val').textContent = s.intensity;
-    $('meter').innerHTML = Array.from({ length: 10 }, (_, i) => `<i class="${i < s.intensity ? 'on' : ''}" style="height:${4 + i * 1.2}px"></i>`).join('');
-    for (const b of document.querySelectorAll('#qjump .qbtn')) b.classList.toggle('on', b.dataset.q === s.quarter);
-    $('scrub').max = s.n - 1; if (document.activeElement !== $('scrub')) $('scrub').value = s.i;
-    // resources: the island's means for the facilitator, the table's own levels for a table
-    const own = w.view === 'facilitator' ? null : w.view;
-    const level = k => own ? (s.parishes[own].levels[k] ?? 0) : PIDS.reduce((a, p) => a + (s.parishes[p].levels[k] ?? 0), 0) / PIDS.length;
-    const morale = own ? (s.parishes[own].morale ?? 0) : PIDS.reduce((a, p) => a + (s.parishes[p].morale ?? 0), 0) / PIDS.length;
-    const tiles = [];
-    if (s.counters) tiles.push({ l: 'Doses shipped', v: fmt(s.counters.doses), mock: true, bar: s.counters.doses / 170000, col: 'var(--mock)' }, { l: 'People safe', v: fmt(s.counters.people), mock: true, bar: s.counters.people / 24100, col: 'var(--mock)' });
-    for (const k of SYSTEMS) { const v = level(k); tiles.push({ l: SYS_LABEL[k], v: Math.round(v) + '%', bar: v / 100, col: `var(--${status(v)})` }); }
-    tiles.push({ l: 'Morale', v: Math.round(morale), bar: morale / 100, col: `var(--${status(morale)})` });
-    if (own && s.tokens) { const tk = s.tokens[own]; tiles.push({ l: 'Tokens held', v: Object.entries(tk).filter(([k]) => k !== 'crew').map(([k, n]) => RESOURCES[k].glyph + n).join(' '), mock: true, bar: 0, col: 'var(--mock)' }); }
-    // Tiles are updated in place; the DOM is rebuilt only when the set of tiles changes (view switch).
-    const res = $('res'), key = tiles.map(t => t.l + (t.mock ? '*' : '')).join('|');
-    if (res.dataset.key !== key) { res.innerHTML = tiles.map(t => `<div class="tile${t.mock ? ' mock' : ''}"><span class="lbl">${esc(t.l)}</span><span class="v"></span><span class="bar"><i></i></span></div>`).join(''); res.dataset.key = key; }
-    tiles.forEach((t, i) => { const n = res.children[i]; const v = n.children[1], bar = n.children[2].firstChild; if (v.textContent !== t.v) v.textContent = t.v; const wpc = clamp(t.bar * 100, 0, 100).toFixed(0) + '%'; if (bar.style.width !== wpc) bar.style.width = wpc; if (bar.style.background !== t.col) bar.style.background = t.col; });
-    this.panel();
-  },
-  onTick() { const w = session.world; if (w.cur && document.activeElement !== $('scrub')) $('scrub').value = clock.i; },
-  fps(ms) { this.frameMs = ms; const el = $('fps'); if (el) el.textContent = `render ${ms.toFixed(1)} ms/frame · ${Math.round(1000 / Math.max(ms, 0.1))} fps`; },
-  feedLine(l) { return `<div class="al ${l.sev}${l.mock ? ' mock' : ''}"><span class="t num">${clockStr(l.t)}</span><span class="dot"></span><span class="x">${esc(l.text)}${l.mock ? '<span class="tag">mock</span>' : ''}</span></div>`; },
-  appendFeed(l) { const list = $('feed-list'); list.insertAdjacentHTML('afterbegin', this.feedLine(l)); while (list.children.length > 80) list.lastChild.remove(); },
-  refreshFeed() { const w = session.world; $('feed-list').innerHTML = w.feed.filter(l => w.concerns(l.pids, l.kind)).map(l => this.feedLine(l)).join(''); },
-  panel() {
-    const w = session.world, el = $('panel'), pid = w.selected;
-    if (!pid) { el.hidden = true; return; }
-    const p = PARISH[pid], s = w.cur, st = s && s.parishes[pid], fog = w.fogged(pid), col = hexColor(GEO[pid].color);
-    let body = `<p class="desc">${esc(p.description || '')}. Population ${fmt(p.population || 0)}.</p>`;
-    const seen = w.lastSeen[pid];
-    if (fog) body += `<div class="fogged">${seen ? `Out of contact since ${clockStr(seen.t)}: last report shown.` : `No contact with ${esc(pname(pid))} yet.`} Parishes talk only while both have communications; the storm, the roads and radio maydays are shared.</div>`;
-    if (fog && seen) { const L = seen.levels; body += '<div style="opacity:.6">' + SYSTEMS.map(k => { const v = L[k] ?? 0; return `<div class="lv"><span>${SYS_LABEL[k]}</span><span class="bar"><i style="width:${v}%;background:var(--${status(v)})"></i></span><span class="n num">${Math.round(v)}</span></div>`; }).join('') + '</div>'; }
-    else if (st && !fog) {
-      body += '<div>' + ['power', 'communications', 'roads', 'water', 'hospital', 'port', 'airport'].filter(k => !(p.absent || []).includes(k)).map(k => { const v = st.levels[k] ?? 0; return `<div class="lv"><span>${SYS_LABEL[k]}</span><span class="bar"><i style="width:${v}%;background:var(--${status(v)})"></i></span><span class="n num">${Math.round(v)}</span></div>`; }).join('') + '</div>';
-      body += `<div class="lbl">Morale <span class="num" style="color:var(--fg)">${Math.round(st.morale ?? 0)}</span>${st.isolated ? ' · <span style="color:var(--failed)">isolated</span>' : ''}</div>`;
-      if (s.tokens) body += `<div><span class="lbl">Tokens held <span style="color:var(--mock)">mock</span></span><div class="tokens">${Object.entries(s.tokens[pid]).map(([k, n]) => `<span class="tok">${esc(RESOURCES[k].name)} <b>${n}</b></span>`).join('')}</div></div>`;
-    }
-    const recent = (w.recent[pid] || []).slice(0, 5);
-    if (recent.length && !fog) body += `<div><span class="lbl">Recent</span><div class="mini-feed">${recent.map(l => `<span><span class="t num">${clockStr(l.t)}</span>${esc(l.text)}</span>`).join('')}</div></div>`;
-    const html = `<header><span class="sw" style="background:${col}"></span><h2>${esc(p.name)}</h2><span class="lbl">${esc(p.role || '')}</span><button class="btn tiny" data-close type="button" title="Close (Esc)">✕</button></header><div class="body">${body}</div>`;
-    if (html !== this._panelHtml) { el.innerHTML = html; this._panelHtml = html; }
-    el.hidden = false;
-  },
-  timerToggle() { this.timer.running = !this.timer.running; this.timer.last = performance.now(); $('qt-toggle').textContent = this.timer.running ? 'Pause' : 'Start'; },
-  timerDraw() { const r = Math.max(0, this.timer.remaining); $('qt').textContent = String(Math.floor(r / 60)).padStart(2, '0') + ':' + String(Math.floor(r % 60)).padStart(2, '0'); $('qt').classList.toggle('low', r <= 60); },
-};
-setInterval(() => { const t = hud.timer; if (!t.running) return; const now = performance.now(); t.remaining -= (now - t.last) / 1000; t.last = now; if (t.remaining <= 0) { t.remaining = 0; t.running = false; $('qt-toggle').textContent = 'Start'; } hud.timerDraw(); }, 250);
-
-/* ---------- boot ---------- */
-async function boot() {
-  const msg = m => { $('veil-msg').textContent = m; };
-  try {
-    const view = Q.get('view') || (location.hash.slice(1) || 'facilitator');
-    session.world = new World(PIDS.includes(view) ? view : 'facilitator');
-    if (Q.get('fog') === '0') session.world.fogEnabled = false;
-    msg('Loading the engine…'); await initEngine();
-    const seed = Number(Q.get('seed') || DATA.session.seed || 42);
-    msg(`Running Hurricane Midas, seed ${seed}…`);
-    await new Promise(r => setTimeout(r, 20));
-    const log = engineRun({ seed });
-    session.log = log;
-    msg('Reading the island…');
-    const img = new Image(); img.src = $('island-src').textContent.trim(); await img.decode();
-    try { SHORE = traceShore(img); } catch (e) { console.warn('shore trace failed, using a disc', e); }
-    buildRoutes();
-    const mock = buildMock(log, seed);
-    session.source = new LocalRunSource(log, mock);
-    msg('Building the board…');
-    await createRenderer(img);
-    session.world.on('snapshot', s => R.onSnapshot(s));
-    session.world.on('fog', () => { R.redraw(); hud.refreshFeed(); });
-    // The transport seam, named as the experience flow names it: this build is the Loopback transport (the core
-    // as WebAssembly in the same page). A LAN host or a cloud relay replaces it by calling session.ingest.
-    session.transport = { name: 'loopback', send(intent) { console.warn('intents are not wired in this build', intent); } };
-    hud.init();
-    R.redraw(); R.cam.fit(); R.cam.x = R.cam.tx; R.cam.y = R.cam.ty; R.cam.z = R.cam.tz;
-    const t0 = Q.has('t') ? Number(Q.get('t')) : log.t_start;
-    clock.jump(session.source.indexOf(t0));
-    if (Q.get('autoplay') === '1') clock.play();
-    $('veil').classList.add('off');
-    window.__crucible = {
-      ready: true, session, clock, world: session.world, R,
-      jumpTo: t => clock.jump(session.source.indexOf(t)), play: () => clock.play(), pause: () => clock.pause(),
-      setSpeed: s => { clock.speed = s; }, setView: v => hud.setView(v), setFog: f => hud.setFog(f), select: p => hud.select(p), focus: p => R.cam.focus(p), fit: () => R.cam.fit(),
-      ingest: m => session.ingest(m), // an external host (LAN or relay) drives the board through here
-      external: on => { clock.external = on; if (on) clock.pause(); },
-      measureFrames: async ms => {
-        const { samples: s, cpu } = await R.measure(ms); const sorted = [...s].sort((a, b) => a - b); const avg = s.reduce((a, b) => a + b, 0) / s.length;
-        const cpuAvg = cpu.length ? cpu.reduce((a, b) => a + b, 0) / cpu.length : null;
-        return { frames: s.length, avgMs: +avg.toFixed(2), p95Ms: +sorted[Math.floor(sorted.length * 0.95)].toFixed(2), maxMs: +sorted[sorted.length - 1].toFixed(2), fps: +(1000 / avg).toFixed(1), cpuMs: cpuAvg == null ? null : +cpuAvg.toFixed(2) };
-      },
-      stateHash: log.summary && log.summary.state_hash, seed, ticks: log.ticks.length, shore: SHORE,
-    };
-  } catch (e) {
-    console.error(e);
-    $('veil-msg').innerHTML = `<span class="err">The board failed to start: ${esc(e.message || e)}</span>`;
-    window.__crucible = { ready: false, error: String(e && e.message || e) };
-  }
-}
-boot();
+__APP_JS__
 </script>
-<script type="text/plain" id="island-src">__ISLAND_JPG__</script>
 </body>
 </html>
