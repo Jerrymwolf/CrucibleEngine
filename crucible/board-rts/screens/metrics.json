@@ -2,120 +2,120 @@
   "speed": 36,
   "pages": {
     "dm": {
-      "boot_ms": 1828,
+      "boot_ms": 1728,
       "stages": {
-        "engine": 176,
-        "island": 200,
-        "shore": 246,
-        "routes": 247,
-        "welcome": 670,
-        "renderer": 775
+        "engine": 184,
+        "island": 211,
+        "shore": 256,
+        "routes": 256,
+        "welcome": 640,
+        "renderer": 722
       }
     },
     "projector": {
-      "boot_ms": 4404,
+      "boot_ms": 3117,
       "stages": {
-        "engine": 283,
-        "island": 309,
-        "shore": 383,
-        "routes": 384,
-        "welcome": 590,
-        "renderer": 702
+        "engine": 326,
+        "island": 352,
+        "shore": 391,
+        "routes": 393,
+        "welcome": 695,
+        "renderer": 756
       }
     },
     "table": {
-      "boot_ms": 2378,
+      "boot_ms": 2399,
       "stages": {
-        "engine": 237,
-        "island": 261,
-        "shore": 305,
-        "routes": 306,
-        "welcome": 477,
-        "renderer": 574
+        "engine": 364,
+        "island": 375,
+        "shore": 507,
+        "routes": 508,
+        "welcome": 802,
+        "renderer": 890
       }
     },
     "phone": {
-      "boot_ms": 837,
+      "boot_ms": 1807,
       "stages": {
-        "engine": 221,
-        "island": 255,
-        "shore": 300,
-        "routes": 301,
-        "welcome": 459
+        "engine": 321,
+        "island": 358,
+        "shore": 468,
+        "routes": 469,
+        "welcome": 853
       }
     },
     "lobby-phone": {
-      "boot_ms": 789,
+      "boot_ms": 1099,
       "stages": {
-        "engine": 177,
-        "island": 189,
-        "shore": 314,
-        "routes": 315
+        "engine": 327,
+        "island": 351,
+        "shore": 446,
+        "routes": 447
       }
     },
     "print": {
-      "boot_ms": 1114,
+      "boot_ms": 901,
       "stages": {
-        "engine": 222
+        "engine": 215
       }
     },
     "projector-reduced": {
-      "boot_ms": 2190,
+      "boot_ms": 1859,
       "stages": {
-        "engine": 266,
-        "island": 296,
-        "shore": 336,
-        "routes": 337,
-        "welcome": 555,
-        "renderer": 655
+        "engine": 310,
+        "island": 321,
+        "shore": 433,
+        "routes": 434,
+        "welcome": 623,
+        "renderer": 717
       }
     },
     "ws-dm": {
-      "boot_ms": 1100,
+      "boot_ms": 1098,
       "stages": {
-        "engine": 192,
-        "island": 202,
-        "shore": 252,
-        "routes": 253,
-        "welcome": 431,
-        "renderer": 511
+        "engine": 209,
+        "island": 230,
+        "shore": 274,
+        "routes": 276,
+        "welcome": 463,
+        "renderer": 545
       }
     },
     "ws-projector": {
-      "boot_ms": 5843,
+      "boot_ms": 5391,
       "stages": {
-        "engine": 273,
-        "island": 285,
-        "shore": 451,
-        "routes": 452,
-        "welcome": 653,
-        "renderer": 2778
+        "engine": 173,
+        "island": 183,
+        "shore": 268,
+        "routes": 269,
+        "welcome": 434,
+        "renderer": 2378
       }
     },
     "ws-table": {
-      "boot_ms": 2383,
+      "boot_ms": 2240,
       "stages": {
-        "engine": 215,
-        "island": 225,
-        "shore": 277,
-        "routes": 278,
-        "welcome": 512,
-        "renderer": 594
+        "engine": 172,
+        "island": 191,
+        "shore": 234,
+        "routes": 235,
+        "welcome": 422,
+        "renderer": 517
       }
     },
     "ws-phone": {
-      "boot_ms": 701,
+      "boot_ms": 720,
       "stages": {
-        "engine": 200,
-        "island": 215,
-        "shore": 254,
-        "routes": 254
+        "engine": 216,
+        "island": 227,
+        "shore": 279,
+        "routes": 280
       }
     },
     "ws-bare-link": {
-      "boot_ms": 732,
+      "boot_ms": 1205,
       "stages": {
-        "engine": 204
+        "engine": 166
       }
     }
   },
@@ -160,12 +160,12 @@
     "ws-05-dm-debrief"
   ],
   "golden": {
-    "hash": "cf4a4b8c3064b3d7146a260d8dbea0b588745f39c6dcb2a8b8b76461b6501e31",
+    "hash": "dcdb95f193db7962811ca28241b8d410ba63155d5ba4e3a3dcefa4937937a06c",
     "ticks": 481
   },
-  "projector_fps": 10.112586799704633,
+  "projector_fps": 9.944971159583714,
   "run": {
-    "hash": "e90788de38b8951fd599424dfa083417e07a06b08008258b4d09330fb3f04841",
+    "hash": "023a0363153ca90f9731f76d571e25251e71af976aaeaf9abb13ebff9a03810d",
     "inputs": 85,
     "ticks": 481,
     "decisions_by_tables": 21,
@@ -173,23 +173,23 @@
   },
   "host": {
     "runs": 47,
-    "ms": 74,
+    "ms": 96,
     "errors": [],
     "inputs": 85,
     "log": 179
   },
   "ws": {
-    "code": "Z3ZZ9H",
-    "hash": "e70b3771e748702cd44be5bcd05b82f3a54420e6fe485cd0fac9ca0a870eadb9",
+    "code": "RZ9ASW",
+    "hash": "6f45cae639e3ff48c785575191a28d032c9f8d67d7320d5f6cfe3915ea84557a",
     "inputs": 7,
     "clients": 5
   },
   "errors": [],
   "failures": [],
   "notes": [
-    "projector frame rate while running on the software GPU: 10.1 fps (2504 ms sample)",
+    "projector frame rate while running on the software GPU: 9.9 fps (2504 ms sample)",
     "fog at landfall as Haven sees it: gateway, heartland, keystone, sterling, summit out of contact",
     "decisions: 21 by tables, 3 by the storm at a deadline; 13 aid answers, 1 expired"
   ],
-  "checked": "2026-10-21T16:18:27.420Z"
+  "checked": "2026-10-21T17:25:07.036Z"
 }

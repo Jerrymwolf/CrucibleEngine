@@ -61,7 +61,8 @@ class ChannelTransport extends BaseTransport {
   close() { this.closed = true; clearTimeout(this.timer); if (this.bc) { this.bc.postMessage({ to: 'host', from: this.id, bye: true }); this.bc.close(); } this.setState('closed'); }
 }
 
-/* WebSocket: crucible-host. Reconnects with exponential backoff, 1 s doubling to 30 s (PROTOCOL.md 10). */
+/* WebSocket: crucible-host. Reconnects with backoff, 1 s doubling to 4 s, and pings every 10 s: a link silent
+   for 25 s is closed and retried, so a half-open Wi-Fi link does not keep showing "linked" (PROTOCOL.md 10). */
 class WebSocketTransport extends BaseTransport {
   constructor(url) { super(); this.url = url; this.backoff = 1000; }
   connect() {
@@ -70,14 +71,15 @@ class WebSocketTransport extends BaseTransport {
     let ws;
     try { ws = new WebSocket(this.url); } catch (e) { this.setState('closed', String(e.message || e)); this.scheduleRetry(); return; }
     this.ws = ws;
-    ws.onopen = () => { this.backoff = 1000; this.setState('open'); this.flush(f => ws.send(JSON.stringify(f))); };
-    ws.onmessage = ev => { let f; try { f = JSON.parse(ev.data); } catch (e) { return; } this.deliver(f); };
-    ws.onclose = ev => { if (this.ws !== ws) return; this.ws = null; this.setState('closed', ev.reason || `code ${ev.code}`); this.scheduleRetry(); };
+    ws.onopen = () => { this.backoff = 1000; this.heard = Date.now(); this.setState('open'); this.flush(f => ws.send(JSON.stringify(f))); this.beat(ws); };
+    ws.onmessage = ev => { this.heard = Date.now(); let f; try { f = JSON.parse(ev.data); } catch (e) { return; } this.deliver(f); };
+    ws.onclose = ev => { clearInterval(this.pinger); if (this.ws !== ws) return; this.ws = null; this.setState('closed', ev.reason || `code ${ev.code}`); this.scheduleRetry(); };
     ws.onerror = () => { /* onclose follows */ };
   }
-  scheduleRetry() { if (this.closed) return; clearTimeout(this.timer); this.timer = setTimeout(() => this.connect(), this.backoff); this.backoff = Math.min(30000, this.backoff * 2); }
+  beat(ws) { clearInterval(this.pinger); this.pinger = setInterval(() => { if (this.ws !== ws) return clearInterval(this.pinger); if (Date.now() - this.heard > 25000) { ws.close(4000, 'no answer from the host'); return; } if (ws.readyState === 1) ws.send(JSON.stringify({ v: 1, type: 'ping' })); }, 10000); }
+  scheduleRetry() { if (this.closed) return; clearTimeout(this.timer); this.timer = setTimeout(() => this.connect(), this.backoff); this.backoff = Math.min(4000, this.backoff * 2); }
   send(f) { if (this.ws && this.ws.readyState === 1) this.ws.send(JSON.stringify(f)); else this.queue.push(f); }
-  close() { this.closed = true; clearTimeout(this.timer); const ws = this.ws; this.ws = null; if (ws) ws.close(); this.setState('closed'); }
+  close() { this.closed = true; clearTimeout(this.timer); clearInterval(this.pinger); const ws = this.ws; this.ws = null; if (ws) ws.close(); this.setState('closed'); }
 }
 
 /* The client side of the protocol: hello, seat, intents with a per-device counter, acks, resync on

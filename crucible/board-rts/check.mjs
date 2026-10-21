@@ -287,6 +287,7 @@ async function rehearsal() {
   await waitFor(tbl, () => !!document.querySelector('.vrec'), null, 'the record by value appears once the table has placed its moment');
   ok(await tbl.evaluate(() => !document.querySelector('.gapbar') && !/over \d/.test(document.body.innerText)), 'no signed score or mean anywhere on the console');
   await shot(tbl, '22b-table-debrief-moments');
+  ok(await tbl.evaluate(() => { const t = document.body.innerText; return !/Capitulating/.test([...document.querySelectorAll('.mom')].filter(m => !m.querySelector('.press')).map(m => m.querySelector('.anc-chip') ? m.querySelector('.anc-chip').innerText : '').join(' ')) && (!document.querySelector('.later') || /Known later, not at the time/i.test(t)); }), 'the console reads Capitulating only beside a named pressure, and labels what was known later');
   await dmStep('moments'); await shot(proj, '23-projector-debrief-moments');
   await dmStep('questions'); await shot(proj, '23b-projector-debrief-questions');
   await dmStep('pattern'); await shot(proj, '24-projector-debrief-pattern');

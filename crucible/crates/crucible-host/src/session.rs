@@ -767,11 +767,13 @@ impl Host {
                 dilemmas
                     .iter()
                     .map(|(d, vs)| {
+                        // a late vote is kept, never counted
                         let mut split: BTreeMap<&str, i64> = BTreeMap::new();
-                        for v in vs.values() {
+                        for v in vs.values().filter(|v| !v.late) {
                             *split.entry(v.option_id.as_str()).or_default() += 1;
                         }
-                        (d.clone(), json!({ "count": vs.len(), "split": split, "late": vs.values().filter(|v| v.late).count() }))
+                        let late = vs.values().filter(|v| v.late).count();
+                        (d.clone(), json!({ "count": vs.len() - late, "split": split, "late": late }))
                     })
                     .collect()
             })
@@ -798,8 +800,9 @@ impl Host {
                     .get(p)
                     .map(|d| d.iter().filter_map(|(k, v)| v.get(&client.id).map(|vote| (k.clone(), json!(vote.option_id)))).collect())
                     .unwrap_or_default();
+                let my_late: Vec<&String> = self.votes.get(p).map(|d| d.iter().filter(|(_, v)| v.get(&client.id).is_some_and(|vote| vote.late)).map(|(k, _)| k).collect()).unwrap_or_default();
                 Some(json!({
-                    "parish": p, "pending": self.pending_for(Some(p)), "my_votes": my_votes,
+                    "parish": p, "pending": self.pending_for(Some(p)), "my_votes": my_votes, "my_late": my_late,
                     "my_pick": self.picks.get(&client.id),
                 }))
             }

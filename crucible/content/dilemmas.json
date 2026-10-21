@@ -3394,7 +3394,7 @@
       "personaId": "mendez",
       "personaLine": "I've seen this weather before. I know what it does. I'll take them out if you tell me to. I'm telling you what it costs.",
       "later": "A and D put the Pacific Harvester among the last boats in at T-32h; the DM heats landfall-gateway with 'she never made the Mole'.",
-      "debrief": "Heartland's works held six days, not four. The run bought nothing the island did not already have.",
+      "debrief": "Heartland's works held six days, not four, so the extra run bought nothing the island lacked. At the time, four days was the only number on the table. What made the run feel necessary?",
       "cards": [
         "tomas-reyes"
       ],
@@ -3422,8 +3422,8 @@
           "description": "Keystone and Sterling first.",
           "valueAlignment": {
             "fairness": -2,
-            "duty": 1,
-            "obedience": 1
+            "duty": 0,
+            "obedience": 0
           },
           "consequenceSketch": {
             "immediate": "Doses protected; hospital on its own generator when the dam dips; Ruth Calloway's dialysis depends on 48 hours of fuel.",
@@ -3442,7 +3442,11 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "the Authority board and Sterling (the signed 2019 schedule)"
+            "actor": "the Authority board and Sterling (the signed 2019 schedule)",
+            "invokes": [
+              "duty",
+              "obedience"
+            ]
           }
         },
         {
@@ -3622,7 +3626,7 @@
           "valueAlignment": {
             "compassion": 1,
             "candor": -2,
-            "loyalty": 1
+            "loyalty": 0
           },
           "consequenceSketch": {
             "immediate": "Doses hold; whether Southfield has places depends on the allocation round.",
@@ -3637,7 +3641,10 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "Chicago (the line runs until the port closes)"
+            "actor": "Chicago (the line runs until the port closes)",
+            "invokes": [
+              "loyalty"
+            ]
           }
         },
         {
@@ -3849,7 +3856,7 @@
       "personaId": "santos",
       "personaLine": "Have you asked the people who'll actually be doing this what they think? Two hours. Then you'll have crews who chose it, or you'll know they didn't.",
       "later": "Option A's exhausted crews are the ones asked to load batch 47 in the wind (call A2).",
-      "debrief": "The master was always sailing at T-30h; the meeting would have cost nothing she had not already decided.",
+      "debrief": "The master had decided to sail at T-30h before anyone asked her. At the time, the meeting looked as if it could change her mind. What did asking cost, and what did not asking cost?",
       "cards": [
         "dmitri-volkov"
       ],
@@ -3921,7 +3928,7 @@
           "valueAlignment": {
             "courage": -2,
             "honesty": -1,
-            "obedience": 1
+            "obedience": 0
           },
           "consequenceSketch": {
             "immediate": "40% of Riverside moves; the rest wait for a knock.",
@@ -3953,7 +3960,10 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "the Governor (voluntary language until 85%)"
+            "actor": "the Governor (voluntary language until 85%)",
+            "invokes": [
+              "obedience"
+            ]
           }
         },
         {
@@ -4086,7 +4096,7 @@
           "label": "Hold it until the ship sails, as instructed",
           "description": "",
           "valueAlignment": {
-            "loyalty": 2,
+            "loyalty": 0,
             "honesty": -2
           },
           "consequenceSketch": {
@@ -4102,7 +4112,10 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "Chicago (confidential until the ship sails)"
+            "actor": "Chicago (confidential until the ship sails)",
+            "invokes": [
+              "loyalty"
+            ]
           }
         },
         {
@@ -4464,7 +4477,7 @@
           "valueAlignment": {
             "candor": -2,
             "safety": -2,
-            "obedience": 2
+            "obedience": 0
           },
           "consequenceSketch": {
             "immediate": "The release arrives unannounced on a town with the river already in its ground floors.",
@@ -4479,7 +4492,10 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "the published protocol (the Authority board)"
+            "actor": "the published protocol (the Authority board)",
+            "invokes": [
+              "obedience"
+            ]
           }
         }
       ],
@@ -4491,7 +4507,7 @@
       "personaId": "tanaka",
       "personaLine": "If I tell them now and the rain stops, I have emptied a town for nothing and told the island my gate is broken. If I tell them at ninety-four, they have ninety minutes in the dark. Pick the night you want to explain.",
       "later": "This choice sets the state Riverside is in when landfall-summit and L3 arrive.",
-      "debrief": "The rain did not stop.",
+      "debrief": "The rain did not stop. At the time, the forecast still held a break. What would have let the table act before it knew?",
       "cards": [
         "amara-osei",
         "sam-oyelaran"
@@ -4994,7 +5010,7 @@
           "label": "The manifest flies",
           "description": "Executives' families out, as planned.",
           "valueAlignment": {
-            "loyalty": 2,
+            "loyalty": 0,
             "integrity": -2,
             "fairness": -2
           },
@@ -5028,7 +5044,10 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "Chicago's security team (the manifest)"
+            "actor": "Chicago's security team (the manifest)",
+            "invokes": [
+              "loyalty"
+            ]
           }
         },
         {
@@ -5390,8 +5409,8 @@
           "label": "Follow the protocol: open at 97%",
           "description": "If the rain holds, the spillway goes over with no warning time left.",
           "valueAlignment": {
-            "duty": 2,
-            "obedience": 2,
+            "duty": 0,
+            "obedience": 0,
             "courage": -2
           },
           "consequenceSketch": {
@@ -5426,7 +5445,11 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "the published protocol (the Authority board)"
+            "actor": "the published protocol (the Authority board)",
+            "invokes": [
+              "duty",
+              "obedience"
+            ]
           }
         },
         {
@@ -5538,7 +5561,7 @@
       "personaId": "tanaka",
       "personaLine": "At ninety-four I open and I own a flood I could have waited on. At ninety-seven I open by the book and the water reaches the town ninety minutes after the book says it will. At ninety-nine I am praying. I'll make whichever call you give me. I need the words.",
       "later": "The water from this choice is the water at Sterling's gate and in Riverside at landfall-sterling and landfall-summit.",
-      "debrief": "The rain did not slow until T+3h. At 99% the overflow sill would have taken it. Tanaka's 'I need the words' is read back beside whatever words the table gave.",
+      "debrief": "The rain did not slow until T+3h, and at 99% the overflow sill would have taken it. At the time, the protocol said 97% and nobody knew where the sill would give. Tanaka's 'I need the words' is read back beside whatever words the table gave.",
       "cards": [
         "sam-oyelaran",
         "amara-osei",
@@ -5567,7 +5590,7 @@
           "label": "Order the crew to stay; the rooms hold; radio Southfield that help is coming",
           "description": "",
           "valueAlignment": {
-            "duty": 2,
+            "duty": 0,
             "respect": -3,
             "honesty": -1
           },
@@ -5605,7 +5628,10 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "Chicago (the rooms hold)"
+            "actor": "Chicago (the rooms hold)",
+            "invokes": [
+              "duty"
+            ]
           }
         },
         {
@@ -6296,7 +6322,7 @@
       "personaId": "whitlock",
       "personaLine": "I've got thirty bodies and two boats and water in the street. My people will go in if you say go. Some of them will go in if you say don't. Say something.",
       "later": "What is left of Riverside's population in the water is who stands at Sterling's gate.",
-      "debrief": "The backup held. The hand-carry was never needed. Nobody knew that at T-1h.",
+      "debrief": "The backup held, and the hand-carry was never needed. Nobody knew that at T-1h. What was the table protecting when it decided?",
       "cards": [
         "ben-whitlock",
         "amara-osei",
@@ -6368,9 +6394,9 @@
           "label": "Keep it shut",
           "description": "",
           "valueAlignment": {
-            "safety": 2,
+            "safety": 0,
             "compassion": -2,
-            "loyalty": 1
+            "loyalty": 0
           },
           "consequenceSketch": {
             "immediate": "The three hundred go up the open stairwells of the car park; the board puts 300 at risk through the backside; the cameras record it.",
@@ -6389,7 +6415,11 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "Chicago's security chief"
+            "actor": "Chicago's security chief",
+            "invokes": [
+              "safety",
+              "loyalty"
+            ]
           }
         },
         {
@@ -6528,7 +6558,7 @@
           "label": "Give the reporter the company's draft now; tell Ines afterwards",
           "description": "",
           "valueAlignment": {
-            "recognition": 2,
+            "recognition": 0,
             "candor": -2,
             "respect": -2
           },
@@ -6545,7 +6575,10 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "Sterling's communications office (the company draft)"
+            "actor": "Sterling's communications office (the company draft)",
+            "invokes": [
+              "recognition"
+            ]
           }
         },
         {
@@ -6668,7 +6701,7 @@
           "label": "The schedule: Keystone and Sterling first; crews to the Switchbacks and Caldera",
           "description": "",
           "valueAlignment": {
-            "duty": 2,
+            "duty": 0,
             "fairness": -2,
             "accountability": -2
           },
@@ -6696,7 +6729,10 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "the Priority Schedule (Sterling and the board)"
+            "actor": "the Priority Schedule (Sterling and the board)",
+            "invokes": [
+              "duty"
+            ]
           }
         },
         {
@@ -6905,7 +6941,10 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "Chicago"
+            "actor": "Chicago",
+            "invokes": [
+              "loyalty"
+            ]
           }
         }
       ],
@@ -6974,7 +7013,7 @@
           "label": "Facts only; no orders, no names; accept Sterling's 50%",
           "description": "",
           "valueAlignment": {
-            "loyalty": 2,
+            "loyalty": 0,
             "honesty": -2,
             "fairness": -2
           },
@@ -6999,7 +7038,10 @@
           },
           "pressure": {
             "form": "conditional_belonging",
-            "actor": "Sterling (50% pay, \"given losses\")"
+            "actor": "Sterling (50% pay, \"given losses\")",
+            "invokes": [
+              "loyalty"
+            ]
           }
         },
         {
@@ -7104,7 +7146,7 @@
           "label": "Sign; take the money; rebuild now",
           "description": "",
           "valueAlignment": {
-            "stewardship": 1,
+            "stewardship": 0,
             "accountability": -2,
             "honesty": -2
           },
@@ -7126,7 +7168,10 @@
           },
           "pressure": {
             "form": "enforced_silence",
-            "actor": "Meridian ($40M for the sentence)"
+            "actor": "Meridian ($40M for the sentence)",
+            "invokes": [
+              "stewardship"
+            ]
           }
         },
         {
@@ -7264,7 +7309,7 @@
           "label": "Read Chicago's statement as written",
           "description": "",
           "valueAlignment": {
-            "loyalty": 2,
+            "loyalty": 0,
             "respect": -2,
             "honesty": -2
           },
@@ -7281,7 +7326,10 @@
           },
           "pressure": {
             "form": "coercive_authority",
-            "actor": "Chicago (the drafted statement)"
+            "actor": "Chicago (the drafted statement)",
+            "invokes": [
+              "loyalty"
+            ]
           }
         },
         {

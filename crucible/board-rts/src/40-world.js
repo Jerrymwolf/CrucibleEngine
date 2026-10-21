@@ -67,7 +67,7 @@ class World extends Emitter {
     this.role = null; this.parish = null;
     this.session = null; this.clock = null; this.t = T_START; this.seq = 0; this.hash = null;
     this.tick = null; this.ticks = []; this.lastSeen = {}; this.fogged = [];
-    this.teams = {}; this.feed = []; this.cards = {}; this.calls = {}; this.convoys = {}; this.residents = { cards: {}, groups: {} }; this.scored = []; this.routeCutAt = {};
+    this.teams = {}; this.feed = []; this.cards = {}; this.calls = {}; this.convoys = {}; this.residents = { cards: {}, groups: {} }; this.scored = []; this.rejections = []; this.routeCutAt = {};
     this.phase = null; this.quarterCard = null; this.debrief = null; this.private = null; this.lobby = null; this.waiting = null; this.roster = null;
     this.conn = 'connecting'; this.lastError = null; this.anchor = { wall: performance.now(), t: T_START }; this.scrub = null;
     this.results = []; // intent results for the console's status line
@@ -109,7 +109,7 @@ class World extends Emitter {
     this.role = f.role || this.client.role || this.role; this.parish = f.parish !== undefined ? f.parish : (this.client.parish || this.parish);
     this.session = snap.session || this.session; this.clock = snap.clock || this.clock; this.seq = snap.seq || 0; this.hash = snap.hash || null;
     this.teams = {}; for (const tm of snap.teams || []) this.teams[tm.parish_id] = { stated_values: tm.stated_values || [], statement: tm.statement || null, controller: tm.controller };
-    this.feed = []; this.cards = {}; this.calls = {}; this.convoys = {}; this.residents = { cards: {}, groups: {} }; this.scored = []; this.routeCutAt = {}; this.ticks = []; this.lastSeen = {};
+    this.feed = []; this.cards = {}; this.calls = {}; this.convoys = {}; this.residents = { cards: {}, groups: {} }; this.scored = []; this.rejections = []; this.routeCutAt = {}; this.ticks = []; this.lastSeen = {};
     for (const h of snap.history || []) this.ingest(h.t, h.event, false);
     this.historyTruncated = !!snap.history_truncated;
     if (snap.tick) this.setTick(snap.tick, snap.t);
@@ -156,9 +156,10 @@ class World extends Emitter {
       case 'dilemma_presented': this.cards[e.parish_id + '|' + e.dilemma_id] = { parish_id: e.parish_id, dilemma_id: e.dilemma_id, title: e.title, presented_t: t, deadline_t: e.deadline_t, decision: null }; break;
       case 'decision': { const k = e.parish_id + '|' + e.dilemma_id; const c = this.cards[k] || (this.cards[k] = { parish_id: e.parish_id, dilemma_id: e.dilemma_id, title: (DATA.dilemmas[e.dilemma_id] || {}).title, presented_t: null, deadline_t: null }); c.decision = { t, option_id: e.option_id, option_label: e.option_label, decided_by: e.decided_by || 'table', controller: e.controller, rationale: e.rationale }; this.scored.push({ t, parish_id: e.parish_id, gkind: 'dilemma', gid: e.dilemma_id, gopt: e.option_id, glabel: `${letterOf(e.dilemma_id, e.option_id)} on ${(DATA.dilemmas[e.dilemma_id] || { title: e.dilemma_id }).title}`, values_signaled: e.values_signaled || {}, decided_by: e.decided_by, reason: e.rationale || '' }); break; }
       case 'allocation': this.scored.push({ t, parish_id: e.parish_id, gkind: e.entry === 'repair_send' ? 'repair' : 'allocation', gid: e.entry === 'declare_hidden' ? 'declare_hidden' : e.entry === 'keep_everything' ? 'allocate:keep' : `allocate:${e.token}`, gopt: e.entry === 'send' || e.entry === 'repair_send' ? `send:${e.to}` : e.entry === 'declare_hidden' ? 'declare' : e.entry, glabel: describe(e).text.replace(pname(e.parish_id) + ' ', ''), values_signaled: e.values_signaled || {}, decided_by: e.entry === 'keep_everything' ? 'storm' : undefined }); break;
-      case 'aid_answer': { const c = this.calls[e.call_id] || (this.calls[e.call_id] = { call_id: e.call_id, asker: e.asker, holder: e.holder }); c.answer = { t, answer: e.answer, label: e.label, count: e.count, controller: e.controller, delivered: e.delivered !== false }; this.scored.push({ t, parish_id: e.holder, gkind: 'aid', gid: e.call_id, gopt: e.answer, glabel: e.controller === 'silence' ? `no answer to ${pname(e.asker)} (${e.call_id}): the storm decided` : `${e.label || answerLabel(e.call_id, e.answer)} to ${pname(e.asker)} (${e.call_id})`, values_signaled: e.values_signaled || {}, decided_by: e.controller === 'silence' ? 'storm' : undefined, reason: e.rationale || e.reason || '' }); break; }
+      case 'aid_answer': { const c = this.calls[e.call_id] || (this.calls[e.call_id] = { call_id: e.call_id, asker: e.asker, holder: e.holder }); c.answer = { t, answer: e.answer, label: e.label, count: e.count, controller: e.controller, delivered: e.delivered !== false }; this.scored.push({ t, parish_id: e.holder, gkind: 'aid', gid: e.call_id, gopt: e.answer, glabel: e.controller === 'silence' ? `no answer to ${pname(e.asker)} (${e.call_id}): the storm decided` : `${e.label || answerLabel(e.call_id, e.answer)} to ${pname(e.asker)} (${e.call_id})`, values_signaled: e.values_signaled || {}, decided_by: e.controller === 'silence' ? 'storm' : undefined, reason: e.rationale || e.reason || '', note: e.note || '' }); break; }
       case 'aid_expired': { const c = this.calls[e.call_id] || (this.calls[e.call_id] = { call_id: e.call_id, holder: e.holder }); c.answer = { t, answer: 'expired', label: 'no answer', controller: 'silence' }; break; }
       case 'mayday': this.calls[e.call_id] = { call_id: e.call_id, asker: e.asker, holder: e.holder, token: e.token, count: e.count, opened_t: t, deadline_t: e.deadline_t, ask: e.ask, line: e.line, persona_id: e.persona_id, raised_by: e.raised_by, answer: null }; break;
+      case 'rejected': this.rejections.push({ t, parish_id: e.parish_id, source: e.source, reason: e.reason }); break;
       case 'credit_line': this.scored.push({ t, parish_id: e.parish_id, gkind: 'credit', gid: `credit:${e.to}`, gopt: 'credit', glabel: `credit to ${pname(e.to)}`, values_signaled: e.values_signaled || {}, text: e.text, to: e.to }); break;
       case 'values_locked': this.teams[e.parish_id] = { ...(this.teams[e.parish_id] || {}), stated_values: e.values || [], statement: e.statement || null, locked_t: t }; break;
       case 'convoy_departed': this.convoys[e.convoy_id] = { id: e.convoy_id, from: e.from, to: e.to, token: e.token, count: e.count, route_ids: e.route_ids || [], depart_t: t, arrive_t: e.arrive_t, purpose: e.purpose, status: 'moving' }; break;
@@ -189,6 +190,12 @@ class World extends Emitter {
       if (e.reason && !storm) m.reasons.push(e.reason);
       if (!storm) for (const [v, sig] of Object.entries(e.values_signaled || {})) { const cur = m.signals[v]; if (cur == null || Math.abs(sig) > Math.abs(cur) || (Math.abs(sig) === Math.abs(cur) && sig < cur)) m.signals[v] = sig; }
       if (m.dilemma_id) { const d = DATA.dilemmas[m.dilemma_id] || {}; const o = (d.options || []).find(x => x.id === m.option_id); m.pressure = o && o.pressure || null; m.debrief = d.debrief || ''; m.letter = letterOf(m.dilemma_id, m.option_id); m.option_label = o ? o.label : m.option_id; }
+    }
+    // A chosen move with no reading says why: the engine refused what it tried to do.
+    for (const m of out.values()) if (!m.storm && !Object.keys(m.signals).length) {
+      const r = m.dilemma_id && this.rejections.find(x => x.parish_id === parish && x.source === m.dilemma_id && x.t === m.t);
+      const held = m.events.find(e => /holds no/.test(e.note || ''));
+      m.unrated = r ? r.reason : held ? held.note : null;
     }
     // Capitulating is giving way to a pressure: a -2 on a moment that carried none reads as Faltering.
     for (const m of out.values()) if (!m.pressure) for (const [v, sig] of Object.entries(m.signals)) if (sig === -2) m.signals[v] = -1;

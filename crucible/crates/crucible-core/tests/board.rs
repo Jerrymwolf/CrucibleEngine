@@ -152,8 +152,9 @@ fn the_allocation_round_locks_scores_and_delivers() {
     let (t, Event::Allocation { values_signaled, .. }) = send.expect("the send is scored") else { unreachable!() };
     assert_eq!(t, lock_t);
     // Summit needs FUEL in approach and Haven never does; Summit's need is the island's greatest.
-    assert_eq!(values_signaled.get("service"), Some(&2));
-    assert_eq!(values_signaled.get("fairness"), Some(&2));
+    // The fuel costs Haven nothing it needs, so the send reads Striving at most, one signal per value.
+    assert_eq!(values_signaled.get("service"), Some(&1));
+    assert_eq!(values_signaled.get("fairness"), Some(&1));
     assert_eq!(values_signaled.get("compassion"), Some(&1));
     assert!(events(&log).any(|(t, e)| t == lock_t && matches!(e, Event::Allocation { parish_id, entry, .. } if parish_id == "haven" && entry == "keep")));
     assert!(events(&log).any(|(t, e)| t == lock_t && matches!(e, Event::Allocation { parish_id, entry, values_signaled, .. } if parish_id == "sterling" && entry == "keep_everything" && values_signaled.is_empty())));
@@ -172,7 +173,7 @@ fn the_allocation_round_locks_scores_and_delivers() {
     assert_eq!(log.ticks[idx].stock["haven"]["FUEL"], 3);
     // The values gap carries the allocation as evidence of its kind.
     let row = log.summary.values_gap.iter().find(|r| r.parish_id == "haven" && r.value == "service").unwrap();
-    assert!(row.evidence.iter().any(|e| e.kind == "allocation" && e.dilemma_id == "allocate:FUEL" && e.option_id == "send:summit" && e.signal == 2));
+    assert!(row.evidence.iter().any(|e| e.kind == "allocation" && e.dilemma_id == "allocate:FUEL" && e.option_id == "send:summit" && e.signal == 1));
     assert!(log.summary.values_gap.iter().any(|r| r.parish_id == "sterling" && r.evidence.iter().any(|e| e.option_id == "keep_everything")));
 }
 
@@ -410,4 +411,16 @@ fn thirty_credit_lines_are_one_moment() {
     let row = log.summary.values_gap.iter().find(|r| r.parish_id == "haven" && r.value == "recognition").unwrap();
     assert_eq!(row.evidence.iter().filter(|e| e.kind == "credit").count(), 1);
     assert!(row.evidence.iter().all(|e| e.signal <= 1), "a cost-free move never rates above +1");
+}
+
+#[test]
+fn giving_way_earns_nothing_on_the_value_the_actor_invokes() {
+    let mut c = content();
+    c.validate().expect("shipped content validates");
+    let d = c.dilemmas.all_dilemmas.iter_mut().find(|d| d.id == "v3-prep-sterling").unwrap();
+    let o = d.options.iter_mut().find(|o| o.pressure.is_some() && o.pressure.as_ref().unwrap().form != "situational").unwrap();
+    let v = o.pressure.as_ref().unwrap().invokes[0].clone();
+    o.value_alignment.insert(v.clone(), 2);
+    let err = format!("{:?}", c.validate().expect_err("a +2 on the invoked value is refused"));
+    assert!(err.contains(&format!("reads {v} above 0")), "{err}");
 }

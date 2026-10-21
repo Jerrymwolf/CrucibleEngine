@@ -179,8 +179,9 @@ class LocalHost {
   }
   entriesOf(p) { return this.inputs.filter(i => i.kind === 'allocate' && i.parish_id === p).map(i => ({ token: i.token, to: i.to, count: i.count, seq: i.seq, t: i.t })); }
   voteCounts(p) { const out = {}; for (const [d, by] of Object.entries(this.votes[p] || {})) out[d] = Object.keys(by).length; return out; }
-  voteSplit(p) { const out = {}; for (const [d, by] of Object.entries(this.votes[p] || {})) { const split = {}; let late = 0; for (const v of Object.values(by)) { split[v.option_id] = (split[v.option_id] || 0) + 1; if (v.late) late++; } out[d] = { count: Object.keys(by).length, split, late }; } return out; }
+  voteSplit(p) { const out = {}; for (const [d, by] of Object.entries(this.votes[p] || {})) { const split = {}; let late = 0, count = 0; for (const v of Object.values(by)) { if (v.late) { late++; continue; } split[v.option_id] = (split[v.option_id] || 0) + 1; count++; } out[d] = { count, split, late }; } return out; }   // a late vote is kept, never counted
   myVotes(cid, p) { const out = {}; for (const [d, by] of Object.entries(this.votes[p] || {})) if (by[cid]) out[d] = by[cid].option_id; return out; }
+  myLate(cid, p) { return Object.entries(this.votes[p] || {}).filter(([, by]) => by[cid] && by[cid].late).map(([d]) => d); }
   seatsView() {
     return ROSTER.map(p => {
       const h = this.seats[p].console && this.clients.get(this.seats[p].console);
@@ -197,7 +198,7 @@ class LocalHost {
     }
     if (client.role === 'phone') {
       const p = client.parish;
-      return { parish: p, pending: this.openCards(p), my_votes: this.myVotes(client.client_id, p), my_pick: this.picks[client.client_id] || null };
+      return { parish: p, pending: this.openCards(p), my_votes: this.myVotes(client.client_id, p), my_late: this.myLate(client.client_id, p), my_pick: this.picks[client.client_id] || null };
     }
     if (client.role === 'dm') {
       return { briefs: PROFILE.secretBriefs || {}, pending: this.openCards(), calls: this.openCalls(), entries: Object.fromEntries(ROSTER.map(p => [p, this.entriesOf(p)])), stock: tick.stock || {},

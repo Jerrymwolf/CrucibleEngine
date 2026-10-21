@@ -458,6 +458,11 @@ pub struct DilemmaOption {
 pub struct PressureTag {
     pub form: String,
     pub actor: String,
+    /// The values the actor invokes to justify the demand ("loyalty to the
+    /// company", "follow the protocol"). Giving way earns nothing on them:
+    /// on the option that yields, each reads 0 at most.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub invokes: Vec<String>,
 }
 
 /// The pressure forms an option may name: the dissertation's four social

@@ -147,6 +147,15 @@ impl Content {
                     if !crate::content::PRESSURE_FORMS.contains(&pt.form.as_str()) {
                         k.errs.push(format!("{what} option {}: unknown pressure form {}", o.id, pt.form));
                     }
+                    // giving way to a social pressure earns nothing on the values its actor invokes
+                    for v in &pt.invokes {
+                        if o.value_alignment.get(v).copied().unwrap_or(0) > 0 {
+                            k.errs.push(format!("{what} option {}: yields to {} yet reads {v} above 0, the value the actor invokes", o.id, pt.actor));
+                        }
+                    }
+                    if pt.form != "situational" && pt.invokes.is_empty() {
+                        k.errs.push(format!("{what} option {}: a social pressure names the values its actor invokes", o.id));
+                    }
                 }
             }
             // v3 cards follow the audit fix rules (decision-2026-10-21-audit-fix-spec,

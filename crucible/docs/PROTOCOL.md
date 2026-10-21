@@ -207,13 +207,13 @@ The run log's tick (`RUN_LOG_SCHEMA.md`) with its per-parish maps reduced to the
   "votes": { "v3-prep-haven": 4 },                                   // how many phones have voted on each open card; never the split
   "inputs": [ { "seq": 12, "t": -4005, "kind": "allocate", "payload": { … }, "by": "console" } ],   // this table's accepted inputs, oldest first
   "my_placement": { "moment": "dilemma:v3-landfall-haven", "anchor": -1, "label": "…", "seq": 610 },   // the table's own placement (D7), or null
-  "vote_split": { "v3-prep-haven": { "count": 4, "split": { "a": 3, "c": 1 }, "late": 0 } } }   // only once the debrief is open; null before
+  "vote_split": { "v3-prep-haven": { "count": 4, "split": { "a": 3, "c": 1 }, "late": 0 } } }   // only once the debrief is open; null before. count and split hold on-time votes only; a vote after the table's move is kept and counted under late
 ```
 
 **phone**
 ```jsonc
 { "parish": "haven", "pending": [ … as console … ],
-  "my_votes": { "v3-prep-haven": "a" }, "my_pick": ["service", "candor", "safety"] }   // no commitment: it never leaves the phone
+  "my_votes": { "v3-prep-haven": "a" }, "my_late": [], "my_pick": ["service", "candor", "safety"] }   // my_late: the cards this phone voted on after the table's move (not counted); no commitment: it never leaves the phone
 ```
 
 **dm**
@@ -244,8 +244,8 @@ The host sends a client only what its role and parish may see. The data never re
 - Clients `ack { seq }` the frames they apply; the host uses acks only for its connection view (the DM's roster).
 - A client that sees a gap in `seq` sends `resync { from_seq }` with the last seq it applied. The host answers with every buffered sequenced frame whose `seq` is greater, in order, filtered for that client; or, when the buffer cannot serve it, with one `snapshot` frame.
 - The first frame on a connection is always the answer to `hello` (`welcome`, `lobby`, `waiting`, `reload` or `error`); the `roster` and `lobby` broadcasts a join causes go to the other devices. A `welcome` can also arrive unasked: when the DM's `reassign` or `admit` gives a console seat away, the former holder receives a new `welcome` with `role: "phone"` and a fresh snapshot, and drops its console view.
-- A disconnected client reconnects with `hello { client_id, resume_token, last_seq }`. The answer is `welcome` with a full snapshot; the client applies it and discards its stale view (snapshots are small enough at one tick per four seconds). `last_seq` is accepted and ignored: a client that wants the frames it missed sends `resync { from_seq }` after the welcome and gets them in order. Then it re-sends every intent that has no `intent_result` yet, with its original `client_seq`; the host de-duplicates. An intent whose deadline passed while the device was offline is rejected `expired`: the console says "the storm decided". A phone vote flushed after its table raised the card is recorded with `late: true` and still counts for the second gap, marked.
-- Clients retry with exponential backoff (1 s doubling to 30 s) and keep `client_id`, `resume_token` and the role token in local storage.
+- A disconnected client reconnects with `hello { client_id, resume_token, last_seq }`. The answer is `welcome` with a full snapshot; the client applies it and discards its stale view (snapshots are small enough at one tick per four seconds). `last_seq` is accepted and ignored: a client that wants the frames it missed sends `resync { from_seq }` after the welcome and gets them in order. Then it re-sends every intent that has no `intent_result` yet, with its original `client_seq`; the host de-duplicates. An intent whose deadline passed while the device was offline is rejected `expired`: the console says "the storm decided". A phone vote flushed after its table raised the card is recorded with `late: true`: it is kept and shown as late, never counted in `vote_split`.
+- Clients retry with backoff (1 s doubling to 4 s) and keep `client_id`, `resume_token` and the role token in local storage.
 - Late joins: a console joining in Q2 gets the snapshot and plays from there; its Q1 allocation was "keep everything" unless the DM entered a sheet for it. A phone joining mid-quarter sees the open card and may vote until the table raises its card.
 
 ## 11. Intents

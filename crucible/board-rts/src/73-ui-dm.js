@@ -98,7 +98,7 @@ const DMUI = {
         moments: `“Turn to your console. Before anything else, pick the moment that was hardest for your table and agree where it sits on the scale. Then you will see how the engine read it.” (${placed}/${ROSTER.length} placed)`,
         questions: `“At your table, two questions. ${DEBRIEF_QUESTIONS.join(' ')} Start from the moment you placed.” Four minutes.`,
         pattern: '“This is the room, not any one table. Where pressure from people with power won, where it did not, and what the storm took when nobody chose.”',
-        gap: '“On your console: how your phones voted against what your table chose. Counts, no names. Who knew and did not say?”',
+        gap: '“On your console: how your phones voted against what your table chose. Counts, no names. What would it have taken to say it out loud?”',
         credits: '“The lines of credit: who named whose people.”', replay: '“The storm, from the start. Watch for your hardest moment.”',
         commitment: '“On your phone, one sentence: when that moment comes again, what will you do first? It stays on your phone. Nothing is sent.”' };
       const line = step.id.startsWith('secret:') ? `“${esc(pname(step.id.slice(7)))} knew this.” Then: “${esc(db.debrief_question || '')}”` : say[step.id] || '';

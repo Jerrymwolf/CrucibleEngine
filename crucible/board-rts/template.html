@@ -131,6 +131,7 @@ body.role-phone #app,body.role-print #app{position:static;pointer-events:auto}
 .opt.chosen{border-color:var(--ok)}
 .opt .d{font-size:12px;color:var(--fg-2)}
 .deadline{display:flex;align-items:center;gap:10px}
+.deadline.off{opacity:.45}
 .radial{width:54px;height:54px;flex-shrink:0}
 .radial circle{fill:none;stroke-width:5}
 .radial .bg{stroke:var(--line)}
@@ -344,6 +345,7 @@ body.role-phone #app,body.role-print #app{position:static;pointer-events:auto}
 .role-table.debrief .side{width:min(58vw,760px)}
 /* S5.2: the primary button stays in reach on a 1280x800 or 1024x768 tablet */
 .role-table .side .action .body .confirm{position:sticky;bottom:0;z-index:2;background:var(--bg);box-shadow:0 -8px 12px var(--bg)}
+.role-table .side .action .body .opt,.role-table .side .action .body .answers{scroll-margin-bottom:96px}   /* a chosen option scrolls clear of the sticky lock bar */
 @media (max-height:820px){.role-table .side .lower{max-height:22%}.dcard .setup{max-height:22vh}}
 /* S5.3: nothing on the wall under 22 px; headlines 28 px and up */
 .role-projector .full p.small,.role-projector .full .bigcounters .b,.role-projector .full .bigcounters .l,.role-projector .credits .c b,.role-projector .scrub .marks,.role-projector .stm .txt,.role-projector .stm .pending,.role-projector .stm .vals span,.role-projector .col,.role-projector .col .person,.role-projector .col .person .n,.role-projector .col .st,.role-projector .tag,.role-projector .full .kicker,.role-projector .secretcard .kicker,.role-projector .scrub .dim{font-size:22px}

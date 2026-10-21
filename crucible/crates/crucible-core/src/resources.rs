@@ -94,14 +94,14 @@ pub fn record_allocation(content: &Content, state: &mut SimState, parish: &str, 
     Ok(())
 }
 
+/// A send's reading, one signal per value (the strongest, never a sum). A send
+/// that costs the sender nothing it needs reads Striving (+1) at most; only a
+/// token the sender itself needs before the storm ends can read higher.
 fn score_send(content: &Content, state: &SimState, stock_before: i64, parish: &str, token: &str, to: &str, count: i64) -> BTreeMap<String, i64> {
     let all = quarter_ids(content);
     let needs_p = content.resources.need(parish, token, &all);
     let needs_to = content.resources.need(to, token, &all);
     let mut sig = BTreeMap::new();
-    if needs_p > 0 && stock_before - count < needs_p {
-        add_signals(&mut sig, &rule_signals(content, "sendLastNeeded"));
-    }
     if needs_to > 0 {
         let before_you = match (first_need(content, to, token), first_need(content, parish, token)) {
             (Some(q_to), Some(q_p)) => q_to < q_p,
@@ -109,15 +109,21 @@ fn score_send(content: &Content, state: &SimState, stock_before: i64, parish: &s
             _ => false,
         };
         if before_you {
-            add_signals(&mut sig, &rule_signals(content, "sendNeededBeforeYou"));
+            strongest_signals(&mut sig, &rule_signals(content, "sendNeededBeforeYou"));
         }
         let greatest = content.parish_ids().iter().map(|p| content.resources.need(p, token, &all)).max().unwrap_or(0);
         if needs_to == greatest {
-            add_signals(&mut sig, &rule_signals(content, "sendGreatestNeed"));
+            strongest_signals(&mut sig, &rule_signals(content, "sendGreatestNeed"));
         }
     }
     if token == "FUND" && state.asked_of.get(parish).is_some_and(|h| h.contains(to)) {
-        add_signals(&mut sig, &rule_signals(content, "fundToAsked"));
+        strongest_signals(&mut sig, &rule_signals(content, "fundToAsked"));
+    }
+    for v in sig.values_mut() {
+        *v = (*v).min(1);
+    }
+    if needs_p > 0 && stock_before - count < needs_p {
+        strongest_signals(&mut sig, &rule_signals(content, "sendLastNeeded"));
     }
     clamp3(sig)
 }
@@ -350,6 +356,25 @@ pub fn lock_values(ctx: &mut Ctx, parish: &str, values: &[String], statement: Op
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_spare_send_reads_striving_at_most() {
+        let content = Content::load(&std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../content")).unwrap();
+        let mut rng = crate::rng::SimRng::new(42);
+        let state = crate::sim::test_state(&content, &mut rng);
+        let all = quarter_ids(&content);
+        for p in content.parish_ids() {
+            for (token, n) in state.stock.get(&p).cloned().unwrap_or_default() {
+                for to in content.parish_ids().iter().filter(|q| **q != p) {
+                    let sig = score_send(&content, &state, n, &p, &token, to, 1);
+                    if content.resources.need(&p, &token, &all) <= n - 1 {
+                        assert!(sig.values().all(|v| *v <= 1), "{p} sending a spare {token} to {to} reads {sig:?}");
+                    }
+                    assert!(sig.values().all(|v| *v <= 2), "{p} sending {token} to {to} reads {sig:?}");
+                }
+            }
+        }
+    }
 
     #[test]
     fn keeping_three_surpluses_is_one_falter_not_three() {

@@ -706,7 +706,8 @@ async fn six_tables_and_a_dm_play_a_whole_session_that_replays_and_repeats() {
     // The DM saw votes with their split and a late one, both flags, and the cancelled heat.
     let last = a.dm_frames.iter().rev().find(|f| f["type"] == "state").unwrap();
     assert_eq!(last["private"]["briefs"].as_object().unwrap().len(), 6);
-    assert!(last["private"]["votes"]["haven"]["v3-prep-haven"]["count"].as_u64().unwrap() >= 2, "{}", last["private"]["votes"]);
+    // count holds the on-time votes only; the late one is kept apart, never counted
+    assert!(last["private"]["votes"]["haven"]["v3-prep-haven"]["count"].as_u64().unwrap() >= 1, "{}", last["private"]["votes"]);
     assert!(last["private"]["votes"]["haven"]["v3-prep-haven"]["late"].as_u64().unwrap() >= 1, "{}", last["private"]["votes"]);
     assert_eq!(last["private"]["flags"].as_array().unwrap().len(), 2);
     assert_eq!(last["private"]["intensity_offset"], 0, "heat then cool");

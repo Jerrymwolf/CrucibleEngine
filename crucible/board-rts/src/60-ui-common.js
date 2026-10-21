@@ -20,11 +20,13 @@ const Live = {
       const dl = Number(el.dataset.deadline), totalTicks = Number(el.dataset.total || 0), sec = w.secondsLeft(dl), total = Math.max(1, totalTicks) * w.spt;
       const fg = el.querySelector('.fg'), tx = el.querySelector('text'), C = 2 * Math.PI * 23;
       if (fg) fg.setAttribute('stroke-dashoffset', String(C * (1 - clamp(sec / total, 0, 1))));
-      if (tx) { const s = mmss(sec); if (tx.textContent !== s) tx.textContent = s; }
+      const off = w.conn && w.conn !== 'open';   // offline: the host keeps time, so show none rather than a frozen count
+      el.classList.toggle('off', !!off);
+      if (tx) { const s = off ? '--:--' : mmss(sec); if (tx.textContent !== s) tx.textContent = s; }
       el.classList.toggle('low', sec < 60 && sec > 0);
-      const txt = el.querySelector('.dl-text'); if (txt) { const s = sec > 0 ? `${mmss(sec)} left · by ${clockStr(dl)}` : `closed at ${clockStr(dl)}`; if (txt.textContent !== s) txt.textContent = s; }
+      const txt = el.querySelector('.dl-text'); if (txt) { const s = off ? `link lost · the host keeps the clock · due ${clockStr(dl)}` : sec > 0 ? `${mmss(sec)} left · by ${clockStr(dl)}` : `closed at ${clockStr(dl)}`; if (txt.textContent !== s) txt.textContent = s; }
     }
-    for (const el of document.querySelectorAll('[data-countdown]')) { const s = mmss(w.secondsLeft(Number(el.dataset.countdown))); if (el.textContent !== s) el.textContent = s; }
+    for (const el of document.querySelectorAll('[data-countdown]')) { const sec = w.secondsLeft(Number(el.dataset.countdown)), s = w.conn && w.conn !== 'open' ? '--:--' : sec > 0 ? mmss(sec) : 'closed'; if (el.textContent !== s) el.textContent = s; }
   },
 };
 function radialHTML(deadlineT, totalTicks, label) {
@@ -122,15 +124,16 @@ function readingEnds(r) { return !r ? [] : r.tradeoff ? [r.lo, r.hi] : [r.lo]; }
 function momentLineHTML(m, opts = {}) {
   const sig = opts.signal != null ? opts.signal : null;
   return `<div class="mom ${m.storm ? 'storm' : ''}"><div class="mh">${m.storm ? '<span class="tag storm">the storm decided</span>' : sig != null ? `<span class="anc-chip ${sig > 0 ? 'pos' : sig < 0 ? 'neg' : ''}">${signed(sig)} ${esc(anchorName(sig))}</span>` : ''}<b>${esc(m.label)}</b>${m.letter ? `<span class="dim">${m.storm ? 'default ' : ''}${esc(m.letter)}: ${esc(m.option_label || '')}</span>` : ''}</div>
+    ${m.unrated ? `<div class="why">The move could not run (${esc(m.unrated)}), so nothing was rated.</div>` : ''}
     ${m.reasons && m.reasons.length ? `<div class="why">You said: “${esc(m.reasons[m.reasons.length - 1])}”</div>` : ''}
     ${m.pressure ? `<div class="press">${esc(PRESSURE_FORM[m.pressure.form] || m.pressure.form)} · ${esc(m.pressure.actor || '')}</div>` : ''}
-    ${opts.debrief && m.debrief ? `<div class="later">${esc(m.debrief)}</div>` : ''}</div>`;
+    ${opts.debrief && m.debrief ? `<div class="later"><span class="lbl">Known later, not at the time</span> ${esc(m.debrief)}</div>` : ''}</div>`;
 }
 /* the console's private record (S4 step 2): each stated value, its chosen moments on the anchors, the storm's apart */
 function momentsHTML(parish, world) {
   const rows = world.gapRows(parish);
   if (!rows.length) return `<span class="dim">No values stated.</span>`;
-  return `<div class="vrec">${rows.map(r => `<div class="vr"><div class="vh"><b>${r.stated_rank}. ${esc(vname(r.value))}</b><span class="dim">${r.tested ? `${r.n_chosen} moments you chose touched it` : r.n_chosen === 1 ? 'tested once: not enough to read a pattern' : 'untested: nothing you chose touched it'}</span></div>
+  return `<div class="vrec">${rows.map(r => `<div class="vr"><div class="vh"><b>${r.stated_rank}. ${esc(vname(r.value))}</b><span class="dim">${r.tested ? `${r.n_chosen} moments you chose touched it` : r.n_chosen === 1 ? 'tested once: not enough to read a pattern' : 'untested: your cards rarely asked about it'}</span></div>
     ${r.evidence.map(m => momentLineHTML(m, { signal: m.signal, debrief: true })).join('')}
     ${r.storm.length ? `<div class="stormlist"><span class="lbl">Left to the storm (not rated)</span>${r.storm.map(m => momentLineHTML(m, { debrief: true })).join('')}</div>` : ''}</div>`).join('')}</div>`;
 }
