@@ -59,6 +59,36 @@ The model returns a short reading for the DM only:
 
 The reading uses the seven anchors' language for passages, never for people. It is never shown on the wall or on a table's screen.
 
+### 1a. JEV as the evaluator (Jerry, 2026-10-21)
+
+JEV is TypeSafe AI's "System One" model, released in September 2026. It is a hosted decision API (`POST https://api.typesafe.ai/v1/systemone`, TypeScript SDK `@typesafe-ai/sdk`). It returns typed answers, never text. Three answer types fit the game:
+- **Choice:** one of up to 255 options, with probabilities.
+- **Score:** an ordered scale of 2 to 10 levels described in words.
+- **Noul:** a yes/no probability.
+
+Published figures are 70 to 500 ms per call and $0.042 per million input tokens, with output free. Those are vendor claims and have not been measured here.
+
+That makes JEV the evaluator, and Claude the writer. The host calls JEV after every decision with the table's digest as `state` and these questions:
+
+| Question | Type | Use |
+|---|---|---|
+| Where does this passage sit on the stated value? | Score, 7 levels with the dissertation's anchor descriptions | DM reading, and to pick what the follow-up tests |
+| Which permission form shows in the rationale? | Choice: outcome minimization / performance-based exception / local normalization / situational / none | DM reading and debrief question |
+| Which pressure was the table under? | Choice: coercive authority / conditional belonging / enforced silence / shame-related devaluation / time / scarcity / odds / none | DM reading and debrief question |
+| Did the table comply with an off-board coercer? | Noul | Flags the Capitulating-not-Villainous case for the debrief |
+| Which follow-up best answers this choice? | Choice over the matching entries in `followups.json` | Fallback pick and the brief handed to the writer |
+| Is this draft safe to release unreviewed? | Noul, threshold set high | Cruise control's gate. Below threshold, the draft waits for the DM |
+
+Each answer is written into the log as part of the issue input, so replay never calls JEV again.
+
+Rules for using it:
+- **Pin the version** (for example `jev-1.13.0`), so a session's readings don't shift mid-conference.
+- **Treat player text as untrusted.** Rationales and refusal reasons are typed by players and can steer the answer. Every question names that text as the table's words to be judged, and no rating is ever shown to a table.
+- **Hide its numbers.** JEV's readings go to the DM only, as words ("leaning toward Faltering on candor"), never as numbers, in line with the rule that ratings place passages, not people.
+- **Keep the engine's own scoring.** The engine's deterministic scoring stays the record. JEV's reading is a second witness, and where the two disagree, that disagreement is itself a debrief prompt.
+
+JEV needs the internet, has no offline or self-hosted version, and was waitlisted at launch. Without it, the host skips the readings and picks follow-ups from the flags alone.
+
 ### 2. The issue writer (once per table per quarter, or when the DM asks)
 
 The writer receives the digest, the canon (parish lore, residents, personas) and the effects schema. It drafts one dilemma that turns a past choice into a present consequence. For example: the crew a table kept working is now exhausted at landfall, or the neighbour it refused is now the one holding the fuel.
@@ -126,8 +156,8 @@ The decision window itself comes from the pacing fix, so an AI card is never slo
 
 ## Open
 
-- **JEV.** Jerry chose "Something else" and has not yet named it. Its slot is the evaluator or the writer, depending on what it is.
-- **The API key at the venue.** It lives only on the facilitator's laptop, in the host's config, never in the page or the repo.
+- **JEV access.** JEV is waitlisted. Someone needs to get a TypeSafe key before it can be tested on real session logs.
+- **The API keys at the venue** (Claude and TypeSafe). It lives only on the facilitator's laptop, in the host's config, never in the page or the repo.
 - **Model and latency budget.** A draft must reach the DM within the quarter's quiet time. The fallback covers misses.
 - **Privacy.** Rationales and phone picks leave the room when they are sent to the model. That needs a line in the session brief, or a setting that sends only the table's choices.
 
