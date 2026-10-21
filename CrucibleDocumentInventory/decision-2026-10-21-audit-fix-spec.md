@@ -11,8 +11,9 @@ related:
   - "[[decision-2026-10-21-engine-allocations-aid]]"
   - "[[reference-2026-10-21-permission-and-pressure]]"
   - "[[values-crucible-session-90]]"
+  - "[[framing-2026-10-21-audit-fixes]]"
 source: "Advisor panel audit, https://claude.ai/artifact/CNfhFiCekWbeof3o2CdfYH"
-self_audit: "v1 57/100, v2 95/100 (see Appendix A)"
+self_audit: "spec v1 57/100, v2 95/100 (Appendix A); framing 52 to 97 in framing-2026-10-21-audit-fixes"
 tags: [crucible, scoring, debrief, permission-and-pressure, spec, plan]
 ---
 
@@ -44,10 +45,11 @@ otherwise.
 |---|---|---|---|---|
 | D1 | How a storm-decided card or silent mayday is rated | No rating, marked "the storm decided" and examined in the debrief; effects still play (revised 2026-10-21 to match the revised audit: a timeout shows no answer was given, not that a value was surrendered) | S1.2 emits −2 (or −1) instead; nothing else moves | pending (card re-posted) |
 | D2 | What the wall shows about each table's values | Room pattern on the wall; each table's evidence only on its own console | S4 steps 2 and 4 swap screens | pending |
-| D3 | How far to recode the deck | Full recode into the mortal middle | "Worst only" drops S2.1 and S2.5; "keep" drops S2 except S2.2 | pending |
+| D3 | How to make hard choices actually hard (re-asked) | Rewrite option wording so every option costs something, and re-rate honestly into the mortal middle | "Numbers only" drops the wording half of S2.1; "worst cases only" keeps S2.2 and S2.4 | pending (card re-posted) |
 | D4 | When tables see the Authority charter clause | During play | S5.9 dropped; S4 step 4 reveals it instead | pending |
 | D5 | How pressure rises | Storm curve, ~180 / 140 / 95 / 150 s, heat and cool ±20 s | S6.1 table changes | pending |
-| D6 | What must land before the conference | All phases, in order | Phases 3 and 6 become stretch; the legacy profile ships for them (Plan, rollback) | pending |
+| D6 | Smallest version that still teaches (re-asked) | Minimum unbroken chain first (Plan, cut A), then the rest | "Every phase in order" drops the cut; "scoring only" ships phase 1 on the legacy profile | pending (card re-posted) |
+| D7 | Who says what a moment meant (new) | Each table places its hardest moment on the scale first, then sees the engine's reading | "Engine only" drops S4.4; "no scale" shows moments without anchors | pending |
 
 ## Design principles
 
@@ -96,6 +98,7 @@ Each item has an id, the files it touches, and a check that proves it.
 | S2.6 | Add three or four live pressure moments where an off-board voice (HQ, the Governor, Chicago) applies a social form during play, for example HQ making aid conditional on silence about a shortfall. Never script one real table to pressure another. | Each form enacted at least once per session |
 | S2.7 | Coverage: candor, courage, duty, integrity and respect are each tested at least twice per table over the session. | Validator counts per parish |
 | S2.8 | **Two-coder method.** Two independent coders rate every option on the seven anchors from the dissertation definitions. Exact agreement ≥ 80% and every disagreement within one anchor; Jerry settles the rest. The table is committed as `crucible/content/coding/dilemmas-anchors-v4.csv` beside the content. | Agreement figures in the commit message |
+| S2.9 | **Permission on every card.** Each card keeps one reasonable voice granting permission to falter and one granting permission to strive, so neither option is the obvious one. | Coding table column per card |
 
 ### S3. Consequences (`residents.rs`, `resources.rs`, `routes.rs`, `tally.rs`, `content/residents.json`)
 
@@ -115,7 +118,7 @@ DM-advanced, no auto-advance. Fifteen minutes in total.
 | Step | Screen | Content | Minutes |
 |---|---|---|---|
 | 1 | Wall | The island: counters and the low point | 1 |
-| 2 | Each console, private (D2) | **Your moments.** Each stated value, its moments on the seven anchors, chosen apart from storm, with the reasons the table logged and the card's prepared debrief line. Untested values say so. | 3 |
+| 2 | Each console, private (D2) | **Your moments.** The table first picks its hardest moment and places it on the seven anchors (D7, S4.4); then it sees each stated value, its moments on the seven anchors, chosen apart from storm, with the reasons the table logged and the card's prepared debrief line. Untested values say so. | 3 |
 | 3 | Wall, consoles, DM read-aloud | **The two questions.** What made compromise acceptable? What made resistance costly? Tables talk. | 4 |
 | 4 | Wall | **Permission and pressure in this room.** Where pressure won and where tables held, by form and actor; situational pressure apart from social forms; who invoked the Authority clause (D4). No table is named against a rating. | 2 |
 | 5 | Console | **The gap.** Private phone votes against the table's card, as counts, no names. | 1 |
@@ -123,7 +126,7 @@ DM-advanced, no auto-advance. Fifteen minutes in total.
 | 7 | Wall | **Credit lines and replay.** | 1 |
 | 8 | Phone | **Commitment.** "When ___ happens, I will ___." Stays on the phone; never sent to the host or exported. | 1 |
 
-S4.1: the projector mirror's per-table bars are deleted. S4.2: the phone
+S4.4: the self-placement is a logged input, so replay holds; the room pattern in step 4 shows where tables placed themselves beside the engine's reading, with no table named. S4.1: the projector mirror's per-table bars are deleted. S4.2: the phone
 commitment no longer travels to the host (today `30-host.js` and
 `session.rs` both handle it). S4.3: the DM read-aloud text and the one-page DM
 card are rewritten to this order.
@@ -209,6 +212,8 @@ acceptance; a build-log entry. Work continues on the PR #2 lineage.
 | 5. UX and room | S5, S7 | M | none | S5 check passes; print pack regenerated |
 | 6. Pacing | S6 | S | 1 | Window table matches the log |
 | 7. Re-audit | Same four advisor lenses, same seeds | M | 1 to 6 | Each of the audit's seven blockers closed or explained in writing |
+
+**Cut A, the minimum unbroken chain (D6).** Every link of the chain in [[framing-2026-10-21-audit-fixes]] holds at a basic level: phase 1 whole; S2.2, S2.4 and the wording half of S2.1 for the four landfall cards; S3.1 for resident groups tied to maydays only, plus S3.4; S4 whole; S5.1, S5.2, S5.3; S6.1 for landfall only. The rest follows as time allows.
 
 Phases 4 and 5 run beside phases 2 and 3. Phase 1 lands first because
 everything reads its records.
