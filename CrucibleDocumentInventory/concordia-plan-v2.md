@@ -1,3 +1,18 @@
+---
+title: "Concordia narrative development plan v2 (superseded)"
+date: 2026-10-21
+type: plan
+status: superseded
+superseded_by: "[[concordia-parishes-v3]]"
+project: Crucible Engine (The Values Crucible)
+tags: [crucible-engine, plan, lore, superseded]
+related:
+  - "[[concordia-narrative-plan]]"
+  - "[[concordia-parishes-v3]]"
+  - "[[crucible-dilemmas-v3]]"
+canon_note: "The gaps this plan listed (parish specs, timeline, crisis dilemmas, personas) are filled by [[concordia-parishes-v3]], [[concordia-storm-quarters]] and [[crucible-dilemmas-v3]]. The supply chain it confirmed has changed: Heartland processes the kelp, Haven only ships."
+---
+
 # Concordia Narrative Development Plan v2
 
 ## What Exists (From Transcript)

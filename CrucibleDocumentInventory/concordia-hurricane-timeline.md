@@ -1,3 +1,18 @@
+---
+title: "Hurricane Midas: timeline and weather progression (partly superseded)"
+date: 2026-10-21
+type: world-bible
+status: superseded-in-part
+superseded_in_part_by: "[[concordia-storm-quarters]]"
+project: Crucible Engine (The Values Crucible)
+tags: [crucible-engine, lore, timeline, storm]
+related:
+  - "[[concordia-storm-quarters]]"
+  - "[[concordia-parishes-v3]]"
+  - "[[decision-2026-10-21-parish-leadership-redesign]]"
+canon_note: "The storm itself (Category 4, 145 mph, 938 mb, 10 to 14 ft surge, the eye over the island) stands. The four-quarter structure, the route-cut table, the eye timing, the reservoir and dam figures and the two counters in [[concordia-storm-quarters]] win where they differ from the hour-by-hour here."
+---
+
 # HURRICANE MIDAS: Timeline and Weather Progression
 
 ## Storm Overview
