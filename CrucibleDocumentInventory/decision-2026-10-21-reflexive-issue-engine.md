@@ -1,169 +1,228 @@
 ---
-title: Reflexive issue engine (AI-written follow-up dilemmas, DM approved)
+title: Reflexive issue engine (JEV reads each choice, Claude writes follow-ups, DM approves)
 type: decision
 status: proposed
 date: 2026-10-21
 deciders: Jerry
-tags: [values-crucible, engine, ai, pressure, facilitator]
+tags: [values-crucible, engine, ai, pressure, facilitator, jev]
 related: ["[[decision-2026-10-21-rts-experience-flow]]", "[[decision-2026-10-21-engine-allocations-aid]]", "[[decision-2026-10-21-audit-fix-spec]]", "[[reference-2026-10-21-permission-and-pressure]]", "[[crucible-dilemmas-v3]]"]
 ---
 
 # Reflexive issue engine
 
-## What Jerry asked (2026-10-21)
+## What Jerry asked and decided (2026-10-21)
 
-1. Pressure rises with the storm.
-2. The Crucible master can raise the pressure by hand.
-3. An AI keeps evaluating the decisions tables make and writes new, reflexive issues from their past choices. Jerry named a tool, "JEV", to help (what it is is still open).
+| # | Ask | Status |
+|---|---|---|
+| 1 | Pressure rises with the storm | Built in [[decision-2026-10-21-audit-fix-spec]]: decision windows shrink to about 95 s at landfall |
+| 2 | The Crucible master raises pressure by hand | Built there too: the DM's heat lever moves windows about 20 s. This record adds its effect on the writer (section 6) |
+| 3 | An AI keeps evaluating decisions and writes new, reflexive issues from past choices | This record |
+| 4 | Use JEV to help | JEV is the evaluator (section 2) |
+| 5 | A cruise-control setting for when the DM walks away | Section 5 |
 
-He chose: **the AI runs live and the DM approves each issue before a table sees it, with a pre-written follow-up if the network fails.**
+Jerry's choice on where the AI runs: **live, the DM approves each issue, and a pre-written follow-up plays if the network fails.**
 
-Items 1 and 2 are built in [[decision-2026-10-21-audit-fix-spec]]: decision windows shrink as the storm builds, and the DM's heat lever moves them. This record covers item 3 and how it uses that pressure.
+## Rules that do not move
 
-## The rule that does not move
-
-The core stays deterministic. The AI never runs inside `crucible-core`. Everything it produces enters the run as an ordinary input, so `crucible run` and `crucible replay` reproduce a session byte for byte from its log, whether the issues came from the AI or from the fallback.
+1. **Determinism.** No model runs inside `crucible-core`. Every model output that changes play enters the run as a logged input, so `crucible run` and `crucible replay` reproduce a session byte for byte from its log, with no network.
+2. **Content is data.** Prompts, question wording, bounds, thresholds and fallback cards live in `content/` (`issue-engine.json`, `followups.json`), not in Rust or TypeScript.
+3. **Ratings place passages, not people.** No model reading appears on the wall or on a table's screen. The DM sees readings as words, never numbers.
+4. **The engine's deterministic scoring is the record.** Model readings are a second witness.
+5. **Nothing confidential goes into a prompt.** The BEI codebook and calibration material stay out. Prompts carry only the final anchor names and the published permission and pressure definitions in [[reference-2026-10-21-permission-and-pressure]].
 
 ## Shape
 
 ```
-tables decide ─► core (deterministic) ─► run log
-                                          │
-                       host: issue engine reads the log
-                                          │
-             Claude drafts a follow-up ◄──┘   (or the fallback picks one)
-                                          │
-                 validator checks it against the effects schema
-                                          │
-                DM console: preview, edit wording, Release / Skip
-                                          │
-             host appends input  present_issue {parish, dilemma, deadline}
-                                          │
-                     core presents it like a scheduled card
+tables act ─► core (deterministic) ─► run log
+                                        │
+                      host: digest per table
+                                        │
+            JEV reads the digest (typed answers, < 1 s)
+                                        │
+            jev_reading input logged ─► DM panel (words only)
+                                        │
+        once per table per quarter, or on "Write one now":
+        Claude drafts a follow-up from the digest + readings
+        (or the fallback library supplies one)
+                                        │
+        validator: schema, references, bounds
+                                        │
+        JEV gate (cruise only) ─► DM panel: Release / Edit wording / Skip
+                                        │
+        present_issue input logged ─► core presents it like a scheduled card
 ```
 
-### 1. The evaluator (runs all session)
+## 1. The digest
 
-After every decision, aid answer, allocation lock or credit line, the host builds a compact digest for each table. The digest holds:
-- its stated values and statement;
-- each choice, with the table's logged rationale or refusal reason;
-- who decided (the table, its phones, or the storm);
+After every `decide`, `answer_aid`, allocation lock, `repair_send` or `credit_line`, the host builds one digest per table from the run log:
+- the table's stated values and statement;
+- each choice so far, with its logged rationale or refusal reason;
+- who decided it (the table, its phones, or the storm);
 - the private phone picks against the table's pick;
-- the current pressure level.
+- the current pressure (storm intensity plus DM heat) and the quarter.
 
-The model returns a short reading for the DM only:
-- which value is under strain;
-- what permission the table seems to have used (outcome minimization, performance-based exception, local normalization, or a situational one);
-- what pressure it was under (coercive authority, conditional belonging, enforced silence, shame-related devaluation, or time, scarcity and odds);
-- one follow-up question to ask in the debrief.
+What goes into the digest depends on the **privacy setting**, which the DM sets before the session:
+- **Choices only** (the default) sends choice ids and who decided them.
+- **With reasons** also sends rationales and refusal reasons. It needs a line in the session brief telling players that their typed reasons go to an outside AI service.
 
-The reading uses the seven anchors' language for passages, never for people. It is never shown on the wall or on a table's screen.
+Phone picks are always sent as counts, never per person.
 
-### 1a. JEV as the evaluator (Jerry, 2026-10-21)
+## 2. JEV, the evaluator
 
-JEV is TypeSafe AI's "System One" model, released in September 2026. It is a hosted decision API (`POST https://api.typesafe.ai/v1/systemone`, TypeScript SDK `@typesafe-ai/sdk`). It returns typed answers, never text. Three answer types fit the game:
-- **Choice:** one of up to 255 options, with probabilities.
+JEV is TypeSafe AI's "System One" model, launched in September 2026. It is a hosted API (`POST https://api.typesafe.ai/v1/systemone`, TypeScript SDK `@typesafe-ai/sdk`, key in `TYPESAFE_API_KEY`). It returns typed answers and no text:
+- **Choice:** up to 255 options, with probabilities.
 - **Score:** an ordered scale of 2 to 10 levels described in words.
 - **Noul:** a yes/no probability.
 
-Published figures are 70 to 500 ms per call and $0.042 per million input tokens, with output free. Those are vendor claims and have not been measured here.
+Vendor figures:
+- 70 to 500 ms per call;
+- $0.042 per million input tokens, output free;
+- a 64k-token context;
+- 67.8% aggregate accuracy on TypeSafe's own benchmark, against model-made labels.
 
-That makes JEV the evaluator, and Claude the writer. The host calls JEV after every decision with the table's digest as `state` and these questions:
+None of these has been measured here.
+
+On every digest the host asks:
 
 | Question | Type | Use |
 |---|---|---|
-| Where does this passage sit on the stated value? | Score, 7 levels with the dissertation's anchor descriptions | DM reading, and to pick what the follow-up tests |
-| Which permission form shows in the rationale? | Choice: outcome minimization / performance-based exception / local normalization / situational / none | DM reading and debrief question |
+| Where does the latest passage sit on the value it tested? | Score, 7 levels using the anchors' published descriptions | Picks the value the follow-up presses on, shown in words |
+| Which permission form shows? | Choice: outcome minimization / performance-based exception / local normalization / situational / none | DM reading and debrief question |
 | Which pressure was the table under? | Choice: coercive authority / conditional belonging / enforced silence / shame-related devaluation / time / scarcity / odds / none | DM reading and debrief question |
-| Did the table comply with an off-board coercer? | Noul | Flags the Capitulating-not-Villainous case for the debrief |
-| Which follow-up best answers this choice? | Choice over the matching entries in `followups.json` | Fallback pick and the brief handed to the writer |
-| Is this draft safe to release unreviewed? | Noul, threshold set high | Cruise control's gate. Below threshold, the draft waits for the DM |
+| Did the table comply with an off-board coercer? | Noul | Flags Capitulating, not Villainous, for the debrief |
+| Which fallback follow-up best answers this choice? | Choice over the entries in `followups.json` whose conditions hold | Fallback pick and a seed for the writer |
 
-Each answer is written into the log as part of the issue input, so replay never calls JEV again.
+On a draft, in cruise only:
 
-Rules for using it:
-- **Pin the version** (for example `jev-1.13.0`), so a session's readings don't shift mid-conference.
-- **Treat player text as untrusted.** Rationales and refusal reasons are typed by players and can steer the answer. Every question names that text as the table's words to be judged, and no rating is ever shown to a table.
-- **Hide its numbers.** JEV's readings go to the DM only, as words ("leaning toward Faltering on candor"), never as numbers, in line with the rule that ratings place passages, not people.
-- **Keep the engine's own scoring.** The engine's deterministic scoring stays the record. JEV's reading is a second witness, and where the two disagree, that disagreement is itself a debrief prompt.
+| Question | Type | Use |
+|---|---|---|
+| Is this draft fit to show executives unreviewed? | Noul, release at 0.9 or above | Cruise gate (section 5) |
 
-JEV needs the internet, has no offline or self-hosted version, and was waitlisted at launch. Without it, the host skips the readings and picks follow-ups from the flags alone.
+**Debrief questions are templates, not model text.** `issue-engine.json` holds one debrief question per permission form and per pressure form, worded on the dissertation's two practitioner questions. JEV's choices pick which template the DM sees.
 
-### 2. The issue writer (once per table per quarter, or when the DM asks)
+Each set of answers is logged as a `jev_reading` input carrying the model version and the raw answers. It changes no core state, so replay never calls JEV.
 
-The writer receives the digest, the canon (parish lore, residents, personas) and the effects schema. It drafts one dilemma that turns a past choice into a present consequence. For example: the crew a table kept working is now exhausted at landfall, or the neighbour it refused is now the one holding the fuel.
+Rules:
+- **Pin the version** (for example `jev-1.13.0`) in `issue-engine.json`.
+- **Player text is untrusted state.** It is fenced and labelled as the table's words to be judged. A reading never changes a score or releases anything outside cruise.
+- **Timeout.** Each call gets 2 s with one retry and backoff on 429 or 529 errors. On a miss, the panel shows "no reading" and the fallback is picked from flags alone.
+- **Disagreement is a prompt.** When JEV's Score and the engine's rating differ by two anchors or more, the DM panel marks it as a debrief moment.
 
-Every drafted issue must:
+## 3. Claude, the writer
+
+**When it writes.**
+- Once per table per quarter, prepared during the quarter's first decision window so it is ready for the second.
+- On demand when the DM taps **Write one now**.
+
+**What it receives.**
+- The digest and JEV's latest readings.
+- The canon: the parish lore, residents and personas from `content/`.
+- The effects schema.
+- The fallback seed JEV picked.
+
+**Its job.** It drafts one dilemma, in the existing `Dilemma` shape, that turns a past choice into a present consequence. For example: the crew a table kept working is exhausted at landfall, or the neighbour it refused now holds the fuel.
+
+**Every draft must:**
 - test one or two of the table's own stated values;
-- offer three or four options, mostly in the Mortal Middle (−1, 0, +1), with Heroic (+3) only where a real cost is written into the option;
-- apply pressure through an off-board voice (HQ, the Governor's office, a resident, a persona), never by scripting another real table to shame or silence this one;
-- use only effects the validator accepts, with bounded sizes (for example no option moves more than a set number of people or doses), so an AI card cannot swing the island beyond what a written card could;
-- carry a `defaultOptionId` that the scoring fixes treat as "the storm decided", with no rating.
+- offer three or four options, most rated in the Mortal Middle (−1, 0, +1);
+- carry Heroic (+3) only on an option whose text names a real cost, and Villainous (−3) only where the table itself destroys others' conditions;
+- apply pressure only through an off-board voice (HQ, the Governor's office, a resident, a persona), never by scripting another real table to shame or silence this one;
+- name the coercer in the card when an option is compliance under coercion, and rate that compliance −2 at most;
+- carry a `defaultOptionId`, which the audit fixes score as "the storm decided" with no rating.
 
-### 3. The validator (Rust, shared with `crucible validate`)
+The option ratings are the model's proposal. The DM sees them on the draft, and the validator enforces the rules above.
 
-The validator parses the draft into the existing `Dilemma` shape and runs the same reference checks as content, plus the bounds above. A draft that fails goes back to the model once with the errors. A second failure falls back to a pre-written follow-up.
+**Model and budget.** The model is set in `issue-engine.json`, defaulting to `claude-sonnet-5-5` for speed. A draft has 45 s to come back. A slower draft, or a draft that fails validation twice, falls back to the follow-up JEV picked.
 
-### 4. The DM's control
+## 4. The validator (Rust, in `crucible-core::validate`, shared with `crucible validate`)
 
-The DM console gains an **Issues** panel with:
-- a card for each draft, showing the table, the past choice it answers, the text, the options and their effects;
-- **Release**, **Edit wording** and **Skip** buttons (editing changes text only, never effects);
-- a **Write one now** button for any table;
-- the evaluator's latest reading per table.
+The validator:
+1. Parses the draft into `Dilemma` and runs the same reference checks as content.
+2. Checks bounds per option, all from `issue-engine.json`. Manual-mode defaults match the largest effects already written in the deck: at most 600 people moved between states, at most 17,250 doses moved, at most 2 tokens and 1 route change, and no `atT` past the end of the next quarter.
+3. Applies the rating rules from section 3: at most one ±3 per draft, a cost phrase present on any +3, and no −3 on an option tagged as compliance.
+4. Gives back a list of errors, which goes to the writer once. A second failure falls back.
 
-The panel sits beside the existing heat lever, so the DM raises pressure and releases issues from one place.
+## 5. The DM's Issues panel and cruise control
 
-### 4a. Cruise control (Jerry, 2026-10-21)
+**Manual mode (default).** The panel shows:
+- one card per draft, with the table, the past choice it answers, the text, the options, their proposed ratings and their effects;
+- **Release**, **Edit wording** and **Skip** buttons (editing changes text only, never effects or ratings);
+- **Write one now** for any table;
+- the latest JEV reading per table, in words, with its debrief question;
+- the heat lever, beside the issues.
 
-The DM can switch the panel to **Cruise** when they have to step away. One tap turns it on, and one tap takes the DM back to manual.
+A released issue is presented at the table's next free moment: the first tick on which it has no open card or call.
 
-While Cruise is on:
-- **Issues.** Drafts that pass the validator release on their own at the next quiet moment for that table, at most one per table per quarter. A draft that fails twice is replaced by its pre-written fallback, and with no fallback it is skipped.
-- **Pressure.** It follows the storm's curve alone. The heat lever holds where the DM left it and makes no automatic jumps.
-- **Tighter bounds.** Effects are capped at half the manual limit, and no new named resident is put at risk without a written fallback behind it, because nobody is reading first.
-- **Clock.** Cards, maydays and quarter changes run as scheduled. Cruise never pauses or ends the session by itself.
+**Cruise.** One tap turns cruise on, and one tap takes the DM back to manual.
+- **Issues.** A draft releases on its own only if it passes the validator under the cruise bounds and JEV's gate scores 0.9 or above. Cruise bounds are half the manual ones, and a draft may not put a new named resident at risk. Each table gets at most one cruise release per quarter. A draft that misses the gate is replaced by its fallback, which also passes the validator, and with no fallback it is skipped.
+- **Pressure.** It follows the storm's curve. The heat lever holds where the DM left it and makes no automatic moves.
+- **Clock.** Cards, maydays and quarter changes run as scheduled. Cruise never pauses or ends the session, and it never starts the debrief.
 - **Projector.** A small "on cruise" mark shows, so the room knows the facilitator is away.
+- **Return.** When the DM switches back, the panel lists everything released while they were away, each with the table's answer, ready to bring into the debrief.
 
-When the DM returns, the panel lists everything that was released while they were away, with each table's answer. The DM can then bring any of it into the debrief.
+## 6. Pressure feeds the writer
 
-The switch is logged as a `dm_mode` input, so replay shows what was released automatically and what the DM approved.
-
-### 5. Pressure feeds the writer
-
-The current intensity (the storm's curve plus the DM's heat) is passed to the writer:
+The current pressure is the storm intensity plus the DM's heat, and it shapes each draft:
 
 | Pressure | What the writer does |
 |---|---|
-| Low | Writes setups with time to think |
-| Rising | Narrows the options and names a cost |
-| Peak | Brings back a named resident the table already affected, with a short window |
+| Low (prep) | A setup with time to think and a cost that lands later |
+| Rising (approach, or heat raised) | Three options, one cost named up front, a voice of authority on the line |
+| Peak (landfall, or heat at maximum) | Brings back a named resident the table already affected, with the shortest window |
+| Recovery | A repair or reckoning: someone the table helped or refused asks what happens now |
 
-The decision window itself comes from the pacing fix, so an AI card is never slower than a written one.
+The decision window itself comes from the pacing fix. An AI card gets the same window as a written card in that quarter, and the heat lever moves both.
 
-### 6. Fallback (offline or a model failure)
+## 7. Fallback library
 
-`content/followups.json` holds pre-written follow-ups keyed to flags and past options that already exist in the content (for example `if prep-keystone = B`). When the model is unreachable, slow (over a set number of seconds) or fails validation twice, the host offers the DM the matching fallback instead. Sessions at a venue with no internet still get reflexive follow-ups, just fewer and less tailored ones.
+`content/followups.json` holds pre-written follow-ups. Each one carries:
+- a condition over existing options and flags (for example `prep-keystone = B`);
+- a quarter;
+- a full dilemma that passes the validator.
 
-## Engine changes (after the audit fixes land)
+The target is two per written dilemma (48 in all), drafted by Claude and finalized by Jerry, because content is his call. The fallback plays:
+- when there is no network;
+- when either model misses its timeout;
+- when a draft fails validation twice;
+- when cruise rejects a draft.
 
-- New input `dm_mode { mode: "manual" | "cruise" }`, logged only. It changes no state, and the host uses it to decide who releases issues.
-- New input `present_issue { parish_id, dilemma, deadline_ticks, source: "ai" | "fallback" | "dm", released_by: "dm" | "cruise" }` in `inputs.rs`. The full dilemma travels inside the input, so the log is self-contained and the content hash is unchanged.
-- The core presents it at the first tick where the parish has no open card, exactly like a scheduled card, and scores it with the same rules.
-- `RUN_LOG_SCHEMA.md` records the new input kind. That is a contract change, so this record is its decision.
-- Host side: an `issues` module that holds the model client, the digest, the queue, the fallback picker and the DM protocol messages (`issue_draft`, `issue_release`, `issue_skip`).
-- Board side: the DM's Issues panel. Tables see an AI issue exactly like any other card.
+A venue with no internet still gets reflexive follow-ups. They are less tailored and come with no readings.
+
+## Engine changes (after the audit-fix branch lands)
+
+- **`inputs.rs`.** Three new input kinds:
+  - `present_issue { parish_id, dilemma, deadline_ticks, source: "ai" | "fallback" | "dm", released_by: "dm" | "cruise" }`. The full dilemma travels in the input, so the log is self-contained and the content hash is unchanged. The core presents it at the parish's next free tick, like a scheduled card, and scores it with the same rules. An invalid one is logged `rejected` and changes nothing.
+  - `jev_reading { parish_id, model, answers }`, logged only.
+  - `dm_mode { mode: "manual" | "cruise" }`, logged only.
+- **`validate.rs`.** Draft validation and bounds, callable from the host.
+- **`RUN_LOG_SCHEMA.md` and `ENGINE_SPEC.md`.** An amendment for the three input kinds. This is a contract change, and this record is its decision.
+- **`crucible-host`.** A new `issues` module holding the digest builder, the JEV and Claude clients, the queue, the cruise gate, the fallback picker, and the protocol messages `issue_draft`, `issue_release`, `issue_skip`, `jev_reading` and `dm_mode` (added to `PROTOCOL.md`). API keys come from the host's config on the facilitator's laptop, never from the page or the repo.
+- **`board-rts`.** The DM's Issues panel and the projector's cruise mark. Tables see an AI issue exactly like any other card.
+
+## Tests
+
+- Replay of a run with `present_issue`, `jev_reading` and `dm_mode` inputs is byte-identical and needs no network.
+- The prefix property holds with issues inserted mid-run.
+- The validator rejects drafts over the bounds, with two ±3s, with −3 on compliance, or with a broken reference.
+- Cruise releases only gated drafts, at most one per table per quarter, and never pauses the clock.
+- A bot rehearsal with **recorded** JEV and Claude responses (fixtures in `tests/fixtures/issues/`), so CI needs no keys.
+- One live rehearsal with real keys before the conference, measuring JEV and Claude latency on real digests.
 
 ## Open
 
-- **JEV access.** JEV is waitlisted. Someone needs to get a TypeSafe key before it can be tested on real session logs.
-- **The API keys at the venue** (Claude and TypeSafe). It lives only on the facilitator's laptop, in the host's config, never in the page or the repo.
-- **Model and latency budget.** A draft must reach the DM within the quarter's quiet time. The fallback covers misses.
-- **Privacy.** Rationales and phone picks leave the room when they are sent to the model. That needs a line in the session brief, or a setting that sends only the table's choices.
+- **A TypeSafe key.** JEV is waitlisted. Jerry asked on 2026-10-21 whether he has one.
+- **The privacy default.** "Choices only" is proposed. Jerry decides whether reasons may be sent.
+- **The fallback library.** 48 follow-ups to draft and for Jerry to approve.
+- **JEV accuracy on this task.** It is unmeasured. Before relying on it, score 50 passages from rehearsal logs both by hand and with JEV.
 
 ## Consequences
 
-- Tables meet consequences of their own choices, which is the reflexive loop the audit found missing.
-- The DM keeps control of every word executives see.
-- Replay, determinism and offline play are unchanged.
-- Cost: a model call per draft and per reading, and one more panel for the DM to watch.
+- Tables meet the consequences of their own choices, which is the reflexive loop the audit found missing.
+- The DM controls every word executives see, except in cruise, where tighter bounds and the gate stand in.
+- Determinism, replay and offline play still hold. Offline, the session loses only the tailoring and the readings.
+- Cost: one JEV call per action, about a cent per session at the published price, plus one Claude draft per table per quarter. The DM gains one more panel to watch.
+
+## Sources
+
+- [How to Use Jev: a practical guide to TypeSafe's System One model (DEV)](https://dev.to/valyuai/how-to-use-jev-a-practical-guide-to-typesafes-system-one-model-g5e)
+- [TypeSafe Jev review: the AI model that doesn't generate text (Kingy AI)](https://kingy.ai/blog/typesafe-jev-review-the-ai-model-that-doesnt-generate-text/)
