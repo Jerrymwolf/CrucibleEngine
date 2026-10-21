@@ -200,7 +200,16 @@ Phase 1 must land first, because everything else reads its signals.
 ## Open after this record
 
 - The per-dilemma coding table lives in the advisor's working files; it should
-  be committed beside this record before phase 2.
+  be committed beside this record before phase 2. Known from it so far:
+  - Coerced compliance to recode from −3 to −2 (9 of 18 −3s), including
+    prep-sterling B, approach-heartland D, approach-sterling B and
+    landfall-heartland C.
+  - Genuine −3s to keep, where the table itself coerces or deceives: for
+    example approach-keystone B and landfall-keystone A.
+  - Defaults that score a silent table as acting well (fixed by S1.2, and
+    re-picked under S2.5): prep-gateway c, prep-keystone c, prep-haven b,
+    approach-gateway c, approach-haven b, approach-summit a, landfall-gateway
+    a, landfall-keystone b, landfall-haven b.
 - [[reference-2026-10-21-permission-and-pressure]] is waiting on Jerry's
   approval to be pushed from the "Nursing leaders 1-hour session" thread.
 - Conference date is still unknown, so phases are ordered, not dated.
