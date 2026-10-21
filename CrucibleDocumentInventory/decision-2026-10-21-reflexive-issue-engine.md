@@ -139,7 +139,7 @@ The option ratings are the model's proposal. The DM sees them on the draft, and 
 The validator:
 1. Parses the draft into `Dilemma` and runs the same reference checks as content.
 2. Checks bounds per option, all from `issue-engine.json`. Manual-mode defaults match the largest effects already written in the deck: at most 600 people moved between states, at most 17,250 doses moved, at most 2 tokens and 1 route change, and no `atT` past the end of the next quarter.
-3. Applies the rating rules from section 3: at most one ±3 per draft, a cost phrase present on any +3, and no −3 on an option tagged as compliance.
+3. Applies the rating rules from section 3: at most one ±3 per draft, a cost phrase present on any +3, and no −3 on an option tagged as compliance. It also runs the content rules from audit cut B (commit d550db3 on `claude/project-thread-lt1euh`): a social pressure tag must list the values the actor appeals to in `invokes`; the option that yields rates 0 at most on those values; and a send rates +1 at most unless the sender needed the token. The writer's prompt states these rules, so a draft rarely fails on them.
 4. Gives back a list of errors, which goes to the writer once. A second failure falls back.
 
 ## 5. The DM's Issues panel and cruise control
