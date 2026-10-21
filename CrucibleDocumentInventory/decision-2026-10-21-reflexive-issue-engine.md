@@ -220,7 +220,7 @@ A venue with no internet still gets reflexive follow-ups. They are less tailored
 - Tables meet the consequences of their own choices, which is the reflexive loop the audit found missing.
 - The DM controls every word executives see, except in cruise, where tighter bounds and the gate stand in.
 - Determinism, replay and offline play still hold. Offline, the session loses only the tailoring and the readings.
-- Cost: one JEV call per action, about a cent per session at the published price, plus one Claude draft per table per quarter. The DM gains one more panel to watch.
+- Cost: one JEV call per action, a few cents per session at the published price (about 300 calls of 3,000 tokens), plus one Claude draft per table per quarter. The DM gains one more panel to watch.
 
 ## Sources
 
