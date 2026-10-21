@@ -59,5 +59,62 @@
       "PORT_MIN": 30,
       "AIRPORT_MIN": 30
     }
+  },
+  "PRODUCTION": {
+    "canon": "concordia-parishes-v3: the cure, in numbers the board uses",
+    "product": "Celarithin",
+    "patients": 340000,
+    "childrenPercent": 0.14,
+    "weeklyNeedDoses": 170000,
+    "dosesPerDay": 24000,
+    "dosesPerHour": 1000,
+    "shifts": 3,
+    "cleanRooms": 12,
+    "shelfLifeDays": 21,
+    "restartHours": 9,
+    "restartHoursToldToSummit": 6,
+    "vault": {
+      "capacityDoses": 120000,
+      "startingDoses": 72000,
+      "batteryHours": 4
+    },
+    "works": {
+      "stockHoursDeclared": 96,
+      "stockHoursTrue": 144,
+      "cycleHours": 18
+    },
+    "consignment": {
+      "name": "Singapore",
+      "ship": "MV Kestrel Reach",
+      "doses": 120000,
+      "batch47Doses": 24000,
+      "loadHours": 18,
+      "loadStartT": -2880,
+      "sailT": -1800,
+      "lastSafeSailT": -1440,
+      "distributor": "Asia-Pacific"
+    },
+    "nextConsignment": {
+      "t": 2160,
+      "requires": [
+        "haven port above failed",
+        "keystone power above failed",
+        "haven-keystone road open"
+      ]
+    },
+    "reliabilityClause": "two consecutive late consignments and the distributor may second-source a biosimilar",
+    "population": 24100,
+    "productionConditions": {
+      "keystonePowerMin": 30,
+      "keystoneWaterMin": 30
+    },
+    "workersByParish": {
+      "gateway": 142,
+      "heartland": 920,
+      "keystone": 247,
+      "haven": 186,
+      "summit": 34,
+      "sterling": 160
+    }
   }
 }

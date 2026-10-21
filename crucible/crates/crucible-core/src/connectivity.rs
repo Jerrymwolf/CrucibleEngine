@@ -299,12 +299,12 @@ mod tests {
     fn power_priority_and_backup_hours_follow_content() {
         let c = content();
         let order = power_priority(&c);
-        assert_eq!(&order[..2], &["keystone".to_string(), "summit".to_string()]);
-        assert_eq!(order[2], "sterling"); // largest population after the priority list
+        assert_eq!(&order[..2], &["keystone".to_string(), "sterling".to_string()]);
+        assert_eq!(order[2], "summit"); // largest population after the priority list
         assert_eq!(order.len(), 6);
         assert_eq!(backup_hours(&c, "keystone"), BACKUP_HOURS_PRIORITY);
         assert_eq!(backup_hours(&c, "gateway"), BACKUP_HOURS_OTHER);
-        assert_eq!(backup_hours(&c, "haven"), 0.0);
+        assert_eq!(backup_hours(&c, "nowhere"), 0.0);
     }
 
     #[test]

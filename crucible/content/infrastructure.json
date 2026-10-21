@@ -15,7 +15,7 @@
           "delayMinutes": 15
         }
       ],
-      "narrative": "Dam output dropping. Keystone manufacturing facility switching to backup generators, but clean room power fluctuations detected."
+      "narrative": "Dam output dropping. Keystone's clean rooms switch to backup generators; positive pressure fluctuating."
     },
     {
       "id": "heartland-dam-critical",
@@ -48,9 +48,15 @@
           "parishId": "gateway",
           "degradation": 25,
           "delayMinutes": 20
+        },
+        {
+          "system": "power",
+          "parishId": "summit",
+          "degradation": 30,
+          "delayMinutes": 20
         }
       ],
-      "narrative": "CRITICAL: Heartland Dam output at dangerous levels. Rolling blackouts beginning across the island. Priority power to Keystone failing."
+      "narrative": "CRITICAL: Concordia Dam output at dangerous levels. Rolling blackouts across the island. The Priority Schedule is being executed."
     },
     {
       "id": "heartland-dam-failure",
@@ -85,13 +91,19 @@
           "delayMinutes": 0
         },
         {
+          "system": "power",
+          "parishId": "summit",
+          "degradation": 55,
+          "delayMinutes": 0
+        },
+        {
           "system": "water",
           "parishId": "keystone",
           "degradation": 40,
           "delayMinutes": 30
         }
       ],
-      "narrative": "EMERGENCY: Heartland Dam offline. Island-wide blackout. Only facilities with backup generators operational. Ultrapure water production halted at Keystone."
+      "narrative": "EMERGENCY: Concordia Dam offline. Island-wide blackout. Only generators run. Ultrapure water production halted at Keystone."
     },
     {
       "id": "keystone-power-cleanroom",
@@ -108,7 +120,7 @@
           "delayMinutes": 120
         }
       ],
-      "narrative": "Keystone backup generators running. Clean room air handling on emergency power. Contamination risk increases every hour without grid power."
+      "narrative": "Keystone on backup generators. Clean-room air handling on emergency power; contamination risk rises every hour without grid power."
     },
     {
       "id": "keystone-power-critical",
@@ -125,7 +137,7 @@
           "delayMinutes": 60
         }
       ],
-      "narrative": "ALERT: Keystone clean room positive pressure failing. Batch contamination imminent if power not restored within 60 minutes."
+      "narrative": "ALERT: Keystone clean-room positive pressure failing. The batch in progress is contaminated within the hour."
     },
     {
       "id": "heartland-water-keystone",
@@ -142,7 +154,7 @@
           "delayMinutes": 60
         }
       ],
-      "narrative": "Water treatment capacity reduced. Ultrapure water supply to Keystone manufacturing at risk."
+      "narrative": "Water treatment capacity reduced. Ultrapure water supply to Keystone at risk."
     },
     {
       "id": "heartland-water-critical",
@@ -160,24 +172,24 @@
         },
         {
           "system": "water",
-          "parishId": "sterling",
+          "parishId": "summit",
           "degradation": 30,
           "delayMinutes": 45
         },
         {
           "system": "hospital",
-          "parishId": "sterling",
+          "parishId": "summit",
           "degradation": 20,
           "delayMinutes": 90
         }
       ],
-      "narrative": "CRITICAL: Water treatment failing. Boil water advisory for Sterling. Hospital sterilization protocols compromised."
+      "narrative": "CRITICAL: Water treatment failing. Boil-water advisory for the capital. Concordia General's sterilisation protocols compromised."
     },
     {
-      "id": "summit-comms-island",
+      "id": "sterling-comms-island",
       "trigger": {
         "system": "communications",
-        "parishId": "summit",
+        "parishId": "sterling",
         "threshold": 50
       },
       "effects": [
@@ -195,7 +207,7 @@
         },
         {
           "system": "communications",
-          "parishId": "sterling",
+          "parishId": "summit",
           "degradation": 15,
           "delayMinutes": 0
         },
@@ -204,15 +216,21 @@
           "parishId": "gateway",
           "degradation": 25,
           "delayMinutes": 0
+        },
+        {
+          "system": "communications",
+          "parishId": "heartland",
+          "degradation": 20,
+          "delayMinutes": 0
         }
       ],
-      "narrative": "Summit communication tower damaged. Radio coverage degraded across all parishes. Coordination between teams becoming difficult."
+      "narrative": "Sterling's uplink tower damaged. Radio coverage degraded across the island. Coordination between parishes becoming difficult."
     },
     {
-      "id": "summit-comms-failure",
+      "id": "sterling-comms-failure",
       "trigger": {
         "system": "communications",
-        "parishId": "summit",
+        "parishId": "sterling",
         "threshold": 20
       },
       "effects": [
@@ -239,9 +257,15 @@
           "parishId": "gateway",
           "degradation": 60,
           "delayMinutes": 0
+        },
+        {
+          "system": "communications",
+          "parishId": "summit",
+          "degradation": 30,
+          "delayMinutes": 0
         }
       ],
-      "narrative": "EMERGENCY: Summit tower collapsed. Island-wide communications blackout. Only Sterling emergency broadcast remains operational. Parishes isolated."
+      "narrative": "EMERGENCY: the uplink is down. Only Summit's emergency broadcast remains. Parishes report by radio or not at all."
     },
     {
       "id": "gateway-roads-isolation",
@@ -258,7 +282,7 @@
           "delayMinutes": 0
         }
       ],
-      "narrative": "Gateway access roads flooded. Airport runways accessible only by helicopter. Ground evacuation routes compromised."
+      "narrative": "Gateway's access roads flooded. The terminal reachable only by helicopter; ground evacuation routes gone."
     },
     {
       "id": "heartland-roads-isolation",
@@ -275,7 +299,7 @@
           "delayMinutes": 120
         }
       ],
-      "narrative": "Crater roads impassable. Dam maintenance crews unable to reach Heartland. Remote monitoring only."
+      "narrative": "Both crater roads impassable. Relief crews cannot reach the dam; the operators inside are on their own."
     },
     {
       "id": "haven-roads-port",
@@ -292,7 +316,7 @@
           "delayMinutes": 30
         }
       ],
-      "narrative": "Haven port access roads flooded. Shipping containers cannot be moved. Cold chain integrity at risk."
+      "narrative": "Haven's port access roads flooded. Containers cannot move; the reefer yard's cold chain at risk."
     },
     {
       "id": "haven-port-supply",
@@ -304,12 +328,12 @@
       "effects": [
         {
           "system": "hospital",
-          "parishId": "sterling",
+          "parishId": "summit",
           "degradation": 10,
           "delayMinutes": 360
         }
       ],
-      "narrative": "Haven port operations limited. Medical supply shipments delayed. Sterling General may need to ration certain supplies."
+      "narrative": "Port operations limited. Medical supply shipments delayed; Concordia General begins rationing."
     },
     {
       "id": "haven-port-failure",
@@ -321,18 +345,18 @@
       "effects": [
         {
           "system": "hospital",
-          "parishId": "sterling",
+          "parishId": "summit",
           "degradation": 30,
           "delayMinutes": 720
         }
       ],
-      "narrative": "CRITICAL: Haven port offline. No external supply deliveries possible. Island must survive on existing stockpiles."
+      "narrative": "CRITICAL: Haven's port offline. No external deliveries; the island lives on what it has."
     },
     {
-      "id": "sterling-hospital-crisis",
+      "id": "summit-hospital-crisis",
       "trigger": {
         "system": "hospital",
-        "parishId": "sterling",
+        "parishId": "summit",
         "threshold": 40
       },
       "effects": [
@@ -347,9 +371,15 @@
           "parishId": "haven",
           "degradation": 15,
           "delayMinutes": 60
+        },
+        {
+          "system": "hospital",
+          "parishId": "sterling",
+          "degradation": 15,
+          "delayMinutes": 60
         }
       ],
-      "narrative": "Sterling General overwhelmed. Diverting critical cases to parish clinics. Medical resources stretched thin island-wide."
+      "narrative": "Concordia General overwhelmed. Critical cases diverted to the parish clinics; medical resources stretched island-wide."
     },
     {
       "id": "gateway-airport-evacuation",
@@ -366,7 +396,7 @@
           "delayMinutes": 0
         }
       ],
-      "narrative": "Gateway Airport closed. External flights cancelled. Island isolated from mainland support. Satellite communications only."
+      "narrative": "The runway is closed. No fixed-wing flights; the island's only lift is Sterling's two helicopters."
     }
   ],
   "DEGRADATION_RATES": {
@@ -414,48 +444,39 @@
     "CRITICAL": 30
   },
   "INITIAL_INFRASTRUCTURE_STATUS": {
-    "keystone": {
+    "gateway": {
       "power": 100,
       "communications": 100,
       "roads": 100,
       "water": 100,
-      "hospital": 100,
-      "port": 0,
-      "airport": 0
+      "hospital": 50,
+      "port": 80,
+      "airport": 100
     },
     "haven": {
       "power": 100,
       "communications": 100,
       "roads": 100,
       "water": 100,
-      "hospital": 80,
+      "hospital": 60,
       "port": 100,
       "airport": 0
-    },
-    "gateway": {
-      "power": 100,
-      "communications": 100,
-      "roads": 100,
-      "water": 100,
-      "hospital": 70,
-      "port": 80,
-      "airport": 100
     },
     "heartland": {
       "power": 100,
       "communications": 100,
       "roads": 90,
       "water": 100,
-      "hospital": 60,
+      "hospital": 30,
       "port": 0,
       "airport": 0
     },
-    "summit": {
+    "keystone": {
       "power": 100,
       "communications": 100,
-      "roads": 85,
+      "roads": 100,
       "water": 100,
-      "hospital": 90,
+      "hospital": 50,
       "port": 0,
       "airport": 0
     },
@@ -464,8 +485,17 @@
       "communications": 100,
       "roads": 100,
       "water": 100,
+      "hospital": 70,
+      "port": 0,
+      "airport": 40
+    },
+    "summit": {
+      "power": 100,
+      "communications": 100,
+      "roads": 95,
+      "water": 100,
       "hospital": 100,
-      "port": 70,
+      "port": 0,
       "airport": 0
     }
   }

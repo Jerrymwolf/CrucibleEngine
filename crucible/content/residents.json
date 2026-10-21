@@ -1,0 +1,864 @@
+{
+  "CANON": "crucible-residents-v3: the people the board reports on",
+  "STATES": [
+    "safe",
+    "sheltered",
+    "at_risk",
+    "rescued",
+    "injured",
+    "lost"
+  ],
+  "SAFE_STATES": [
+    "safe",
+    "sheltered",
+    "rescued"
+  ],
+  "GROUPS": [
+    {
+      "id": "fleet-crew",
+      "parishId": "gateway",
+      "name": "fleet crew",
+      "size": 36
+    },
+    {
+      "id": "harvester-watch",
+      "parishId": "gateway",
+      "name": "the Pacific Harvester's two-man watch",
+      "size": 2
+    },
+    {
+      "id": "airport-staff",
+      "parishId": "gateway",
+      "name": "airport staff",
+      "size": 140
+    },
+    {
+      "id": "strand-visitors",
+      "parishId": "gateway",
+      "name": "visitors on the Strand",
+      "size": 1100
+    },
+    {
+      "id": "strand-road-households",
+      "parishId": "gateway",
+      "name": "Strand Road households",
+      "size": 150
+    },
+    {
+      "id": "caldera-villagers",
+      "parishId": "heartland",
+      "name": "Caldera villagers",
+      "size": 420
+    },
+    {
+      "id": "works-crew",
+      "parishId": "heartland",
+      "name": "works crew, mostly commuters",
+      "size": 800
+    },
+    {
+      "id": "dam-staff",
+      "parishId": "heartland",
+      "name": "dam and plant staff inside the structure",
+      "size": 40
+    },
+    {
+      "id": "tanker-crew",
+      "parishId": "heartland",
+      "name": "the Gorge Road tanker crew",
+      "size": 2
+    },
+    {
+      "id": "skeleton-crew",
+      "parishId": "keystone",
+      "name": "skeleton crew holding the clean rooms",
+      "size": 200
+    },
+    {
+      "id": "qa-staff",
+      "parishId": "keystone",
+      "name": "QA staff",
+      "size": 30
+    },
+    {
+      "id": "southfield-residents",
+      "parishId": "keystone",
+      "name": "Southfield residents",
+      "size": 2400
+    },
+    {
+      "id": "reefer-drivers",
+      "parishId": "keystone",
+      "name": "reefer truck drivers",
+      "size": 12
+    },
+    {
+      "id": "loading-crew",
+      "parishId": "haven",
+      "name": "loading crew",
+      "size": 180
+    },
+    {
+      "id": "longshore-families",
+      "parishId": "haven",
+      "name": "longshore families in the surge zone",
+      "size": 600
+    },
+    {
+      "id": "terminal-staff",
+      "parishId": "haven",
+      "name": "fuel terminal staff",
+      "size": 24
+    },
+    {
+      "id": "port-shops",
+      "parishId": "haven",
+      "name": "the port's shops and bars",
+      "size": 40
+    },
+    {
+      "id": "hospital-staff",
+      "parishId": "summit",
+      "name": "hospital staff",
+      "size": 400
+    },
+    {
+      "id": "officers",
+      "parishId": "summit",
+      "name": "police officers",
+      "size": 120
+    },
+    {
+      "id": "dialysis-patients",
+      "parishId": "summit",
+      "name": "dialysis and ventilator patients",
+      "size": 60
+    },
+    {
+      "id": "icu-patients",
+      "parishId": "summit",
+      "name": "ICU patients",
+      "size": 18
+    },
+    {
+      "id": "pupils",
+      "parishId": "summit",
+      "name": "pupils in the school shelters",
+      "size": 1800
+    },
+    {
+      "id": "riverside-residents",
+      "parishId": "summit",
+      "name": "Riverside residents",
+      "size": 1700
+    },
+    {
+      "id": "campus-ops",
+      "parishId": "sterling",
+      "name": "campus operations staff",
+      "size": 60
+    },
+    {
+      "id": "scientists",
+      "parishId": "sterling",
+      "name": "research campus scientists",
+      "size": 120
+    },
+    {
+      "id": "riverside-at-gate",
+      "parishId": "sterling",
+      "name": "Riverside residents who reach the campus gate",
+      "size": 300
+    },
+    {
+      "id": "executive-households",
+      "parishId": "sterling",
+      "name": "executive households on the headland",
+      "size": 300
+    }
+  ],
+  "CARDS": [
+    {
+      "id": "tomas-reyes",
+      "parishId": "gateway",
+      "name": "Tomás Reyes",
+      "line": "24, deckhand on the Pacific Harvester",
+      "text": "First full season. His mother Ines runs the canteen at the Mole and feeds the fleet on credit. He is on the two-man watch when the Harvester breaks her mooring at the peak.",
+      "groupId": "harvester-watch",
+      "decidedBy": [
+        "v3-landfall-gateway",
+        "L2"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "priya-nair",
+      "parishId": "gateway",
+      "name": "Priya Nair",
+      "line": "34, air traffic controller",
+      "text": "Thirty-six weeks pregnant, scheduled to work the last departure, and on nobody's seat list because she is staff. Her husband is a Heartland lineman stuck at the dam.",
+      "groupId": "airport-staff",
+      "decidedBy": [
+        "v3-approach-gateway"
+      ],
+      "hazardQuarter": "approach"
+    },
+    {
+      "id": "albrecht-family",
+      "parishId": "gateway",
+      "name": "The Albrecht family",
+      "line": "visitors from Graz",
+      "text": "Two parents, two children, a rental car, a phone with no island numbers in it, and a hotel that has told them the shelter is being arranged.",
+      "groupId": "strand-visitors",
+      "decidedBy": [
+        "v3-approach-gateway",
+        "allocation:SHELTER",
+        "L8"
+      ],
+      "hazardQuarter": "approach"
+    },
+    {
+      "id": "walter-finch",
+      "parishId": "gateway",
+      "name": "Walter Finch",
+      "line": "81, retired harbourmaster",
+      "text": "Lives alone on Strand Road at the water's edge, has ridden out four hurricanes, will not leave without being asked in person by someone he knows.",
+      "groupId": "strand-road-households",
+      "decidedBy": [
+        "v3-prep-summit"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "sam-oyelaran",
+      "parishId": "heartland",
+      "name": "Sam Oyelaran",
+      "line": "41, spillway gate operator",
+      "text": "Lives in Caldera village on the lake's south shore with his wife and a six-week-old daughter. When the Switchbacks slide he is at the dam and they are below the lower lane.",
+      "groupId": "caldera-villagers",
+      "decidedBy": [
+        "A4",
+        "v3-landfall-heartland"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "dolores-quint",
+      "parishId": "heartland",
+      "name": "Dolores Quint",
+      "line": "58, shift lead at the works",
+      "text": "Twenty-nine years on the extraction floor, type 1 diabetic, insulin in the works' canteen fridge, which is on grid power.",
+      "groupId": "works-crew",
+      "decidedBy": [
+        "allocation:GEN",
+        "v3-prep-heartland"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "mateo-iglesias",
+      "parishId": "heartland",
+      "name": "Mateo Iglesias",
+      "line": "17, apprentice lineman",
+      "text": "Stays at the dam because his father is on the operator roster; nobody has told him he can go.",
+      "groupId": "dam-staff",
+      "decidedBy": [
+        "v3-prep-heartland"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "gorge-road-tanker-crew",
+      "parishId": "heartland",
+      "name": "The Gorge Road tanker crew",
+      "line": "two Haven drivers",
+      "text": "Two Haven drivers who agree to bring diesel up to the dam's control generators if the road is still open when they are sent.",
+      "groupId": "tanker-crew",
+      "decidedBy": [
+        "v3-approach-haven",
+        "A3"
+      ],
+      "hazardQuarter": "approach"
+    },
+    {
+      "id": "anh-tran",
+      "parishId": "keystone",
+      "name": "Anh Tran",
+      "line": "37, clean-room technician, lead on batch 47",
+      "text": "Her two children are in Southfield Block C with her mother. She will finish the batch if asked and she will not ask to leave.",
+      "groupId": "skeleton-crew",
+      "decidedBy": [
+        "v3-approach-keystone",
+        "v3-landfall-keystone"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "ruben-castillo",
+      "parishId": "keystone",
+      "name": "Rubén Castillo",
+      "line": "46, QA chemist",
+      "text": "Eleven years; has never signed a batch he could not stand behind. The custody log for batch 47 has a gap where the night tech evacuated.",
+      "groupId": "qa-staff",
+      "decidedBy": [
+        "v3-recovery-keystone"
+      ],
+      "hazardQuarter": "recovery"
+    },
+    {
+      "id": "gloria-adebayo-ferris",
+      "parishId": "keystone",
+      "name": "Gloria Adebayo-Ferris",
+      "line": "70, Southfield Block C",
+      "text": "Lives on the ground floor of Southfield Block C, uses a wheelchair, looks after Anh Tran's children on shift nights. Block C is the lowest building on the flat.",
+      "groupId": "southfield-residents",
+      "decidedBy": [
+        "v3-landfall-keystone",
+        "L1"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "kofi-mensah",
+      "parishId": "keystone",
+      "name": "Kofi Mensah",
+      "line": "52, reefer truck driver",
+      "text": "Knows every road and every creek crossing, and which ones go under first. If the trucks go to Southfield, he drives the first one.",
+      "groupId": "reefer-drivers",
+      "decidedBy": [
+        "v3-landfall-keystone"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "dmitri-volkov",
+      "parishId": "haven",
+      "name": "Dmitri Volkov",
+      "line": "61, crane operator",
+      "text": "Thirty years on the port; two months from retirement; the only operator certified on the big crane that loads the Kestrel Reach. Loading in the wind means Dmitri in the cab.",
+      "groupId": "loading-crew",
+      "decidedBy": [
+        "v3-prep-haven",
+        "A2"
+      ],
+      "hazardQuarter": "approach"
+    },
+    {
+      "id": "jonah-baptiste",
+      "parishId": "haven",
+      "name": "Jonah Baptiste",
+      "line": "22, longshoreman",
+      "text": "Lives with his grandmother in a ground-floor flat two streets from the terminal. Volunteers for everything. He is one of the two on the terminal night watch.",
+      "groupId": "terminal-staff",
+      "decidedBy": [
+        "v3-landfall-haven",
+        "L4"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "elena-marsh",
+      "parishId": "haven",
+      "name": "Elena Marsh",
+      "line": "44, fuel terminal night supervisor",
+      "text": "Single mother; her son is in the school shelter at Summit. She is the other half of the Tank 3 watch, and she is the one who reports the seal variance.",
+      "groupId": "terminal-staff",
+      "decidedBy": [
+        "v3-landfall-haven",
+        "L4"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "sato-family",
+      "parishId": "haven",
+      "name": "The Sato family",
+      "line": "the dockside noodle bar",
+      "text": "Run the dockside noodle bar that feeds the night shift, live above it at sea level, and will stay open as long as there are crews to feed.",
+      "groupId": "port-shops",
+      "decidedBy": [
+        "A5"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "amara-osei",
+      "parishId": "summit",
+      "name": "Dr. Amara Osei",
+      "line": "39, ICU attending",
+      "text": "The island's only intensivist. Lives in Riverside, a ten-minute walk below the hospital, with a mother who does not walk well.",
+      "groupId": "hospital-staff",
+      "decidedBy": [
+        "v3-approach-heartland",
+        "v3-landfall-summit"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "ben-whitlock",
+      "parishId": "summit",
+      "name": "Sgt. Ben Whitlock",
+      "line": "45, Riverside precinct",
+      "text": "Runs the lower town's officers and two police boats. His wife is a nurse on the hospital's surgical floor. He will go into the water if sent, and if not sent.",
+      "groupId": "officers",
+      "decidedBy": [
+        "v3-landfall-summit"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "ruth-calloway",
+      "parishId": "summit",
+      "name": "Ruth Calloway",
+      "line": "78, dialysis three mornings a week",
+      "text": "Her next session falls at T-6h. Lives alone on Hospital Hill, safe from the water, not from a power failure.",
+      "groupId": "dialysis-patients",
+      "decidedBy": [
+        "v3-prep-heartland",
+        "v3-approach-summit",
+        "A7"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "hannah-brecht-class",
+      "parishId": "summit",
+      "name": "Hannah Brecht's third grade",
+      "line": "26 pupils in the school shelter",
+      "text": "Twenty-six pupils whose parents work shifts at Keystone and Haven; their teacher stays because nobody has come for them.",
+      "groupId": "pupils",
+      "decidedBy": [
+        "A5",
+        "v3-recovery-summit"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "ji-woo-park",
+      "parishId": "sterling",
+      "name": "Ji-woo Park",
+      "line": "31, uplink engineer",
+      "text": "The only person who can keep the satellite uplink aligned by hand when the automatic tracking fails, which it does above 90 mph. The dish is on the tower roof.",
+      "groupId": "campus-ops",
+      "decidedBy": [
+        "v3-landfall-sterling"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "yusuf-haddad",
+      "parishId": "sterling",
+      "name": "Dr. Yusuf Haddad",
+      "line": "55, research campus",
+      "text": "Four months out from a bone-marrow transplant, immunosuppressed, in executive housing on the headland with his wife. A crowded shelter is a danger to him that it is to no one else.",
+      "groupId": "scientists",
+      "decidedBy": [
+        "v3-landfall-sterling",
+        "v3-approach-sterling"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "celeste-dubois",
+      "parishId": "sterling",
+      "name": "Celeste Dubois",
+      "line": "29, executive assistant to the Regional President",
+      "text": "Works on the 30th floor and lives in Riverside, across the bridge, because that is what an assistant's salary buys. She is at the campus gate with her neighbours at the peak.",
+      "groupId": "riverside-at-gate",
+      "decidedBy": [
+        "v3-landfall-sterling",
+        "L6"
+      ],
+      "hazardQuarter": "landfall"
+    },
+    {
+      "id": "whitfield-twins",
+      "parishId": "sterling",
+      "name": "The Whitfield twins",
+      "line": "9, children of the VP of Operations",
+      "text": "At home on the headland with a nanny while both parents are in the crisis room. Their names are on the first helicopter manifest.",
+      "groupId": "executive-households",
+      "decidedBy": [
+        "v3-approach-sterling",
+        "A1"
+      ],
+      "hazardQuarter": "approach"
+    }
+  ],
+  "HAZARDS": [
+    {
+      "t": -1080,
+      "state": "at_risk",
+      "groupId": "works-crew",
+      "count": 400,
+      "unlessFlag": "works-released",
+      "narrative": "The Switchbacks slide; the works' commuters are stuck wherever the road left them."
+    },
+    {
+      "t": -240,
+      "state": "at_risk",
+      "groupId": "southfield-residents",
+      "narrative": "Water on Southfield's ground floors."
+    },
+    {
+      "t": -240,
+      "state": "at_risk",
+      "cardId": "gloria-adebayo-ferris",
+      "narrative": "Block C, the lowest building on the flat, is flooding."
+    },
+    {
+      "t": -180,
+      "state": "at_risk",
+      "groupId": "longshore-families",
+      "narrative": "Surge in Haven's surge zone."
+    },
+    {
+      "t": -180,
+      "state": "at_risk",
+      "cardId": "jonah-baptiste",
+      "unlessFlag": "longshore-sheltered",
+      "narrative": "His grandmother's ground-floor flat is two streets from the terminal."
+    },
+    {
+      "t": -180,
+      "state": "at_risk",
+      "groupId": "port-shops",
+      "narrative": "The dockside at sea level."
+    },
+    {
+      "t": -180,
+      "state": "at_risk",
+      "cardId": "sato-family",
+      "narrative": "The noodle bar is at sea level."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "groupId": "harvester-watch",
+      "narrative": "The Pacific Harvester breaks her mooring with a two-man watch aboard."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "cardId": "tomas-reyes",
+      "narrative": "Tomás Reyes is on the Harvester's watch."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "groupId": "riverside-residents",
+      "narrative": "The river is in Riverside's ground floors."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "cardId": "amara-osei",
+      "unlessFlag": "riverside-warned",
+      "narrative": "Dr. Osei and her mother are in Riverside."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "groupId": "strand-visitors",
+      "narrative": "The Strand's roofs go at the peak."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "cardId": "albrecht-family",
+      "narrative": "The Albrechts are in a Strand hotel with the roof going."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "groupId": "strand-road-households",
+      "unlessFlag": "door-to-door",
+      "narrative": "Strand Road at the water's edge."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "cardId": "walter-finch",
+      "unlessFlag": "door-to-door",
+      "narrative": "Nobody he knows came to ask him to leave."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "groupId": "caldera-villagers",
+      "narrative": "The lake rises over Caldera's lower lane."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "cardId": "sam-oyelaran",
+      "unlessFlag": "caldera-evacuated",
+      "narrative": "Sam's wife and daughter are below the lower lane."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "cardId": "dolores-quint",
+      "narrative": "Grid down; the canteen fridge with her insulin is dark."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "cardId": "mateo-iglesias",
+      "narrative": "Seventeen, inside the dam, counted as essential by nobody in particular."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "groupId": "campus-ops",
+      "count": 10,
+      "narrative": "Ji-woo Park's team on the tower roof keeping the uplink aligned."
+    },
+    {
+      "t": -120,
+      "state": "at_risk",
+      "cardId": "ji-woo-park",
+      "narrative": "On the tower roof above 90 mph."
+    },
+    {
+      "t": -90,
+      "state": "at_risk",
+      "groupId": "riverside-at-gate",
+      "narrative": "Three hundred Riverside residents reach the campus fence in the water."
+    },
+    {
+      "t": -90,
+      "state": "at_risk",
+      "cardId": "celeste-dubois",
+      "narrative": "Celeste Dubois is at the gate with her neighbours."
+    },
+    {
+      "t": -60,
+      "state": "at_risk",
+      "groupId": "icu-patients",
+      "unlessFlag": "icu-evacuated",
+      "narrative": "The hospital generator fails for eleven minutes."
+    },
+    {
+      "t": -60,
+      "state": "at_risk",
+      "groupId": "dialysis-patients",
+      "unlessFlag": "hospital-first",
+      "narrative": "Dialysis and ventilators on the backup alone."
+    },
+    {
+      "t": -60,
+      "state": "at_risk",
+      "cardId": "ruth-calloway",
+      "unlessFlag": "hospital-first",
+      "narrative": "Her dialysis is on the backup."
+    },
+    {
+      "t": 0,
+      "state": "injured",
+      "groupId": "strand-visitors",
+      "count": 40,
+      "from": "at_risk",
+      "narrative": "Forty injured walk from the Strand to the terminal in the eye."
+    },
+    {
+      "t": 120,
+      "state": "rescued",
+      "cardId": "ji-woo-park",
+      "narrative": "Off the roof as the backside arrives."
+    },
+    {
+      "t": 120,
+      "state": "rescued",
+      "groupId": "campus-ops",
+      "narrative": "The uplink team comes down."
+    },
+    {
+      "t": 360,
+      "state": "rescued",
+      "groupId": "caldera-villagers",
+      "narrative": "The lake falls back below the lower lane."
+    },
+    {
+      "t": 360,
+      "state": "rescued",
+      "cardId": "sam-oyelaran",
+      "narrative": "Caldera village comes out of the water."
+    },
+    {
+      "t": 360,
+      "state": "rescued",
+      "cardId": "mateo-iglesias",
+      "narrative": "The dam's doors open."
+    },
+    {
+      "t": 540,
+      "state": "rescued",
+      "groupId": "harvester-watch",
+      "narrative": "A Haven tug nobody asked finds the Harvester aground on the south point, the watch alive in the wheelhouse."
+    },
+    {
+      "t": 540,
+      "state": "rescued",
+      "cardId": "tomas-reyes",
+      "narrative": "Found alive in the wheelhouse by a Haven tug."
+    },
+    {
+      "t": 720,
+      "state": "rescued",
+      "groupId": "icu-patients",
+      "narrative": "The dam restarts at 60%; the hospital comes off the generator."
+    },
+    {
+      "t": 720,
+      "state": "rescued",
+      "groupId": "dialysis-patients",
+      "narrative": "Grid power returns to Hospital Hill."
+    },
+    {
+      "t": 720,
+      "state": "rescued",
+      "cardId": "ruth-calloway",
+      "narrative": "Dialysis resumes."
+    },
+    {
+      "t": 720,
+      "state": "rescued",
+      "cardId": "dolores-quint",
+      "narrative": "The works' fridge is cold again."
+    },
+    {
+      "t": 720,
+      "state": "rescued",
+      "groupId": "works-crew",
+      "narrative": "The Gorge Road reopens; the works' crews go home."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "groupId": "southfield-residents",
+      "narrative": "The water leaves Southfield."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "gloria-adebayo-ferris",
+      "narrative": "Block C drains."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "anh-tran",
+      "narrative": "Southfield is dry."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "kofi-mensah",
+      "narrative": "The berm is a road again."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "groupId": "riverside-residents",
+      "unlessFlag": "riverside-delayed",
+      "narrative": "Riverside's pumps drain the town."
+    },
+    {
+      "t": 2400,
+      "state": "rescued",
+      "groupId": "riverside-residents",
+      "narrative": "Riverside drains two days late."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "amara-osei",
+      "narrative": "Riverside drains."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "groupId": "riverside-at-gate",
+      "narrative": "The water leaves the campus gate."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "celeste-dubois",
+      "narrative": "Off the campus stairs."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "groupId": "strand-visitors",
+      "narrative": "The relief flight lands; the visitors leave the terminal."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "albrecht-family",
+      "narrative": "On the first relief flight out."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "groupId": "strand-road-households",
+      "narrative": "Strand Road dries out."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "walter-finch",
+      "narrative": "Found on his porch, where he said he would be."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "groupId": "longshore-families",
+      "narrative": "The surge zone drains."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "jonah-baptiste",
+      "narrative": "Home from the terminal."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "groupId": "port-shops",
+      "narrative": "The noodle bar reopens on the first floor."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "sato-family",
+      "narrative": "Feeding the night shift again."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "priya-nair",
+      "narrative": "Her daughter was born in the terminal clinic at T+3h."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "ben-whitlock",
+      "narrative": "Out of the water."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "elena-marsh",
+      "narrative": "Out of the control room."
+    },
+    {
+      "t": 1440,
+      "state": "rescued",
+      "cardId": "dmitri-volkov",
+      "narrative": "Out of the cab."
+    }
+  ]
+}
