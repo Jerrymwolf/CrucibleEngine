@@ -32,6 +32,58 @@ function chooseRole(u) {
     onClick($('veil-join'), '[data-pick]', el => { const v = el.dataset.pick; try { sessionStorage.setItem(k, v); } catch (e) { /* fine */ } veil.join(''); res(v); });
   });
 }
+// a page opened with nothing in its address (the published artifact drops query strings): one question, how to use it
+function chooseStart() {
+  return new Promise(res => {
+    let pace = 2;
+    const draw = () => {
+      veil.show('How do you want to try the Values Crucible?');
+      veil.join(`<div class="join">
+        <div class="hint" style="font-weight:600">Play one parish yourself. Bots lead the other five, and the session runs itself.</div>
+        <div class="parishes" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">${ROSTER.map(p => `<button class="btn" data-solo="${p}" style="color:${pcolor(p)};min-height:52px">${esc(pname(p))}</button>`).join('')}</div>
+        <div class="roles"><button class="btn ${pace === 2 ? 'on' : ''}" data-pace="2">Quick<small>about 30 minutes of play</small></button><button class="btn ${pace === 1 ? 'on' : ''}" data-pace="1">Real pace<small>60 minutes, as in the room</small></button></div>
+        <div class="hint" style="font-weight:600;margin-top:10px">Or watch, or run it for a room</div>
+        <div class="roles"><button class="btn" data-mode="rehearsal">Watch a bot rehearsal<small>all six parishes, about 5 minutes</small></button><button class="btn" data-mode="dm">Facilitate a session<small>the DM console; tables join from other windows</small></button></div>
+      </div>`);
+    };
+    draw();
+    onClick($('veil-join'), '[data-pace]', el => { pace = Number(el.dataset.pace); draw(); });
+    onClick($('veil-join'), '[data-solo]', el => { veil.join(''); res({ mode: 'solo', parish: el.dataset.solo, speed: pace }); });
+    onClick($('veil-join'), '[data-mode]', el => { veil.join(''); res({ mode: el.dataset.mode }); });
+  });
+}
+// solo: an in-page host, this page is the chosen parish's console, bots take the other tables once its values are locked
+function startSolo(u, parish, speed) {
+  Object.assign(u, { role: 'console', parish, speed, code: null, rehearsal: false, fresh: true });
+  Object.assign(App, { role: 'console', parish, solo: true }); App.join = { role: 'console', parish };
+  const host = startLocalHost(u);
+  const iv = setInterval(() => { if (host.inputs.some(i => i.kind === 'lock_values' && i.parish_id === parish)) { clearInterval(iv); host.startRehearsal(); } }, 400);
+  const opts = { code: host.code, session_code: host.code, token: host.tokens.tables[parish], role: 'console', scope: scopeFor(u), name: `${pname(parish)} tablet` };
+  veil.show('Starting the session…');
+  connect(new LoopbackTransport(host), opts, u);
+}
+// the facilitator's few moves a solo player still needs: pause, and stepping through the debrief
+function soloBar(world) {
+  const bar = document.createElement('div'); bar.id = 'solo-bar';
+  bar.style.cssText = 'position:fixed;top:8px;right:8px;z-index:4;display:flex;gap:6px;align-items:center;background:var(--bg);border:1px solid var(--line, #334);border-radius:6px;padding:4px 8px;font-size:13px';
+  document.body.appendChild(bar);
+  const dm = (kind, p = {}) => App.host.dmIntent(App.host.autoDm(), kind, p);
+  const draw = () => {
+    const h = App.host, ph = h.phase;
+    let html = '<span class="dim">Solo</span>';
+    if (ph === 'lobby') html += '<span>Lock your three values to start the storm</span>';
+    if (ph === 'running') html += '<button class="btn tiny" data-solo-act="pause">Pause</button>';
+    if (ph === 'paused') html += '<button class="btn tiny" data-solo-act="resume">Resume</button>';
+    if (ph === 'debrief') { const { i, step, steps } = debriefStepOf(world); html += `<span>${i + 1}/${steps.length} ${esc(step.title)}</span><button class="btn tiny" data-solo-act="back" ${i > 0 ? '' : 'disabled'}>Back</button><button class="btn tiny" data-solo-act="next" ${i < steps.length - 1 ? '' : 'disabled'}>Next</button>`; }
+    if (bar.innerHTML !== html) bar.innerHTML = html;
+  };
+  onClick(bar, '[data-solo-act]', el => {
+    const a = el.dataset.soloAct;
+    if (a === 'pause' || a === 'resume') dm(a);
+    else { const { i, steps } = debriefStepOf(world), j = a === 'next' ? i + 1 : i - 1; if (steps[j]) dm('debrief_step', { step: j, id: steps[j].id }); }
+  });
+  world.on('change', draw); draw();
+}
 function startLocalHost(u) {
   const saved = u.code && !u.fresh && !u.rehearsal ? LocalHost.saved(u.code) : null;
   App.host = new LocalHost(saved ? { restore: saved, speed: u.speed } : { seed: u.seed, speed: u.speed, rehearsal: u.rehearsal, code: u.code, pin: u.pin });
@@ -98,6 +150,7 @@ function connect(transport, opts, u) {
       if (world.role !== 'phone' && App.img && !R.ready) { try { await createRenderer(App.img); if (App.timing) App.timing.renderer = Math.round(performance.now()); } catch (e) { console.warn('WebGL unavailable; the map is off', e.message); } }
       if (R.ready) R.setWorld(world);
       initUI(world); App.starting = false;
+      if (App.solo && !App.soloBar) App.soloBar = soloBar(world) || true;
     } else if (App.uiRole !== world.role) { location.reload(); return; } // the seat changed role (a console became a phone): start clean
     veil.hide();
   });
@@ -128,6 +181,11 @@ async function boot() {
   try { App.img = await loadIsland(); mark('island'); SHORE = traceShore(App.img); mark('shore'); } catch (e) { console.warn('island art', e.message); }
   buildRoutes(); mark('routes');
   const servedByHost = /^https?:$/.test(location.protocol) && (/\/j\//.test(location.pathname) || Q.get('host') === 'ws');
+  if (!u.role && !u.token && !u.code && !u.ws && !servedByHost) {
+    const pick = await chooseStart();
+    if (pick.mode === 'solo') { startSolo(u, pick.parish, pick.speed); return; }
+    Object.assign(u, { role: 'dm', rehearsal: pick.mode === 'rehearsal', speed: pick.mode === 'rehearsal' ? 18 : null, fresh: true }); App.role = 'dm';
+  }
   const opts = { session_code: u.code, token: u.token, role: u.role === 'console' || u.role === 'phone' ? u.role : undefined, pin: u.pin, code: u.code, scope: scopeFor(u), name: u.role === 'console' ? `${pname(u.parish || '')} tablet`.trim() : u.role || 'device' };
   if (!u.token && u.code && App.join.role && App.join.parish) opts.claim = { parish: App.join.parish, role: App.join.role };
   let transport;

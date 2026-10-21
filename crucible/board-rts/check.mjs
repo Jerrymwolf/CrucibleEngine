@@ -7,7 +7,7 @@
 // golden run replays to its recorded hash), private things stay private, reduced motion is honoured.
 // When a crucible-host binary is present it also plays one end-to-end session over WebSockets against it.
 //
-// Usage: PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers node check.mjs [--speed 36] [--no-ws] [--ws-only] [--host <binary>]
+// Usage: PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers node check.mjs [--speed 36] [--no-ws] [--ws-only] [--solo-only] [--host <binary>]
 // Playwright is imported from its absolute global path; nothing needs installing.
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, unlinkSync } from 'node:fs';
 import { createServer } from 'node:http';
@@ -461,9 +461,34 @@ async function websocket(bin) {
   }
 }
 
+/* =============================== C. solo: a bare page, one parish, bots for the rest =============================== */
+async function solo() {
+  log('\nC. solo: the start screen, one parish played, the session runs itself');
+  const ctx = await browser.newContext({ viewport: { width: 1366, height: 1024 }, deviceScaleFactor: 1 });
+  const p = await open(ctx, `${BASE}/`, { label: 'solo', ready: false });
+  await p.waitForFunction(() => document.querySelector('[data-solo="keystone"]'), null, { polling: 100 });
+  ok(await p.evaluate(() => /How do you want to try/.test(document.body.innerText)), 'a bare page asks how to use it instead of looking for a host');
+  await shot(p, 'solo-01-start');
+  await click(p, '[data-pace="2"]'); await click(p, '[data-solo="keystone"]');
+  await p.waitForFunction(() => __crucible.world && __crucible.world.ready && document.querySelector('#solo-bar'), null, { timeout: 90000, polling: 100 });
+  ok((await state(p)).role === 'console' && (await state(p)).parish === 'keystone', 'the page is Keystone\'s console');
+  ok(await p.evaluate(() => __crucible.host.phase === 'lobby' && Object.keys(__crucible.host.bots).length === 0), 'nothing starts before the table locks its values');
+  await lockValues(p, 'Keystone makes the cure and tells the truth about who gets it.');
+  await waitFor(p, () => __crucible.host.phase === 'quarter_open', null, 'solo: the first quarter opens once values lock');
+  ok((await p.evaluate(() => Object.keys(__crucible.host.bots).sort().join())) === 'gateway,haven,heartland,sterling,summit', 'solo: bots took the five other tables');
+  await waitFor(p, () => __crucible.host.phase === 'running', null, 'solo: the clock starts by itself', 90000);
+  await click(p, '[data-solo-act="pause"]');
+  await waitFor(p, () => __crucible.host.phase === 'paused', null, 'solo: the player can pause');
+  await shot(p, 'solo-02-running');
+  await click(p, '[data-solo-act="resume"]');
+  await waitFor(p, () => __crucible.host.phase === 'running', null, 'solo: and resume');
+  await ctx.close();
+}
+
 try {
-  if (!flag('--ws-only')) await rehearsal();
-  if (!flag('--no-ws')) { const bin = findHost(); if (bin) await websocket(bin); else if (flag('--ws')) failures.push('no crucible-host binary (cargo build -p crucible-host)'); else note('no crucible-host binary found; the WebSocket session was skipped (cargo build -p crucible-host, or --host <binary>)'); }
+  if (flag('--solo-only')) await solo();
+  if (!flag('--ws-only') && !flag('--solo-only')) { await rehearsal(); await solo(); }
+  if (!flag('--no-ws') && !flag('--solo-only')) { const bin = findHost(); if (bin) await websocket(bin); else if (flag('--ws')) failures.push('no crucible-host binary (cargo build -p crucible-host)'); else note('no crucible-host binary found; the WebSocket session was skipped (cargo build -p crucible-host, or --host <binary>)'); }
 } catch (e) {
   failures.push(`crashed: ${e.stack || e}`);
 } finally {

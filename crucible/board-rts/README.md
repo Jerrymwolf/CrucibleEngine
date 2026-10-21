@@ -26,6 +26,8 @@ With **crucible-host** on the LAN (`docs/PROTOCOL.md`), the host prints the link
 
 **Without a server** the same page hosts the session itself. Open `index.html?role=dm` (from `file://` or any static server) and the DM console starts an in-page host; the DM's *Join links & QR* dialog gives every other role its link (`?code=CODE&role=table&parish=…#t=…`, `?role=projector#p=…`), which work in other windows of the same browser (BroadcastChannel) and are what the printed pack carries. A role that finds no host offers *Run on this device instead*, which starts a host in that page (Loopback) for a single-device walk-through. The in-page host persists to local storage, so reloading the DM page resumes the session; `&new=1` starts afresh. Give the DM console its own window, not a background tab: browsers throttle timers in tabs that are not visible, and the in-page host's clock runs on them.
 
+**A bare page** (no role, token, code or `?ws` in its address, as the published artifact opens) shows a start screen: play one parish with bots leading the other five (an in-page host; the session runs itself once the table locks its values, and a small Solo box pauses and steps the debrief), watch a bot rehearsal, or open the DM console.
+
 **Rehearsal**: `index.html?role=dm&rehearsal=1&speed=18&seed=42` fills every table with bots that lock values, allocate, vote, decide and answer through the same intent path as a real console, and runs the 90 minutes in about five (`speed` is the tempo multiplier; the DM levers *Fill empty tables* and *Autopilot* do the same by hand, and a real tablet that joins displaces its bot).
 
 ## What each screen does
