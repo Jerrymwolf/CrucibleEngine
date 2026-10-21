@@ -53,13 +53,7 @@ mod tests {
         assert!(first.contains(&"heartland-dam-keystone-power".to_string()));
         let second = evaluate(&c, &mut state);
         assert!(second.is_empty());
-        let scheduled: usize = c
-            .infrastructure
-            .cascade_rules
-            .iter()
-            .filter(|r| first.contains(&r.id))
-            .map(|r| r.effects.len())
-            .sum();
+        let scheduled: usize = c.infrastructure.cascade_rules.iter().filter(|r| first.contains(&r.id)).map(|r| r.effects.len()).sum();
         assert_eq!(state.scheduled.len(), scheduled);
     }
 }

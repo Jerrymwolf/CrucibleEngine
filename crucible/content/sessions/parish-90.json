@@ -1,0 +1,367 @@
+{
+  "id": "parish-90",
+  "title": "The Values Crucible: parish leadership, 90 minutes",
+  "status": "draft: the schedule, the scoring and the new characters are defaults pending Jerry's confirmation",
+  "canon": "values-crucible-session-90 and decision-2026-10-21-rts-experience-flow",
+  "seed": 42,
+  "valuesDeck": [
+    "safety",
+    "fairness",
+    "candor",
+    "courage",
+    "accountability",
+    "compassion",
+    "integrity",
+    "loyalty",
+    "stewardship",
+    "respect",
+    "honesty",
+    "duty"
+  ],
+  "valuesToPick": 3,
+  "statementTemplate": "When Midas comes, {parish} will put ___ before ___, and we will ___.",
+  "roster": [
+    "gateway",
+    "heartland",
+    "keystone",
+    "haven",
+    "summit",
+    "sterling"
+  ],
+  "quarters": [
+    {
+      "id": "prep",
+      "title": "Quarter 1: Preparation",
+      "fromT": -4320,
+      "toT": -2160,
+      "phase": "watch",
+      "cardSeconds": 90,
+      "playSeconds": 660,
+      "closeSeconds": 150,
+      "humanDeadlineTicks": 39,
+      "maydayAnswerTicks": null,
+      "secondMove": "allocation",
+      "card": "Midas is Category 3, five hundred miles south-east, 55% likely by T-60h. Everything works. This is the quarter in which every later choice is cheap."
+    },
+    {
+      "id": "approach",
+      "title": "Quarter 2: Approach",
+      "fromT": -2160,
+      "toT": -360,
+      "phase": "crisis",
+      "cardSeconds": 90,
+      "playSeconds": 660,
+      "closeSeconds": 150,
+      "humanDeadlineTicks": 33,
+      "maydayAnswerTicks": 22,
+      "secondMove": "aid",
+      "card": "Rain bands at T-36h. The harbour closes to departures at T-30h, the runway at T-24h. Roads start to go at T-24h."
+    },
+    {
+      "id": "landfall",
+      "title": "Quarter 3: Landfall",
+      "fromT": -360,
+      "toT": 360,
+      "phase": "crisis",
+      "cardSeconds": 90,
+      "playSeconds": 660,
+      "closeSeconds": 150,
+      "humanDeadlineTicks": 13,
+      "maydayAnswerTicks": 9,
+      "secondMove": "aid",
+      "card": "Peak at T-2h: 120 mph sustained, gusts to 145, eight to ten feet of surge at Haven. The eye passes from T+0 to T+2h. Then the backside."
+    },
+    {
+      "id": "recovery",
+      "title": "Quarter 4: Recovery",
+      "fromT": 360,
+      "toT": 2880,
+      "phase": "recovery",
+      "cardSeconds": 90,
+      "playSeconds": 660,
+      "closeSeconds": 150,
+      "humanDeadlineTicks": 46,
+      "maydayAnswerTicks": null,
+      "secondMove": "repair",
+      "card": "Tropical-storm conditions at T+6h, clear by T+24h. Roads reopen; the dam restarts at 60% at T+12h; the cutter Resolute arrives at T+14h. Repair, giving back, credit, and the first questions."
+    }
+  ],
+  "intensity": [
+    [
+      -4320,
+      3
+    ],
+    [
+      -3600,
+      4
+    ],
+    [
+      -2160,
+      5
+    ],
+    [
+      -1440,
+      6
+    ],
+    [
+      -720,
+      7
+    ],
+    [
+      -360,
+      8
+    ],
+    [
+      -120,
+      10
+    ],
+    [
+      0,
+      9
+    ],
+    [
+      120,
+      8
+    ],
+    [
+      360,
+      6
+    ],
+    [
+      720,
+      5
+    ],
+    [
+      1440,
+      4
+    ],
+    [
+      2160,
+      3
+    ]
+  ],
+  "allocation": {
+    "lockT": -3120,
+    "note": "Tables that have not locked by the lock tick keep everything."
+  },
+  "ask": {
+    "gateway": [
+      {
+        "dilemmaId": "v3-prep-gateway",
+        "presentT": -3600,
+        "deadlineTicks": 39
+      },
+      {
+        "dilemmaId": "v3-approach-gateway",
+        "presentT": -1920,
+        "deadlineTicks": 33
+      },
+      {
+        "dilemmaId": "v3-landfall-gateway",
+        "presentT": 0,
+        "deadlineTicks": 13
+      },
+      {
+        "dilemmaId": "v3-recovery-gateway",
+        "presentT": 720,
+        "deadlineTicks": 46
+      }
+    ],
+    "heartland": [
+      {
+        "dilemmaId": "v3-prep-heartland",
+        "presentT": -3360,
+        "deadlineTicks": 39
+      },
+      {
+        "dilemmaId": "v3-approach-heartland",
+        "presentT": -1440,
+        "deadlineTicks": 33
+      },
+      {
+        "dilemmaId": "v3-landfall-heartland",
+        "presentT": -120,
+        "deadlineTicks": 13
+      },
+      {
+        "dilemmaId": "v3-recovery-heartland",
+        "presentT": 735,
+        "deadlineTicks": 46
+      }
+    ],
+    "keystone": [
+      {
+        "dilemmaId": "v3-prep-keystone",
+        "presentT": -3120,
+        "deadlineTicks": 39
+      },
+      {
+        "dilemmaId": "v3-approach-keystone",
+        "presentT": -2160,
+        "deadlineTicks": 33
+      },
+      {
+        "dilemmaId": "v3-landfall-keystone",
+        "presentT": -180,
+        "deadlineTicks": 13
+      },
+      {
+        "dilemmaId": "v3-recovery-keystone",
+        "presentT": 1080,
+        "deadlineTicks": 46
+      }
+    ],
+    "haven": [
+      {
+        "dilemmaId": "v3-prep-haven",
+        "presentT": -3000,
+        "deadlineTicks": 39
+      },
+      {
+        "dilemmaId": "v3-approach-haven",
+        "presentT": -1800,
+        "deadlineTicks": 33
+      },
+      {
+        "dilemmaId": "v3-landfall-haven",
+        "presentT": -105,
+        "deadlineTicks": 13
+      },
+      {
+        "dilemmaId": "v3-recovery-haven",
+        "presentT": 1440,
+        "deadlineTicks": 46
+      }
+    ],
+    "summit": [
+      {
+        "dilemmaId": "v3-prep-summit",
+        "presentT": -2880,
+        "deadlineTicks": 39
+      },
+      {
+        "dilemmaId": "v3-approach-summit",
+        "presentT": -1380,
+        "deadlineTicks": 33
+      },
+      {
+        "dilemmaId": "v3-landfall-summit",
+        "presentT": -60,
+        "deadlineTicks": 13
+      },
+      {
+        "dilemmaId": "v3-recovery-summit",
+        "presentT": 1800,
+        "deadlineTicks": 46
+      }
+    ],
+    "sterling": [
+      {
+        "dilemmaId": "v3-prep-sterling",
+        "presentT": -2820,
+        "deadlineTicks": 39
+      },
+      {
+        "dilemmaId": "v3-approach-sterling",
+        "presentT": -2040,
+        "deadlineTicks": 33
+      },
+      {
+        "dilemmaId": "v3-landfall-sterling",
+        "presentT": -45,
+        "deadlineTicks": 13
+      },
+      {
+        "dilemmaId": "v3-recovery-sterling",
+        "presentT": 2160,
+        "deadlineTicks": 46
+      }
+    ]
+  },
+  "maydays": [
+    {
+      "callId": "A1",
+      "t": -2040,
+      "answerTicks": 33
+    },
+    {
+      "callId": "A6",
+      "t": -1740,
+      "answerTicks": 22
+    },
+    {
+      "callId": "A5",
+      "t": -1620,
+      "answerTicks": 22
+    },
+    {
+      "callId": "A3",
+      "t": -1500,
+      "answerTicks": 22
+    },
+    {
+      "callId": "L3",
+      "t": -150,
+      "answerTicks": 9
+    },
+    {
+      "callId": "L5",
+      "t": -90,
+      "answerTicks": 9
+    },
+    {
+      "callId": "L1",
+      "t": 0,
+      "answerTicks": 9
+    },
+    {
+      "callId": "L7",
+      "t": 0,
+      "answerTicks": 9
+    }
+  ],
+  "optionalMaydays": [
+    "A2",
+    "A4",
+    "A7",
+    "L2",
+    "L4",
+    "L6",
+    "L8",
+    "R1"
+  ],
+  "freeMaydaysPerQuarter": 3,
+  "answerReasons": [
+    "We need it ourselves",
+    "The route is gone",
+    "We do not trust the ask",
+    "Our people first",
+    "We promised it elsewhere",
+    "Other"
+  ],
+  "creditLine": {
+    "signals": {
+      "recognition": 2,
+      "respect": 1
+    },
+    "prompt": "One line of credit naming another table's people: a crew, a captain, a nurse."
+  },
+  "secretBriefs": {
+    "gateway": "Private to the Gateway council. The last departure at T-30h has 45 seats. Twelve of them were blocked yesterday by Sterling's corporate travel office for Meridian personnel, names to follow. The airline has honoured the block because Meridian guarantees its winter charters. Summit does not know. You can release the block (the airline will comply if the parish asks in writing), keep it and say nothing, or tell Summit and let the Council fight Sterling.",
+    "heartland": "Private to the Authority board. Spillway gate 2's actuator has a known fault. A controlled release takes ninety minutes longer to establish than the published protocol assumes, so the protocol's 97% trigger has to be treated as 94% to be safe. The board chose in June not to publish this until the repair budget was approved. Also: the works manager reports four days of concentrate in the tanks. It is six. He pads the number so Keystone does not plan against it.",
+    "keystone": "Private to the Keystone site leadership. Two documents. 1. An internal engineering memo, June 2024: Southfield storm drainage has not been load-tested since construction. Closed by Sterling facilities: no action, budget cycle. The 2,400 people in Southfield have been told the housing is built to code. It is. It has never been tested. 2. An email from Chicago this morning: the Singapore consignment must sail; site leaders will be assessed this quarter on doses shipped; keep the line running until the port closes.",
+    "haven": "Private to the Port Authority board. The fuel terminal reports 500,000 gallons to the island's emergency inventory. The true figure is 640,000. The Authority has under-reported for six years to keep a reserve the island does not plan against. Also: Captain Ingrid Solheim, master of the Kestrel Reach, has told the harbourmaster privately that she sails at T-30h with whatever is aboard. She will not wait for batch 47 whatever Keystone or Sterling says.",
+    "summit": "Private to the Island Emergency Council. The Governor is at a conference on the mainland and cannot return before the runway closes. Her chief of staff called at T-70h: no mandatory order until the track is certain; voluntary language until 85%. Also: the Council's hydrologist has the dam's release map. The spillway floods Riverside and Sterling's lower campus. Sterling's own insurance flood map shows the same thing, and Sterling quietly moved its data centre to the fourth floor in the spring. It has not warned the Riverside households that rent from it.",
+    "sterling": "Private to the Meridian crisis room. Three things Chicago expects you to know and the island does not. 1. Twenty small generators in executive garages on the headland, 96 hours of fuel under the tower and 21 days of food in the operations centre, none of it on the island's emergency inventory. 2. Meridian's internal track model has put the direct-hit probability at 70% since T-72h, fifteen points above the public forecast; confidential until the Singapore consignment sails. 3. The Whitfield twins, the Haddads and ten other executive households are on a helicopter manifest drawn up by Chicago's security team last night. Summit has not been told the helicopters exist as a resource."
+  },
+  "secretOrder": [
+    "sterling",
+    "summit",
+    "haven",
+    "keystone",
+    "heartland",
+    "gateway"
+  ],
+  "debriefQuestion": "Which secret, had it been on the table at T-72h, would have changed the most decisions?",
+  "commitment": "The next time I feel [this pressure], I will [this action] to stay aligned with [this value]."
+}

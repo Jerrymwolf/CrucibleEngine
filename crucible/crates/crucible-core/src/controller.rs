@@ -32,13 +32,29 @@ pub struct Choice {
     pub controller: String,
     pub expired: bool,
     pub pressure: f64,
+    /// "storm" when the deadline passed and the card's default option was applied.
+    pub decided_by: Option<String>,
 }
 
 /// Keys whose positive alignment reads as expedient under pressure, and keys
 /// whose positive alignment is the costly, other-regarding choice. Used to
 /// derive an option's expedience score since the content carries none.
 const EXPEDIENT: &[&str] = &["success", "ambition", "stewardship", "competence", "boldness", "authority", "order", "loyalty", "stability", "recognition"];
-const COSTLY: &[&str] = &["safety", "equality", "fairness", "justice", "honesty", "compassion", "service", "community", "respect", "accountability", "integrity", "candor", "kindness"];
+const COSTLY: &[&str] = &[
+    "safety",
+    "equality",
+    "fairness",
+    "justice",
+    "honesty",
+    "compassion",
+    "service",
+    "community",
+    "respect",
+    "accountability",
+    "integrity",
+    "candor",
+    "kindness",
+];
 
 pub fn expedience(content: &Content, option: &DilemmaOption) -> f64 {
     let sig = option_signals(content, option);
@@ -63,7 +79,11 @@ pub fn alignment(content: &Content, option: &DilemmaOption, stated: &[String]) -
         den += w;
         num += w * *sig.get(&canonical(content, v)).unwrap_or(&0) as f64 / 3.0;
     }
-    if den == 0.0 { 0.0 } else { num / den }
+    if den == 0.0 {
+        0.0
+    } else {
+        num / den
+    }
 }
 
 /// Pressure 0..1: intensity, the parish's own infrastructure loss, and time
@@ -81,7 +101,10 @@ fn rationale(dilemma: &Dilemma, option: &DilemmaOption, stated: &[String], p: f6
     if p < 0.35 {
         format!("Holding to {value}: {}. {}", option.label, option.consequence_sketch.immediate)
     } else if p < 0.65 {
-        format!("With {persona} pressing and conditions worsening, {} looked like the only workable path; we will revisit {value} once the storm passes.", option.label.to_lowercase())
+        format!(
+            "With {persona} pressing and conditions worsening, {} looked like the only workable path; we will revisit {value} once the storm passes.",
+            option.label.to_lowercase()
+        )
     } else {
         format!("No time left. {}. {value} will have to wait.", option.label)
     }
@@ -106,22 +129,26 @@ pub fn decide(content: &Content, state: &SimState, rng: &mut SimRng, parish: &st
         return Some(Choice {
             option_id: option.id.clone(),
             rationale: s.rationale.clone().unwrap_or_else(|| rationale(dilemma, option, stated, p)),
-            controller: "script".into(),
+            // A human team's entered decision arrives as a script; keep its label.
+            controller: if controller == "human" { "human".into() } else { "script".into() },
             expired: false,
             pressure: p,
+            decided_by: None,
         });
     }
     if controller == "human" || (controller == "script" && script.is_none()) {
         if !expired {
             return None;
         }
-        let option = &dilemma.options[0];
+        // The storm decides: the option the persona would have taken alone.
+        let option = dilemma.default_option();
         return Some(Choice {
             option_id: option.id.clone(),
-            rationale: "Deadline passed with no decision; default option applied.".into(),
+            rationale: "Deadline passed with no decision; the storm applied the card's default option.".into(),
             controller: controller.into(),
             expired: true,
             pressure: p,
+            decided_by: Some("storm".into()),
         });
     }
     // ai: decide once half the window has elapsed (or at the deadline).
@@ -143,6 +170,7 @@ pub fn decide(content: &Content, state: &SimState, rng: &mut SimRng, parish: &st
         controller: "ai".into(),
         expired: false,
         pressure: p,
+        decided_by: None,
     })
 }
 

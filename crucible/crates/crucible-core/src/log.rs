@@ -1,6 +1,8 @@
 //! The run log: the only output of the core and the only input of the viewer.
 //! Field names follow docs/RUN_LOG_SCHEMA.md; anything beyond it is optional.
 
+use crate::inputs::{InputRecord, Session};
+use crate::state::{Convoy, GroupState};
 use crate::values::ValuesGapRow;
 use crate::weather::Weather;
 use serde::{Deserialize, Serialize};
@@ -41,21 +43,45 @@ pub struct WindowMeta {
     pub timeline_phase: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Team {
     pub parish_id: String,
     /// ai | script | human
     pub controller: String,
     pub stated_values: Vec<String>,
+    /// The table's one-line statement, when it locked one.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub statement: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum Event {
-    WindowTransition { from: Option<String>, to: String, narrative: String },
-    Degradation { parish_id: String, system: String, delta: i64, cause: String },
-    Cascade { rule_id: String, parish_id: String, system: String, delta: i64, narrative: String },
-    Connectivity { parish_id: String, system: String, status: String, source: String, narrative: String },
+    WindowTransition {
+        from: Option<String>,
+        to: String,
+        narrative: String,
+    },
+    Degradation {
+        parish_id: String,
+        system: String,
+        delta: i64,
+        cause: String,
+    },
+    Cascade {
+        rule_id: String,
+        parish_id: String,
+        system: String,
+        delta: i64,
+        narrative: String,
+    },
+    Connectivity {
+        parish_id: String,
+        system: String,
+        status: String,
+        source: String,
+        narrative: String,
+    },
     Isolation {
         parish_id: String,
         narrative: String,
@@ -84,8 +110,178 @@ pub enum Event {
         expired: Option<bool>,
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pressure: Option<f64>,
+        /// "storm" when the deadline passed and the default option was applied.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        decided_by: Option<String>,
     },
-    Consequence { dilemma_id: String, parish_id: String, system: String, delta: i64, delay_minutes: i64, narrative: String },
+    Consequence {
+        dilemma_id: String,
+        parish_id: String,
+        system: String,
+        delta: i64,
+        delay_minutes: i64,
+        narrative: String,
+    },
+    // --- routes and convoys ---
+    RouteCut {
+        route_id: String,
+        name: String,
+        mode: String,
+        from: String,
+        to: String,
+        narrative: String,
+    },
+    RouteReopened {
+        route_id: String,
+        name: String,
+        mode: String,
+        from: String,
+        to: String,
+        narrative: String,
+    },
+    ConvoyDeparted {
+        convoy_id: u64,
+        from: String,
+        to: String,
+        token: String,
+        count: i64,
+        route_ids: Vec<String>,
+        arrive_t: i64,
+        purpose: String,
+    },
+    ConvoyTurnedBack {
+        convoy_id: u64,
+        from: String,
+        to: String,
+        token: String,
+        count: i64,
+        route_id: String,
+        return_t: i64,
+        narrative: String,
+    },
+    ConvoyArrived {
+        convoy_id: u64,
+        from: String,
+        to: String,
+        token: String,
+        count: i64,
+        purpose: String,
+    },
+    TokenReturned {
+        parish_id: String,
+        token: String,
+        count: i64,
+    },
+    // --- tokens ---
+    /// An allocation entry (send | keep | keep_everything), a declared
+    /// reserve or a repair send, with the signals it was scored.
+    Allocation {
+        parish_id: String,
+        entry: String,
+        token: String,
+        to: String,
+        count: i64,
+        values_signaled: BTreeMap<String, i64>,
+    },
+    ValuesLocked {
+        parish_id: String,
+        values: Vec<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        statement: Option<String>,
+    },
+    CreditLine {
+        parish_id: String,
+        to: String,
+        text: String,
+        values_signaled: BTreeMap<String, i64>,
+    },
+    // --- aid ---
+    Mayday {
+        call_id: String,
+        asker: String,
+        holder: String,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        token: Option<String>,
+        count: i64,
+        deadline_t: i64,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        persona_id: Option<String>,
+        line: String,
+        ask: String,
+        raised_by: String,
+    },
+    AidExpired {
+        call_id: String,
+        holder: String,
+    },
+    AidAnswer {
+        call_id: String,
+        asker: String,
+        holder: String,
+        answer: String,
+        label: String,
+        count: i64,
+        /// human | ai | silence | dilemma
+        controller: String,
+        /// Some(false) when the token could not travel; None while a convoy is on its way.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        delivered: Option<bool>,
+        /// Why the token did not travel.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        note: Option<String>,
+        /// The table's own words, when it gave any.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        rationale: Option<String>,
+        values_signaled: BTreeMap<String, i64>,
+    },
+    // --- residents, doses, chance ---
+    ResidentState {
+        parish_id: String,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        group_id: Option<String>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        card_id: Option<String>,
+        state: String,
+        count: i64,
+        source: String,
+        narrative: String,
+    },
+    ShipSailed {
+        consignment: String,
+        doses: i64,
+    },
+    ConsignmentMissed {
+        consignment: String,
+        reason: String,
+    },
+    DosesLost {
+        doses: i64,
+        reason: String,
+    },
+    Chance {
+        parish_id: String,
+        source: String,
+        p: f64,
+        hit: bool,
+    },
+    /// An input or an authored effect that could not apply, and why.
+    Rejected {
+        source: String,
+        parish_id: String,
+        reason: String,
+    },
+}
+
+/// The two counters the board shows, plus what feeds them.
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
+pub struct Counters {
+    pub doses_shipped: i64,
+    pub people_safe: i64,
+    pub vault_doses: i64,
+    pub aboard: i64,
+    pub at_risk: i64,
+    pub injured: i64,
+    pub lost: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -102,6 +298,17 @@ pub struct Tick {
     /// Optional extra: primitive RNG draws made during this tick (REA brief e.5).
     #[serde(default)]
     pub rng_draws: u64,
+    #[serde(default)]
+    pub counters: Counters,
+    /// parish -> token -> count on the sheet after this tick.
+    #[serde(default)]
+    pub stock: BTreeMap<String, BTreeMap<String, i64>>,
+    /// Route ids cut after this tick.
+    #[serde(default)]
+    pub routes_cut: Vec<String>,
+    /// SHA-256 of the hashed state after this tick.
+    #[serde(default)]
+    pub state_hash: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -114,6 +321,16 @@ pub struct ParishOutcome {
     pub final_infrastructure: BTreeMap<String, i64>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct ResidentsSummary {
+    pub groups: BTreeMap<String, GroupState>,
+    pub cards: BTreeMap<String, String>,
+    pub people_safe: i64,
+    pub at_risk: i64,
+    pub injured: i64,
+    pub lost: i64,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Summary {
     pub ticks: usize,
@@ -124,6 +341,24 @@ pub struct Summary {
     pub state_hash: String,
     /// Extra: the ids of the cascade rules that fired, in id order.
     pub cascade_rules_fired: Vec<String>,
+    #[serde(default)]
+    pub counters: Counters,
+    #[serde(default)]
+    pub residents: ResidentsSummary,
+    #[serde(default)]
+    pub stock: BTreeMap<String, BTreeMap<String, i64>>,
+    #[serde(default)]
+    pub flags: Vec<String>,
+}
+
+/// A call for aid still open when the run stopped.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct OpenCallInfo {
+    pub call_id: String,
+    pub asker: String,
+    pub holder: String,
+    pub opened_t: i64,
+    pub deadline_t: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -141,9 +376,44 @@ pub struct RunLog {
     pub teams: Vec<Team>,
     pub ticks: Vec<Tick>,
     pub summary: Summary,
+    /// Live mode only: the run halted before tick `t` because these human
+    /// dilemmas are waiting for a decision. Absent from complete runs.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub pending: Vec<PendingDilemma>,
+    /// The inputs the run was given, as given (replay feeds them back).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub inputs: Vec<InputRecord>,
+    /// The session profile parts the run used.
+    #[serde(default, skip_serializing_if = "Session::is_empty")]
+    pub session: Session,
+    /// The horizon the run stopped at, when it stopped before `t_end`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub until: Option<i64>,
+    /// Calls for aid still open when the run stopped.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub open_calls: Vec<OpenCallInfo>,
 }
 
-/// What the state hash covers: the canonical final state.
+/// A dilemma open for a human team that has no decision yet (live mode).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct PendingDilemma {
+    pub t: i64,
+    pub parish_id: String,
+    pub dilemma_id: String,
+    pub title: String,
+    pub setup: String,
+    pub deadline_t: i64,
+    pub options: Vec<PendingOption>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct PendingOption {
+    pub id: String,
+    pub label: String,
+    pub description: String,
+}
+
+/// What the state hash covers: the canonical state after a tick.
 #[derive(Serialize)]
 pub struct HashedState<'a> {
     pub t: i64,
@@ -151,7 +421,18 @@ pub struct HashedState<'a> {
     pub morale: &'a BTreeMap<String, i64>,
     pub isolated: &'a BTreeSet<String>,
     pub fired_rules: &'a BTreeSet<String>,
-    pub decisions: Vec<(i64, String, String, String)>,
+    /// (t, kind, parish, source id, choice)
+    pub decisions: Vec<(i64, String, String, String, String)>,
+    pub stock: &'a BTreeMap<String, BTreeMap<String, i64>>,
+    pub hidden: &'a BTreeMap<String, BTreeMap<String, i64>>,
+    pub routes_cut: Vec<String>,
+    pub convoys: &'a [Convoy],
+    pub counters: &'a Counters,
+    pub groups: &'a BTreeMap<String, GroupState>,
+    pub cards: &'a BTreeMap<String, String>,
+    pub flags: &'a BTreeSet<String>,
+    pub calls_answered: &'a BTreeMap<String, String>,
+    pub doses: (i64, i64, i64, i64, i64),
 }
 
 pub fn state_hash(h: &HashedState) -> String {
@@ -170,19 +451,21 @@ impl RunLog {
         serde_json::from_str(s)
     }
 
-    /// Scripted decisions recovered from the log, pinned to their ticks.
+    /// Scripted decisions recovered from the log, pinned to their ticks. The
+    /// storm's defaults are left out: the replay reaches the same deadline
+    /// with no decision and applies the same default, keeping `decided_by`
+    /// and `expired` as the live run recorded them.
     pub fn recorded_decisions(&self) -> BTreeMap<String, crate::controller::ScriptedDecision> {
         let mut out = BTreeMap::new();
         for tick in &self.ticks {
             for e in &tick.events {
-                if let Event::Decision { dilemma_id, option_id, rationale, .. } = e {
+                if let Event::Decision { dilemma_id, option_id, rationale, decided_by, .. } = e {
+                    if decided_by.as_deref() == Some("storm") {
+                        continue;
+                    }
                     out.insert(
                         dilemma_id.clone(),
-                        crate::controller::ScriptedDecision {
-                            option_id: option_id.clone(),
-                            rationale: Some(rationale.clone()),
-                            t: Some(tick.t),
-                        },
+                        crate::controller::ScriptedDecision { option_id: option_id.clone(), rationale: Some(rationale.clone()), t: Some(tick.t) },
                     );
                 }
             }
@@ -222,5 +505,14 @@ mod tests {
         assert!(!s.contains("ended"));
         let back: Event = serde_json::from_str(&s).unwrap();
         assert!(matches!(back, Event::Isolation { .. }));
+        let e = Event::RouteCut {
+            route_id: "gorge-road".into(),
+            name: String::new(),
+            mode: "road".into(),
+            from: "summit".into(),
+            to: "heartland".into(),
+            narrative: String::new(),
+        };
+        assert!(serde_json::to_string(&e).unwrap().contains("\"kind\":\"route_cut\""));
     }
 }

@@ -3,13 +3,15 @@
     "id": "midas",
     "name": "Hurricane Midas",
     "category": 4,
+    "canon": "concordia-storm-quarters (v3)",
     "windows": [
       {
         "id": "watch-72",
         "phase": "watch",
         "tMinusHours": -72,
-        "label": "Watch Issued",
+        "label": "Watch issued",
         "certaintyPercent": 40,
+        "intensity": 3,
         "decisionType": "Pre-positioning",
         "weather": {
           "windMph": 15,
@@ -19,49 +21,51 @@
         },
         "infrastructureState": {
           "roadsPassable": [
-            "haven",
-            "summit",
             "gateway",
+            "haven",
             "heartland",
             "keystone",
-            "sterling"
+            "sterling",
+            "summit"
           ],
           "powerAvailable": [
-            "haven",
-            "summit",
             "gateway",
+            "haven",
             "heartland",
             "keystone",
-            "sterling"
+            "sterling",
+            "summit"
           ],
           "commsOperational": [
-            "haven",
-            "summit",
             "gateway",
+            "haven",
             "heartland",
             "keystone",
-            "sterling"
+            "sterling",
+            "summit"
           ]
         },
         "unavailableActions": [],
         "emergingPressures": [
-          "Tourists requesting early flights",
-          "Supply orders need confirmation",
-          "Workers asking about contingency plans"
+          "Midas is a Category 3 five hundred miles south-east",
+          "Tourists ask about early flights",
+          "The Kestrel Reach is at the berth with the Singapore consignment half loaded",
+          "Meridian's internal model says 70%; the public forecast says 40%"
         ],
         "narrativeBeats": [
-          "First weather advisory appears",
-          "Corporate asks for status update",
-          "\"Should we or shouldn't we\" tension begins",
-          "Production targets remain unchanged"
+          "First advisory on the emergency broadcast",
+          "Chicago asks Sterling for a status update",
+          "Gateway's fleet is at sea",
+          "The works report four days of concentrate"
         ]
       },
       {
         "id": "watch-48",
         "phase": "watch",
         "tMinusHours": -48,
-        "label": "Track Solidifies",
-        "certaintyPercent": 65,
+        "label": "Hurricane Warning",
+        "certaintyPercent": 70,
+        "intensity": 4,
         "decisionType": "Early release",
         "weather": {
           "windMph": 25,
@@ -71,52 +75,53 @@
         },
         "infrastructureState": {
           "roadsPassable": [
-            "haven",
-            "summit",
             "gateway",
+            "haven",
             "heartland",
             "keystone",
-            "sterling"
+            "sterling",
+            "summit"
           ],
           "powerAvailable": [
-            "haven",
-            "summit",
             "gateway",
+            "haven",
             "heartland",
             "keystone",
-            "sterling"
+            "sterling",
+            "summit"
           ],
           "commsOperational": [
-            "haven",
-            "summit",
             "gateway",
+            "haven",
             "heartland",
             "keystone",
-            "sterling"
+            "sterling",
+            "summit"
           ]
         },
         "unavailableActions": [
-          "Order new supplies from mainland (too late for delivery)"
+          "Order supplies from the mainland (too late to deliver)"
         ],
         "emergingPressures": [
-          "Workers asking about evacuation",
-          "Last commercial flights filling up",
-          "Production targets still active",
-          "Union meeting called"
+          "The allocation round closes; sends roll along open roads",
+          "Haven's crews vote on hazard pay on the public number",
+          "The Council drafts the evacuation order with the Governor off-island",
+          "Loading must start by now to beat the harbour closing"
         ],
         "narrativeBeats": [
-          "Executives book flights \"just in case\"",
-          "First resource conflict emerges",
-          "Workers notice who gets to leave",
-          "Frank Reeves faces impossible choice"
+          "Hurricane Warning issued; the public forecast reaches 70%",
+          "Midas is Category 4",
+          "Boats not heading in are gambling",
+          "Southfield's families ask what the housing memo says"
         ]
       },
       {
         "id": "warning-24",
         "phase": "warning",
         "tMinusHours": -24,
-        "label": "Warning Issued",
+        "label": "Tropical-storm winds; the runway closes",
         "certaintyPercent": 85,
+        "intensity": 5,
         "decisionType": "Evacuation",
         "weather": {
           "windMph": 45,
@@ -126,189 +131,271 @@
         },
         "infrastructureState": {
           "roadsPassable": [
-            "haven",
-            "summit",
             "gateway",
+            "haven",
             "heartland",
             "keystone",
-            "sterling"
+            "sterling",
+            "summit"
           ],
           "powerAvailable": [
-            "haven",
-            "summit",
             "gateway",
+            "haven",
             "heartland",
             "keystone",
-            "sterling"
+            "sterling",
+            "summit"
           ],
           "commsOperational": [
-            "haven",
-            "summit",
             "gateway",
+            "haven",
             "heartland",
             "keystone",
-            "sterling"
+            "sterling",
+            "summit"
           ]
         },
         "unavailableActions": [
-          "Order new supplies",
-          "Evacuate by sea (conditions too rough)",
-          "Continue harvest operations"
+          "Evacuate by sea (the harbour closed to departures at T-30h)",
+          "Fixed-wing evacuation (the runway closes at 45 mph)",
+          "Continue the harvest"
         ],
         "emergingPressures": [
-          "Airport closing in 12 hours",
-          "Who gets evacuation priority?",
-          "Production shutdown decision urgent",
-          "Sterling shelter capacity concerns"
+          "The last flight left at T-30h with 45 seats",
+          "The Haven-Keystone road floods at the surge creek",
+          "Reservoir at 87% and rising 2% an hour",
+          "Who holds the pen on crisis standards of care"
         ],
         "narrativeBeats": [
-          "Mandatory evacuation debates begin",
-          "Class divisions become visible",
-          "First \"we should have acted sooner\" regrets",
-          "Maria Santos threatens work stoppage"
+          "Rain bands since T-36h",
+          "The Kestrel Reach sailed, or did not",
+          "Keystone is cut from the port",
+          "Riverside can still walk out in daylight"
         ]
       },
       {
         "id": "approach-12",
         "phase": "approach",
         "tMinusHours": -12,
-        "label": "Outer Bands",
+        "label": "Hurricane conditions; the Gorge Road floods",
         "certaintyPercent": 95,
+        "intensity": 6,
         "decisionType": "Last movement",
         "weather": {
-          "windMph": 65,
+          "windMph": 70,
           "rainfallInchesPerHour": 2,
           "stormSurgeFeet": 3,
           "visibility": "poor"
         },
         "infrastructureState": {
           "roadsPassable": [
-            "haven",
             "gateway",
-            "keystone",
-            "sterling"
+            "summit",
+            "sterling",
+            "haven",
+            "keystone"
           ],
           "powerAvailable": [
-            "haven",
-            "summit",
             "gateway",
+            "haven",
             "heartland",
             "keystone",
-            "sterling"
+            "sterling",
+            "summit"
           ],
           "commsOperational": [
-            "haven",
-            "summit",
             "gateway",
+            "haven",
             "heartland",
             "keystone",
-            "sterling"
+            "sterling",
+            "summit"
           ]
         },
         "unavailableActions": [
-          "Evacuate by air",
-          "Move between crater and ring road",
-          "Continue any production",
+          "Move between the crater and the ring road",
+          "Fly anything but the helicopters",
           "Transfer heavy equipment"
         ],
         "emergingPressures": [
-          "People who didn't evacuate need shelter",
-          "Power demand spiking",
-          "Last chance to position resources",
-          "Summit and Heartland now isolated"
+          "Heartland is alone",
+          "Tankers that have not climbed will not",
+          "Southfield's drainage canal backs up",
+          "The cell network fails: radio, uplink and broadcast only"
         ],
         "narrativeBeats": [
-          "Airport closes",
-          "Summit/Heartland cut off from ring road",
-          "Shelter capacity decisions forced",
-          "Tanaka warns about dam stress"
+          "The South Switchbacks slid at T-18h; Caldera village has one road and it is gone",
+          "Tank 3's seal variance is first reported",
+          "Hurricane-force gusts on the Strand",
+          "The reservoir passes 92%"
         ]
       },
       {
         "id": "approach-6",
         "phase": "approach",
         "tMinusHours": -6,
-        "label": "Hurricane Conditions",
+        "label": "First structural damage; brownouts",
         "certaintyPercent": null,
+        "intensity": 7,
         "decisionType": "Shelter only",
         "weather": {
           "windMph": 95,
-          "rainfallInchesPerHour": 4,
+          "rainfallInchesPerHour": 3,
           "stormSurgeFeet": 6,
           "visibility": "zero"
         },
         "infrastructureState": {
           "roadsPassable": [],
           "powerAvailable": [
-            "summit",
-            "keystone"
+            "gateway",
+            "haven",
+            "heartland",
+            "keystone",
+            "sterling",
+            "summit"
           ],
           "commsOperational": [
+            "sterling",
             "summit"
           ]
         },
         "unavailableActions": [
-          "Any movement between parishes",
-          "Most communications",
-          "Resource transfers",
+          "Any movement between parishes by road",
+          "Resource transfers except by radio agreement",
           "Rescue operations"
         ],
         "emergingPressures": [
-          "Medical emergencies with no transport",
-          "Power failures cascading",
-          "Communication blackouts",
-          "People trapped in wrong locations"
+          "Each parish on its own power and its own road",
+          "Riverside's first floors take river water from T-8h",
+          "Harbour cranes stand down above 85 mph",
+          "Southfield floods to the first floor from T-4h"
         ],
         "narrativeBeats": [
-          "Total isolation begins",
-          "Life-or-death decisions",
-          "Earlier choices have consequences",
-          "Sterling hospital overwhelmed"
+          "Sterling-Haven road under surge",
+          "Grid stressed; rolling brownouts",
+          "The hospital on its generators",
+          "Every parish decides alone"
         ]
       },
       {
-        "id": "landfall-0",
+        "id": "peak-2",
         "phase": "landfall",
-        "tMinusHours": 0,
-        "label": "Landfall",
+        "tMinusHours": -2,
+        "label": "The eyewall: peak",
         "certaintyPercent": null,
+        "intensity": 10,
         "decisionType": "Life safety",
         "weather": {
-          "windMph": 130,
-          "rainfallInchesPerHour": 6,
-          "stormSurgeFeet": 12,
+          "windMph": 120,
+          "rainfallInchesPerHour": 4,
+          "stormSurgeFeet": 10,
           "visibility": "zero"
         },
         "infrastructureState": {
           "roadsPassable": [],
-          "powerAvailable": [
-            "summit"
-          ],
-          "commsOperational": []
+          "powerAvailable": [],
+          "commsOperational": [
+            "sterling"
+          ]
         },
         "unavailableActions": [
-          "Everything except immediate shelter decisions"
+          "Everything except the decision in front of you"
         ],
         "emergingPressures": [
-          "Structural failures",
-          "Flooding deaths",
-          "Complete information blackout",
-          "Dam at critical stress"
+          "The dam goes to emergency shutdown; grid down island-wide",
+          "Reservoir at 97%: the spillway decision is now",
+          "The Pacific Harvester breaks her mooring with a two-man watch aboard",
+          "Three hundred people at Sterling's gate"
         ],
         "narrativeBeats": [
-          "Peak crisis",
-          "Survival mode",
-          "No more decisions - consequences play out",
-          "Each parish faces their worst fear"
+          "120 mph sustained, gusts to 145, eight to ten feet of surge at Haven",
+          "Haven's yard floods; the crane collapses",
+          "Riverside floods from the river",
+          "The hospital generator fails for eleven minutes at T-1h"
         ]
       },
       {
-        "id": "eye-6",
+        "id": "eye-0",
         "phase": "eye",
-        "tMinusHours": 6,
-        "label": "Eye Passage / Easing",
+        "tMinusHours": 0,
+        "label": "The eye: two hours of sky",
         "certaintyPercent": null,
+        "intensity": 9,
         "decisionType": "Rescue priority",
+        "weather": {
+          "windMph": 20,
+          "rainfallInchesPerHour": 0.5,
+          "stormSurgeFeet": 8,
+          "visibility": "poor"
+        },
+        "infrastructureState": {
+          "roadsPassable": [],
+          "powerAvailable": [],
+          "commsOperational": [
+            "sterling",
+            "summit"
+          ]
+        },
+        "unavailableActions": [
+          "Road travel (every road is under water or debris)",
+          "External supply"
+        ],
+        "emergingPressures": [
+          "Boats and helicopters can move until T+2h",
+          "Southfield's roofs; the Harvester somewhere south of the Mole",
+          "The dam's controls on their last hours"
+        ],
+        "narrativeBeats": [
+          "Stars over Concordia",
+          "People believe it is over",
+          "Two hours of choices nobody can take back",
+          "The backside is coming from the other direction"
+        ]
+      },
+      {
+        "id": "backside-2",
+        "phase": "landfall",
+        "tMinusHours": 2,
+        "label": "The backside",
+        "certaintyPercent": null,
+        "intensity": 8,
+        "decisionType": "Life safety",
+        "weather": {
+          "windMph": 110,
+          "rainfallInchesPerHour": 3,
+          "stormSurgeFeet": 7,
+          "visibility": "zero"
+        },
+        "infrastructureState": {
+          "roadsPassable": [],
+          "powerAvailable": [],
+          "commsOperational": [
+            "sterling"
+          ]
+        },
+        "unavailableActions": [
+          "Everything except shelter"
+        ],
+        "emergingPressures": [
+          "What the front loosened, the back takes",
+          "Boats not in the Mole are lost",
+          "The lobby windows at Sterling",
+          "Tank 3 in the eye"
+        ],
+        "narrativeBeats": [
+          "110 mph from the opposite direction",
+          "The water in Riverside and Southfield at its highest",
+          "Nobody moves until T+6h"
+        ]
+      },
+      {
+        "id": "easing-6",
+        "phase": "recovery",
+        "tMinusHours": 6,
+        "label": "Tropical-storm conditions, easing",
+        "certaintyPercent": null,
+        "intensity": 6,
+        "decisionType": "Repair",
         "weather": {
           "windMph": 40,
           "rainfallInchesPerHour": 1,
@@ -318,82 +405,123 @@
         "infrastructureState": {
           "roadsPassable": [
             "summit",
-            "heartland"
+            "sterling",
+            "haven"
           ],
           "powerAvailable": [
             "summit",
-            "heartland"
+            "sterling"
           ],
           "commsOperational": [
-            "summit"
+            "sterling",
+            "summit",
+            "gateway"
           ]
         },
         "unavailableActions": [
-          "Ring road travel",
-          "External communication",
-          "Full operations"
+          "Ring road travel beyond Haven-Sterling-Summit",
+          "Fixed-wing flights until T+12h"
         ],
         "emergingPressures": [
-          "Rescue vs. assessment",
-          "Who do we reach first?",
-          "Damage reports flooding in",
-          "Body count unknown"
+          "Rescue before assessment",
+          "Who gets power first when the dam restarts",
+          "Whose crews clear whose road",
+          "The first questions"
         ],
         "narrativeBeats": [
-          "First survey of damage",
-          "Rescue triage begins",
-          "Accountability questions emerge",
-          "Who made it and who did not"
+          "Haven-Summit road cleared, one lane",
+          "The runway and the Gorge Road reopen at T+12h; the dam restarts at 60%",
+          "The cutter Resolute arrives at T+14h",
+          "Damage reports by radio"
         ]
       },
       {
         "id": "recovery-24",
         "phase": "recovery",
         "tMinusHours": 24,
-        "label": "Recovery Begins",
+        "label": "Clear; recovery",
         "certaintyPercent": null,
+        "intensity": 4,
         "decisionType": "Accountability",
         "weather": {
-          "windMph": 20,
+          "windMph": 15,
           "rainfallInchesPerHour": 0.2,
           "stormSurgeFeet": 1,
-          "visibility": "reduced"
+          "visibility": "clear"
         },
         "infrastructureState": {
           "roadsPassable": [
-            "haven",
-            "summit",
             "gateway",
+            "haven",
             "heartland",
             "keystone",
-            "sterling"
+            "sterling",
+            "summit"
           ],
           "powerAvailable": [
             "summit",
-            "heartland",
-            "keystone"
+            "sterling",
+            "keystone",
+            "heartland"
           ],
           "commsOperational": [
-            "summit",
-            "gateway"
+            "gateway",
+            "haven",
+            "heartland",
+            "keystone",
+            "sterling",
+            "summit"
           ]
         },
         "unavailableActions": [
           "Pretend nothing happened"
         ],
         "emergingPressures": [
-          "Media arriving",
-          "Families demanding answers",
-          "Insurance assessments",
-          "Blame assignment",
-          "Board demanding explanation"
+          "The press lands on the first relief flight",
+          "Families ask for an inquiry",
+          "Chicago drafts the statement",
+          "The next consignment at T+36h, or the reliability clause"
         ],
         "narrativeBeats": [
-          "Reporter asks \"why did you...\"",
-          "Body count known",
-          "Redemption or deflection choice",
-          "Values tested one final time"
+          "Ring road mostly open; the Switchbacks at T+36h",
+          "Dam at 85%",
+          "The batch nobody can certify",
+          "Who is thanked, in whose name"
         ]
+      }
+    ],
+    "EYE_WINDOW": {
+      "fromT": 0,
+      "toT": 120
+    },
+    "QUARTERS": [
+      {
+        "id": "prep",
+        "label": "Preparation",
+        "fromT": -4320,
+        "toT": -2160,
+        "intensity": "3 to 4"
+      },
+      {
+        "id": "approach",
+        "label": "Approach",
+        "fromT": -2160,
+        "toT": -360,
+        "intensity": "5 to 7"
+      },
+      {
+        "id": "landfall",
+        "label": "Landfall",
+        "fromT": -360,
+        "toT": 360,
+        "intensity": "8 to 10"
+      },
+      {
+        "id": "recovery",
+        "label": "Recovery",
+        "fromT": 360,
+        "toT": 2880,
+        "intensity": "6 falling to 3"
       }
     ]
   }

@@ -1,3 +1,17 @@
+---
+title: "Dilemma generation framework"
+date: 2026-10-21
+type: design-framework
+status: reference
+project: Crucible Engine (The Values Crucible)
+tags: [crucible-engine, dilemmas, framework, reference]
+related:
+  - "[[crucible-dilemmas-v3]]"
+  - "[[concordia-parishes-v3]]"
+  - "[[decision-2026-10-21-parish-leadership-redesign]]"
+canon_note: "The principles stand and the v3 cards follow them: two values in tension, no clean option, consequences that chain. Two things are superseded. Dilemmas are now an authored library ([[crucible-dilemmas-v3]]) chosen by the engine's ask lists, not generated at runtime; and the parish facts used in the examples (Haven processing, the Coast Guard station) follow [[concordia-parishes-v3]]."
+---
+
 # Dilemma Generation Framework
 
 ## Design Principle

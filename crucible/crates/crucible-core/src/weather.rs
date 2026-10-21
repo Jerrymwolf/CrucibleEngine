@@ -51,23 +51,27 @@ pub fn log_phase(timeline_phase: &str) -> &'static str {
 }
 
 /// DEGRADATION_RATES key from the timeline phase.
-/// watch => watch; warning => warning; approach, landfall => crisis;
-/// eye => recovery (the eye window is labelled "Easing": crews start repairs);
+/// watch => watch; warning => warning; approach, landfall, eye => crisis
+/// (the eye sits between the front and the backside: nobody repairs yet);
 /// recovery => recovery.
 pub fn degradation_key(timeline_phase: &str) -> &'static str {
     match timeline_phase {
         "watch" => "watch",
         "warning" => "warning",
-        "approach" | "landfall" => "crisis",
+        "approach" | "landfall" | "eye" => "crisis",
         _ => "recovery",
     }
 }
 
-/// Default Crucible Master dial per timeline phase when no curve is scripted:
-/// watch 3 then 4, warning 5, approach 7 then 8, landfall 9, eye 7, recovery 5.
+/// Default Crucible Master dial when no curve is scripted: the window's own
+/// `intensity` from the timeline, else by phase (watch 3 then 4, warning 5,
+/// approach 7 then 8, landfall 9, eye 7, recovery 5).
 pub fn default_intensity(content: &Content, idx: usize) -> i64 {
     let ws = &content.timeline.hurricane_midas.windows;
     let w = &ws[idx];
+    if let Some(i) = w.intensity {
+        return i.clamp(1, 10);
+    }
     let nth_of_phase = ws[..idx].iter().filter(|x| x.phase == w.phase).count();
     match w.phase.as_str() {
         "watch" => 3 + nth_of_phase.min(1) as i64,
@@ -164,7 +168,21 @@ mod tests {
         assert_eq!(log_phase("approach"), "crisis");
         assert_eq!(log_phase("eye"), "crisis");
         assert_eq!(degradation_key("landfall"), "crisis");
-        assert_eq!(degradation_key("eye"), "recovery");
+        assert_eq!(degradation_key("eye"), "crisis");
+        assert_eq!(degradation_key("recovery"), "recovery");
+    }
+
+    #[test]
+    fn default_intensity_follows_the_timeline() {
+        let c = Content::load(&std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../content")).unwrap();
+        let ws = &c.timeline.hurricane_midas.windows;
+        for (i, w) in ws.iter().enumerate() {
+            if let Some(x) = w.intensity {
+                assert_eq!(default_intensity(&c, i), x.clamp(1, 10));
+            }
+        }
+        let peak = ws.iter().position(|w| w.id == "peak-2").unwrap();
+        assert_eq!(default_intensity(&c, peak), 10);
     }
 
     #[test]

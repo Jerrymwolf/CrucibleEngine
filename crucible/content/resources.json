@@ -1,0 +1,270 @@
+{
+  "CANON": "crucible-resource-tokens-v3",
+  "TOKENS": {
+    "GEN": {
+      "name": "Generator",
+      "unit": "one large generator or a pallet of small ones, about 100 kW with 48 hours of fuel",
+      "wantedFor": "hospital, clean rooms, shelters, pumps, reefer plugs, the dam's controls"
+    },
+    "FUEL": {
+      "name": "Fuel",
+      "unit": "one tanker load, 5,000 gallons of diesel",
+      "wantedFor": "every generator, every boat, every ambulance after the first day"
+    },
+    "BOAT": {
+      "name": "Boat",
+      "unit": "one heavy-weather craft with crew",
+      "wantedFor": "rescue from Southfield, Riverside, the terminal; the search for the Harvester"
+    },
+    "LIFT": {
+      "name": "Lift",
+      "unit": "one sortie: a plane load (45 seats, Gateway, before T-30h) or a helicopter load (6 seats, Sterling, before T-24h or in the eye)",
+      "wantedFor": "evacuation and medevac"
+    },
+    "SHELTER": {
+      "name": "Shelter",
+      "unit": "500 hardened places with water and sanitation for 72 hours",
+      "wantedFor": "families from the surge zone, Southfield, Riverside, the Strand's visitors"
+    },
+    "MEDIC": {
+      "name": "Medical team",
+      "unit": "one medical team with a vehicle",
+      "wantedFor": "Heartland has none; the terminal and the Mole have crowds"
+    },
+    "COLD": {
+      "name": "Cold bay",
+      "unit": "one pharmaceutical-grade cold bay with its own backup power",
+      "wantedFor": "the blood bank, insulin, vaccines; or 24,000 doses"
+    },
+    "CREW": {
+      "name": "Crew",
+      "unit": "twenty trained people with a truck or heavy equipment",
+      "wantedFor": "clearing roads, sandbagging, moving the ICU by hand, the Southfield convoy"
+    },
+    "FUND": {
+      "name": "Fund",
+      "unit": "a $5M line for hazard pay, relief or rebuilding, released by the crisis room",
+      "wantedFor": "the injured, the rebuild"
+    },
+    "COMMS": {
+      "name": "Uplink",
+      "unit": "an hour a day of uplink and a satellite phone, lent to one parish",
+      "wantedFor": "a parish with no other way to be heard"
+    },
+    "WATER": {
+      "name": "Water tanker",
+      "unit": "one water tanker",
+      "wantedFor": "a parish whose mains have failed"
+    }
+  },
+  "STOCKPILES": {
+    "gateway": {
+      "GEN": 1,
+      "FUEL": 1,
+      "BOAT": 3,
+      "LIFT": 1,
+      "SHELTER": 2,
+      "MEDIC": 1
+    },
+    "heartland": {
+      "GEN": 3,
+      "FUEL": 1,
+      "CREW": 3,
+      "WATER": 1
+    },
+    "keystone": {
+      "GEN": 3,
+      "FUEL": 1,
+      "MEDIC": 1,
+      "COLD": 2,
+      "CREW": 1
+    },
+    "haven": {
+      "GEN": 2,
+      "FUEL": 4,
+      "BOAT": 2,
+      "SHELTER": 1,
+      "COLD": 1,
+      "CREW": 1
+    },
+    "summit": {
+      "FUEL": 1,
+      "BOAT": 1,
+      "SHELTER": 3,
+      "MEDIC": 2,
+      "CREW": 1
+    },
+    "sterling": {
+      "GEN": 2,
+      "FUEL": 1,
+      "LIFT": 2,
+      "SHELTER": 1,
+      "MEDIC": 1,
+      "FUND": 2,
+      "COMMS": 1
+    }
+  },
+  "HIDDEN": {
+    "haven": {
+      "FUEL": 2,
+      "note": "The terminal holds 640,000 gallons, not the 500,000 it reports."
+    },
+    "sterling": {
+      "GEN": 2,
+      "note": "Twenty small generators in the executive garages, on no island inventory."
+    }
+  },
+  "NEEDS": {
+    "gateway": {
+      "approach": {
+        "FUEL": 1,
+        "MEDIC": 1
+      },
+      "landfall": {
+        "BOAT": 2,
+        "GEN": 1
+      },
+      "recovery": {
+        "CREW": 1
+      }
+    },
+    "heartland": {
+      "approach": {
+        "FUEL": 1,
+        "MEDIC": 1,
+        "CREW": 1
+      },
+      "landfall": {},
+      "recovery": {
+        "CREW": 2
+      }
+    },
+    "keystone": {
+      "approach": {
+        "GEN": 1,
+        "SHELTER": 2
+      },
+      "landfall": {
+        "BOAT": 2,
+        "MEDIC": 1
+      },
+      "recovery": {
+        "FUEL": 1,
+        "CREW": 2
+      }
+    },
+    "haven": {
+      "approach": {
+        "SHELTER": 1,
+        "GEN": 1
+      },
+      "landfall": {
+        "MEDIC": 1
+      },
+      "recovery": {
+        "CREW": 2,
+        "FUND": 1
+      }
+    },
+    "summit": {
+      "approach": {
+        "GEN": 2,
+        "FUEL": 2,
+        "COLD": 1,
+        "LIFT": 2
+      },
+      "landfall": {
+        "BOAT": 2,
+        "CREW": 1,
+        "GEN": 1
+      },
+      "recovery": {
+        "FUND": 1,
+        "CREW": 3
+      }
+    },
+    "sterling": {
+      "approach": {
+        "BOAT": 1,
+        "CREW": 1
+      },
+      "landfall": {},
+      "recovery": {}
+    }
+  },
+  "SIGNALS": {
+    "sendNeededBeforeYou": {
+      "service": 2,
+      "fairness": 1,
+      "compassion": 1
+    },
+    "sendGreatestNeed": {
+      "fairness": 2,
+      "stewardship": 1
+    },
+    "sendLastNeeded": {
+      "courage": 2,
+      "service": 2,
+      "safety": -1
+    },
+    "keepNeededByLandfall": {
+      "preparedness": 1,
+      "stewardship": 1
+    },
+    "keepUnneededWhileListed": {
+      "fairness": -2,
+      "compassion": -1,
+      "loyalty": 1
+    },
+    "keepEverything": {
+      "loyalty": 2,
+      "fairness": -2,
+      "service": -2
+    },
+    "declareHidden": {
+      "honesty": 2,
+      "candor": 1
+    },
+    "fundToAsked": {
+      "fairness": 0,
+      "integrity": -1
+    },
+    "repairSend": {
+      "service": 2,
+      "stewardship": 1
+    },
+    "creditLine": {
+      "recognition": 2,
+      "respect": 1
+    }
+  },
+  "EFFECTS": {
+    "GEN": {
+      "generatorHours": 48
+    },
+    "FUEL": {
+      "generatorHours": 24
+    },
+    "SHELTER": {
+      "shelterPlaces": 500
+    },
+    "COLD": {
+      "coldBays": 1
+    },
+    "CREW": {
+      "repairPointsPerHour": {
+        "roads": 2,
+        "power": 1
+      }
+    },
+    "WATER": {
+      "infrastructure": {
+        "water": 10
+      }
+    }
+  },
+  "ROUND": {
+    "description": "Preparation allocation: each table writes KEEP or SEND and a parish for every token. Only entries count; sends are final; a kept token can be asked for by mayday.",
+    "sendsAlwaysArrive": "prep"
+  }
+}

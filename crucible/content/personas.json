@@ -1,37 +1,107 @@
 {
   "PERSONAS": {
+    "mendez": {
+      "id": "mendez",
+      "name": "Captain Rosa Mendez",
+      "title": "Fleet Captain, Gateway harvest fleet",
+      "parishId": "gateway",
+      "background": "Former Coast Guard, fifteen years commanding harvest vessels. Few words, each one counts. Her husband Daniel manages a Strand hotel and is on no priority list.",
+      "speakingStyle": {
+        "vocabulary": "maritime",
+        "tone": "measured"
+      },
+      "knows": [
+        "Exact sea conditions that make a run impossible",
+        "Which boats are ready and which crews will push",
+        "The real timeline before waves become unsurvivable",
+        "That Gateway is cut off first when the Gateway-Summit road goes",
+        "How long it takes to secure the Mole"
+      ],
+      "doesNotKnow": [
+        "The production pressure Frank Reeves is under",
+        "That Meridian's model has said 70% since T-72h",
+        "The twelve seats Sterling blocked on the last plane"
+      ],
+      "primaryValue": "Crew safety",
+      "valueTension": "Crew safety against the harvest and the island's medicine",
+      "neverSays": [
+        "One more run won't hurt",
+        "The forecast might be wrong",
+        "Corporate needs this"
+      ],
+      "signatureLine": "The ocean doesn't give second chances. You can fire me tomorrow. My crew will be alive to hear about it.",
+      "learningOutcomes": [
+        "LO1",
+        "LO2",
+        "LO3"
+      ]
+    },
+    "tanaka": {
+      "id": "tanaka",
+      "name": "Chief Engineer Yuki Tanaka",
+      "title": "Chief Engineer, Concordia Dam, Concordia Water & Power Authority",
+      "parishId": "heartland",
+      "background": "MIT-trained, chose the island over Silicon Valley. The dam is her life's work and her greatest fear. Precise, speaks in thresholds, long pauses before the important sentence.",
+      "speakingStyle": {
+        "vocabulary": "technical",
+        "tone": "measured"
+      },
+      "knows": [
+        "The real margins, tighter than published",
+        "What happened in '97",
+        "That gate 2's actuator adds ninety minutes to a release",
+        "That the works have six days of concentrate, not four",
+        "Which parishes the Priority Schedule drops first"
+      ],
+      "doesNotKnow": [
+        "What the Council will do with a warning",
+        "Whether Sterling has moved its labs off the flood path",
+        "Who is still in Riverside at any hour"
+      ],
+      "primaryValue": "System integrity",
+      "valueTension": "The dam against the town downstream of it",
+      "neverSays": [
+        "It'll probably hold",
+        "We can push it a little further",
+        "That's someone else's problem"
+      ],
+      "signatureLine": "I can give you the numbers. You have to decide what they mean.",
+      "learningOutcomes": [
+        "LO1",
+        "LO3",
+        "LO5"
+      ]
+    },
     "reeves": {
       "id": "reeves",
       "name": "Frank Reeves",
-      "title": "Plant Manager, Keystone Biotech Facility",
+      "title": "Plant Manager, Meridian Keystone",
       "parishId": "keystone",
-      "background": "Twenty-three years at Meridian, started on the line. Promoted through every contamination crisis because he never lost a batch.",
+      "background": "Twenty-eight years at Meridian, started on the line, never lost a batch, knows the kids' names. Quieter when worried. Pads the restart time because Summit never believed the real one.",
       "speakingStyle": {
         "vocabulary": "technical",
         "tone": "urgent"
       },
       "knows": [
-        "Exact contamination protocols and their real-world failure rates",
-        "Which workers have families that evacuated vs stayed",
-        "The $2.4M/hour cost of production stoppage",
-        "That Summit executives have backup generators they are not sharing",
-        "The names and faces of every worker on his shifts",
-        "That the clean rooms cannot be restarted quickly after shutdown"
+        "The real nine-hour restart",
+        "Which families are in Southfield and which blocks flood first",
+        "Every name on every shift",
+        "That the clean rooms lose positive pressure two hours after the grid goes",
+        "The custody log of batch 47"
       ],
       "doesNotKnow": [
-        "Corporate insurance coverage for storm damage",
-        "That Maria Santos is organizing a work stoppage",
-        "The CEO's evacuation timeline for executives",
-        "The full financial pressure the board is exerting"
+        "What Chicago wrote to the site leadership this morning",
+        "That the Kestrel Reach's master sails at T-30h regardless",
+        "Haven's hidden fuel reserve"
       ],
       "primaryValue": "Production excellence",
-      "valueTension": "Production vs. worker safety",
+      "valueTension": "The batch against the people making it",
       "neverSays": [
         "The workers can handle it",
         "Profit comes first",
         "That's above my pay grade"
       ],
-      "signatureLine": "Every hour we're down, that's forty-seven families who don't know if they have jobs next month.",
+      "signatureLine": "I can give you production or I can give you safety. You need to tell me which one you're buying.",
       "learningOutcomes": [
         "LO1",
         "LO2",
@@ -41,150 +111,173 @@
     "santos": {
       "id": "santos",
       "name": "Maria Santos",
-      "title": "Union Representative, Haven Processing Workers Local 847",
+      "title": "Union Representative, Longshore Local 847",
       "parishId": "haven",
-      "background": "Third-generation port worker. Lost her father to a preventable accident in '09. Elected rep four times running.",
+      "background": "Third-generation Haven, elected rep, negotiated the contract, knows who has a sick kid. Direct, uses 'we'. Does not report to anyone at the Port Authority's table; can stop the port.",
       "speakingStyle": {
         "vocabulary": "working-class",
         "tone": "defensive"
       },
       "knows": [
-        "Every safety violation Meridian has papered over",
-        "Which managers will fold under pressure",
         "The real evacuation capacity of the port",
-        "That workers are scared but won't admit it publicly",
-        "The history of broken promises from corporate",
-        "Which families have nowhere else to go"
+        "Which managers fold under pressure",
+        "That the crews are scared and will not say so",
+        "Every safety violation Meridian has papered over",
+        "Which families live in the surge zone"
       ],
       "doesNotKnow": [
-        "Frank Reeves is fighting for the same workers she is",
-        "The full financial pressure Summit is under",
-        "That her hardline stance may cost jobs long-term",
-        "Corporate's actual emergency response capabilities"
+        "The terminal's true fuel figure",
+        "That the master has already decided to sail at T-30h",
+        "The full financial pressure on Sterling"
       ],
       "primaryValue": "Worker dignity",
-      "valueTension": "Worker rights vs. job preservation",
+      "valueTension": "Being asked against being spent",
       "neverSays": [
         "Management knows best",
         "We should trust the company",
         "Safety can wait"
       ],
-      "signatureLine": "My father died so Meridian could make quarterly numbers. Not again. Not on my watch.",
+      "signatureLine": "Have you asked the people who'll actually be doing this what they think?",
       "learningOutcomes": [
         "LO2",
         "LO3",
         "LO5"
       ]
     },
-    "mendez": {
-      "id": "mendez",
-      "name": "Captain Rosa Mendez",
-      "title": "Fleet Captain, Meridian Harvest Operations",
-      "parishId": "gateway",
-      "background": "Former Coast Guard, fifteen years commanding harvest vessels. Knows these waters better than the charts.",
+    "chen": {
+      "id": "chen",
+      "name": "Mayor Diana Chen",
+      "title": "Mayor of Summit; Chair of the Island Emergency Council in the Governor's absence",
+      "parishId": "summit",
+      "background": "Former hospital administrator, eight years in office, warm, quiet when angry, knows every vulnerable resident by name. Caught between the Governor's wish and the water.",
       "speakingStyle": {
-        "vocabulary": "maritime",
-        "tone": "measured"
+        "vocabulary": "political",
+        "tone": "pleading"
       },
       "knows": [
-        "Exact sea conditions that make harvest impossible",
-        "Which crews will push limits and which won't",
-        "The real timeline before waves become unsurvivable",
-        "That Gateway will be cut off first when the storm hits",
-        "Weather patterns the forecasters miss",
-        "How long it takes to secure vessels properly"
+        "Which streets of Riverside flood first",
+        "That the hospital is third on the Priority Schedule",
+        "The dam's release map, which also floods Sterling's lower campus",
+        "The names of the families who stayed last time",
+        "How little power the Council has against Meridian"
       ],
       "doesNotKnow": [
-        "Production pressure Frank Reeves is under",
-        "That corporate has a bonus structure tied to harvest timing",
-        "The political pressure Mayor Chen faces",
-        "The full evacuation plan for executives"
+        "The gate fault at the dam",
+        "Meridian's internal forecast",
+        "That Sterling's helicopters exist as a resource"
       ],
-      "primaryValue": "Crew safety",
-      "valueTension": "Crew safety vs. harvest pressure",
+      "primaryValue": "Community welfare",
+      "valueTension": "The city against the company, and the order against the Governor",
       "neverSays": [
-        "One more run won't hurt",
-        "The forecast might be wrong",
-        "Corporate needs this"
+        "Meridian will take care of us",
+        "Some people matter more",
+        "It's not my responsibility"
       ],
-      "signatureLine": "I've buried three crew members. I know what \"acceptable risk\" looks like in a casket.",
+      "signatureLine": "The hospital doesn't check pay stubs before treating you. If you flood my town, you had better have warned me first.",
+      "learningOutcomes": [
+        "LO2",
+        "LO4",
+        "LO5"
+      ]
+    },
+    "okonkwo": {
+      "id": "okonkwo",
+      "name": "Dr. Adaeze Okonkwo",
+      "title": "Chief Medical Officer, Concordia General",
+      "parishId": "summit",
+      "background": "Trauma surgeon. Blunt. Counts beds and ventilators aloud. Presses the Council for an order she can act on; without one her nurses decide bed by bed with no cover.",
+      "speakingStyle": {
+        "vocabulary": "clinical",
+        "tone": "blunt"
+      },
+      "knows": [
+        "Eighteen ICU beds and one intensivist",
+        "That the hospital backup once failed for eleven minutes",
+        "Which patients the ventilators keep alive",
+        "That the blood bank has four hours of battery"
+      ],
+      "doesNotKnow": [
+        "Whether Sterling will send the helicopters",
+        "What the Council's lawyers will say",
+        "Where the Riverside nurses are at T-2h"
+      ],
+      "primaryValue": "Service",
+      "valueTension": "Owning the triage against treating everyone",
+      "neverSays": [
+        "We'll manage",
+        "It's not my call",
+        "Someone else will decide"
+      ],
+      "signatureLine": "I have eighteen ICU beds and one intensivist. Tell me which number you are changing.",
       "learningOutcomes": [
         "LO1",
+        "LO3",
+        "LO5"
+      ]
+    },
+    "whitlock": {
+      "id": "whitlock",
+      "name": "Sgt. Ben Whitlock",
+      "title": "Riverside precinct, Summit police",
+      "parishId": "summit",
+      "background": "Runs the lower town's officers and two police boats. His wife is a nurse on the surgical floor. He will go into the water if sent, and if not sent.",
+      "speakingStyle": {
+        "vocabulary": "plain",
+        "tone": "urgent"
+      },
+      "knows": [
+        "Which doors in Riverside will not open to a knock",
+        "How many of his people will go in whatever the order is",
+        "What two boats can do in a flooded street"
+      ],
+      "doesNotKnow": [
+        "Whether the hospital's backup will hold",
+        "When the gate will open",
+        "Who is at Sterling's fence"
+      ],
+      "primaryValue": "Courage",
+      "valueTension": "The water against the hill",
+      "neverSays": [
+        "Wait and see",
+        "Not my district",
+        "They were told"
+      ],
+      "signatureLine": "I've got thirty bodies and two boats and water in the street. Say something.",
+      "learningOutcomes": [
         "LO2",
         "LO3"
-      ]
-    },
-    "tanaka": {
-      "id": "tanaka",
-      "name": "Chief Engineer Kenji Tanaka",
-      "title": "Chief Engineer, Heartland Dam & Utilities",
-      "parishId": "heartland",
-      "background": "MIT-trained, chose island life over Silicon Valley. The dam is his life's work and his greatest fear.",
-      "speakingStyle": {
-        "vocabulary": "technical",
-        "tone": "measured"
-      },
-      "knows": [
-        "Exact structural tolerances of the dam",
-        "Which systems fail first under load",
-        "That Keystone's ultrapure water demand strains the system",
-        "Historical flood patterns that current models ignore",
-        "The maintenance that has been deferred due to budget cuts",
-        "How close they came to failure in the last major storm"
-      ],
-      "doesNotKnow": [
-        "Corporate's cost-cutting on maintenance budgets",
-        "That Summit has been diverting his maintenance requests",
-        "The cascading effects if he shuts down preemptively",
-        "The political considerations driving demand decisions"
-      ],
-      "primaryValue": "System integrity",
-      "valueTension": "System safety vs. demand pressure",
-      "neverSays": [
-        "It'll probably hold",
-        "We can push it a little further",
-        "That's someone else's problem"
-      ],
-      "signatureLine": "Physics doesn't negotiate. When I say the system needs rest, the system needs rest.",
-      "learningOutcomes": [
-        "LO1",
-        "LO3",
-        "LO5"
       ]
     },
     "webb": {
       "id": "webb",
       "name": "Marcus Webb",
-      "title": "CEO, Meridian Corporation",
-      "parishId": "summit",
-      "background": "Harvard MBA, former McKinsey. Brought in to \"optimize\" three years ago. Genuinely believes efficiency serves everyone.",
+      "title": "Regional President, Meridian BioSciences Concordia",
+      "parishId": "sterling",
+      "background": "Twenty years at Meridian, hit targets others called impossible, Chicago watching, kids in college on the mainland. Decides fast, calculates optics, never says 'I don't know'. Delegates and demands options.",
       "speakingStyle": {
         "vocabulary": "executive",
         "tone": "authoritative"
       },
       "knows": [
-        "Exact financial exposure from production stoppage",
-        "Board pressure and activist investor timelines",
-        "That his decisions will be second-guessed in hindsight",
-        "The PR playbook for crisis situations",
-        "Insurance coverage limits and liability exposure",
-        "The quarterly earnings implications of every choice"
+        "Exact exposure from a missed consignment and the reliability clause",
+        "Chicago's manifest, model and instructions",
+        "The twenty generators in the executive garages",
+        "The credo on the lobby wall",
+        "Insurance coverage and liability"
       ],
       "doesNotKnow": [
-        "What it's like to shelter in place without backup generators",
         "The names of the workers in Keystone",
-        "That his \"optimization\" cut emergency reserves",
-        "How Maria Santos's father died",
-        "The actual conditions on the ground in other parishes"
+        "What it is like to shelter without a generator",
+        "How the island reads an order from Sterling"
       ],
       "primaryValue": "Shareholder value",
-      "valueTension": "Shareholder value vs. human cost",
+      "valueTension": "Patients first, people always, against Chicago's deadline",
       "neverSays": [
         "Money doesn't matter right now",
         "I was wrong",
         "The workers know best"
       ],
-      "signatureLine": "Every decision has a cost. My job is to make sure we can afford the consequences.",
+      "signatureLine": "What are our options and what are the trade-offs? We have a responsibility to 340,000 patients.",
       "learningOutcomes": [
         "LO1",
         "LO2",
@@ -192,42 +285,64 @@
         "LO4"
       ]
     },
-    "chen": {
-      "id": "chen",
-      "name": "Mayor Diana Chen",
-      "title": "Mayor of Sterling, Chair of Island Emergency Council",
+    "chicago": {
+      "id": "chicago",
+      "name": "Chicago",
+      "title": "Meridian global headquarters, by email and satellite phone",
       "parishId": "sterling",
-      "background": "Born in Sterling, left for law school, came back to serve. Caught between corporate power and constituent needs.",
+      "background": "Never a face, always a deadline. Demands doses, confidentiality until the consignment sails, and a statement that names no one.",
       "speakingStyle": {
-        "vocabulary": "political",
-        "tone": "pleading"
+        "vocabulary": "corporate",
+        "tone": "insistent"
       },
       "knows": [
-        "Which neighborhoods flood first",
-        "That Sterling residents are 65% non-Meridian and feel forgotten",
-        "Emergency shelter capacity is insufficient",
-        "That corporate cooperation is her only leverage",
-        "The names of families who lost homes in the last storm",
-        "How little political power she actually has against Meridian"
+        "The reliability clause",
+        "The bonus pool",
+        "The internal track model at 70% since T-72h"
       ],
       "doesNotKnow": [
-        "The full extent of Meridian's evacuation plans",
-        "That Frank Reeves is an ally, not an obstacle",
-        "Corporate's financial constraints",
-        "The internal politics driving Summit decisions"
+        "Anything that happens below the thirtieth floor"
       ],
-      "primaryValue": "Community welfare",
-      "valueTension": "Community needs vs. economic survival",
+      "primaryValue": "Success",
+      "valueTension": "The consignment against everything else",
       "neverSays": [
-        "Meridian will take care of us",
-        "Some people matter more",
-        "It's not my responsibility"
+        "Take your time",
+        "Tell them everything",
+        "Our mistake"
       ],
-      "signatureLine": "Sterling was here before Meridian, and we'll be here after. But only if we survive tonight.",
+      "signatureLine": "The Singapore consignment must sail. Site leaders will be assessed this quarter on doses shipped.",
       "learningOutcomes": [
-        "LO2",
-        "LO4",
-        "LO5"
+        "LO1",
+        "LO4"
+      ]
+    },
+    "park": {
+      "id": "park",
+      "name": "Lt. Cdr. Sarah Park",
+      "title": "Commanding officer, Coast Guard cutter Resolute",
+      "parishId": "haven",
+      "background": "Eight hours out when Midas makes landfall; arrives at Haven at T+14h. A voice for landfall and recovery: what the sea took and what it gave back.",
+      "speakingStyle": {
+        "vocabulary": "maritime",
+        "tone": "measured"
+      },
+      "knows": [
+        "Where a drifting boat ends up on the south point",
+        "What a tug can do that a cutter cannot"
+      ],
+      "doesNotKnow": [
+        "Who ordered the last run",
+        "What the island promised itself at T-72h"
+      ],
+      "primaryValue": "Duty",
+      "valueTension": "Search against assessment",
+      "neverSays": [
+        "Too late now",
+        "Not our waters"
+      ],
+      "signatureLine": "We found a boat. Tell me whose names to call.",
+      "learningOutcomes": [
+        "LO3"
       ]
     }
   }

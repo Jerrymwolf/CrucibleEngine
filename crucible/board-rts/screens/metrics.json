@@ -1,0 +1,190 @@
+{
+  "speed": 36,
+  "pages": {
+    "dm": {
+      "boot_ms": 1778,
+      "stages": {
+        "engine": 180,
+        "island": 190,
+        "shore": 235,
+        "routes": 236,
+        "welcome": 599,
+        "renderer": 692
+      }
+    },
+    "projector": {
+      "boot_ms": 3756,
+      "stages": {
+        "engine": 193,
+        "island": 217,
+        "shore": 261,
+        "routes": 262,
+        "welcome": 464,
+        "renderer": 542
+      }
+    },
+    "table": {
+      "boot_ms": 2731,
+      "stages": {
+        "engine": 243,
+        "island": 257,
+        "shore": 303,
+        "routes": 303,
+        "welcome": 488,
+        "renderer": 560
+      }
+    },
+    "phone": {
+      "boot_ms": 815,
+      "stages": {
+        "engine": 200,
+        "island": 227,
+        "shore": 277,
+        "routes": 278,
+        "welcome": 447
+      }
+    },
+    "lobby-phone": {
+      "boot_ms": 740,
+      "stages": {
+        "engine": 187,
+        "island": 202,
+        "shore": 309,
+        "routes": 310
+      }
+    },
+    "print": {
+      "boot_ms": 833,
+      "stages": {
+        "engine": 180
+      }
+    },
+    "projector-reduced": {
+      "boot_ms": 20585,
+      "stages": {
+        "engine": 206,
+        "island": 219,
+        "shore": 464,
+        "routes": 466,
+        "welcome": 673,
+        "renderer": 16393
+      }
+    },
+    "ws-dm": {
+      "boot_ms": 1033,
+      "stages": {
+        "engine": 171,
+        "island": 181,
+        "shore": 222,
+        "routes": 229,
+        "welcome": 418,
+        "renderer": 489
+      }
+    },
+    "ws-projector": {
+      "boot_ms": 5847,
+      "stages": {
+        "engine": 244,
+        "island": 254,
+        "shore": 353,
+        "routes": 354,
+        "welcome": 545,
+        "renderer": 2698
+      }
+    },
+    "ws-table": {
+      "boot_ms": 2508,
+      "stages": {
+        "engine": 235,
+        "island": 265,
+        "shore": 316,
+        "routes": 317,
+        "welcome": 498,
+        "renderer": 616
+      }
+    },
+    "ws-phone": {
+      "boot_ms": 734,
+      "stages": {
+        "engine": 187,
+        "island": 196,
+        "shore": 244,
+        "routes": 245
+      }
+    },
+    "ws-bare-link": {
+      "boot_ms": 1167,
+      "stages": {
+        "engine": 192
+      }
+    }
+  },
+  "shots": [
+    "01-projector-lobby",
+    "02-table-brief-values",
+    "03-phone-pick",
+    "04-dm-lobby",
+    "05-projector-quarter-card",
+    "06-table-quarter-card",
+    "07-table-allocation",
+    "08-dm-running",
+    "09-table-card",
+    "10-phone-vote",
+    "11-projector-running",
+    "12-projector-quarter-close",
+    "13-dm-quarter-close",
+    "14-table-quarter-close",
+    "15-table-mayday",
+    "16-projector-approach",
+    "17-projector-eye",
+    "18-table-landfall",
+    "19-phone-landfall",
+    "20-table-recovery",
+    "21-projector-debrief-counters",
+    "22-table-after-action",
+    "23-phone-commitment",
+    "24-projector-debrief-secret",
+    "25-projector-debrief-mirror",
+    "26-projector-debrief-credits",
+    "27-projector-debrief-replay",
+    "28-print-pack",
+    "ws-01-projector-q1",
+    "ws-02-table-card",
+    "ws-03-projector-last-close",
+    "ws-04-projector-debrief",
+    "ws-05-dm-debrief"
+  ],
+  "golden": {
+    "hash": "a92f76cb9c729157c1e0b772f5ebd2c7949c17fed7530bce9fd77360aeca2578",
+    "ticks": 481
+  },
+  "projector_fps": 9.269272362119573,
+  "run": {
+    "hash": "79e5e39b0208b3f250627da0131dee1600f077c74969ef7c77a8e98ed9ab9325",
+    "inputs": 84,
+    "ticks": 481,
+    "decisions_by_tables": 21,
+    "decisions_by_storm": 3
+  },
+  "host": {
+    "runs": 48,
+    "ms": 84,
+    "errors": [],
+    "inputs": 84,
+    "log": 169
+  },
+  "ws": {
+    "code": "WABJSG",
+    "hash": "e5249674b4f0b553abf6fb38538c0c6108063f606fb860810d9a44cf8e757703",
+    "inputs": 7,
+    "clients": 5
+  },
+  "errors": [],
+  "failures": [],
+  "notes": [
+    "projector frame rate while running on the software GPU: 9.3 fps (2502 ms sample)",
+    "fog at landfall as Haven sees it: gateway, heartland, keystone, sterling, summit out of contact",
+    "decisions: 21 by tables, 3 by the storm at a deadline; 12 aid answers, 1 expired"
+  ],
+  "checked": "2026-10-21T06:10:29.736Z"
+}

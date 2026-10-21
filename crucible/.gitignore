@@ -2,3 +2,6 @@ target/
 node_modules/
 *.run.json
 !runs/seed-42.run.json
+board/index.html
+board-rts/index.html
+sessions/

@@ -1,43 +1,597 @@
 {
-  "CRATER_ROADS": {
-    "segments": [
-      {
-        "from": "ring",
-        "to": "summit",
-        "km": 4,
-        "normalMin": 8,
-        "stormPassable": false
+  "CANON": "concordia-parishes-v3: one island, one company, one cure, one storm",
+  "POPULATION": 24100,
+  "PARISHES": {
+    "GATEWAY": {
+      "id": "gateway",
+      "name": "Gateway",
+      "position": {
+        "x": 19.1,
+        "y": 50.0
       },
-      {
-        "from": "ring",
-        "to": "heartland",
-        "km": 3,
-        "normalMin": 6,
-        "stormPassable": false
+      "population": 3800,
+      "meridianPercent": 60,
+      "supplyChainRole": "harvest",
+      "description": "The front door: the kelp fleet, the only runway, the Strand resorts and the Mole",
+      "classCharacter": {
+        "whoLivesHere": "Captains and crews who were fishermen before they were harvesters; airport ground crew, controllers and security; hotel staff; retirees who came for the view.",
+        "whatTheyFear": "Being caught on the water, the runway closing before their families are out, being forgotten in recovery because they are far from the city.",
+        "whatTheyWant": "Evacuation seats for their own, clear communication, the fleet home safe."
       },
-      {
-        "from": "summit",
-        "to": "heartland",
-        "km": 2,
-        "normalMin": 4,
-        "floodRisk": true
+      "keyAssets": [
+        {
+          "type": "airport",
+          "name": "The runway",
+          "capacity": "the island's only fixed-wing link; closes at 45 mph"
+        },
+        {
+          "type": "fleet",
+          "name": "The kelp fleet",
+          "capacity": "18 boats, 12 active; the only shallow-water rescue craft"
+        },
+        {
+          "type": "harbour",
+          "name": "The Mole",
+          "capacity": "breakwater fleet harbour; funnels surge"
+        },
+        {
+          "type": "depot",
+          "name": "Fuel depot",
+          "capacity": "80,000 gallons of aviation fuel and marine diesel"
+        },
+        {
+          "type": "hotels",
+          "name": "The Strand resorts",
+          "capacity": "1,200 rooms; 2,000 hurricane-rated shelter places owned by a resort group"
+        }
+      ],
+      "resources": {
+        "generators": 15,
+        "medicalSupplies": "low",
+        "fuel": "medium",
+        "food": "medium",
+        "water": "low",
+        "shelterCapacity": 2600
+      },
+      "dependencies": [
+        "heartland",
+        "haven",
+        "summit"
+      ],
+      "vulnerabilities": [
+        "runway closes at 45 mph wind",
+        "the Mole funnels storm surge; vessels at the wall take damage",
+        "wind damage to the Strand roofs",
+        "cut off from the city when the Gateway-Summit road goes"
+      ],
+      "valuesTested": [
+        "safety",
+        "duty",
+        "fairness",
+        "loyalty"
+      ],
+      "sheet": {
+        "produces": "Raw kelp (60 tons a day to Heartland's works), tourist money, access by air",
+        "needs": "Power and water from Heartland; diesel from Haven; medical care from Summit; a clear ring road west",
+        "uniquelyHolds": "The runway, the fleet, the Mole, the Strand's beds",
+        "shares": "Evacuation seats, boats, hotel beds, hotel generators, the terminal's 600 places",
+        "temptedToHoard": "Seats for residents over tourists and other parishes' sick; boats kept safe in the Mole; the hotels' beds and generators",
+        "coreQuestion": "When do you stop betting that you have more time, and whose seat do you give away when you lose the bet?"
       }
-    ]
+    },
+    "HEARTLAND": {
+      "id": "heartland",
+      "name": "Heartland",
+      "position": {
+        "x": 50.0,
+        "y": 38.9
+      },
+      "population": 4200,
+      "meridianPercent": 45,
+      "supplyChainRole": "power-and-process",
+      "description": "The crater: Concordia Dam, the lake, the water, and the kelp works that make thalassarin concentrate",
+      "classCharacter": {
+        "whoLivesHere": "Dam operators, water specialists, high-voltage electricians, heavy-equipment crews, and the works' shift crews who commute up from Summit and Keystone.",
+        "whatTheyFear": "Dam failure, being blamed for prioritisation, making the spillway call wrong.",
+        "whatTheyWant": "Autonomy to make safety decisions and respect for the gauges."
+      },
+      "keyAssets": [
+        {
+          "type": "dam",
+          "name": "Concordia Dam",
+          "capacity": "45 MW, eighty percent of the island's power"
+        },
+        {
+          "type": "reservoir",
+          "name": "Crater lake and treatment plant",
+          "capacity": "8 million gallons a day, including Keystone's ultrapure line"
+        },
+        {
+          "type": "plant",
+          "name": "The kelp works",
+          "capacity": "thalassarin concentrate; 18-hour cycles; four days of concentrate declared"
+        },
+        {
+          "type": "shelter",
+          "name": "The dam's interior shelter",
+          "capacity": "300 places; the safest ground on the island"
+        },
+        {
+          "type": "depot",
+          "name": "Maintenance complex",
+          "capacity": "heavy equipment, 120 workers, ten large generators held as dam spares"
+        }
+      ],
+      "resources": {
+        "generators": 10,
+        "medicalSupplies": "low",
+        "fuel": "medium",
+        "food": "high",
+        "water": "high",
+        "shelterCapacity": 300
+      },
+      "dependencies": [
+        "gateway",
+        "haven"
+      ],
+      "vulnerabilities": [
+        "dam stress and the spillway decision",
+        "crater roads slide and flood early",
+        "isolated inside the island from T-18h",
+        "no medical care of its own"
+      ],
+      "valuesTested": [
+        "fairness",
+        "integrity",
+        "candor",
+        "courage"
+      ],
+      "sheet": {
+        "produces": "Power, water, thalassarin concentrate",
+        "needs": "Kelp from Gateway; a crater road; diesel for the control generators; someone downstream who answers before the spillway opens",
+        "uniquelyHolds": "The Priority Schedule, the spillway, the dam shelter, the heavy-equipment crews, fourteen days of food",
+        "shares": "Power priority, generators, water tankers, the concentrate, spillway timing and warning",
+        "temptedToHoard": "The ten dam spares, the concentrate, the dam shelter, the truth about how long a release takes",
+        "coreQuestion": "When there is not enough, who gets it, and what do you owe the people downstream of your answer?"
+      }
+    },
+    "KEYSTONE": {
+      "id": "keystone",
+      "name": "Keystone",
+      "position": {
+        "x": 55.7,
+        "y": 80.7
+      },
+      "population": 3200,
+      "meridianPercent": 95,
+      "supplyChainRole": "manufacture",
+      "description": "The plant: twelve clean rooms, the only place on earth that makes Celarithin, and Southfield below it",
+      "classCharacter": {
+        "whoLivesHere": "Production technicians, QA chemists, maintenance engineers, and their families in the company housing on the Southfield flat.",
+        "whatTheyFear": "Contamination, blame, the water in Block C, losing the only skilled work on the island.",
+        "whatTheyWant": "Recognition for critical work and fair treatment of the people who make the medicine."
+      },
+      "keyAssets": [
+        {
+          "type": "cleanroom",
+          "name": "Twelve ISO Class 5 clean rooms",
+          "capacity": "24,000 doses a day on three shifts"
+        },
+        {
+          "type": "storage",
+          "name": "The cold vault",
+          "capacity": "five days of finished doses (120,000); four hours of battery"
+        },
+        {
+          "type": "fleet",
+          "name": "Twelve refrigerated trucks",
+          "capacity": "the island's cold chain and its highest-floor vehicles"
+        },
+        {
+          "type": "lab",
+          "name": "QA laboratory",
+          "capacity": "every batch tested before release"
+        },
+        {
+          "type": "housing",
+          "name": "Southfield",
+          "capacity": "800 units on the lowest ground in the parish; built to code, never drainage-tested"
+        }
+      ],
+      "resources": {
+        "generators": 15,
+        "medicalSupplies": "low",
+        "fuel": "medium",
+        "food": "low",
+        "water": "high",
+        "shelterCapacity": 400
+      },
+      "dependencies": [
+        "heartland",
+        "haven"
+      ],
+      "vulnerabilities": [
+        "power failure stops the clean rooms",
+        "ultrapure water disruption",
+        "Southfield flooding on untested drainage",
+        "cut from the port when the surge creek road floods"
+      ],
+      "valuesTested": [
+        "candor",
+        "compassion",
+        "duty",
+        "respect"
+      ],
+      "sheet": {
+        "produces": "Celarithin: 24,000 doses a day",
+        "needs": "Stable power and ultrapure water; concentrate by road every eight hours; the port; its own people's families safe",
+        "uniquelyHolds": "The clean rooms, the cold vault, the reefer trucks, two EMTs, a basement rated for 400",
+        "shares": "Generators, reefer trucks, vault space, the EMTs, the plant basement",
+        "temptedToHoard": "Generators for the clean rooms over the hospital; the batch over the crew; vault space over the blood bank; the trucks",
+        "coreQuestion": "How much risk to the people making the medicine is acceptable to serve the people who need it, and who answers for them?"
+      }
+    },
+    "HAVEN": {
+      "id": "haven",
+      "name": "Haven",
+      "position": {
+        "x": 82.9,
+        "y": 42.9
+      },
+      "population": 4600,
+      "meridianPercent": 70,
+      "supplyChainRole": "ship",
+      "description": "The port: cranes, reefers, tugs, the fuel terminal and the union hall",
+      "classCharacter": {
+        "whoLivesHere": "Longshoremen, crane operators, tug crews, tanker drivers who know every road, the bars and the noodle shop that feed the night shift; families here for three generations.",
+        "whatTheyFear": "Being trapped at work while their families are in the surge zone; chemical exposure; being blamed afterward.",
+        "whatTheyWant": "To be asked before they are spent."
+      },
+      "keyAssets": [
+        {
+          "type": "port",
+          "name": "The deep-water berth",
+          "capacity": "two ships at once; the MV Kestrel Reach and the Singapore consignment"
+        },
+        {
+          "type": "terminal",
+          "name": "The fuel terminal",
+          "capacity": "500,000 gallons on the books; Tank 3's seal"
+        },
+        {
+          "type": "fleet",
+          "name": "Two harbour tugs and the pilot launch",
+          "capacity": "the island's heavy-weather craft"
+        },
+        {
+          "type": "hall",
+          "name": "The union hall",
+          "capacity": "800 shelter places, in the surge zone"
+        },
+        {
+          "type": "warehouse",
+          "name": "The reefer yard",
+          "capacity": "cold storage for a consignment"
+        }
+      ],
+      "resources": {
+        "generators": 12,
+        "medicalSupplies": "low",
+        "fuel": "high",
+        "food": "medium",
+        "water": "medium",
+        "shelterCapacity": 800
+      },
+      "dependencies": [
+        "heartland",
+        "keystone"
+      ],
+      "vulnerabilities": [
+        "storm surge over the yard and the fuel terminal",
+        "cranes stand down above 85 mph",
+        "port flooding",
+        "labour stops if the crews feel unsafe"
+      ],
+      "valuesTested": [
+        "respect",
+        "stewardship",
+        "honesty",
+        "courage"
+      ],
+      "sheet": {
+        "produces": "Shipping, fuel, rescue craft",
+        "needs": "Power for the cranes and reefer plugs; finished doses from Keystone; a road north for its families; a workforce that is willing",
+        "uniquelyHolds": "The berth and the consignment, the fuel terminal, the tugs, the union hall",
+        "shares": "Fuel, the tugs, reefer plugs and yard space, the union hall, berth time",
+        "temptedToHoard": "Fuel for the port's own cranes and generators; berth time for doses over families; the tugs",
+        "coreQuestion": "When the people with the power to stop everything are the ones being asked to risk the most, who decides what is safe enough?"
+      }
+    },
+    "SUMMIT": {
+      "id": "summit",
+      "name": "Summit",
+      "position": {
+        "x": 42.9,
+        "y": 16.8
+      },
+      "population": 6200,
+      "meridianPercent": 20,
+      "supplyChainRole": "govern-and-care",
+      "description": "The capital: Government House, the police, fire and ambulance, the schools, and Concordia General on Hospital Hill",
+      "classCharacter": {
+        "whoLivesHere": "Nurses, doctors, teachers, police, firefighters, shopkeepers, civil servants, and the Meridian families who chose a real town over company housing.",
+        "whatTheyFear": "Being deprioritised because they are not essential to production; the hospital overwhelmed; the water in Riverside.",
+        "whatTheyWant": "The hospital does not check pay stubs; neither should the island."
+      },
+      "keyAssets": [
+        {
+          "type": "hospital",
+          "name": "Concordia General",
+          "capacity": "120 beds, 18 ICU, one intensivist; the only surgery and emergency room"
+        },
+        {
+          "type": "hq",
+          "name": "Government House and the Island Emergency Council",
+          "capacity": "the evacuation order"
+        },
+        {
+          "type": "station",
+          "name": "Police, fire and ambulance",
+          "capacity": "120 officers, 2 police boats, 6 ambulances, 3 fire stations"
+        },
+        {
+          "type": "broadcast",
+          "name": "Emergency broadcast",
+          "capacity": "the word non-Meridian residents believe"
+        },
+        {
+          "type": "schools",
+          "name": "The school shelters",
+          "capacity": "2,400 places"
+        },
+        {
+          "type": "quarter",
+          "name": "Riverside",
+          "capacity": "2,000 people on the spillway's floodplain; two hours to clear"
+        }
+      ],
+      "resources": {
+        "generators": 3,
+        "medicalSupplies": "high",
+        "fuel": "medium",
+        "food": "medium",
+        "water": "medium",
+        "shelterCapacity": 2400
+      },
+      "dependencies": [
+        "heartland",
+        "haven",
+        "gateway",
+        "sterling"
+      ],
+      "vulnerabilities": [
+        "Riverside on the spillway's floodplain",
+        "hospital on a generator with 48 hours of fuel",
+        "staff cannot reach Hospital Hill once roads close",
+        "road isolation of the capital"
+      ],
+      "valuesTested": [
+        "courage",
+        "respect",
+        "accountability",
+        "compassion"
+      ],
+      "sheet": {
+        "produces": "Care, authority, legitimacy",
+        "needs": "Power and water from Heartland (third on the Priority Schedule); fuel from Haven; cold storage for blood; lift for ICU patients; warning before the gate opens",
+        "uniquelyHolds": "The hospital, the police and ambulances, the broadcast, the evacuation order, the power to commandeer",
+        "shares": "Officers and ambulances, hospital beds, shelter places, the broadcast, the order",
+        "temptedToHoard": "Ambulances and police in the capital; hospital beds and generators for its own; the fuel depot; the order itself",
+        "coreQuestion": "When the people who serve everyone need help themselves, who serves them, and who signs the order?"
+      }
+    },
+    "STERLING": {
+      "id": "sterling",
+      "name": "Sterling",
+      "position": {
+        "x": 62.1,
+        "y": 16.1
+      },
+      "population": 2100,
+      "meridianPercent": 95,
+      "supplyChainRole": "headquarters",
+      "description": "Meridian BioSciences Concordia: the campus towers by the river, the executive homes on the headland, the uplink, the helipad and the crisis room",
+      "classCharacter": {
+        "whoLivesHere": "Executives and their families, senior scientists, strategy and communications staff, executive assistants, security and household staff, many of whom live in Riverside.",
+        "whatTheyFear": "Losing control, a decision that kills someone, personal exposure.",
+        "whatTheyWant": "To be seen making the hard calls well."
+      },
+      "keyAssets": [
+        {
+          "type": "tower",
+          "name": "The uplink and radio tower",
+          "capacity": "the only reliable external link once the cell network fails"
+        },
+        {
+          "type": "helipad",
+          "name": "Two helicopters",
+          "capacity": "six seats each; fly below 40 mph and in the eye"
+        },
+        {
+          "type": "bunker",
+          "name": "The Hardened Operations Centre",
+          "capacity": "500 places; 96 hours of fuel; 21 days of food"
+        },
+        {
+          "type": "lab",
+          "name": "The research campus",
+          "capacity": "120 scientists"
+        },
+        {
+          "type": "clinic",
+          "name": "Executive health clinic",
+          "capacity": "a doctor, a pharmacy, a stabilisation suite"
+        }
+      ],
+      "resources": {
+        "generators": 24,
+        "medicalSupplies": "medium",
+        "fuel": "high",
+        "food": "high",
+        "water": "medium",
+        "shelterCapacity": 500
+      },
+      "dependencies": [
+        "heartland",
+        "haven"
+      ],
+      "vulnerabilities": [
+        "lower campus on the river's flood path",
+        "communications tower and uplink in 90 mph wind",
+        "decision paralysis behind filtered reports",
+        "reputational exposure"
+      ],
+      "valuesTested": [
+        "honesty",
+        "loyalty",
+        "integrity",
+        "compassion"
+      ],
+      "sheet": {
+        "produces": "Decisions and money, communications, lift, science",
+        "needs": "Power and comms from Heartland (second on the Priority Schedule); the consignment to sail; unfiltered information; legitimacy",
+        "uniquelyHolds": "The helicopters, the uplink, the bunker, twenty-four generators, the clinic, the internal forecast model",
+        "shares": "Helicopters, generators, the bunker, the uplink and satellite phones, money, the authority to pause production",
+        "temptedToHoard": "Helicopter seats for executives' families; the bunker; the twenty garage generators; the forecast; the story",
+        "coreQuestion": "When you hold the most, what do you give, and whose safety do you count as ours?"
+      }
+    }
+  },
+  "PARISH_DEPENDENCIES": {
+    "GATEWAY": {
+      "dependsOn": [
+        "HEARTLAND",
+        "HAVEN",
+        "SUMMIT"
+      ],
+      "providesTo": [
+        "HEARTLAND",
+        "SUMMIT",
+        "STERLING"
+      ],
+      "criticalResources": [
+        "kelp",
+        "the runway",
+        "the boats"
+      ]
+    },
+    "HEARTLAND": {
+      "dependsOn": [
+        "GATEWAY",
+        "HAVEN"
+      ],
+      "providesTo": [
+        "KEYSTONE",
+        "STERLING",
+        "SUMMIT",
+        "HAVEN",
+        "GATEWAY"
+      ],
+      "criticalResources": [
+        "power",
+        "water",
+        "concentrate",
+        "the spillway warning"
+      ]
+    },
+    "KEYSTONE": {
+      "dependsOn": [
+        "HEARTLAND",
+        "HAVEN"
+      ],
+      "providesTo": [
+        "HAVEN",
+        "SUMMIT"
+      ],
+      "criticalResources": [
+        "Celarithin",
+        "the cold vault",
+        "the reefer trucks"
+      ]
+    },
+    "HAVEN": {
+      "dependsOn": [
+        "HEARTLAND",
+        "KEYSTONE"
+      ],
+      "providesTo": [
+        "GATEWAY",
+        "SUMMIT",
+        "HEARTLAND",
+        "KEYSTONE",
+        "STERLING"
+      ],
+      "criticalResources": [
+        "the berth",
+        "fuel",
+        "the tugs"
+      ]
+    },
+    "SUMMIT": {
+      "dependsOn": [
+        "HEARTLAND",
+        "HAVEN",
+        "GATEWAY",
+        "STERLING"
+      ],
+      "providesTo": [
+        "GATEWAY",
+        "HAVEN",
+        "HEARTLAND",
+        "KEYSTONE",
+        "STERLING"
+      ],
+      "criticalResources": [
+        "the hospital",
+        "police and ambulances",
+        "the order"
+      ]
+    },
+    "STERLING": {
+      "dependsOn": [
+        "HEARTLAND",
+        "HAVEN"
+      ],
+      "providesTo": [
+        "SUMMIT",
+        "KEYSTONE",
+        "HAVEN",
+        "GATEWAY"
+      ],
+      "criticalResources": [
+        "helicopters",
+        "uplink",
+        "generators",
+        "money",
+        "the pause"
+      ]
+    }
   },
   "INFRASTRUCTURE": {
     "power": {
       "source": "heartland",
       "priority": [
         "keystone",
-        "summit"
+        "sterling"
       ],
+      "prioritySchedule": "2019: Keystone's clean rooms and the Sterling campus first, Concordia General second, everyone else after",
       "backupGenerators": {
-        "summit": true,
-        "keystone": true,
-        "sterling": false,
-        "haven": false,
         "gateway": true,
-        "heartland": true
+        "haven": true,
+        "heartland": true,
+        "keystone": true,
+        "sterling": true,
+        "summit": true
       }
     },
     "water": {
@@ -48,504 +602,24 @@
       "treatment": "heartland"
     },
     "comms": {
-      "primary": "summit",
+      "primary": "sterling",
       "external": "gateway",
-      "backup": "sterling"
-    }
-  },
-  "PARISHES": {
-    "KEYSTONE": {
-      "id": "keystone",
-      "name": "Keystone",
-      "position": {
-        "x": 70,
-        "y": 60
-      },
-      "population": 3200,
-      "meridianPercent": 95,
-      "supplyChainRole": "manufacture",
-      "description": "Biotech manufacturing facility and research center",
-      "classCharacter": {
-        "whoLivesHere": "Technicians, researchers, clean room operators. Highly skilled workforce.",
-        "whatTheyFear": "Contamination, facility shutdown, losing specialized jobs with no local alternatives.",
-        "whatTheyWant": "Recognition for critical work, fair treatment during emergencies."
-      },
-      "keyAssets": [
-        {
-          "type": "facility",
-          "name": "Biotech Manufacturing Plant",
-          "capacity": "200 workers/shift"
-        },
-        {
-          "type": "cleanroom",
-          "name": "Class 100 Clean Rooms",
-          "capacity": "12 production lines"
-        },
-        {
-          "type": "lab",
-          "name": "Quality Control Laboratory",
-          "capacity": "24/7 operations"
-        },
-        {
-          "type": "storage",
-          "name": "Cold Storage Facility",
-          "capacity": "500,000 units"
-        }
-      ],
-      "resources": {
-        "generators": 6,
-        "medicalSupplies": "low",
-        "fuel": "medium",
-        "food": "low",
-        "water": "high",
-        "shelterCapacity": 1200
-      },
-      "dependencies": [
-        "heartland",
-        "haven"
-      ],
-      "vulnerabilities": [
-        "power failure",
-        "contamination",
-        "ultrapure water disruption"
-      ],
-      "valuesTested": [
-        "production",
-        "worker-safety",
-        "quality",
-        "financial-responsibility"
-      ]
-    },
-    "HAVEN": {
-      "id": "haven",
-      "name": "Haven",
-      "position": {
-        "x": 85,
-        "y": 50
-      },
-      "population": 5400,
-      "meridianPercent": 85,
-      "supplyChainRole": "process",
-      "description": "Port and processing hub with strong union presence",
-      "classCharacter": {
-        "whoLivesHere": "Port workers, processing plant employees, union members. Working-class community.",
-        "whatTheyFear": "Layoffs, safety violations, being treated as expendable.",
-        "whatTheyWant": "Fair treatment, safe working conditions, job security."
-      },
-      "keyAssets": [
-        {
-          "type": "port",
-          "name": "Main Shipping Port",
-          "capacity": "500 TEU/day"
-        },
-        {
-          "type": "plant",
-          "name": "Processing Facility",
-          "capacity": "300 workers"
-        },
-        {
-          "type": "warehouse",
-          "name": "Cold Chain Warehouse",
-          "capacity": "50,000 sq ft"
-        },
-        {
-          "type": "station",
-          "name": "Coast Guard Station",
-          "capacity": 45
-        }
-      ],
-      "resources": {
-        "generators": 8,
-        "medicalSupplies": "low",
-        "fuel": "medium",
-        "food": "high",
-        "water": "medium",
-        "shelterCapacity": 2000
-      },
-      "dependencies": [
-        "gateway",
-        "heartland"
-      ],
-      "vulnerabilities": [
-        "storm surge",
-        "port flooding",
-        "processing shutdown"
-      ],
-      "valuesTested": [
-        "worker-safety",
-        "solidarity",
-        "livelihood",
-        "dignity"
-      ]
-    },
-    "GATEWAY": {
-      "id": "gateway",
-      "name": "Gateway",
-      "position": {
-        "x": 15,
-        "y": 50
-      },
-      "population": 3800,
-      "meridianPercent": 70,
-      "supplyChainRole": "harvest",
-      "description": "Airport and harvest operations hub, first to see approaching storms",
-      "classCharacter": {
-        "whoLivesHere": "Harvest crews, airport staff, hospitality workers. Transient population.",
-        "whatTheyFear": "Being forgotten during evacuation, stranded crews, airport closure.",
-        "whatTheyWant": "Evacuation priority, clear communication, crew safety."
-      },
-      "keyAssets": [
-        {
-          "type": "airport",
-          "name": "International Airport",
-          "capacity": "2 runways"
-        },
-        {
-          "type": "fleet",
-          "name": "Harvest Fleet Base",
-          "capacity": "12 vessels"
-        },
-        {
-          "type": "depot",
-          "name": "Aviation Fuel Depot",
-          "capacity": "2,000,000 gallons"
-        },
-        {
-          "type": "hotels",
-          "name": "Resort District",
-          "capacity": "3,500 rooms"
-        }
-      ],
-      "resources": {
-        "generators": 15,
-        "medicalSupplies": "medium",
-        "fuel": "high",
-        "food": "medium",
-        "water": "low",
-        "shelterCapacity": 4000
-      },
-      "dependencies": [
-        "heartland",
-        "sterling"
-      ],
-      "vulnerabilities": [
-        "runway flooding",
-        "wind damage",
-        "fuel depot fire",
-        "stranded vessels"
-      ],
-      "valuesTested": [
-        "crew-safety",
-        "quota-pressure",
-        "equity",
-        "economics"
-      ]
-    },
-    "HEARTLAND": {
-      "id": "heartland",
-      "name": "Heartland",
-      "position": {
-        "x": 45,
-        "y": 35
-      },
-      "population": 3400,
-      "meridianPercent": 90,
-      "supplyChainRole": "power",
-      "description": "Dam, utilities, and essential infrastructure in the crater",
-      "classCharacter": {
-        "whoLivesHere": "Dam operators, utility workers, essential infrastructure staff. Critical workforce.",
-        "whatTheyFear": "Being blamed for failures, impossible demands, dam failure.",
-        "whatTheyWant": "Autonomy to make safety decisions, respect for expertise."
-      },
-      "keyAssets": [
-        {
-          "type": "dam",
-          "name": "Heartland Dam",
-          "capacity": "200 MW"
-        },
-        {
-          "type": "reservoir",
-          "name": "Freshwater Reservoir",
-          "capacity": "50,000,000 gallons"
-        },
-        {
-          "type": "plant",
-          "name": "Water Treatment Plant",
-          "capacity": "10,000,000 GPD"
-        },
-        {
-          "type": "substation",
-          "name": "Power Distribution Hub",
-          "capacity": "island-wide"
-        }
-      ],
-      "resources": {
-        "generators": 25,
-        "medicalSupplies": "low",
-        "fuel": "high",
-        "food": "low",
-        "water": "high",
-        "shelterCapacity": 800
-      },
-      "dependencies": [
-        "summit"
-      ],
-      "vulnerabilities": [
-        "dam stress",
-        "flooding",
-        "cascading power failure",
-        "isolated during storm"
-      ],
-      "valuesTested": [
-        "system-integrity",
-        "safety",
-        "demand-pressure",
-        "expertise"
-      ]
-    },
-    "SUMMIT": {
-      "id": "summit",
-      "name": "Summit",
-      "position": {
-        "x": 50,
-        "y": 20
-      },
-      "population": 2100,
-      "meridianPercent": 95,
-      "supplyChainRole": "coordinate",
-      "description": "Executive headquarters and communications hub on high ground",
-      "classCharacter": {
-        "whoLivesHere": "Executives, scientists, corporate leadership. Safest location on island.",
-        "whatTheyFear": "Exposure of decisions, liability, loss of control.",
-        "whatTheyWant": "Control over narrative, protection of company interests."
-      },
-      "keyAssets": [
-        {
-          "type": "hq",
-          "name": "Meridian Corporate HQ",
-          "capacity": "500 executives"
-        },
-        {
-          "type": "tower",
-          "name": "Emergency Radio Tower",
-          "capacity": "island-wide"
-        },
-        {
-          "type": "bunker",
-          "name": "Executive Emergency Shelter",
-          "capacity": 200
-        },
-        {
-          "type": "lab",
-          "name": "Research Campus",
-          "capacity": "150 scientists"
-        }
-      ],
-      "resources": {
-        "generators": 12,
-        "medicalSupplies": "high",
-        "fuel": "low",
-        "food": "high",
-        "water": "medium",
-        "shelterCapacity": 1500
-      },
-      "dependencies": [
-        "heartland",
-        "gateway"
-      ],
-      "vulnerabilities": [
-        "communications tower collapse",
-        "road isolation",
-        "information blackout"
-      ],
-      "valuesTested": [
-        "shareholder-value",
-        "transparency",
-        "equity",
-        "accountability"
-      ]
-    },
-    "STERLING": {
-      "id": "sterling",
-      "name": "Sterling",
-      "position": {
-        "x": 50,
-        "y": 85
-      },
-      "population": 6200,
-      "meridianPercent": 35,
-      "supplyChainRole": "ship",
-      "description": "Government center with hospital, schools, and non-Meridian families",
-      "classCharacter": {
-        "whoLivesHere": "Service workers, teachers, healthcare staff, non-Meridian families. Most vulnerable population.",
-        "whatTheyFear": "Abandonment, being deprioritized, inequality in emergency response.",
-        "whatTheyWant": "Equality, fair access to resources, community-first decisions."
-      },
-      "keyAssets": [
-        {
-          "type": "hospital",
-          "name": "Sterling General Hospital",
-          "capacity": "200 beds"
-        },
-        {
-          "type": "complex",
-          "name": "Government Complex",
-          "capacity": 2000
-        },
-        {
-          "type": "broadcast",
-          "name": "Emergency Broadcast Center",
-          "capacity": "100% island coverage"
-        },
-        {
-          "type": "schools",
-          "name": "School District",
-          "capacity": "3,000 students"
-        }
-      ],
-      "resources": {
-        "generators": 10,
-        "medicalSupplies": "high",
-        "fuel": "medium",
-        "food": "medium",
-        "water": "medium",
-        "shelterCapacity": 3500
-      },
-      "dependencies": [
-        "haven",
-        "summit",
-        "gateway",
-        "heartland"
-      ],
-      "vulnerabilities": [
-        "shelter overflow",
-        "hospital overwhelm",
-        "communications failure",
-        "flooding"
-      ],
-      "valuesTested": [
-        "community",
-        "equity",
-        "compassion",
-        "accountability"
-      ]
-    }
-  },
-  "PARISH_DEPENDENCIES": {
-    "KEYSTONE": {
-      "dependsOn": [
-        "HEARTLAND",
-        "HAVEN"
-      ],
-      "providesTo": [
-        "HAVEN"
-      ],
-      "criticalResources": [
-        "biotech-manufacturing",
-        "quality-control",
-        "cold-storage"
-      ]
-    },
-    "HAVEN": {
-      "dependsOn": [
-        "GATEWAY",
-        "HEARTLAND",
-        "KEYSTONE"
-      ],
-      "providesTo": [
-        "KEYSTONE",
-        "STERLING"
-      ],
-      "criticalResources": [
-        "port-access",
-        "processing",
-        "cold-chain"
-      ]
-    },
-    "GATEWAY": {
-      "dependsOn": [
-        "HEARTLAND",
-        "STERLING"
-      ],
-      "providesTo": [
-        "HAVEN",
-        "SUMMIT",
-        "HEARTLAND"
-      ],
-      "criticalResources": [
-        "air-evacuation",
-        "harvest",
-        "external-supplies",
-        "fuel"
-      ]
-    },
-    "HEARTLAND": {
-      "dependsOn": [
-        "SUMMIT"
-      ],
-      "providesTo": [
-        "KEYSTONE",
-        "HAVEN",
-        "GATEWAY",
-        "STERLING",
-        "SUMMIT"
-      ],
-      "criticalResources": [
-        "power",
-        "freshwater",
-        "ultrapure-water"
-      ]
-    },
-    "SUMMIT": {
-      "dependsOn": [
-        "HEARTLAND",
-        "GATEWAY"
-      ],
-      "providesTo": [
-        "HEARTLAND",
-        "STERLING",
-        "KEYSTONE",
-        "HAVEN",
-        "GATEWAY"
-      ],
-      "criticalResources": [
-        "coordination",
-        "radio-communications",
-        "corporate-authority"
-      ]
-    },
-    "STERLING": {
-      "dependsOn": [
-        "HAVEN",
-        "SUMMIT",
-        "GATEWAY",
-        "HEARTLAND"
-      ],
-      "providesTo": [
-        "HAVEN",
-        "GATEWAY"
-      ],
-      "criticalResources": [
-        "medical-care",
-        "emergency-broadcast",
-        "government-coordination",
-        "shelter"
-      ]
+      "backup": "summit"
     }
   },
   "PARISH_IDS": [
-    "KEYSTONE",
-    "HAVEN",
     "GATEWAY",
     "HEARTLAND",
+    "KEYSTONE",
+    "HAVEN",
     "SUMMIT",
     "STERLING"
   ],
   "PARISH_IDS_LOWER": [
-    "keystone",
-    "haven",
     "gateway",
     "heartland",
+    "keystone",
+    "haven",
     "summit",
     "sterling"
   ],
@@ -553,61 +627,83 @@
     "segments": [
       {
         "from": "gateway",
-        "to": "sterling",
-        "km": 12,
+        "to": "summit",
+        "km": 11,
         "normalMin": 15,
-        "degradedMin": 45
+        "degradedMin": 45,
+        "name": "Gateway-Summit road"
+      },
+      {
+        "from": "summit",
+        "to": "sterling",
+        "km": 2,
+        "normalMin": 5,
+        "degradedMin": 20,
+        "name": "The river bridges"
       },
       {
         "from": "sterling",
         "to": "haven",
         "km": 10,
         "normalMin": 12,
-        "degradedMin": 40
+        "degradedMin": 40,
+        "name": "Sterling-Haven road"
       },
       {
         "from": "haven",
         "to": "keystone",
         "km": 8,
         "normalMin": 10,
-        "degradedMin": 30
+        "degradedMin": 30,
+        "name": "Haven-Keystone road (the surge creek)"
       },
       {
         "from": "keystone",
         "to": "gateway",
-        "km": 12,
+        "km": 11,
         "normalMin": 15,
-        "degradedMin": 45
+        "degradedMin": 45,
+        "name": "Keystone-Gateway road"
       }
     ],
     "totalKm": 42
+  },
+  "CRATER_ROADS": {
+    "segments": [
+      {
+        "from": "summit",
+        "to": "heartland",
+        "km": 4,
+        "normalMin": 10,
+        "floodRisk": true,
+        "name": "The Gorge Road"
+      },
+      {
+        "from": "keystone",
+        "to": "heartland",
+        "km": 5,
+        "normalMin": 14,
+        "stormPassable": false,
+        "name": "The South Switchbacks"
+      }
+    ]
   },
   "SUPPLY_CHAIN": {
     "steps": [
       {
         "stage": "harvest",
         "parish": "gateway",
-        "hoursToNext": 4
-      },
-      {
-        "stage": "transport-in",
-        "parish": "haven",
-        "hoursToNext": 2
+        "hoursToNext": 8
       },
       {
         "stage": "process",
-        "parish": "haven",
-        "hoursToNext": 8
+        "parish": "heartland",
+        "hoursToNext": 18
       },
       {
         "stage": "manufacture",
         "parish": "keystone",
-        "hoursToNext": 12
-      },
-      {
-        "stage": "transport-out",
-        "parish": "haven",
-        "hoursToNext": 2
+        "hoursToNext": 8
       },
       {
         "stage": "ship",
@@ -615,8 +711,8 @@
         "hoursToNext": 0
       }
     ],
-    "totalCycleHours": 28,
-    "interruptionCostPerHour": 2400000,
-    "productName": "BioCore-7 pharmaceutical compound"
+    "totalCycleHours": 34,
+    "interruptionCostDosesPerDay": 24000,
+    "productName": "Celarithin"
   }
 }

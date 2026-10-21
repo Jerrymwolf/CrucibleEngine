@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/crucible-core", "crates/crucible-cli"]
+members = ["crates/crucible-core", "crates/crucible-cli", "crates/crucible-wasm", "crates/crucible-host"]
 
 [workspace.package]
 version = "0.1.0"
@@ -10,8 +10,8 @@ license = "MIT"
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
-rand = "0.8"
-rand_chacha = "0.3"
+rand = { version = "0.8", default-features = false, features = ["alloc"] }
+rand_chacha = { version = "0.3", default-features = false }
 sha2 = "0.10"
 thiserror = "1.0"
 anyhow = "1.0"
