@@ -149,7 +149,7 @@ The validator:
 - **Release**, **Edit wording** and **Skip** buttons (editing changes text only, never effects or ratings);
 - **Write one now** for any table;
 - the latest JEV reading per table, in words, with its debrief question;
-- the heat lever, beside the issues.
+- the pressure control, beside the issues. Today this is the lever row's small "Heat +2" and "Cool −2" buttons (`board-rts/src/73-ui-dm.js`). Each tap moves intensity ±2 and shortens or lengthens windows that open afterwards by the quarter's `heatStepTicks` (about 14 to 22 s). It also changes the infrastructure decay rate and is logged as a `lever` input. This panel relabels the buttons **Raise pressure** and **Ease pressure** and makes them full-size. Each press also tells the writer to apply an off-board pressure voice to the next draft (section 6), so pressure rises in the story as well as on the clock.
 
 A released issue is presented at the table's next free moment: the first tick on which it has no open card or call.
 
@@ -192,8 +192,7 @@ A venue with no internet still gets reflexive follow-ups. They are less tailored
 
 - **`inputs.rs`.** Three new input kinds:
   - `present_issue { parish_id, dilemma, deadline_ticks, source: "ai" | "fallback" | "dm", released_by: "dm" | "cruise" }`. The full dilemma travels in the input, so the log is self-contained and the content hash is unchanged. The core presents it at the parish's next free tick, like a scheduled card, and scores it with the same rules. An invalid one is logged `rejected` and changes nothing.
-  - `jev_reading { parish_id, model, answers }`, logged only.
-  - `dm_mode { mode: "manual" | "cruise" }`, logged only.
+  - `jev_reading { parish_id, model, answers }` and `dm_mode { mode: "manual" | "cruise" }`, logged with `core: false` (the host's existing pattern for `self_place`). The run log carries them and replay reproduces them, but they never enter the core's state or its hash.
 - **`validate.rs`.** Draft validation and bounds, callable from the host.
 - **`RUN_LOG_SCHEMA.md` and `ENGINE_SPEC.md`.** An amendment for the three input kinds. This is a contract change, and this record is its decision.
 - **`crucible-host`.** A new `issues` module holding the digest builder, the JEV and Claude clients, the queue, the cruise gate, the fallback picker, and the protocol messages `issue_draft`, `issue_release`, `issue_skip`, `jev_reading` and `dm_mode` (added to `PROTOCOL.md`). API keys come from the host's config on the facilitator's laptop, never from the page or the repo.
