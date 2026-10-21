@@ -42,3 +42,4 @@ jobs:
         run: |
           cargo build --locked -q -p crucible-wasm --target wasm32-unknown-unknown --release
           node board/build.mjs nursing-60 /tmp/board.html
+          node board-rts/build.mjs nursing-60 /tmp/board-rts.html
