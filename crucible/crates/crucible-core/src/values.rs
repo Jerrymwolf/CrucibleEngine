@@ -166,19 +166,25 @@ pub fn default_stated_values(content: &Content, parish_id: &str, rng: &mut SimRn
     out
 }
 
-/// One scored choice behind a values-gap row. `kind` says what `dilemma_id`
-/// names: a dilemma, an allocation entry (`allocate:TOKEN`), a call for aid,
-/// a repair send or a line of credit.
+/// One moment behind a values-gap row. `kind` says what `dilemma_id` names:
+/// a dilemma, an allocation entry (`allocate:TOKEN`), a call for aid, a
+/// repair send or a line of credit. `moment` groups the records that count
+/// as one moment: a card, a call for aid, the allocation round, a declare,
+/// or the recovery quarter's credit lines and repair sends.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Evidence {
     #[serde(default = "dilemma_kind")]
     pub kind: String,
     pub dilemma_id: String,
     pub option_id: String,
+    /// The moment's strongest signal on this value; 0 for a storm moment,
+    /// which carries no rating.
     pub signal: i64,
-    /// "storm" when the deadline passed and the default option was applied.
+    /// "storm" when no answer was given and the clock decided.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub decided_by: Option<String>,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub moment: String,
 }
 
 fn dilemma_kind() -> String {
@@ -190,41 +196,112 @@ pub struct ValuesGapRow {
     pub parish_id: String,
     pub value: String,
     pub stated_rank: usize,
+    /// Deprecated (2026-10-21): the mean of the chosen moments' signals,
+    /// kept for the legacy replay viewer only. The session screens show the
+    /// evidence and never a mean.
     pub enacted_score: f64,
+    /// Chosen moments that touched the value.
     pub n_decisions: usize,
+    /// False when fewer than two chosen moments touched the value.
+    #[serde(default)]
+    pub tested: bool,
+    /// Storm moments on cards that test the value: no answer was given.
+    #[serde(default)]
+    pub n_storm: usize,
     pub evidence: Vec<Evidence>,
 }
 
-/// For each stated value of each team: the mean enacted signal across the
-/// parish's decisions that touched that value.
-pub fn values_gap(teams: &[(String, Vec<String>)], decisions: &[DecisionRecord]) -> Vec<ValuesGapRow> {
+/// The moment a record belongs to. Allocation entries share the round;
+/// recovery credit lines and repair sends share the quarter.
+pub fn moment_of(d: &DecisionRecord) -> String {
+    match d.kind.as_str() {
+        "allocation" if d.dilemma_id == "declare_hidden" => "declare".into(),
+        "allocation" => "allocation".into(),
+        "repair" | "credit" => "recovery-support".into(),
+        _ => format!("{}:{}", d.kind, d.dilemma_id),
+    }
+}
+
+/// For each stated value of each team: one piece of evidence per moment
+/// (the strongest signal within it; ties go to the negative), storm moments
+/// listed apart and unrated, and whether the value was tested at all.
+pub fn values_gap(content: &Content, teams: &[(String, Vec<String>)], decisions: &[DecisionRecord]) -> Vec<ValuesGapRow> {
     let mut rows = Vec::new();
     for (parish_id, stated) in teams {
         for (i, value) in stated.iter().enumerate() {
-            let evidence: Vec<Evidence> = decisions
-                .iter()
-                .filter(|d| &d.parish_id == parish_id)
-                .filter_map(|d| {
-                    d.values_signaled.get(value).map(|s| Evidence {
-                        kind: d.kind.clone(),
-                        dilemma_id: d.dilemma_id.clone(),
-                        option_id: d.option_id.clone(),
-                        signal: *s,
-                        decided_by: d.decided_by.clone(),
-                    })
-                })
-                .collect();
-            let n = evidence.len();
+            let mut by_moment: BTreeMap<String, Evidence> = BTreeMap::new();
+            let mut order: Vec<String> = Vec::new();
+            for d in decisions.iter().filter(|d| &d.parish_id == parish_id) {
+                let storm = d.decided_by.as_deref() == Some("storm");
+                let signal = if storm {
+                    if !tests_value(content, d, value) {
+                        continue;
+                    }
+                    0
+                } else {
+                    match d.values_signaled.get(value) {
+                        Some(s) => *s,
+                        None => continue,
+                    }
+                };
+                let m = moment_of(d);
+                let e = Evidence {
+                    kind: d.kind.clone(),
+                    dilemma_id: d.dilemma_id.clone(),
+                    option_id: d.option_id.clone(),
+                    signal,
+                    decided_by: d.decided_by.clone(),
+                    moment: m.clone(),
+                };
+                match by_moment.get_mut(&m) {
+                    None => {
+                        order.push(m.clone());
+                        by_moment.insert(m, e);
+                    }
+                    Some(cur) => {
+                        if signal.abs() > cur.signal.abs() || (signal.abs() == cur.signal.abs() && signal < cur.signal) {
+                            *cur = e;
+                        }
+                    }
+                }
+            }
+            let evidence: Vec<Evidence> = order.into_iter().filter_map(|m| by_moment.remove(&m)).collect();
+            let chosen: Vec<&Evidence> = evidence.iter().filter(|e| e.decided_by.as_deref() != Some("storm")).collect();
+            let n = chosen.len();
             let score = if n == 0 {
                 0.0
             } else {
-                let sum: i64 = evidence.iter().map(|e| e.signal).sum();
+                let sum: i64 = chosen.iter().map(|e| e.signal).sum();
                 ((sum as f64 / n as f64) * 1000.0).round() / 1000.0
             };
-            rows.push(ValuesGapRow { parish_id: parish_id.clone(), value: value.clone(), stated_rank: i + 1, enacted_score: score, n_decisions: n, evidence });
+            rows.push(ValuesGapRow {
+                parish_id: parish_id.clone(),
+                value: value.clone(),
+                stated_rank: i + 1,
+                enacted_score: score,
+                n_decisions: n,
+                tested: n >= 2,
+                n_storm: evidence.len() - n,
+                evidence,
+            });
         }
     }
     rows
+}
+
+/// Whether a record's card or call tests `value`: a dilemma's
+/// `valuesTested`, or any option's signals touching it.
+fn tests_value(content: &Content, d: &DecisionRecord, value: &str) -> bool {
+    match d.kind.as_str() {
+        "dilemma" => content.dilemma(&d.dilemma_id).is_some_and(|dl| {
+            dl.values_tested.iter().any(|v| canonical(content, v) == value)
+                || dl.options.iter().any(|o| option_signals(content, o).contains_key(value))
+        }),
+        "aid" => content.aid.call(&d.dilemma_id).is_some_and(|c| c.answers.values().any(|a| canonical_signals(content, &a.signals).contains_key(value))),
+        // The allocation round tests what its scoring rules touch.
+        "allocation" => content.resources.signals.values().any(|rule| canonical_signals(content, rule).contains_key(value)),
+        _ => false,
+    }
 }
 
 #[cfg(test)]

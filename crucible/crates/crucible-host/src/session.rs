@@ -13,7 +13,7 @@ use anyhow::{anyhow, Context, Result};
 use crucible_core::log::{clock as sim_clock, RunLog};
 use crucible_core::sim::RECOVERY_PLAY_MINUTES;
 use crucible_core::weather::window_t;
-use crucible_core::{run, Content, Input, InputRecord, RunConfig, Team, STEP_MINUTES};
+use crucible_core::{run, Content, Input, InputRecord, RunConfig, Session, Team, STEP_MINUTES};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Map, Value};
 use std::collections::{BTreeMap, BTreeSet};
@@ -375,7 +375,7 @@ impl Host {
             ask: None,
             inputs: self.core_inputs(),
             until: Some(self.horizon),
-            session: self.profile.core.clone(),
+            session: self.effective_session(),
         };
         self.run = run(&self.content, &cfg);
     }
@@ -406,6 +406,30 @@ impl Host {
                 (t, (b + off).clamp(1, 10))
             })
             .collect()
+    }
+
+    /// The profile's schedule with the DM's heat and cool applied: each heat
+    /// shortens every card and mayday window that opens after it by its
+    /// quarter's step, each cool lengthens them. Windows already open keep
+    /// their deadline. The run log carries the schedule used, so replay holds.
+    fn effective_session(&self) -> Session {
+        let mut s = self.profile.core.clone();
+        if self.offsets.is_empty() {
+            return s;
+        }
+        let step_at = |t: i64| self.profile.quarters.iter().find(|q| q.from_t <= t && t < q.to_t).map(|q| q.heat_step_ticks).unwrap_or(0);
+        let shift = |t: i64| -> i64 { self.offsets.iter().filter(|(ot, _)| *ot <= t).map(|(_, d)| -d.signum() * step_at(t)).sum() };
+        for asks in s.schedule.values_mut() {
+            for a in asks.iter_mut() {
+                a.deadline_ticks = (a.deadline_ticks + shift(a.present_t)).max(2);
+            }
+        }
+        for m in s.maydays.iter_mut() {
+            if let Some(n) = m.answer_ticks {
+                m.answer_ticks = Some((n + shift(m.t)).max(2));
+            }
+        }
+        s
     }
 
     pub fn intensity_offset(&self) -> i64 {
@@ -1245,12 +1269,21 @@ impl Host {
                 if !d.options.iter().any(|o| &o.id == option_id) {
                     return Err(("unknown_option", format!("{dilemma_id} has no option {option_id}")));
                 }
-                let open = self
-                    .run
-                    .pending
-                    .iter()
-                    .find(|p| p.parish_id == parish && &p.dilemma_id == dilemma_id)
-                    .ok_or(("not_open", format!("{dilemma_id} is not open for {parish}")))?;
+                let Some(open) = self.run.pending.iter().find(|p| p.parish_id == parish && &p.dilemma_id == dilemma_id) else {
+                    // A card the clock already decided is "expired", so the table knows it was too late, not wrong.
+                    let stormed = self.run.ticks.iter().flat_map(|t| t.events.iter().map(move |e| (t.t, e))).find_map(|(t, e)| match e {
+                        crucible_core::log::Event::Decision { dilemma_id: d, parish_id: p, decided_by, .. }
+                            if d == dilemma_id && p == parish && decided_by.as_deref() == Some("storm") =>
+                        {
+                            Some(t)
+                        }
+                        _ => None,
+                    });
+                    return Err(match stormed {
+                        Some(t) => ("expired", format!("the storm decided {dilemma_id} at {}", sim_clock(t))),
+                        None => ("not_open", format!("{dilemma_id} is not open for {parish}")),
+                    });
+                };
                 if open.deadline_t < applied_t {
                     return Err(("expired", format!("the deadline {} passed", sim_clock(open.deadline_t))));
                 }
@@ -1274,7 +1307,12 @@ impl Host {
             }
             Input::AnswerAid { call_id, answer, .. } => {
                 let call = self.content.aid.call(call_id).ok_or(("unknown_call", format!("no call {call_id}")))?;
-                let open = self.run.open_calls.iter().find(|c| &c.call_id == call_id).ok_or(("not_open", format!("{call_id} is not open")))?;
+                let Some(open) = self.run.open_calls.iter().find(|c| &c.call_id == call_id) else {
+                    let silent = self.run.ticks.iter().flat_map(|t| t.events.iter()).any(
+                        |e| matches!(e, crucible_core::log::Event::AidExpired { call_id: c, holder, .. } if c == call_id && holder == parish),
+                    );
+                    return Err(if silent { ("expired", format!("{call_id} closed with no answer")) } else { ("not_open", format!("{call_id} is not open")) });
+                };
                 if open.holder != parish {
                     return Err(("not_holder", format!("{call_id} is {}'s to answer", open.holder)));
                 }

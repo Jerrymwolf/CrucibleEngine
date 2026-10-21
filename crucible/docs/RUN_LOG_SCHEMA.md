@@ -1,4 +1,4 @@
-# Run log contract (v0.2)
+# Run log contract (v0.3)
 
 The simulation core writes one JSON document per run. The viewer and all analysis read only this document. Fields marked optional may be absent; readers must tolerate absence and unknown event kinds. The example below is the v0.1 base and still holds; the fields version 0.2 added on 2026-10-21 are listed at the end and are optional for readers.
 
@@ -162,3 +162,13 @@ Rules added in 0.2:
 - A `decision` with `decided_by: "storm"` also carries `expired: true` and the controller of the team that let the deadline pass.
 - Allocation and aid `values_signaled` are integers in -3..3, like those on decisions.
 - `inputs`, `session`, `until` and `open_calls` are absent when empty; readers of v0.1 files see none of the 0.2 fields.
+
+## Version 0.3 (2026-10-21): the engine rates the answer, never the weather
+
+Decided in `CrucibleDocumentInventory/decision-2026-10-21-audit-fix-spec.md` (S1, S3.4, section C). `version` is `"0.3"`. Everything in 0.2 still holds except the rules below; a 0.2 reader that tolerates unknown fields reads a 0.3 file.
+
+- **Storm moments carry no values.** A card decided at its deadline (`decided_by: "storm"`), a call for aid answered by silence, and an allocation round where a table entered nothing are logged with empty `values_signaled`. Their effects still apply. A silent answer's `decided_by` is now `"storm"` (it was `"silence"` in 0.2); its `controller` stays `"silence"`.
+- **Unrated moves.** An option whose own moves the engine rejected (a `rejected` event with the card as `source`), and a grant of tokens the holder does not hold, are logged with empty `values_signaled`.
+- **`values_gap[]`**: one piece of `evidence` per **moment** per value, holding the moment's strongest signal (ties go to the negative). `evidence[].moment` names it: `dilemma:<id>`, `aid:<call>`, `allocation` (the whole round), `declare`, or `recovery-support` (the recovery quarter's repair sends and credit lines). Storm moments appear with `signal: 0` and `decided_by: "storm"` under every value their card tests. New fields `tested` (at least two chosen moments) and `n_storm`. `n_decisions` counts chosen moments only. `enacted_score` is **deprecated**: the mean of chosen moments, kept for the legacy replay viewer; the session screens show evidence, never a mean.
+- **`counters`** (per tick and in the summary) add `lowest_people_safe` (the low point so far) and `people_hours_at_risk` (people at risk or injured, summed over hours so far).
+- **Content** (not the log): dilemma options may carry `pressure: {form, actor}` and `cost`; resident hazards may carry `share` (a fraction of the `from` bucket) instead of `count`.

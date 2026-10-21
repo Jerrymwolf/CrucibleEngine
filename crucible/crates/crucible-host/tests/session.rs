@@ -499,9 +499,9 @@ async fn play(sessions_dir: &Path) -> Played {
                 let st = c.state_at(h).await;
                 assert_eq!(st["public"]["t"], h);
                 act(c, &st).await;
-                if p == "gateway" && !gateway_storm_checked && h >= -3000 {
-                    // The storm decided Gateway's preparation card at its deadline (T-50:15); a late entry is refused.
-                    c.rejected("decide", json!({ "dilemma_id": "v3-prep-gateway", "option_id": "a" }), "not_open").await;
+                if p == "gateway" && !gateway_storm_checked && h >= -2490 {
+                    // The storm decided Gateway's preparation card at its deadline (T-41:45); a late entry is refused as expired.
+                    c.rejected("decide", json!({ "dilemma_id": "v3-prep-gateway", "option_id": "a" }), "expired").await;
                     gateway_storm_checked = true;
                 }
             }

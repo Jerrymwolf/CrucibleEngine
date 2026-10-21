@@ -143,6 +143,26 @@ impl Content {
             }
             for o in &d.options {
                 k.effects(&format!("{what} option {}", o.id), &o.effects);
+                if let Some(pt) = &o.pressure {
+                    if !crate::content::PRESSURE_FORMS.contains(&pt.form.as_str()) {
+                        k.errs.push(format!("{what} option {}: unknown pressure form {}", o.id, pt.form));
+                    }
+                }
+            }
+            // v3 cards follow the audit fix rules (decision-2026-10-21-audit-fix-spec,
+            // S2.1): at most one Heroic and one Villainous option per card, and
+            // every Heroic option names its visible cost.
+            if d.id.starts_with("v3-") {
+                let heroic = d.options.iter().filter(|o| o.value_alignment.values().any(|v| *v >= 3)).count();
+                let villainous = d.options.iter().filter(|o| o.value_alignment.values().any(|v| *v <= -3)).count();
+                if heroic > 1 || villainous > 1 {
+                    k.errs.push(format!("{what}: {heroic} options at +3 and {villainous} at -3; at most one of each"));
+                }
+                for o in d.options.iter().filter(|o| o.value_alignment.values().any(|v| *v >= 3)) {
+                    if o.cost.as_deref().unwrap_or("").trim().is_empty() {
+                        k.errs.push(format!("{what} option {}: a +3 option must name its cost", o.id));
+                    }
+                }
             }
         }
         for r in &self.infrastructure.cascade_rules {

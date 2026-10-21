@@ -110,7 +110,8 @@ fn score_send(content: &Content, state: &SimState, stock_before: i64, parish: &s
     clamp3(sig)
 }
 
-fn record(ctx: &mut Ctx, kind: &str, parish: &str, source: &str, choice: &str, controller: &str, signals: BTreeMap<String, i64>) {
+#[allow(clippy::too_many_arguments)]
+fn record_by(ctx: &mut Ctx, kind: &str, parish: &str, source: &str, choice: &str, controller: &str, signals: BTreeMap<String, i64>, decided_by: Option<String>) {
     ctx.state.decisions.push(DecisionRecord {
         t: ctx.t,
         kind: kind.into(),
@@ -119,8 +120,12 @@ fn record(ctx: &mut Ctx, kind: &str, parish: &str, source: &str, choice: &str, c
         option_id: choice.into(),
         controller: controller.into(),
         values_signaled: signals,
-        decided_by: None,
+        decided_by,
     });
+}
+
+fn record(ctx: &mut Ctx, kind: &str, parish: &str, source: &str, choice: &str, controller: &str, signals: BTreeMap<String, i64>) {
+    record_by(ctx, kind, parish, source, choice, controller, signals, None);
 }
 
 /// Closes the preparation round: sends roll as convoys, entries are scored
@@ -165,7 +170,8 @@ pub fn lock(ctx: &mut Ctx) {
             continue;
         }
         if entries.is_empty() {
-            let signals = rule_signals(ctx.content, "keepEverything");
+            // Nothing entered by the lock: the clock decided, and the clock is not rated.
+            let signals = BTreeMap::new();
             let total: i64 = stock_before.values().sum();
             ctx.events.push(Event::Allocation {
                 parish_id: parish.clone(),
@@ -175,7 +181,7 @@ pub fn lock(ctx: &mut Ctx) {
                 count: total,
                 values_signaled: signals.clone(),
             });
-            record(ctx, "allocation", &parish, "allocate:keep", "keep_everything", "human", signals);
+            record_by(ctx, "allocation", &parish, "allocate:keep", "keep_everything", "human", signals, Some("storm".into()));
             continue;
         }
         let mut keep_sig = BTreeMap::new();

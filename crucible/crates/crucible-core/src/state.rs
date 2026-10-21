@@ -230,6 +230,10 @@ pub struct SimState {
     pub next_effect_seq: u64,
     /// Hazards with t in (last_hazard_t, t] apply this tick.
     pub last_hazard_t: i64,
+    /// The lowest people-safe count so far (the storm's low point).
+    pub lowest_people_safe: i64,
+    /// Sum over ticks of the people at risk or injured: people-quarter-hours.
+    pub people_ticks_at_risk: i64,
     pub doses: Doses,
     /// Power priority override from a decision (None: the content's list).
     pub power_priority: Option<Vec<String>>,
@@ -368,6 +372,8 @@ pub fn blank_state() -> SimState {
         pending_effects: vec![],
         next_effect_seq: 0,
         last_hazard_t: i64::MIN,
+        lowest_people_safe: i64::MAX,
+        people_ticks_at_risk: 0,
         doses: Doses::default(),
         power_priority: None,
         values_locked: BTreeMap::new(),

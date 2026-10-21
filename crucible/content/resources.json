@@ -199,7 +199,7 @@
       "compassion": 1
     },
     "sendGreatestNeed": {
-      "fairness": 2,
+      "fairness": 1,
       "stewardship": 1
     },
     "sendLastNeeded": {
@@ -207,22 +207,15 @@
       "service": 2,
       "safety": -1
     },
-    "keepNeededByLandfall": {
-      "preparedness": 1,
-      "stewardship": 1
-    },
+    "keepNeededByLandfall": {},
     "keepUnneededWhileListed": {
-      "fairness": -2,
+      "fairness": -1,
       "compassion": -1,
       "loyalty": 1
     },
-    "keepEverything": {
-      "loyalty": 2,
-      "fairness": -2,
-      "service": -2
-    },
+    "keepEverything": {},
     "declareHidden": {
-      "honesty": 2,
+      "honesty": 1,
       "candor": 1
     },
     "fundToAsked": {
@@ -230,11 +223,11 @@
       "integrity": -1
     },
     "repairSend": {
-      "service": 2,
+      "service": 1,
       "stewardship": 1
     },
     "creditLine": {
-      "recognition": 2,
+      "recognition": 1,
       "respect": 1
     }
   },

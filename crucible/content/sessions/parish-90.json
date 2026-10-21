@@ -41,7 +41,8 @@
       "humanDeadlineTicks": 39,
       "maydayAnswerTicks": null,
       "secondMove": "allocation",
-      "card": "Midas is Category 3, five hundred miles south-east, 55% likely by T-60h. Everything works. This is the quarter in which every later choice is cheap."
+      "card": "Midas is Category 3, five hundred miles south-east, 55% likely by T-60h. Everything works. This is the quarter in which every later choice is cheap.",
+      "heatStepTicks": 4
     },
     {
       "id": "approach",
@@ -52,10 +53,11 @@
       "cardSeconds": 90,
       "playSeconds": 660,
       "closeSeconds": 150,
-      "humanDeadlineTicks": 33,
-      "maydayAnswerTicks": 22,
+      "humanDeadlineTicks": 25,
+      "maydayAnswerTicks": 18,
       "secondMove": "aid",
-      "card": "Rain bands at T-36h. The harbour closes to departures at T-30h, the runway at T-24h. Roads start to go at T-24h."
+      "card": "Rain bands at T-36h. The harbour closes to departures at T-30h, the runway at T-24h. Roads start to go at T-24h.",
+      "heatStepTicks": 4
     },
     {
       "id": "landfall",
@@ -66,10 +68,11 @@
       "cardSeconds": 90,
       "playSeconds": 660,
       "closeSeconds": 150,
-      "humanDeadlineTicks": 13,
-      "maydayAnswerTicks": 9,
+      "humanDeadlineTicks": 7,
+      "maydayAnswerTicks": 5,
       "secondMove": "aid",
-      "card": "Peak at T-2h: 120 mph sustained, gusts to 145, eight to ten feet of surge at Haven. The eye passes from T+0 to T+2h. Then the backside."
+      "card": "Peak at T-2h: 120 mph sustained, gusts to 145, eight to ten feet of surge at Haven. The eye passes from T+0 to T+2h. Then the backside.",
+      "heatStepTicks": 1
     },
     {
       "id": "recovery",
@@ -80,10 +83,11 @@
       "cardSeconds": 90,
       "playSeconds": 660,
       "closeSeconds": 150,
-      "humanDeadlineTicks": 46,
-      "maydayAnswerTicks": null,
+      "humanDeadlineTicks": 38,
+      "maydayAnswerTicks": 26,
       "secondMove": "repair",
-      "card": "Tropical-storm conditions at T+6h, clear by T+24h. Roads reopen; the dam restarts at 60% at T+12h; the cutter Resolute arrives at T+14h. Repair, giving back, credit, and the first questions."
+      "card": "Tropical-storm conditions at T+6h, clear by T+24h. Roads reopen; the dam restarts at 60% at T+12h; the cutter Resolute arrives at T+14h. Repair, giving back, credit, and the first questions.",
+      "heatStepTicks": 5
     }
   ],
   "intensity": [
@@ -148,176 +152,176 @@
     "gateway": [
       {
         "dilemmaId": "v3-prep-gateway",
-        "presentT": -3600,
+        "presentT": -3090,
         "deadlineTicks": 39
       },
       {
         "dilemmaId": "v3-approach-gateway",
-        "presentT": -1920,
-        "deadlineTicks": 33
+        "presentT": -2130,
+        "deadlineTicks": 25
       },
       {
         "dilemmaId": "v3-landfall-gateway",
-        "presentT": 0,
-        "deadlineTicks": 13
+        "presentT": -120,
+        "deadlineTicks": 7
       },
       {
         "dilemmaId": "v3-recovery-gateway",
-        "presentT": 720,
-        "deadlineTicks": 46
+        "presentT": 1500,
+        "deadlineTicks": 38
       }
     ],
     "heartland": [
       {
         "dilemmaId": "v3-prep-heartland",
-        "presentT": -3360,
+        "presentT": -3090,
         "deadlineTicks": 39
       },
       {
         "dilemmaId": "v3-approach-heartland",
-        "presentT": -1440,
-        "deadlineTicks": 33
+        "presentT": -2130,
+        "deadlineTicks": 25
       },
       {
         "dilemmaId": "v3-landfall-heartland",
         "presentT": -120,
-        "deadlineTicks": 13
+        "deadlineTicks": 7
       },
       {
         "dilemmaId": "v3-recovery-heartland",
-        "presentT": 735,
-        "deadlineTicks": 46
+        "presentT": 1500,
+        "deadlineTicks": 38
       }
     ],
     "keystone": [
       {
         "dilemmaId": "v3-prep-keystone",
-        "presentT": -3120,
+        "presentT": -3090,
         "deadlineTicks": 39
       },
       {
         "dilemmaId": "v3-approach-keystone",
-        "presentT": -2160,
-        "deadlineTicks": 33
+        "presentT": -2130,
+        "deadlineTicks": 25
       },
       {
         "dilemmaId": "v3-landfall-keystone",
-        "presentT": -180,
-        "deadlineTicks": 13
+        "presentT": -120,
+        "deadlineTicks": 7
       },
       {
         "dilemmaId": "v3-recovery-keystone",
-        "presentT": 1080,
-        "deadlineTicks": 46
+        "presentT": 1500,
+        "deadlineTicks": 38
       }
     ],
     "haven": [
       {
         "dilemmaId": "v3-prep-haven",
-        "presentT": -3000,
+        "presentT": -3090,
         "deadlineTicks": 39
       },
       {
         "dilemmaId": "v3-approach-haven",
-        "presentT": -1800,
-        "deadlineTicks": 33
+        "presentT": -2130,
+        "deadlineTicks": 25
       },
       {
         "dilemmaId": "v3-landfall-haven",
-        "presentT": -105,
-        "deadlineTicks": 13
+        "presentT": -120,
+        "deadlineTicks": 7
       },
       {
         "dilemmaId": "v3-recovery-haven",
-        "presentT": 1440,
-        "deadlineTicks": 46
+        "presentT": 1500,
+        "deadlineTicks": 38
       }
     ],
     "summit": [
       {
         "dilemmaId": "v3-prep-summit",
-        "presentT": -2880,
+        "presentT": -3090,
         "deadlineTicks": 39
       },
       {
         "dilemmaId": "v3-approach-summit",
-        "presentT": -1380,
-        "deadlineTicks": 33
+        "presentT": -2130,
+        "deadlineTicks": 25
       },
       {
         "dilemmaId": "v3-landfall-summit",
-        "presentT": -60,
-        "deadlineTicks": 13
+        "presentT": -120,
+        "deadlineTicks": 7
       },
       {
         "dilemmaId": "v3-recovery-summit",
-        "presentT": 1800,
-        "deadlineTicks": 46
+        "presentT": 1500,
+        "deadlineTicks": 38
       }
     ],
     "sterling": [
       {
         "dilemmaId": "v3-prep-sterling",
-        "presentT": -2820,
+        "presentT": -3090,
         "deadlineTicks": 39
       },
       {
         "dilemmaId": "v3-approach-sterling",
-        "presentT": -2040,
-        "deadlineTicks": 33
+        "presentT": -2130,
+        "deadlineTicks": 25
       },
       {
         "dilemmaId": "v3-landfall-sterling",
-        "presentT": -45,
-        "deadlineTicks": 13
+        "presentT": -120,
+        "deadlineTicks": 7
       },
       {
         "dilemmaId": "v3-recovery-sterling",
-        "presentT": 2160,
-        "deadlineTicks": 46
+        "presentT": 1500,
+        "deadlineTicks": 38
       }
     ]
   },
   "maydays": [
     {
       "callId": "A1",
-      "t": -2040,
-      "answerTicks": 33
+      "t": -2130,
+      "answerTicks": 25
     },
     {
       "callId": "A6",
       "t": -1740,
-      "answerTicks": 22
+      "answerTicks": 18
     },
     {
       "callId": "A5",
       "t": -1620,
-      "answerTicks": 22
+      "answerTicks": 18
     },
     {
       "callId": "A3",
       "t": -1500,
-      "answerTicks": 22
+      "answerTicks": 18
     },
     {
       "callId": "L3",
-      "t": -150,
-      "answerTicks": 9
-    },
-    {
-      "callId": "L5",
-      "t": -90,
-      "answerTicks": 9
+      "t": -120,
+      "answerTicks": 7
     },
     {
       "callId": "L1",
+      "t": -120,
+      "answerTicks": 7
+    },
+    {
+      "callId": "L5",
       "t": 0,
-      "answerTicks": 9
+      "answerTicks": 5
     },
     {
       "callId": "L7",
       "t": 0,
-      "answerTicks": 9
+      "answerTicks": 5
     }
   ],
   "optionalMaydays": [
@@ -341,7 +345,7 @@
   ],
   "creditLine": {
     "signals": {
-      "recognition": 2,
+      "recognition": 1,
       "respect": 1
     },
     "prompt": "One line of credit naming another table's people: a crew, a captain, a nurse."
@@ -363,5 +367,6 @@
     "gateway"
   ],
   "debriefQuestion": "Which secret, had it been on the table at T-72h, would have changed the most decisions?",
-  "commitment": "The next time I feel [this pressure], I will [this action] to stay aligned with [this value]."
+  "commitment": "The next time I feel [this pressure], I will [this action] to stay aligned with [this value].",
+  "pacingNote": "2026-10-21 audit fix (S6, D5): each quarter's cards open together; windows ~180 s prep, ~140 s approach, ~95 s landfall, ~150 s recovery; maydays never open while the holder's card is open; heat and cool move later windows by heatStepTicks. A1, L1 and L3 are answered by the holder's own card, so they open with it and share its window."
 }

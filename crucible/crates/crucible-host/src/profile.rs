@@ -23,6 +23,9 @@ pub struct Quarter {
     pub close_seconds: f64,
     pub human_deadline_ticks: Option<i64>,
     pub mayday_answer_ticks: Option<i64>,
+    /// How many ticks the DM's heat takes off (and cool adds to) the windows
+    /// that open after it, about 20 seconds of room time in each quarter.
+    pub heat_step_ticks: i64,
     pub second_move: Option<String>,
     pub card: String,
 }
@@ -116,6 +119,7 @@ impl Profile {
                     close_seconds: num(q, "closeSeconds").unwrap_or(150.0),
                     human_deadline_ticks: q.get("humanDeadlineTicks").and_then(|v| v.as_i64()),
                     mayday_answer_ticks: q.get("maydayAnswerTicks").and_then(|v| v.as_i64()),
+                    heat_step_ticks: q.get("heatStepTicks").and_then(|v| v.as_i64()).unwrap_or(0),
                     second_move: q.get("secondMove").and_then(|v| v.as_str()).map(String::from),
                     card: text(q, "card"),
                 });
@@ -141,6 +145,7 @@ impl Profile {
                 close_seconds: 0.0,
                 human_deadline_ticks: None,
                 mayday_answer_ticks: None,
+                heat_step_ticks: 0,
                 second_move: None,
                 card: String::new(),
             });

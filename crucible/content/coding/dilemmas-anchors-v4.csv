@@ -1,0 +1,61 @@
+card,option,before,after,pressure_form,pressure_actor,reason
+v3-prep-gateway,a,"{""duty"": 2, ""safety"": -2, ""stewardship"": 1}","{""duty"": 2, ""safety"": -2, ""stewardship"": 1}",,,unchanged
+v3-prep-heartland,a,"{""integrity"": 2, ""fairness"": -2, ""duty"": 1}","{""fairness"": -2, ""duty"": 1, ""obedience"": 1}",coercive_authority,the Authority board and Sterling (the signed 2019 schedule),"S2.4: keeping a signed contract is obedience, not integrity"
+v3-prep-heartland,b,"{""fairness"": 2, ""integrity"": -1, ""courage"": 1}","{""fairness"": 2, ""integrity"": 1, ""courage"": 1}",,,S2.4: rewriting on conscience is not an integrity loss
+v3-prep-keystone,a,"{""candor"": 3, ""compassion"": -1, ""duty"": -2}","{""candor"": 2, ""compassion"": -1, ""duty"": -2}",,,S2.1: +3 reserved for extraordinary cost; disclosure here is Exemplifying
+v3-prep-keystone,b,"{""compassion"": 1, ""candor"": -2, ""loyalty"": 1}","{""compassion"": 1, ""candor"": -2, ""loyalty"": 1}",coercive_authority,Chicago (the line runs until the port closes),S2.2: names the coercer
+v3-prep-summit,a,"{""courage"": 2, ""respect"": -2, ""safety"": 2}","{""courage"": 2, ""safety"": 2}",,,S2.4: overriding the Governor is not disrespect
+v3-prep-summit,b,"{""respect"": 2, ""courage"": -2, ""honesty"": -1}","{""courage"": -2, ""honesty"": -1, ""obedience"": 1}",coercive_authority,the Governor (voluntary language until 85%),"S2.4: deference to the Governor is obedience, not respect"
+v3-prep-summit,d,"{""courage"": -2, ""respect"": 1, ""stability"": 1}","{""courage"": -2, ""stability"": 1}",,,S2.4
+v3-prep-sterling,a,"{""honesty"": 3, ""loyalty"": -2, ""candor"": 1}","{""honesty"": 2, ""loyalty"": -2, ""candor"": 1}",,,S2.1
+v3-prep-sterling,b,"{""loyalty"": 2, ""honesty"": -3}","{""loyalty"": 2, ""honesty"": -2}",coercive_authority,Chicago (confidential until the ship sails),"S2.2: complying with Chicago is Capitulating, not Villainous"
+v3-approach-heartland,a,"{""candor"": 3, ""safety"": 1, ""loyalty"": -2}","{""candor"": 2, ""safety"": 1, ""loyalty"": -2}",,,S2.1
+v3-approach-heartland,d,"{""candor"": -3, ""safety"": -2, ""obedience"": 2}","{""candor"": -2, ""safety"": -2, ""obedience"": 2}",coercive_authority,the published protocol (the Authority board),S2.2: following the board protocol under pressure is Capitulating
+v3-approach-keystone,a,"{""candor"": 3, ""duty"": -1, ""respect"": 1}","{""candor"": 2, ""duty"": -1, ""respect"": 1}",,,S2.1
+v3-approach-keystone,b,"{""duty"": 2, ""candor"": -3, ""safety"": -1}","{""duty"": 2, ""candor"": -3, ""safety"": -1}",,,kept -3: the table itself deceives Haven
+v3-approach-haven,a,"{""honesty"": 3, ""stewardship"": -1, ""fairness"": 2}","{""honesty"": 2, ""stewardship"": -1, ""fairness"": 2}",,,S2.1
+v3-approach-haven,d,"{""safety"": 2, ""stewardship"": 1, ""service"": -3}","{""safety"": 2, ""stewardship"": 1, ""service"": -2}",situational,the roads and the storm,"S2.1: self-protective refusal is Capitulating, not Villainous"
+v3-approach-summit,a,"{""accountability"": 3, ""compassion"": -2, ""courage"": 1}","{""accountability"": 2, ""compassion"": -2, ""courage"": 1}",,,S2.1
+v3-approach-sterling,a,"{""integrity"": 3, ""loyalty"": -2, ""service"": 2}","{""integrity"": 3, ""loyalty"": -2, ""service"": 2}",,,kept +3: defying Chicago at real cost
+v3-approach-sterling,b,"{""loyalty"": 2, ""integrity"": -3, ""fairness"": -2}","{""loyalty"": 2, ""integrity"": -2, ""fairness"": -2}",coercive_authority,Chicago's security team (the manifest),S2.2
+v3-landfall-gateway,d,"{""service"": 2, ""compassion"": 2, ""loyalty"": -3, ""courage"": 0}","{""service"": 2, ""compassion"": 2, ""loyalty"": -1, ""courage"": 0}",,,S2.2: saving 200 strangers is not Villainous disloyalty
+v3-landfall-gateway,a,"{""courage"": 2, ""safety"": -2, ""loyalty"": 2}","{""courage"": 2, ""safety"": -2, ""loyalty"": 2}",,,S2.1 wording
+v3-landfall-gateway,b,"{""safety"": 2, ""courage"": -2, ""stewardship"": 1}","{""safety"": 2, ""courage"": -2, ""stewardship"": 1}",,,S2.1 wording
+v3-landfall-heartland,a,"{""courage"": 3, ""duty"": -1, ""candor"": 1, ""safety"": 1}","{""courage"": 2, ""duty"": -1, ""candor"": 1, ""safety"": 1}",,,S2.1: one +3/-3 per card; d keeps the -3
+v3-landfall-heartland,b,"{""duty"": 2, ""obedience"": 2, ""courage"": -2}","{""duty"": 2, ""obedience"": 2, ""courage"": -2}",coercive_authority,the published protocol (the Authority board),S2.2 names the coercer; S2.1 wording
+v3-landfall-heartland,c,"{""courage"": -3, ""duty"": -2, ""safety"": -3}","{""courage"": -2, ""duty"": -2, ""safety"": -2}",situational,the rain and the odds,"S2.2: hoping is Capitulating to fear, not Villainous"
+v3-landfall-heartland,d,"{""courage"": 1, ""candor"": -3, ""duty"": -1}","{""courage"": 1, ""candor"": -3, ""duty"": -1}",,,kept -3: opens without warning and hides the fault
+v3-landfall-keystone,a,"{""duty"": 2, ""respect"": -3, ""honesty"": -1}","{""duty"": 2, ""respect"": -3, ""honesty"": -1}",coercive_authority,Chicago (the rooms hold),kept -3: orders the crew to stay and tells Southfield help is coming
+v3-landfall-keystone,b,"{""respect"": 3, ""duty"": -1, ""accountability"": -1}","{""respect"": 2, ""duty"": -1, ""accountability"": -1}",,,S2.1
+v3-landfall-keystone,c,"{""duty"": 1, ""respect"": 1, ""courage"": 2, ""safety"": -2}","{""duty"": 1, ""respect"": 1, ""courage"": 2, ""safety"": -2}",,,S2.1 wording
+v3-landfall-keystone,d,"{""respect"": 1, ""compassion"": 2, ""duty"": -3}","{""respect"": 1, ""compassion"": 2, ""duty"": -2}",,,S2.2: saving families at the cost of production is not Villainous
+v3-landfall-haven,a,"{""courage"": 2, ""stewardship"": 3, ""safety"": -3}","{""courage"": 2, ""stewardship"": 2, ""safety"": -2}",,,S2.1
+v3-landfall-haven,b,"{""safety"": 3, ""stewardship"": -2, ""courage"": -1}","{""safety"": 2, ""stewardship"": -2, ""courage"": -1}",,,S2.1
+v3-landfall-summit,a,"{""compassion"": 3, ""safety"": -3, ""courage"": 2}","{""compassion"": 3, ""safety"": -2, ""courage"": 2}",,,"kept +3 compassion with its cost named; safety to -2 (one -3 at most, and it is not villainy)"
+v3-landfall-summit,b,"{""safety"": 2, ""compassion"": -2, ""duty"": 1}","{""safety"": 2, ""compassion"": -2, ""duty"": 1}",,,S2.1 wording
+v3-landfall-sterling,a,"{""compassion"": 3, ""safety"": -1, ""courage"": 1}","{""compassion"": 3, ""safety"": -1, ""courage"": 1}",,,kept +3: defying the security chief at real cost
+v3-landfall-sterling,b,"{""safety"": 2, ""compassion"": -3, ""loyalty"": 1}","{""safety"": 2, ""compassion"": -2, ""loyalty"": 1}",coercive_authority,Chicago's security chief,S2.2: complying with the security chief is Capitulating
+v3-recovery-gateway,a,"{""candor"": 3, ""respect"": 2, ""recognition"": -1}","{""candor"": 2, ""respect"": 2, ""recognition"": -1}",,,S2.1
+v3-recovery-gateway,b,"{""recognition"": 2, ""candor"": -3, ""respect"": -2}","{""recognition"": 2, ""candor"": -2, ""respect"": -2}",coercive_authority,Sterling's communications office (the company draft),S2.2
+v3-recovery-heartland,a,"{""accountability"": 3, ""fairness"": 1, ""duty"": -1}","{""accountability"": 2, ""fairness"": 1, ""duty"": -1}",,,S2.1
+v3-recovery-heartland,b,"{""duty"": 2, ""fairness"": -2, ""accountability"": -2}","{""duty"": 2, ""fairness"": -2, ""accountability"": -2}",coercive_authority,the Priority Schedule (Sterling and the board),S2.2 names the coercer
+v3-recovery-keystone,a,"{""integrity"": 3, ""stewardship"": -2, ""candor"": 1}","{""integrity"": 2, ""stewardship"": -2, ""candor"": 1}",,,S2.1
+v3-recovery-keystone,c,"{""stewardship"": 2, ""integrity"": -3, ""accountability"": 1}","{""stewardship"": 2, ""integrity"": -3, ""accountability"": 1}",,,kept -3: ships a batch QA will not sign
+v3-recovery-keystone,d,"{""accountability"": -3, ""integrity"": -1}","{""accountability"": -2, ""integrity"": -1}",coercive_authority,Chicago,S2.2: handing it to Chicago is Capitulating
+v3-recovery-haven,a,"{""honesty"": 3, ""loyalty"": -2, ""accountability"": 2}","{""honesty"": 2, ""loyalty"": -2, ""accountability"": 2}",,,S2.1
+v3-recovery-haven,b,"{""loyalty"": 2, ""honesty"": -2, ""fairness"": -2}","{""loyalty"": 2, ""honesty"": -2, ""fairness"": -2}",conditional_belonging,"Sterling (50% pay, ""given losses"")",S2.2 names the pressure
+v3-recovery-summit,a,"{""accountability"": 3, ""stewardship"": -2, ""honesty"": 2}","{""accountability"": 2, ""stewardship"": -2, ""honesty"": 2}",,,S2.1
+v3-recovery-summit,b,"{""stewardship"": 3, ""accountability"": -2, ""honesty"": -2}","{""stewardship"": 1, ""accountability"": -2, ""honesty"": -2}",enforced_silence,Meridian ($40M for the sentence),S2.4: no stewardship credit for signing a false sentence
+v3-recovery-summit,d,"{""honesty"": 1, ""integrity"": -2, ""stewardship"": 2}","{""honesty"": 1, ""integrity"": -2, ""stewardship"": 1}",,,S2.4
+v3-recovery-sterling,a,"{""respect"": 3, ""loyalty"": -2, ""honesty"": 2}","{""respect"": 2, ""loyalty"": -2, ""honesty"": 2}",,,S2.1
+v3-recovery-sterling,b,"{""loyalty"": 2, ""respect"": -3, ""honesty"": -2}","{""loyalty"": 2, ""respect"": -2, ""honesty"": -2}",coercive_authority,Chicago (the drafted statement),S2.2
+v3-prep-gateway,default,c,d,,,S2.5: what the institution does by doing nothing
+v3-prep-keystone,default,c,b,,,S2.5: what the institution does by doing nothing
+v3-approach-heartland,default,c,d,,,S2.5: what the institution does by doing nothing
+v3-approach-keystone,default,b,c,,,S2.5: what the institution does by doing nothing
+v3-approach-summit,default,a,b,,,S2.5: what the institution does by doing nothing
+v3-landfall-gateway,default,a,b,,,S2.5: what the institution does by doing nothing
+v3-landfall-haven,default,b,d,,,S2.5: what the institution does by doing nothing
+v3-landfall-summit,default,a,d,,,S2.5: what the institution does by doing nothing
+v3-recovery-gateway,default,a,b,,,S2.5: what the institution does by doing nothing
+v3-recovery-haven,default,a,b,,,S2.5: what the institution does by doing nothing

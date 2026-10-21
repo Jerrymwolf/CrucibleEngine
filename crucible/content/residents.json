@@ -662,6 +662,30 @@
       "narrative": "Forty injured walk from the Strand to the terminal in the eye."
     },
     {
+      "t": 0,
+      "state": "injured",
+      "groupId": "riverside-at-gate",
+      "share": 0.1,
+      "from": "at_risk",
+      "narrative": "At the campus gate the water is chest-high; people who were still outside are hurt."
+    },
+    {
+      "t": 0,
+      "state": "injured",
+      "groupId": "longshore-families",
+      "share": 0.05,
+      "from": "at_risk",
+      "narrative": "The surge reaches the longshore streets; families still in their homes are hurt."
+    },
+    {
+      "t": 60,
+      "state": "injured",
+      "groupId": "riverside-residents",
+      "share": 0.05,
+      "from": "at_risk",
+      "narrative": "Riverside floods block by block; people still in their homes are hurt."
+    },
+    {
       "t": 120,
       "state": "rescued",
       "cardId": "ji-woo-park",
@@ -672,6 +696,30 @@
       "state": "rescued",
       "groupId": "campus-ops",
       "narrative": "The uplink team comes down."
+    },
+    {
+      "t": 120,
+      "state": "injured",
+      "groupId": "caldera-villagers",
+      "share": 0.05,
+      "from": "at_risk",
+      "narrative": "The Gorge Road slides; villagers still in Caldera are hurt."
+    },
+    {
+      "t": 240,
+      "state": "injured",
+      "groupId": "southfield-residents",
+      "share": 0.05,
+      "from": "at_risk",
+      "narrative": "Southfield's ground floors are under water; residents still in the blocks are hurt."
+    },
+    {
+      "t": 240,
+      "state": "lost",
+      "groupId": "icu-patients",
+      "share": 0.1,
+      "from": "at_risk",
+      "narrative": "On a failing generator, ICU patients still in the hospital do not all survive."
     },
     {
       "t": 360,
@@ -692,6 +740,46 @@
       "narrative": "The dam's doors open."
     },
     {
+      "t": 360,
+      "state": "lost",
+      "groupId": "riverside-at-gate",
+      "share": 0.03,
+      "from": "at_risk",
+      "narrative": "Not everyone left at the gate makes it through the backside."
+    },
+    {
+      "t": 480,
+      "state": "lost",
+      "groupId": "riverside-residents",
+      "share": 0.015,
+      "from": "at_risk",
+      "narrative": "Riverside counts its dead among those nobody reached."
+    },
+    {
+      "t": 480,
+      "state": "lost",
+      "groupId": "longshore-families",
+      "share": 0.01,
+      "from": "at_risk",
+      "narrative": "The port counts its dead among the families nobody sheltered."
+    },
+    {
+      "t": 480,
+      "state": "lost",
+      "groupId": "harvester-watch",
+      "share": 1.0,
+      "from": "at_risk",
+      "narrative": "Nobody reached the Pacific Harvester."
+    },
+    {
+      "t": 480,
+      "state": "injured",
+      "groupId": "dialysis-patients",
+      "share": 0.2,
+      "from": "at_risk",
+      "narrative": "Dialysis patients still waiting for treatment are in danger."
+    },
+    {
       "t": 540,
       "state": "rescued",
       "groupId": "harvester-watch",
@@ -702,6 +790,30 @@
       "state": "rescued",
       "cardId": "tomas-reyes",
       "narrative": "Found alive in the wheelhouse by a Haven tug."
+    },
+    {
+      "t": 600,
+      "state": "lost",
+      "groupId": "southfield-residents",
+      "share": 0.015,
+      "from": "at_risk",
+      "narrative": "Southfield counts its dead among those nobody reached."
+    },
+    {
+      "t": 600,
+      "state": "lost",
+      "groupId": "caldera-villagers",
+      "share": 0.02,
+      "from": "at_risk",
+      "narrative": "Caldera counts its dead among those nobody reached."
+    },
+    {
+      "t": 600,
+      "state": "lost",
+      "groupId": "strand-visitors",
+      "share": 0.01,
+      "from": "at_risk",
+      "narrative": "On the Strand, visitors nobody reached do not all survive."
     },
     {
       "t": 720,
@@ -763,12 +875,6 @@
       "groupId": "riverside-residents",
       "unlessFlag": "riverside-delayed",
       "narrative": "Riverside's pumps drain the town."
-    },
-    {
-      "t": 2400,
-      "state": "rescued",
-      "groupId": "riverside-residents",
-      "narrative": "Riverside drains two days late."
     },
     {
       "t": 1440,
@@ -859,6 +965,12 @@
       "state": "rescued",
       "cardId": "dmitri-volkov",
       "narrative": "Out of the cab."
+    },
+    {
+      "t": 2400,
+      "state": "rescued",
+      "groupId": "riverside-residents",
+      "narrative": "Riverside drains two days late."
     }
   ]
 }

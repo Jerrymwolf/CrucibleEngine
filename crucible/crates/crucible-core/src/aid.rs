@@ -115,7 +115,11 @@ pub fn answer(
             }
         }
     }
-    let signals = if scored { canonical_signals(ctx.content, &ans.signals) } else { BTreeMap::new() };
+    // Silence is the storm deciding: recorded, never rated. An answer whose
+    // tokens the holder does not hold moved nothing and is not rated either.
+    let silent = by == "silence";
+    let empty_handed = moving > 0 && sent == 0 && note.as_deref().is_some_and(|n| n.contains("holds no"));
+    let signals = if scored && !silent && !empty_handed { canonical_signals(ctx.content, &ans.signals) } else { BTreeMap::new() };
     if scored {
         ctx.state.decisions.push(DecisionRecord {
             t: ctx.t,
@@ -125,7 +129,7 @@ pub fn answer(
             option_id: answer.into(),
             controller: by.into(),
             values_signaled: signals.clone(),
-            decided_by: if by == "silence" { Some("silence".into()) } else { None },
+            decided_by: if silent { Some("storm".into()) } else { None },
         });
     }
     ctx.events.push(Event::AidAnswer {

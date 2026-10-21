@@ -100,7 +100,11 @@ pub fn hazards_step(content: &Content, state: &mut SimState, t: i64, events: &mu
             continue;
         }
         if let Some(g) = &h.group_id {
-            let moved = move_group(state, g, &h.state, h.count, h.from.as_deref());
+            let count = match (h.share, &h.from) {
+                (Some(share), Some(from)) => Some((state.groups.get(g).map(|s| s.get(from)).unwrap_or(0) as f64 * share).floor() as i64),
+                _ => h.count,
+            };
+            let moved = move_group(state, g, &h.state, count, h.from.as_deref());
             if moved > 0 {
                 events.push(Event::ResidentState {
                     parish_id: parish_of_group(content, g),

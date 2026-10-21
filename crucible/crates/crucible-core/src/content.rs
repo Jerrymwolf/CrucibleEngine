@@ -444,7 +444,25 @@ pub struct DilemmaOption {
     /// Structured Board effects (v3 cards).
     #[serde(default)]
     pub effects: Effects,
+    /// The pressure this option yields to, when it yields to one: the form
+    /// (coercive_authority, conditional_belonging, enforced_silence,
+    /// shame_devaluation or situational) and who applies it.
+    #[serde(default)]
+    pub pressure: Option<PressureTag>,
+    /// The visible cost a +3 (Heroic) option carries; required for any +3.
+    #[serde(default)]
+    pub cost: Option<String>,
 }
+
+#[derive(Debug, Clone, Deserialize, serde::Serialize, PartialEq)]
+pub struct PressureTag {
+    pub form: String,
+    pub actor: String,
+}
+
+/// The pressure forms an option may name: the dissertation's four social
+/// forms, plus the game's own situational pressure.
+pub const PRESSURE_FORMS: &[&str] = &["coercive_authority", "conditional_belonging", "enforced_silence", "shame_devaluation", "situational"];
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -766,6 +784,11 @@ pub struct Hazard {
     pub card_id: Option<String>,
     #[serde(default)]
     pub count: Option<i64>,
+    /// A share of the people in `from` (rounded down) instead of a count:
+    /// the storm takes a share of whoever is still exposed, so every group a
+    /// table moved out of reach is spared.
+    #[serde(default)]
+    pub share: Option<f64>,
     #[serde(default)]
     pub from: Option<String>,
     #[serde(default)]

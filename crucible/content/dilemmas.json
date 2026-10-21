@@ -3386,7 +3386,7 @@
           }
         }
       ],
-      "defaultOptionId": "c",
+      "defaultOptionId": "d",
       "valuesTested": [
         "duty",
         "safety"
@@ -3421,9 +3421,9 @@
           "label": "Confirm the schedule as signed",
           "description": "Keystone and Sterling first.",
           "valueAlignment": {
-            "integrity": 2,
             "fairness": -2,
-            "duty": 1
+            "duty": 1,
+            "obedience": 1
           },
           "consequenceSketch": {
             "immediate": "Doses protected; hospital on its own generator when the dam dips; Ruth Calloway's dialysis depends on 48 hours of fuel.",
@@ -3439,6 +3439,10 @@
               "keystone",
               "sterling"
             ]
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "the Authority board and Sterling (the signed 2019 schedule)"
           }
         },
         {
@@ -3447,7 +3451,7 @@
           "description": "Hospital, then Riverside pumps, then production. Tell Sterling the contract yields to a declared emergency.",
           "valueAlignment": {
             "fairness": 2,
-            "integrity": -1,
+            "integrity": 1,
             "courage": 1
           },
           "consequenceSketch": {
@@ -3583,7 +3587,7 @@
           "label": "Tell them everything, now",
           "description": "The memo, the risk, the shelters that exist. Release anyone who wants to go.",
           "valueAlignment": {
-            "candor": 3,
+            "candor": 2,
             "compassion": -1,
             "duty": -2
           },
@@ -3630,6 +3634,10 @@
             "flags": [
               "shelter-requested"
             ]
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "Chicago (the line runs until the port closes)"
           }
         },
         {
@@ -3688,7 +3696,7 @@
           }
         }
       ],
-      "defaultOptionId": "c",
+      "defaultOptionId": "b",
       "valuesTested": [
         "candor",
         "compassion"
@@ -3869,7 +3877,6 @@
           "description": "",
           "valueAlignment": {
             "courage": 2,
-            "respect": -2,
             "safety": 2
           },
           "consequenceSketch": {
@@ -3912,9 +3919,9 @@
           "label": "Voluntary, strongly worded",
           "description": "'Residents of low-lying areas are urged...'",
           "valueAlignment": {
-            "respect": 2,
             "courage": -2,
-            "honesty": -1
+            "honesty": -1,
+            "obedience": 1
           },
           "consequenceSketch": {
             "immediate": "40% of Riverside moves; the rest wait for a knock.",
@@ -3943,6 +3950,10 @@
             "flags": [
               "voluntary-order"
             ]
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "the Governor (voluntary language until 85%)"
           }
         },
         {
@@ -3991,7 +4002,6 @@
           "description": "Project calm.",
           "valueAlignment": {
             "courage": -2,
-            "respect": 1,
             "stability": 1
           },
           "consequenceSketch": {
@@ -4043,7 +4053,7 @@
           "label": "Publish the model to the Council and the port, now",
           "description": "",
           "valueAlignment": {
-            "honesty": 3,
+            "honesty": 2,
             "loyalty": -2,
             "candor": 1
           },
@@ -4077,7 +4087,7 @@
           "description": "",
           "valueAlignment": {
             "loyalty": 2,
-            "honesty": -3
+            "honesty": -2
           },
           "consequenceSketch": {
             "immediate": "Consignment loads on schedule; the island decides on 55%.",
@@ -4089,6 +4099,10 @@
             "flags": [
               "model-held"
             ]
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "Chicago (confidential until the ship sails)"
           }
         },
         {
@@ -4352,7 +4366,7 @@
           "label": "Tell the Council everything now: the numbers, the fault, the 94% trigger",
           "description": "",
           "valueAlignment": {
-            "candor": 3,
+            "candor": 2,
             "safety": 1,
             "loyalty": -2
           },
@@ -4448,7 +4462,7 @@
           "label": "Wait for 97% per the published protocol",
           "description": "",
           "valueAlignment": {
-            "candor": -3,
+            "candor": -2,
             "safety": -2,
             "obedience": 2
           },
@@ -4462,10 +4476,14 @@
             "flags": [
               "protocol-only"
             ]
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "the published protocol (the Authority board)"
           }
         }
       ],
-      "defaultOptionId": "c",
+      "defaultOptionId": "d",
       "valuesTested": [
         "candor",
         "safety"
@@ -4501,7 +4519,7 @@
           "label": "Tell Haven the true nine hours and ask them to hold",
           "description": "They will almost certainly say no.",
           "valueAlignment": {
-            "candor": 3,
+            "candor": 2,
             "duty": -1,
             "respect": 1
           },
@@ -4586,7 +4604,7 @@
           }
         }
       ],
-      "defaultOptionId": "b",
+      "defaultOptionId": "c",
       "valuesTested": [
         "candor",
         "duty"
@@ -4622,7 +4640,7 @@
           "label": "Declare the reserve and send six",
           "description": "Two to Summit, one each to Heartland, Gateway and Keystone, one held.",
           "valueAlignment": {
-            "honesty": 3,
+            "honesty": 2,
             "stewardship": -1,
             "fairness": 2
           },
@@ -4738,7 +4756,7 @@
           "valueAlignment": {
             "safety": 2,
             "stewardship": 1,
-            "service": -3
+            "service": -2
           },
           "consequenceSketch": {
             "immediate": "The hospital's second generator has 48 hours; the dam's controls have twelve after the road floods; Gateway's boats make one run.",
@@ -4750,6 +4768,10 @@
             "flags": [
               "tankers-held"
             ]
+          },
+          "pressure": {
+            "form": "situational",
+            "actor": "the roads and the storm"
           }
         }
       ],
@@ -4789,7 +4811,7 @@
           "label": "Sign the order now, with the criteria she drafted",
           "description": "",
           "valueAlignment": {
-            "accountability": 3,
+            "accountability": 2,
             "compassion": -2,
             "courage": 1
           },
@@ -4902,7 +4924,7 @@
           }
         }
       ],
-      "defaultOptionId": "a",
+      "defaultOptionId": "b",
       "valuesTested": [
         "accountability",
         "compassion"
@@ -4936,7 +4958,7 @@
         {
           "id": "a",
           "label": "Both aircraft to the hospital, all four sorties",
-          "description": "Tear up the manifest.",
+          "description": "Tear up the manifest. Chicago's twelve family members stay through landfall.",
           "valueAlignment": {
             "integrity": 3,
             "loyalty": -2,
@@ -4964,7 +4986,8 @@
               "callId": "A1",
               "answer": "grant"
             }
-          }
+          },
+          "cost": "Chicago's twelve executive family members stay on the island through landfall, and Sterling owns that call."
         },
         {
           "id": "b",
@@ -4972,7 +4995,7 @@
           "description": "Executives' families out, as planned.",
           "valueAlignment": {
             "loyalty": 2,
-            "integrity": -3,
+            "integrity": -2,
             "fairness": -2
           },
           "consequenceSketch": {
@@ -5002,6 +5025,10 @@
               "callId": "A1",
               "answer": "refuse"
             }
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "Chicago's security team (the manifest)"
           }
         },
         {
@@ -5104,7 +5131,7 @@
         {
           "id": "a",
           "label": "Two boats out now, back by T+1:30 no matter what",
-          "description": "",
+          "description": "Two crews into a sea that broke a mooring; if the backside comes early, four more men are missing.",
           "valueAlignment": {
             "courage": 2,
             "safety": -2,
@@ -5171,7 +5198,7 @@
         {
           "id": "b",
           "label": "Hold the boats; ask Sterling for the helicopter (L2); search by sea after the backside",
-          "description": "",
+          "description": "The Harvester drifts for six more hours; the helicopter may not come.",
           "valueAlignment": {
             "safety": 2,
             "courage": -2,
@@ -5259,11 +5286,11 @@
         {
           "id": "d",
           "label": "All three boats to Southfield; the Harvester waits for the sky",
-          "description": "",
+          "description": "The Harvester's two men wait for the sky.",
           "valueAlignment": {
             "service": 2,
             "compassion": 2,
-            "loyalty": -3,
+            "loyalty": -1,
             "courage": 0
           },
           "consequenceSketch": {
@@ -5300,7 +5327,7 @@
           }
         }
       ],
-      "defaultOptionId": "a",
+      "defaultOptionId": "b",
       "valuesTested": [
         "courage",
         "safety"
@@ -5334,9 +5361,9 @@
         {
           "id": "a",
           "label": "Open now, at 94%, with the warning on the Council channel",
-          "description": "",
+          "description": "If the rain slows, Riverside was flooded for nothing, and the gate fault comes out.",
           "valueAlignment": {
-            "courage": 3,
+            "courage": 2,
             "duty": -1,
             "candor": 1,
             "safety": 1
@@ -5361,7 +5388,7 @@
         {
           "id": "b",
           "label": "Follow the protocol: open at 97%",
-          "description": "",
+          "description": "If the rain holds, the spillway goes over with no warning time left.",
           "valueAlignment": {
             "duty": 2,
             "obedience": 2,
@@ -5396,6 +5423,10 @@
               "callId": "L3",
               "answer": "refuse"
             }
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "the published protocol (the Authority board)"
           }
         },
         {
@@ -5403,9 +5434,9 @@
           "label": "Wait to 99% and hope",
           "description": "",
           "valueAlignment": {
-            "courage": -3,
+            "courage": -2,
             "duty": -2,
-            "safety": -3
+            "safety": -2
           },
           "consequenceSketch": {
             "immediate": "50% the rain slows and nobody floods; 50% an uncontrolled release at the overflow sill, Riverside to five feet, the Gorge Road gone until spring.",
@@ -5466,6 +5497,10 @@
               "callId": "L3",
               "answer": "refuse"
             }
+          },
+          "pressure": {
+            "form": "situational",
+            "actor": "the rain and the odds"
           }
         },
         {
@@ -5567,14 +5602,18 @@
             "flags": [
               "crew-ordered"
             ]
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "Chicago (the rooms hold)"
           }
         },
         {
           "id": "b",
           "label": "Ask them. Anyone who goes, goes; the rooms run on whoever stays",
-          "description": "",
+          "description": "The rooms may not hold; the doses in them are the island's export.",
           "valueAlignment": {
-            "respect": 3,
+            "respect": 2,
             "duty": -1,
             "accountability": -1
           },
@@ -5622,7 +5661,7 @@
         {
           "id": "c",
           "label": "Send the trucks: Kofi and four volunteer drivers to Block C, the crew stays for the rooms",
-          "description": "",
+          "description": "Five drivers into moving water in trucks built for roads.",
           "valueAlignment": {
             "duty": 1,
             "respect": 1,
@@ -5694,11 +5733,11 @@
         {
           "id": "d",
           "label": "Shut the rooms, send everyone to Southfield in the trucks",
-          "description": "",
+          "description": "The clean rooms fail; the batch in them is lost.",
           "valueAlignment": {
             "respect": 1,
             "compassion": 2,
-            "duty": -3
+            "duty": -2
           },
           "consequenceSketch": {
             "immediate": "Batch 48 lost; a nine-hour restart after the storm; 200 people on a berm in the dark; the board counts them at risk until the eye.",
@@ -5771,11 +5810,11 @@
         {
           "id": "a",
           "label": "Attempt the transfer, both of them, now",
-          "description": "",
+          "description": "Two people at a seal that may fail while they stand at it.",
           "valueAlignment": {
             "courage": 2,
-            "stewardship": 3,
-            "safety": -3
+            "stewardship": 2,
+            "safety": -2
           },
           "consequenceSketch": {
             "immediate": "50% the transfer completes and the harbour is spared; 50% the manifold fails at the peak and both are injured (call L4); the terminal's fuel is in Tank 5 or in the water.",
@@ -5864,9 +5903,9 @@
         {
           "id": "b",
           "label": "Evacuate them to the union hall; let the tank do what it does",
-          "description": "",
+          "description": "80,000 gallons may go into the harbour and the yard.",
           "valueAlignment": {
-            "safety": 3,
+            "safety": 2,
             "stewardship": -2,
             "courage": -1
           },
@@ -6046,7 +6085,7 @@
           }
         }
       ],
-      "defaultOptionId": "b",
+      "defaultOptionId": "d",
       "valuesTested": [
         "courage",
         "stewardship"
@@ -6081,10 +6120,10 @@
         {
           "id": "a",
           "label": "All thirty into Riverside, door to door, two boats working the lower streets",
-          "description": "",
+          "description": "The hospital carries eighteen patients with whoever is left.",
           "valueAlignment": {
             "compassion": 3,
-            "safety": -3,
+            "safety": -2,
             "courage": 2
           },
           "consequenceSketch": {
@@ -6128,12 +6167,13 @@
                 "BOAT": -1
               }
             }
-          }
+          },
+          "cost": "Thirty officers in moving water at the peak, and the hospital carries eighteen patients with no one to lift them."
         },
         {
           "id": "b",
           "label": "All thirty to the hospital; Riverside waits for the eye",
-          "description": "",
+          "description": "Riverside waits in the water for the eye.",
           "valueAlignment": {
             "safety": 2,
             "compassion": -2,
@@ -6248,7 +6288,7 @@
           }
         }
       ],
-      "defaultOptionId": "a",
+      "defaultOptionId": "d",
       "valuesTested": [
         "compassion",
         "safety"
@@ -6320,7 +6360,8 @@
               "callId": "L6",
               "answer": "grant"
             }
-          }
+          },
+          "cost": "You override Chicago's security chief at the door; a crowded bunker through the backside, with an immunocompromised scientist inside."
         },
         {
           "id": "b",
@@ -6328,7 +6369,7 @@
           "description": "",
           "valueAlignment": {
             "safety": 2,
-            "compassion": -3,
+            "compassion": -2,
             "loyalty": 1
           },
           "consequenceSketch": {
@@ -6345,6 +6386,10 @@
               "callId": "L6",
               "answer": "refuse"
             }
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "Chicago's security chief"
           }
         },
         {
@@ -6461,7 +6506,7 @@
           "label": "The reporter waits; Rosa and a councillor go to Ines Reyes first; then the whole account, including the last run order and the tug",
           "description": "",
           "valueAlignment": {
-            "candor": 3,
+            "candor": 2,
             "respect": 2,
             "recognition": -1
           },
@@ -6484,7 +6529,7 @@
           "description": "",
           "valueAlignment": {
             "recognition": 2,
-            "candor": -3,
+            "candor": -2,
             "respect": -2
           },
           "consequenceSketch": {
@@ -6497,6 +6542,10 @@
             "flags": [
               "story-company"
             ]
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "Sterling's communications office (the company draft)"
           }
         },
         {
@@ -6542,7 +6591,7 @@
           }
         }
       ],
-      "defaultOptionId": "a",
+      "defaultOptionId": "b",
       "valuesTested": [
         "candor",
         "recognition"
@@ -6577,7 +6626,7 @@
           "label": "Riverside and the hospital first, then Keystone; send two crews to Riverside with the pumps",
           "description": "",
           "valueAlignment": {
-            "accountability": 3,
+            "accountability": 2,
             "fairness": 1,
             "duty": -1
           },
@@ -6644,6 +6693,10 @@
                 "reopenT": 1440
               }
             ]
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "the Priority Schedule (Sterling and the board)"
           }
         },
         {
@@ -6761,7 +6814,7 @@
           "label": "Destroy the batch; tell the distributor exactly why; put Castillo's standard in the storm protocol",
           "description": "",
           "valueAlignment": {
-            "integrity": 3,
+            "integrity": 2,
             "stewardship": -2,
             "candor": 1
           },
@@ -6836,7 +6889,7 @@
           "label": "Send it to Chicago's decision",
           "description": "",
           "valueAlignment": {
-            "accountability": -3,
+            "accountability": -2,
             "integrity": -1
           },
           "consequenceSketch": {
@@ -6849,6 +6902,10 @@
             "flags": [
               "batch47-chicago"
             ]
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "Chicago"
           }
         }
       ],
@@ -6888,7 +6945,7 @@
           "label": "Facts in order, names included, Authority's own orders first; full pay and the bonus from the port's reserve if Sterling will not",
           "description": "",
           "valueAlignment": {
-            "honesty": 3,
+            "honesty": 2,
             "loyalty": -2,
             "accountability": 2
           },
@@ -6939,6 +6996,10 @@
                 "atT": 1800
               }
             ]
+          },
+          "pressure": {
+            "form": "conditional_belonging",
+            "actor": "Sterling (50% pay, \"given losses\")"
           }
         },
         {
@@ -6985,7 +7046,7 @@
           }
         }
       ],
-      "defaultOptionId": "a",
+      "defaultOptionId": "b",
       "valuesTested": [
         "honesty",
         "loyalty"
@@ -7022,7 +7083,7 @@
           "label": "Decline the sentence; convene an independent inquiry that includes the Council's own decisions; rebuild on the island's money and a public appeal",
           "description": "",
           "valueAlignment": {
-            "accountability": 3,
+            "accountability": 2,
             "stewardship": -2,
             "honesty": 2
           },
@@ -7043,7 +7104,7 @@
           "label": "Sign; take the money; rebuild now",
           "description": "",
           "valueAlignment": {
-            "stewardship": 3,
+            "stewardship": 1,
             "accountability": -2,
             "honesty": -2
           },
@@ -7062,6 +7123,10 @@
                 "FUND": 8
               }
             }
+          },
+          "pressure": {
+            "form": "enforced_silence",
+            "actor": "Meridian ($40M for the sentence)"
           }
         },
         {
@@ -7109,7 +7174,7 @@
           "valueAlignment": {
             "honesty": 1,
             "integrity": -2,
-            "stewardship": 2
+            "stewardship": 1
           },
           "consequenceSketch": {
             "immediate": "The money arrives; the statement and the timeline contradict each other on the Council's own website.",
@@ -7166,7 +7231,7 @@
           "label": "Rewrite it: name the crews, the captains, the drivers and the dead; say what the bunker did and did not do; release the FUND tokens to the parishes whose people are named",
           "description": "",
           "valueAlignment": {
-            "respect": 3,
+            "respect": 2,
             "loyalty": -2,
             "honesty": 2
           },
@@ -7200,7 +7265,7 @@
           "description": "",
           "valueAlignment": {
             "loyalty": 2,
-            "respect": -3,
+            "respect": -2,
             "honesty": -2
           },
           "consequenceSketch": {
@@ -7213,6 +7278,10 @@
             "flags": [
               "chicago-statement"
             ]
+          },
+          "pressure": {
+            "form": "coercive_authority",
+            "actor": "Chicago (the drafted statement)"
           }
         },
         {

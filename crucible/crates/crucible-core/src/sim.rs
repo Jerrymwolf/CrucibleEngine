@@ -152,6 +152,8 @@ fn init_state(content: &Content, rng: &mut SimRng, t_start: i64) -> SimState {
         pending_effects: vec![],
         next_effect_seq: 0,
         last_hazard_t: i64::MIN,
+        lowest_people_safe: i64::MAX,
+        people_ticks_at_risk: 0,
         doses: tally::init(content),
         power_priority: None,
         values_locked: BTreeMap::new(),
@@ -453,7 +455,9 @@ fn decide_all(ctx: &mut Ctx, asked: &Option<BTreeSet<String>>, decisions: &BTree
         let Some(choice) = controller::decide(content, ctx.state, ctx.rng, &parish, &team_input, &od) else { continue };
         let Some(d) = content.dilemma(&od.dilemma_id) else { continue };
         let Some(option) = d.options.iter().find(|o| o.id == choice.option_id) else { continue };
-        let signals = option_signals(content, option);
+        // The engine rates the answer, never the weather: a card the clock
+        // decided keeps its default option's effects and carries no values.
+        let signals = if choice.decided_by.as_deref() == Some("storm") { BTreeMap::new() } else { option_signals(content, option) };
         ctx.state.open.remove(&parish);
         ctx.state.decided_dilemmas.insert(d.id.clone());
         ctx.state.decisions.push(DecisionRecord {
@@ -466,6 +470,7 @@ fn decide_all(ctx: &mut Ctx, asked: &Option<BTreeSet<String>>, decisions: &BTree
             values_signaled: signals.clone(),
             decided_by: choice.decided_by.clone(),
         });
+        let decision_at = ctx.events.len();
         ctx.events.push(Event::Decision {
             dilemma_id: d.id.clone(),
             parish_id: parish.clone(),
@@ -479,10 +484,25 @@ fn decide_all(ctx: &mut Ctx, asked: &Option<BTreeSet<String>>, decisions: &BTree
             decided_by: choice.decided_by.clone(),
         });
         apply_consequences(content, ctx.state, &parish, &d.id, option, ctx.events);
-        morale::add_leadership(ctx.state, &parish, &signals);
+        let effects_at = ctx.events.len();
         if !option.effects.is_empty() {
             effects::apply(ctx, &option.effects, &parish, &d.id);
         }
+        // An option whose own moves the engine rejected (sending or declaring
+        // what the table does not hold) is recorded but not rated.
+        let rejected = ctx.events[effects_at..].iter().any(|e| matches!(e, Event::Rejected { source, .. } if source == &d.id));
+        let signals = if rejected {
+            if let Some(r) = ctx.state.decisions.last_mut() {
+                r.values_signaled.clear();
+            }
+            if let Event::Decision { values_signaled, .. } = &mut ctx.events[decision_at] {
+                values_signaled.clear();
+            }
+            BTreeMap::new()
+        } else {
+            signals
+        };
+        morale::add_leadership(ctx.state, &parish, &signals);
     }
 }
 
@@ -506,6 +526,8 @@ pub fn counters(content: &Content, state: &SimState) -> Counters {
         at_risk,
         injured,
         lost,
+        lowest_people_safe: if state.lowest_people_safe == i64::MAX { residents::people_safe(content, state) } else { state.lowest_people_safe },
+        people_hours_at_risk: state.people_ticks_at_risk * STEP_MINUTES / 60,
     }
 }
 
@@ -681,6 +703,13 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
             let m = state.min_power.entry(p).or_insert(pw);
             *m = m.min(pw);
         }
+        // The trajectory: the island's low point and the people-hours at risk.
+        {
+            let safe = residents::people_safe(content, &state);
+            state.lowest_people_safe = state.lowest_people_safe.min(safe);
+            let (at_risk, injured, _) = residents::totals(&state);
+            state.people_ticks_at_risk += at_risk + injured;
+        }
         // 9. snapshot and the tick's state hash
         let infra = state.infra_rounded();
         let morale = state.morale_rounded();
@@ -728,7 +757,7 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
         .collect();
     let summary = summarize(content, &state, &teams, ticks.len());
     RunLog {
-        version: "0.2".into(),
+        version: "0.3".into(),
         seed: cfg.seed,
         scenario: "hurricane-midas".into(),
         content_hash: content.content_hash.clone(),
@@ -835,7 +864,7 @@ fn summarize(content: &Content, state: &SimState, teams: &[Team], ticks: usize) 
         decisions: state.decisions.len(),
         cascades_fired: state.fired_rules.len(),
         per_parish,
-        values_gap: values::values_gap(&stated, &state.decisions),
+        values_gap: values::values_gap(content, &stated, &state.decisions),
         state_hash,
         cascade_rules_fired: state.fired_rules.iter().cloned().collect(),
         residents: ResidentsSummary { groups: state.groups.clone(), cards: state.cards.clone(), people_safe: counters.people_safe, at_risk, injured, lost },

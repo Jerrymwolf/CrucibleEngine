@@ -282,6 +282,12 @@ pub struct Counters {
     pub at_risk: i64,
     pub injured: i64,
     pub lost: i64,
+    /// The lowest people-safe count so far: the storm's low point.
+    #[serde(default)]
+    pub lowest_people_safe: i64,
+    /// People at risk or injured, summed over the hours so far.
+    #[serde(default)]
+    pub people_hours_at_risk: i64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
