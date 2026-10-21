@@ -52,10 +52,31 @@ pub struct Team {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum Event {
-    WindowTransition { from: Option<String>, to: String, narrative: String },
-    Degradation { parish_id: String, system: String, delta: i64, cause: String },
-    Cascade { rule_id: String, parish_id: String, system: String, delta: i64, narrative: String },
-    Connectivity { parish_id: String, system: String, status: String, source: String, narrative: String },
+    WindowTransition {
+        from: Option<String>,
+        to: String,
+        narrative: String,
+    },
+    Degradation {
+        parish_id: String,
+        system: String,
+        delta: i64,
+        cause: String,
+    },
+    Cascade {
+        rule_id: String,
+        parish_id: String,
+        system: String,
+        delta: i64,
+        narrative: String,
+    },
+    Connectivity {
+        parish_id: String,
+        system: String,
+        status: String,
+        source: String,
+        narrative: String,
+    },
     Isolation {
         parish_id: String,
         narrative: String,
@@ -85,7 +106,14 @@ pub enum Event {
         #[serde(default, skip_serializing_if = "Option::is_none")]
         pressure: Option<f64>,
     },
-    Consequence { dilemma_id: String, parish_id: String, system: String, delta: i64, delay_minutes: i64, narrative: String },
+    Consequence {
+        dilemma_id: String,
+        parish_id: String,
+        system: String,
+        delta: i64,
+        delay_minutes: i64,
+        narrative: String,
+    },
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -201,11 +229,7 @@ impl RunLog {
                 if let Event::Decision { dilemma_id, option_id, rationale, .. } = e {
                     out.insert(
                         dilemma_id.clone(),
-                        crate::controller::ScriptedDecision {
-                            option_id: option_id.clone(),
-                            rationale: Some(rationale.clone()),
-                            t: Some(tick.t),
-                        },
+                        crate::controller::ScriptedDecision { option_id: option_id.clone(), rationale: Some(rationale.clone()), t: Some(tick.t) },
                     );
                 }
             }

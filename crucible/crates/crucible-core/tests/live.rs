@@ -17,7 +17,11 @@ fn teams(c: &Content) -> Vec<Team> {
         .into_iter()
         .map(|p| {
             let human = p == "sterling" || p == "haven";
-            Team { controller: if human { "human" } else { "ai" }.into(), stated_values: vec!["safety".into(), "honesty".into(), "fairness".into()], parish_id: p }
+            Team {
+                controller: if human { "human" } else { "ai" }.into(),
+                stated_values: vec!["safety".into(), "honesty".into(), "fairness".into()],
+                parish_id: p,
+            }
         })
         .collect()
 }
@@ -84,10 +88,17 @@ fn a_session_profile_asks_only_its_dilemmas() {
     let (fin, halts) = play_asking(&c, 42, Some(ask.clone()));
     let asked: Vec<&str> = halts.iter().flat_map(|h| h.pending.iter().map(|p| p.dilemma_id.as_str())).collect();
     assert!(!asked.is_empty() && asked.iter().all(|d| ask.contains(*d)), "asked {asked:?}");
-    let by_table: Vec<_> = fin.ticks.iter().flat_map(|t| &t.events).filter_map(|e| match e {
-        Event::Decision { parish_id, controller, dilemma_id, .. } if parish_id == "sterling" || parish_id == "haven" => Some((dilemma_id.clone(), controller.clone())),
-        _ => None,
-    }).collect();
+    let by_table: Vec<_> = fin
+        .ticks
+        .iter()
+        .flat_map(|t| &t.events)
+        .filter_map(|e| match e {
+            Event::Decision { parish_id, controller, dilemma_id, .. } if parish_id == "sterling" || parish_id == "haven" => {
+                Some((dilemma_id.clone(), controller.clone()))
+            }
+            _ => None,
+        })
+        .collect();
     assert!(by_table.iter().any(|(_, ctl)| ctl == "ai"), "unasked dilemmas fall to the drift model");
     assert!(by_table.iter().all(|(d, ctl)| (ctl == "human") == ask.contains(d)));
     assert_eq!(replay(&c, &fin).summary.state_hash, fin.summary.state_hash);

@@ -7,8 +7,10 @@ use crate::connectivity;
 use crate::content::Content;
 use crate::controller::{self, ScriptedDecision};
 use crate::dilemma;
+use crate::log::{
+    clock, state_hash, Event, HashedState, MapPoint, ParishMeta, ParishOutcome, PendingDilemma, PendingOption, RunLog, Summary, Tick, WindowMeta,
+};
 use crate::morale;
-use crate::log::{clock, state_hash, Event, HashedState, MapPoint, ParishMeta, ParishOutcome, PendingDilemma, PendingOption, RunLog, Summary, Tick, WindowMeta};
 use crate::rng::SimRng;
 use crate::state::{DecisionRecord, Scheduled, ScheduledSource, SimState};
 use crate::values::{self, option_signals};
@@ -57,10 +59,7 @@ fn vulnerability_mult(content: &Content, parish: &str, system: &str) -> f64 {
         "airport" => &["runway", "wind", "airport"],
         _ => &[],
     };
-    let hits = content
-        .parish(parish)
-        .map(|p| p.vulnerabilities.iter().filter(|v| needles.iter().any(|n| v.to_lowercase().contains(n))).count())
-        .unwrap_or(0);
+    let hits = content.parish(parish).map(|p| p.vulnerabilities.iter().filter(|v| needles.iter().any(|n| v.to_lowercase().contains(n))).count()).unwrap_or(0);
     1.0 + 0.25 * hits.min(2) as f64
 }
 
@@ -84,8 +83,7 @@ fn init_state(content: &Content, rng: &mut SimRng, t_start: i64) -> SimState {
     let mut generator_hours = BTreeMap::new();
     for p in content.parish_ids() {
         let init = content.infrastructure.initial_infrastructure_status.get(&p);
-        let row: BTreeMap<String, f64> =
-            SYSTEMS.iter().map(|s| (s.to_string(), init.and_then(|m| m.get(*s)).copied().unwrap_or(0.0))).collect();
+        let row: BTreeMap<String, f64> = SYSTEMS.iter().map(|s| (s.to_string(), init.and_then(|m| m.get(*s)).copied().unwrap_or(0.0))).collect();
         infra.insert(p.clone(), row);
         morale.insert(p.clone(), 80.0);
         morale_pressure.insert(p.clone(), morale::initial_pressure(80.0));
@@ -159,12 +157,26 @@ fn degrade(content: &Content, state: &mut SimState, key: &str, w: &weather::Weat
 /// values. Immediate: own morale += 2*care. Ripple (+60): morale of every
 /// parish this one provides to += care. Delayed (+240): own weakest live
 /// system += 3*care.
-fn apply_consequences(content: &Content, state: &mut SimState, parish: &str, dilemma_id: &str, option: &crate::content::DilemmaOption, events: &mut Vec<Event>) {
+fn apply_consequences(
+    content: &Content,
+    state: &mut SimState,
+    parish: &str,
+    dilemma_id: &str,
+    option: &crate::content::DilemmaOption,
+    events: &mut Vec<Event>,
+) {
     let sig = option_signals(content, option);
     let care: f64 = sig.iter().filter(|(k, _)| controller::is_costly(k)).map(|(_, v)| *v as f64).sum();
     let sketch = &option.consequence_sketch;
     let delta = state.apply(parish, "morale", (2.0 * care).clamp(-10.0, 10.0));
-    events.push(Event::Consequence { dilemma_id: dilemma_id.into(), parish_id: parish.into(), system: "morale".into(), delta, delay_minutes: 0, narrative: sketch.immediate.clone() });
+    events.push(Event::Consequence {
+        dilemma_id: dilemma_id.into(),
+        parish_id: parish.into(),
+        system: "morale".into(),
+        delta,
+        delay_minutes: 0,
+        narrative: sketch.immediate.clone(),
+    });
     let provides: Vec<String> = content
         .concordia
         .parish_dependencies
@@ -173,7 +185,16 @@ fn apply_consequences(content: &Content, state: &mut SimState, parish: &str, dil
         .map(|(_, d)| d.provides_to.iter().map(|x| x.to_lowercase()).collect())
         .unwrap_or_default();
     for other in provides {
-        state.schedule(Scheduled { due_t: state.t + 60, seq: 0, parish_id: other, system: "morale".into(), delta: care.clamp(-5.0, 5.0), source: ScheduledSource::Consequence { dilemma_id: dilemma_id.into() }, narrative: sketch.ripple.clone(), delay_minutes: 60 });
+        state.schedule(Scheduled {
+            due_t: state.t + 60,
+            seq: 0,
+            parish_id: other,
+            system: "morale".into(),
+            delta: care.clamp(-5.0, 5.0),
+            source: ScheduledSource::Consequence { dilemma_id: dilemma_id.into() },
+            narrative: sketch.ripple.clone(),
+            delay_minutes: 60,
+        });
     }
     let weakest = ["power", "communications", "water", "roads", "hospital"]
         .iter()
@@ -181,7 +202,16 @@ fn apply_consequences(content: &Content, state: &mut SimState, parish: &str, dil
         .min_by(|a, b| state.level(parish, a).partial_cmp(&state.level(parish, b)).unwrap_or(std::cmp::Ordering::Equal))
         .map(|s| s.to_string());
     if let Some(sys) = weakest {
-        state.schedule(Scheduled { due_t: state.t + 240, seq: 0, parish_id: parish.into(), system: sys, delta: (3.0 * care).clamp(-15.0, 9.0), source: ScheduledSource::Consequence { dilemma_id: dilemma_id.into() }, narrative: sketch.delayed.clone(), delay_minutes: 240 });
+        state.schedule(Scheduled {
+            due_t: state.t + 240,
+            seq: 0,
+            parish_id: parish.into(),
+            system: sys,
+            delta: (3.0 * care).clamp(-15.0, 9.0),
+            source: ScheduledSource::Consequence { dilemma_id: dilemma_id.into() },
+            narrative: sketch.delayed.clone(),
+            delay_minutes: 240,
+        });
     }
 }
 
@@ -198,7 +228,14 @@ fn decide_all(content: &Content, state: &mut SimState, rng: &mut SimRng, teams: 
         let signals = option_signals(content, option);
         state.open.remove(&parish);
         state.decided_dilemmas.insert(d.id.clone());
-        state.decisions.push(DecisionRecord { t: state.t, parish_id: parish.clone(), dilemma_id: d.id.clone(), option_id: option.id.clone(), controller: choice.controller.clone(), values_signaled: signals.clone() });
+        state.decisions.push(DecisionRecord {
+            t: state.t,
+            parish_id: parish.clone(),
+            dilemma_id: d.id.clone(),
+            option_id: option.id.clone(),
+            controller: choice.controller.clone(),
+            values_signaled: signals.clone(),
+        });
         events.push(Event::Decision {
             dilemma_id: d.id.clone(),
             parish_id: parish.clone(),
@@ -216,7 +253,11 @@ fn decide_all(content: &Content, state: &mut SimState, rng: &mut SimRng, teams: 
 }
 
 fn default_teams(content: &Content, rng: &mut SimRng) -> Vec<Team> {
-    content.parish_ids().into_iter().map(|p| Team { stated_values: values::default_stated_values(content, &p, rng), parish_id: p, controller: "ai".into() }).collect()
+    content
+        .parish_ids()
+        .into_iter()
+        .map(|p| Team { stated_values: values::default_stated_values(content, &p, rng), parish_id: p, controller: "ai".into() })
+        .collect()
 }
 
 /// Runs a full simulation and returns the run log.
@@ -274,15 +315,32 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
             let nominal = s.delta.round() as i64;
             let applied = state.apply(&s.parish_id, &s.system, s.delta);
             match s.source {
-                ScheduledSource::Cascade { rule_id } => events.push(Event::Cascade { rule_id, parish_id: s.parish_id, system: s.system, delta: nominal, narrative: s.narrative }),
-                ScheduledSource::Consequence { dilemma_id } => events.push(Event::Consequence { dilemma_id, parish_id: s.parish_id, system: s.system, delta: applied, delay_minutes: s.delay_minutes, narrative: s.narrative }),
+                ScheduledSource::Cascade { rule_id } => {
+                    events.push(Event::Cascade { rule_id, parish_id: s.parish_id, system: s.system, delta: nominal, narrative: s.narrative })
+                }
+                ScheduledSource::Consequence { dilemma_id } => events.push(Event::Consequence {
+                    dilemma_id,
+                    parish_id: s.parish_id,
+                    system: s.system,
+                    delta: applied,
+                    delay_minutes: s.delay_minutes,
+                    narrative: s.narrative,
+                }),
             }
         }
         // 6. dilemmas
         for (parish, id) in dilemma::present(content, &mut state, &mut rng, STEP_MINUTES) {
             if let Some(d) = content.dilemmas.all_dilemmas.iter().find(|d| d.id == id) {
                 let deadline_t = state.open[&parish].deadline_t;
-                events.push(Event::DilemmaPresented { dilemma_id: d.id.clone(), parish_id: parish, title: d.title.clone(), setup: d.setup.clone(), values_tested: d.values_tested.clone(), persona_id: d.persona_ids().first().cloned(), deadline_t });
+                events.push(Event::DilemmaPresented {
+                    dilemma_id: d.id.clone(),
+                    parish_id: parish,
+                    title: d.title.clone(),
+                    setup: d.setup.clone(),
+                    values_tested: d.values_tested.clone(),
+                    persona_id: d.persona_ids().first().cloned(),
+                    deadline_t,
+                });
             }
         }
         if cfg.live {
@@ -305,7 +363,18 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
             *m = m.min(pw);
         }
         // 9. snapshot
-        ticks.push(Tick { t, window_id: windows[idx].id.clone(), phase: phase.into(), intensity: state.intensity, weather: w, infrastructure: state.infra_rounded(), morale: state.morale_rounded(), isolated: state.isolated.iter().cloned().collect(), events, rng_draws: rng.draws() - draws_before });
+        ticks.push(Tick {
+            t,
+            window_id: windows[idx].id.clone(),
+            phase: phase.into(),
+            intensity: state.intensity,
+            weather: w,
+            infrastructure: state.infra_rounded(),
+            morale: state.morale_rounded(),
+            isolated: state.isolated.iter().cloned().collect(),
+            events,
+            rng_draws: rng.draws() - draws_before,
+        });
         t += STEP_MINUTES;
     }
     let summary = summarize(content, &state, &teams, ticks.len());
@@ -319,7 +388,18 @@ pub fn run(content: &Content, cfg: &RunConfig) -> RunLog {
         t_end,
         systems: SYSTEMS.iter().map(|s| s.to_string()).collect(),
         parishes: parish_meta(content),
-        windows: windows.iter().map(|w| WindowMeta { id: w.id.clone(), phase: log_phase(&w.phase).into(), t_minus_hours: -w.t_minus_hours, label: w.label.clone(), certainty: w.certainty_percent, t_minutes: window_t(w), timeline_phase: w.phase.clone() }).collect(),
+        windows: windows
+            .iter()
+            .map(|w| WindowMeta {
+                id: w.id.clone(),
+                phase: log_phase(&w.phase).into(),
+                t_minus_hours: -w.t_minus_hours,
+                label: w.label.clone(),
+                certainty: w.certainty_percent,
+                t_minutes: window_t(w),
+                timeline_phase: w.phase.clone(),
+            })
+            .collect(),
         teams,
         ticks,
         summary,
@@ -336,7 +416,9 @@ fn pending_human(content: &Content, state: &SimState, teams: &[Team], cfg: &RunC
     state
         .open
         .iter()
-        .filter(|(p, od)| teams.iter().any(|t| &t.parish_id == *p && t.controller == "human") && asked(cfg, &od.dilemma_id) && !cfg.decisions.contains_key(&od.dilemma_id))
+        .filter(|(p, od)| {
+            teams.iter().any(|t| &t.parish_id == *p && t.controller == "human") && asked(cfg, &od.dilemma_id) && !cfg.decisions.contains_key(&od.dilemma_id)
+        })
         .filter_map(|(p, od)| {
             let d = content.dilemmas.all_dilemmas.iter().find(|d| d.id == od.dilemma_id)?;
             Some(PendingDilemma {
@@ -360,7 +442,14 @@ fn parish_meta(content: &Content) -> Vec<ParishMeta> {
         .map(|(id, p)| {
             let init = content.infrastructure.initial_infrastructure_status.get(&id);
             let absent = SYSTEMS.iter().filter(|s| init.and_then(|m| m.get(**s)).copied().unwrap_or(0.0) <= 0.0).map(|s| s.to_string()).collect();
-            ParishMeta { id, name: p.name.clone(), population: p.population, position: MapPoint { x: p.position.x, y: p.position.y }, role: p.supply_chain_role.clone(), absent_systems: absent }
+            ParishMeta {
+                id,
+                name: p.name.clone(),
+                population: p.population,
+                position: MapPoint { x: p.position.x, y: p.position.y },
+                role: p.supply_chain_role.clone(),
+                absent_systems: absent,
+            }
         })
         .collect()
 }
@@ -405,7 +494,13 @@ fn summarize(content: &Content, state: &SimState, teams: &[Team], ticks: usize) 
 /// Re-executes a logged run from its seed, teams, intensity curve and
 /// recorded decisions. Returns the new log; the caller compares hashes.
 pub fn replay(content: &Content, log: &RunLog) -> RunLog {
-    let cfg = RunConfig { seed: log.seed, teams: Some(log.teams.clone()), decisions: log.recorded_decisions(), intensity: log.recorded_intensity(), ..Default::default() };
+    let cfg = RunConfig {
+        seed: log.seed,
+        teams: Some(log.teams.clone()),
+        decisions: log.recorded_decisions(),
+        intensity: log.recorded_intensity(),
+        ..Default::default()
+    };
     run(content, &cfg)
 }
 
@@ -427,4 +522,3 @@ pub fn first_divergence(a: &RunLog, b: &RunLog) -> Option<String> {
     }
     None
 }
-

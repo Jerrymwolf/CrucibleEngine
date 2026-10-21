@@ -112,10 +112,7 @@ impl SimState {
 
     /// Rounded infrastructure levels for the log and the state hash.
     pub fn infra_rounded(&self) -> BTreeMap<String, BTreeMap<String, i64>> {
-        self.infra
-            .iter()
-            .map(|(p, row)| (p.clone(), row.iter().map(|(s, v)| (s.clone(), v.round() as i64)).collect()))
-            .collect()
+        self.infra.iter().map(|(p, row)| (p.clone(), row.iter().map(|(s, v)| (s.clone(), v.round() as i64)).collect())).collect()
     }
 
     pub fn morale_rounded(&self) -> BTreeMap<String, i64> {

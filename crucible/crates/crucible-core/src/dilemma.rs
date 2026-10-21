@@ -61,10 +61,9 @@ pub fn present(content: &Content, state: &mut SimState, rng: &mut SimRng, step_m
         let d = cands[0];
         state.used_dilemmas.insert(d.id.clone());
         state.last_dilemma_t.insert(parish.clone(), state.t);
-        state.open.insert(
-            parish.clone(),
-            OpenDilemma { dilemma_id: d.id.clone(), presented_t: state.t, deadline_t: state.t + deadline_minutes(state.intensity) },
-        );
+        state
+            .open
+            .insert(parish.clone(), OpenDilemma { dilemma_id: d.id.clone(), presented_t: state.t, deadline_t: state.t + deadline_minutes(state.intensity) });
         out.push((parish, d.id.clone()));
     }
     out

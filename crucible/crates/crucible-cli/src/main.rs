@@ -80,7 +80,11 @@ fn notable(e: &Event) -> Option<String> {
         Event::WindowTransition { to, .. } => format!("window {to}"),
         Event::Cascade { rule_id, parish_id, system, delta, .. } => format!("cascade {rule_id}: {parish_id} {system} {delta:+}"),
         Event::Isolation { parish_id, ended, .. } => {
-            if ended.is_some() { format!("{parish_id} road access restored") } else { format!("{parish_id} ISOLATED") }
+            if ended.is_some() {
+                format!("{parish_id} road access restored")
+            } else {
+                format!("{parish_id} ISOLATED")
+            }
         }
         Event::Connectivity { parish_id, system, status, .. } if status == "lost" || status == "restored" => format!("{parish_id} {system} {status}"),
         Event::DilemmaPresented { parish_id, dilemma_id, .. } => format!("{parish_id} faces {dilemma_id}"),
@@ -119,7 +123,16 @@ fn print_summary(log: &RunLog) {
         let g = |k: &str| f.get(k).copied().unwrap_or(0);
         println!(
             "{:<10} {:>9} {:>12} {:>9} {:>12}  {}/{}/{}/{}/{}",
-            p, o.min_power, o.minutes_isolated, o.decisions, o.final_morale, g("power"), g("communications"), g("roads"), g("water"), g("hospital")
+            p,
+            o.min_power,
+            o.minutes_isolated,
+            o.decisions,
+            o.final_morale,
+            g("power"),
+            g("communications"),
+            g("roads"),
+            g("water"),
+            g("hospital")
         );
     }
     println!();

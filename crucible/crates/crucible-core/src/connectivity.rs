@@ -41,7 +41,11 @@ pub fn backup_hours(content: &Content, parish: &str) -> f64 {
     if !power.backup_generators.iter().any(|(k, v)| k.eq_ignore_ascii_case(parish) && *v) {
         return 0.0;
     }
-    if power.priority.iter().any(|p| p.eq_ignore_ascii_case(parish)) { BACKUP_HOURS_PRIORITY } else { BACKUP_HOURS_OTHER }
+    if power.priority.iter().any(|p| p.eq_ignore_ascii_case(parish)) {
+        BACKUP_HOURS_PRIORITY
+    } else {
+        BACKUP_HOURS_OTHER
+    }
 }
 
 /// Service order for power: the content priority list, then population
@@ -49,12 +53,8 @@ pub fn backup_hours(content: &Content, parish: &str) -> f64 {
 /// out" rule of the reference engine does not depend on scan order.
 pub fn power_priority(content: &Content) -> Vec<String> {
     let priority: Vec<String> = content.concordia.infrastructure.power.priority.iter().map(|p| p.to_lowercase()).collect();
-    let mut rest: Vec<(u64, String)> = content
-        .parish_ids()
-        .into_iter()
-        .filter(|p| !priority.contains(p))
-        .map(|p| (content.parish(&p).map(|x| x.population).unwrap_or(0), p))
-        .collect();
+    let mut rest: Vec<(u64, String)> =
+        content.parish_ids().into_iter().filter(|p| !priority.contains(p)).map(|p| (content.parish(&p).map(|x| x.population).unwrap_or(0), p)).collect();
     rest.sort_by(|a, b| b.0.cmp(&a.0).then_with(|| a.1.cmp(&b.1)));
     priority.into_iter().chain(rest.into_iter().map(|(_, p)| p)).collect()
 }
@@ -102,22 +102,14 @@ pub fn utility_links(content: &Content) -> BTreeMap<String, BTreeSet<String>> {
 
 /// Road edges between real parishes, expanding the virtual "ring" node.
 fn road_edges(content: &Content) -> Vec<(String, String)> {
-    let ring: BTreeSet<String> = content
-        .concordia
-        .ring_road
-        .segments
-        .iter()
-        .flat_map(|s| [s.from.to_lowercase(), s.to.to_lowercase()])
-        .collect();
+    let ring: BTreeSet<String> = content.concordia.ring_road.segments.iter().flat_map(|s| [s.from.to_lowercase(), s.to.to_lowercase()]).collect();
     let mut edges = Vec::new();
     for s in &content.concordia.ring_road.segments {
         edges.push((s.from.to_lowercase(), s.to.to_lowercase()));
     }
     for s in &content.concordia.crater_roads.segments {
-        let ends: Vec<Vec<String>> = [&s.from, &s.to]
-            .iter()
-            .map(|e| if e.as_str() == "ring" { ring.iter().cloned().collect() } else { vec![e.to_lowercase()] })
-            .collect();
+        let ends: Vec<Vec<String>> =
+            [&s.from, &s.to].iter().map(|e| if e.as_str() == "ring" { ring.iter().cloned().collect() } else { vec![e.to_lowercase()] }).collect();
         for a in &ends[0] {
             for b in &ends[1] {
                 edges.push((a.clone(), b.clone()));

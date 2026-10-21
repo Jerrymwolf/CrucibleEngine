@@ -38,7 +38,21 @@ pub struct Choice {
 /// whose positive alignment is the costly, other-regarding choice. Used to
 /// derive an option's expedience score since the content carries none.
 const EXPEDIENT: &[&str] = &["success", "ambition", "stewardship", "competence", "boldness", "authority", "order", "loyalty", "stability", "recognition"];
-const COSTLY: &[&str] = &["safety", "equality", "fairness", "justice", "honesty", "compassion", "service", "community", "respect", "accountability", "integrity", "candor", "kindness"];
+const COSTLY: &[&str] = &[
+    "safety",
+    "equality",
+    "fairness",
+    "justice",
+    "honesty",
+    "compassion",
+    "service",
+    "community",
+    "respect",
+    "accountability",
+    "integrity",
+    "candor",
+    "kindness",
+];
 
 pub fn expedience(content: &Content, option: &DilemmaOption) -> f64 {
     let sig = option_signals(content, option);
@@ -63,7 +77,11 @@ pub fn alignment(content: &Content, option: &DilemmaOption, stated: &[String]) -
         den += w;
         num += w * *sig.get(&canonical(content, v)).unwrap_or(&0) as f64 / 3.0;
     }
-    if den == 0.0 { 0.0 } else { num / den }
+    if den == 0.0 {
+        0.0
+    } else {
+        num / den
+    }
 }
 
 /// Pressure 0..1: intensity, the parish's own infrastructure loss, and time
@@ -81,7 +99,10 @@ fn rationale(dilemma: &Dilemma, option: &DilemmaOption, stated: &[String], p: f6
     if p < 0.35 {
         format!("Holding to {value}: {}. {}", option.label, option.consequence_sketch.immediate)
     } else if p < 0.65 {
-        format!("With {persona} pressing and conditions worsening, {} looked like the only workable path; we will revisit {value} once the storm passes.", option.label.to_lowercase())
+        format!(
+            "With {persona} pressing and conditions worsening, {} looked like the only workable path; we will revisit {value} once the storm passes.",
+            option.label.to_lowercase()
+        )
     } else {
         format!("No time left. {}. {value} will have to wait.", option.label)
     }
@@ -138,13 +159,7 @@ pub fn decide(content: &Content, state: &SimState, rng: &mut SimRng, parish: &st
         }
     }
     let (_, option) = best?;
-    Some(Choice {
-        option_id: option.id.clone(),
-        rationale: rationale(dilemma, option, stated, p),
-        controller: "ai".into(),
-        expired: false,
-        pressure: p,
-    })
+    Some(Choice { option_id: option.id.clone(), rationale: rationale(dilemma, option, stated, p), controller: "ai".into(), expired: false, pressure: p })
 }
 
 /// Whether a canonical value id is one of the costly, other-regarding values.
