@@ -3,6 +3,8 @@ title: "Proposal: a 60-minute live Crucible for the Jefferson Nursing Leaders co
 date: 2026-10-19
 type: decision-record
 status: proposed
+superseded_in_part_by: "[[decision-2026-10-21-parish-leadership-redesign]]"
+canon_note: "Format superseded: the session is 90 minutes (15 brief, 60 play in four 15-minute quarters, 15 debrief), per the 2026-10-21 decision and [[values-crucible-session-90]]. The conference, the twelve-card deck and one dilemma per table per quarter stand."
 project: Crucible Engine (The Values Crucible)
 tags: [crucible-engine, decision, conference, nursing, live-session, dilemmas]
 related:
@@ -11,6 +13,8 @@ related:
   - "[[values-crucible-experience-arc]]"
   - "[[dilemma-generation-framework]]"
   - "[[concordia-all-parishes]]"
+  - "[[decision-2026-10-21-parish-leadership-redesign]]"
+  - "[[values-crucible-session-90]]"
 ---
 
 # Proposal: a 60-minute live Crucible for nursing leaders
