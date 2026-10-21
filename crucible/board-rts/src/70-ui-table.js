@@ -20,7 +20,7 @@ const TableUI = {
     this.bind();
     R.onSelect = pid => { this.selected = pid; this.render(); };
     world.on('change', () => this.render());
-    world.on('result', f => { if (f.status === 'rejected' && f.reason === 'expired') this.last.expired = f; });
+    world.on('result', f => { if (f.status === 'rejected') this.rejected = { text: resultText(f), at: Date.now() }; else if (f.status === 'accepted') this.rejected = null; });
     this.render();
     if (R.ready) { R.cam.fit(1700); R.select(parish); }
   },
@@ -78,6 +78,8 @@ const TableUI = {
   nowLine(cur, c) {
     const w = this.world;
     if (w.conn !== 'open') return nowHTML('Reconnecting to the host… your moves are kept and sent when the link returns.', { urgent: true, label: 'Link' });
+    if (this.rejected && this.rejected.on === undefined) this.rejected.on = cur ? cur.id : null;   // shown until the next item takes the console
+    if (this.rejected && this.rejected.on === (cur ? cur.id : null) && Date.now() - this.rejected.at < 12000) return nowHTML(`<b style="color:var(--fg)">${esc(this.rejected.text)}</b> Nothing was recorded for that move.`, { urgent: true, label: 'Not sent' });
     if (!cur) {
       if (c.phase === 'lobby' || c.phase === 'island') return nowHTML('Locked. The island opens when every table has locked its statement. Read your brief and your sheet.', { quiet: true });
       if (c.phase === 'quarter_open') return nowHTML(`Read the quarter card aloud at your table. The clock starts when the DM starts it.`, { label: w.quarter ? w.quarter.title : 'Quarter' });
@@ -89,7 +91,7 @@ const TableUI = {
     }
     if (this.lockedNote && !cur.card && !cur.call && w.t - this.lockedNote.t <= 8 * STEP) return nowHTML(`Locked in: <b style="color:var(--fg)">${esc(this.lockedNote.text)}</b>. The next card or mayday arrives with its own deadline.`, { quiet: true, label: 'Locked in' });
     if (cur.card) { const s = w.secondsLeft(cur.card.deadline_t); return nowHTML(`Decide <b style="color:var(--fg)">${esc(cur.card.title)}</b> by ${clockStr(cur.card.deadline_t)}. Tap an option, then lock it in. If the deadline passes, the storm decides.`, { urgent: s < 60, label: 'Decide' }); }
-    if (cur.call) { const s = w.secondsLeft(cur.call.deadline_t); return nowHTML(`Answer <b style="color:var(--fg)">${esc(pname(cur.call.asker))}</b> on ${esc(cur.call.call_id)} by ${clockStr(cur.call.deadline_t)}. Silence counts as a refusal.`, { urgent: s < 60, label: 'Mayday' }); }
+    if (cur.call) { const s = w.secondsLeft(cur.call.deadline_t); return nowHTML(`Answer <b style="color:var(--fg)">${esc(pname(cur.call.asker))}</b> on ${esc(cur.call.call_id)} by ${clockStr(cur.call.deadline_t)}. If you give no answer, the storm decides.`, { urgent: s < 60, label: 'Mayday' }); }
     if (cur.id === 'values') return nowHTML('Pick three values in order, write the one line your parish will be held to, then lock it.', { label: 'Step 1' });
     if (cur.id === 'alloc') return nowHTML(`Allocate your tokens before the lock at ${clockStr(LOCK_T)}: keep them, or send some to a parish that needs them. Sealed until the lock.`, { label: 'Allocate' });
     if (cur.id === 'mayday') return nowHTML('You may call for aid this quarter. A mayday is public; the answer is theirs.', { quiet: true, label: 'Optional' });
@@ -139,7 +141,7 @@ const TableUI = {
       <div class="answers">${keys.map(k => `<button class="btn ${s.answer === k ? 'on' : ''}" data-answer="${esc(k)}" data-call="${esc(call.call_id)}" ${res && res.status === 'accepted' ? 'disabled' : ''}>${esc(call.answers[k].label || k)}${call.answers[k].count != null ? ` · ${call.answers[k].count}` : ''}</button>`).join('')}</div>
       ${needsCount ? `<div class="row"><span class="lbl">How many</span><button class="btn tiny" data-act="count-" data-call="${esc(call.call_id)}">−</button><b class="num">${s.count || call.answers[s.answer].count}</b><button class="btn tiny" data-act="count+" data-call="${esc(call.call_id)}">+</button></div>` : ''}
       ${s.answer && s.answer !== 'grant' ? `<div><span class="lbl">Reason (read out on the radio)</span><div class="reasons">${(PROFILE.answerReasons || []).map(r => `<button class="btn ${s.reason === r ? 'on' : ''}" data-reason="${esc(r)}" data-call="${esc(call.call_id)}">${esc(r)}</button>`).join('')}</div></div>` : ''}
-      ${res && res.status === 'accepted' ? `<div class="confirm" style="border-color:var(--ok)"><span>Answer sent: <b>${esc(call.answers[s.answer] ? call.answers[s.answer].label : s.answer)}</b>. ${esc(resultText(res))}</span></div>` : s.answer ? `<div class="confirm"><span style="flex:1">Send <b>${esc(call.answers[s.answer].label || s.answer)}</b> to ${esc(pname(call.asker))}${s.reason ? ` — “${esc(s.reason)}”` : ''}</span><button class="btn primary" data-act="answer" data-call="${esc(call.call_id)}" ${this.busy['answer:' + call.call_id] ? 'disabled' : ''}>Send answer</button></div>` : '<div class="dim">Choose an answer. Silence until the deadline is a refusal.</div>'}
+      ${res && res.status === 'accepted' ? `<div class="confirm" style="border-color:var(--ok)"><span>Answer sent: <b>${esc(call.answers[s.answer] ? call.answers[s.answer].label : s.answer)}</b>. ${esc(resultText(res))}</span></div>` : s.answer ? `<div class="confirm"><span style="flex:1">Send <b>${esc(call.answers[s.answer].label || s.answer)}</b> to ${esc(pname(call.asker))}${s.reason ? ` — “${esc(s.reason)}”` : ''}</span><button class="btn primary" data-act="answer" data-call="${esc(call.call_id)}" ${this.busy['answer:' + call.call_id] ? 'disabled' : ''}>Send answer</button></div>` : '<div class="dim">Choose an answer. If the deadline passes with no answer, the storm decides.</div>'}
       ${res && res.status === 'rejected' ? `<div class="dim" style="color:#ffb4ad">${esc(resultText(res))}</div>` : ''}</div>`;
   },
   allocHTML() {
@@ -152,7 +154,7 @@ const TableUI = {
       <div class="tray">${rows.map(([tok, n]) => { const s = sent(tok), k = kept(tok), remain = n - s, open = a.token === tok; return `<div class="trow"><div class="tk" style="color:${hexColor(TOKEN_COLOR[tok] || 0xffffff)}">${esc(TOKEN_GLYPH[tok] || tok)} <span class="num" style="color:var(--fg)">× ${n}</span><small>${esc(tname(tok))}</small></div>
         <div class="row">${entries.filter(e => e.token === tok).map(e => `<span class="pill ${e.to === 'keep' ? 'keep' : 'send'}">${e.to === 'keep' ? 'keep' : '→ ' + esc(pname(e.to))} × ${e.count}</span>`).join('')}${remain > 0 && !k ? `<span class="dim">${remain} undecided</span>` : ''}</div>
         <div class="row">${remain > 0 ? `<button class="btn tiny ${open ? 'on' : ''}" data-act="alloc-open" data-token="${esc(tok)}">Send…</button>` : ''}${remain > 0 && !k ? `<button class="btn tiny" data-act="alloc-keep" data-token="${esc(tok)}" data-count="${remain}">Keep ${remain}</button>` : ''}</div>
-        ${open ? `<div style="grid-column:1/-1" class="row"><span class="lbl">To</span>${PIDS.filter(x => x !== p).map(x => `<button class="btn tiny ${a.to === x ? 'on' : ''}" data-act="alloc-to" data-to="${esc(x)}" style="color:${pcolor(x)}">${esc(pname(x))}</button>`).join('')}<span class="spacer"></span><button class="btn tiny" data-act="alloc-count-">−</button><b class="num">${Math.min(a.count, remain)}</b><button class="btn tiny" data-act="alloc-count+">+</button><button class="btn primary" style="min-height:36px;font-size:13px;padding:6px 12px" data-act="alloc-send" ${a.to && !this.busy.alloc ? '' : 'disabled'}>Send ${Math.min(a.count, remain)} to ${a.to ? esc(pname(a.to)) : '…'}</button></div>` : ''}</div>`; }).join('')}</div>
+        ${open ? `<div style="grid-column:1/-1" class="row"><span class="lbl">To</span>${PIDS.filter(x => x !== p).map(x => `<button class="btn tiny ${a.to === x ? 'on' : ''}" data-act="alloc-to" data-to="${esc(x)}" style="color:${pcolor(x)}">${esc(pname(x))}</button>`).join('')}<span class="spacer"></span><button class="btn tiny" data-act="alloc-count-">−</button><b class="num">${Math.min(a.count, remain)}</b><button class="btn tiny" data-act="alloc-count+" data-max="${remain}">+</button><button class="btn primary" style="min-height:36px;font-size:13px;padding:6px 12px" data-act="alloc-send" data-count="${Math.min(a.count, remain)}" ${a.to && !this.busy.alloc ? '' : 'disabled'}>Send ${Math.min(a.count, remain)} to ${a.to ? esc(pname(a.to)) : '…'}</button></div>` : ''}</div>`; }).join('')}</div>
       ${this.last.alloc ? `<div class="dim">${esc(resultText(this.last.alloc))}</div>` : ''}</div>`;
   },
   maydayHTML(calls) {
@@ -182,9 +184,9 @@ const TableUI = {
         ${this.last.place && this.last.place.status === 'rejected' ? `<div class="dim" style="color:#ffb4ad">${esc(resultText(this.last.place))}</div>` : ''}</div>`;
     } else {
       const m = ms.find(x => x.key === placed.moment), eng = m ? w.reading(m) : null;
-      first = `<div class="place"><span class="lbl">1 · Your hardest moment</span><div class="row"><b>${esc(m ? m.label : placed.label || placed.moment)}</b></div>${anchorScaleHTML({ sel: placed.anchor, engine: m && !m.storm && eng != null ? eng : undefined })}
-        <p class="muted">${m && m.storm ? 'The storm decided this one, so the engine did not rate it. What would you have chosen?' : eng == null ? 'The engine found no value signal in this moment.' : eng === placed.anchor ? 'You and the engine read it the same way.' : `You placed it at ${esc(anchorName(placed.anchor))}; the engine read ${esc(anchorName(eng))}. Which reading would the people it touched give?`}</p>
-        ${m ? momentLineHTML(m, { signal: m.storm ? null : eng, debrief: true }) : ''}</div>
+      first = `<div class="place"><span class="lbl">1 · Your hardest moment</span><div class="row"><b>${esc(m ? m.label : placed.label || placed.moment)}</b></div>${anchorScaleHTML({ sel: placed.anchor, engine: readingEnds(eng) })}
+        <p class="muted">${m && m.storm ? 'The storm decided this one, so the engine did not rate it. What would you have chosen?' : eng == null ? 'The engine found no value signal in this moment.' : eng.tradeoff ? `The engine read ${esc(readingText(eng))}. Where between those ends would the people it touched put it?` : eng.lo === placed.anchor ? 'You and the engine read it the same way.' : `You placed it at ${esc(anchorName(placed.anchor))}; the engine read ${esc(anchorName(eng.lo))}. Which reading would the people it touched give?`}</p>
+        ${m ? momentLineHTML(m, { signal: m.storm || !eng || eng.tradeoff ? null : eng.lo, debrief: true }) : ''}</div>
         <div><span class="lbl">2 · Your record, value by value</span>${momentsHTML(p, w)}</div>`;
     }
     const qs = at('questions') ? `<div><span class="lbl">3 · Talk at your table</span><div class="qs small">${DEBRIEF_QUESTIONS.map((q, k) => `<div class="q"><b>${k + 1}</b><span>${esc(q)}</span></div>`).join('')}</div></div>` : '';
@@ -221,8 +223,8 @@ const TableUI = {
     onClick(root, '[data-act="answer"]', el => { const id = el.dataset.call, c = s.call[id], call = (this.world.private.calls || []).find(x => x.call_id === id); if (!c || !call) return; const payload = { call_id: id, answer: c.answer }; if (call.answers[c.answer] && call.answers[c.answer].count != null) payload.count = c.count || call.answers[c.answer].count; if (c.reason) payload.reason = c.reason; this.send('answer:' + id, 'answer_aid', payload, r => { if (r.status === 'accepted') this.lockedNote = { text: `${call.answers[c.answer] ? call.answers[c.answer].label : c.answer} to ${pname(call.asker)} on ${id}`, t: r.applied_t }; }); });
     onClick(root, '[data-act="alloc-open"]', el => { s.alloc = { token: s.alloc.token === el.dataset.token ? null : el.dataset.token, to: null, count: 1 }; this.render(); });
     onClick(root, '[data-act="alloc-to"]', el => { s.alloc.to = el.dataset.to; this.render(); });
-    onClick(root, '[data-act="alloc-count-"],[data-act="alloc-count+"]', el => { s.alloc.count = clamp(s.alloc.count + (el.dataset.act.endsWith('+') ? 1 : -1), 1, 9); this.render(); });
-    onClick(root, '[data-act="alloc-send"]', () => { const a = s.alloc, e = { token: a.token, to: a.to, count: a.count }; this.send('alloc', 'allocate', e, r => { if (r.status === 'accepted') { this.entered.push({ ...e, seq: r.input_seq, t: r.applied_t }); s.alloc = { token: null, to: null, count: 1 }; } }); });
+    onClick(root, '[data-act="alloc-count-"],[data-act="alloc-count+"]', el => { s.alloc.count = clamp(s.alloc.count + (el.dataset.act.endsWith('+') ? 1 : -1), 1, Number(el.dataset.max) || s.alloc.count); this.render(); });
+    onClick(root, '[data-act="alloc-send"]', el => { const a = s.alloc, e = { token: a.token, to: a.to, count: Number(el.dataset.count) || 1 }; this.send('alloc', 'allocate', e, r => { if (r.status === 'accepted') { this.entered.push({ ...e, seq: r.input_seq, t: r.applied_t }); s.alloc = { token: null, to: null, count: 1 }; } }); });
     onClick(root, '[data-act="alloc-keep"]', el => { const e = { token: el.dataset.token, to: 'keep', count: Number(el.dataset.count) }; this.send('alloc', 'allocate', e, r => { if (r.status === 'accepted') this.entered.push({ ...e, seq: r.input_seq, t: r.applied_t }); }); });
     onClick(root, '[data-act="mayday"]', el => { const id = el.dataset.call; this.send('mayday:' + id, 'mayday', { call_id: id }, r => { if (r.status === 'accepted') this.raised.add(id); }); });
     onClick(root, '[data-act="declare"]', () => this.send('declare', 'declare_hidden', {}));

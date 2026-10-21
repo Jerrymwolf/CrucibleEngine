@@ -161,6 +161,10 @@ async function rehearsal() {
   if (ok(!!tok, 'console offers the allocation round before the lock')) {
     await click(tbl, `[data-act="alloc-open"][data-token="${tok}"]`);
     await click(tbl, '[data-act="alloc-to"][data-to="summit"]');
+    for (let i = 0; i < 12; i++) await click(tbl, '[data-act="alloc-count+"]');
+    const step = await tbl.evaluate(t => { const b = document.querySelector('[data-act="alloc-send"]'); return { count: Number(b.dataset.count), label: b.textContent, held: ((__crucible.world.private || {}).stock || {})[t] }; }, tok);
+    ok(step.count >= 1 && (step.held == null || step.count <= step.held) && step.label.includes(`Send ${step.count} `), `the send stepper stops at what Haven holds and sends what it shows (${step.label.trim()})`);
+    for (let i = 0; i < 12; i++) await click(tbl, '[data-act="alloc-count-"]');
     await click(tbl, '[data-act="alloc-send"]');
     await waitResult(tbl, () => { const r = __crucible.world.results.slice(-1)[0]; return r && r.status === 'accepted' && r.applied_t > __crucible.world.t; }, 'allocation entry accepted for the next tick');
     for (let i = 0; i < 12 && await clickIf(tbl, '[data-act="alloc-keep"]'); i++) await sleep(150);
@@ -174,6 +178,7 @@ async function rehearsal() {
   ok(alloc.includes('send') && alloc.includes('keep'), `the core applied Haven's entries at the lock (${alloc.join(',')})`);
   const late = await intent(tbl, 'allocate', { token: tok || 'FUEL', to: 'summit', count: 1 });
   ok(late.status === 'rejected' && late.reason === 'after_lock', `an entry after the lock is rejected (${late.reason})`);
+  await waitFor(tbl, () => /Not accepted/.test(document.getElementById('now').textContent), null, 'a rejected move is shown on the now-line');
 
   log(' the first card: a deadline on the console, a private vote on the phone');
   await waitFor(tbl, () => ((__crucible.world.private || {}).pending || []).length > 0, null, "Haven's first card arrives");
@@ -285,8 +290,9 @@ async function rehearsal() {
   await dmStep('moments'); await shot(proj, '23-projector-debrief-moments');
   await dmStep('questions'); await shot(proj, '23b-projector-debrief-questions');
   await dmStep('pattern'); await shot(proj, '24-projector-debrief-pattern');
-  ok(await proj.evaluate(() => { const rows = [...document.querySelectorAll('.pattern .pr:not(.charter-row)')].map(x => x.innerText), pp = [...document.querySelectorAll('.pattern .pp')].map(x => x.innerText).join(' '); return rows.length > 0 && rows.every(r => /gave way/.test(r) && /held/.test(r)) && !PIDS.some(p => pp.includes(pname(p))); }), 'the room pattern counts pressure won and held, by actor, and names no table beside a reading');
+  ok(await proj.evaluate(() => { const rows = [...document.querySelectorAll('.pattern .pr:not(.charter-row):not(.none)')].map(x => x.innerText), all = document.querySelector('.pattern').innerText; return rows.length > 0 && rows.every(r => /gave way/.test(r) && /held/.test(r)) && !PIDS.some(p => all.includes(pname(p))); }), 'the room pattern counts pressure won and held, by form, and names no parish anywhere');
   ok(await proj.evaluate(() => document.querySelectorAll('.pattern .pp').length >= 1), 'the wall shows tables\' placements beside the engine\'s reading');
+  ok(await proj.evaluate(() => PIDS.every(p => __crucible.world.moments(p).every(m => m.pressure || !Object.values(m.signals).includes(-2)))), 'a moment reads Capitulating (-2) only where a pressure was named');
   await dmStep('gap'); await settle(tbl, 300); await shot(tbl, '25-table-debrief-gap');
   ok(await tbl.evaluate(() => /phones against your table/i.test(document.body.innerText) && /\d+ with · \d+ against/.test(document.body.innerText)), 'the console shows its own phones against its cards, as counts');
   const first = await proj.evaluate(() => debriefSteps(__crucible.world.debrief).find(s => s.id.startsWith('secret:')).id);

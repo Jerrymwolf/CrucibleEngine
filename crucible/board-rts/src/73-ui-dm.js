@@ -56,7 +56,7 @@ const DMUI = {
     setHTML($('rail'), steps.map((s, i) => `<div class="step ${i < ci ? 'done' : i === ci ? 'now' : ''}"><i>${i < ci ? '✓' : i + 1}</i><span>${esc(s.label)}<br><span class="dim" style="font-size:11px">${esc(s.sub)}</span></span></div>`).join(''));
     const na = this.nextAction(c);
     setHTML($('next'), na ? `${this.armed === na.kind ? `<button class="btn primary" data-act="confirm">Confirm: ${esc(na.label)}</button><button class="btn" data-act="disarm">Cancel</button>` : `<button class="btn primary" data-act="next" ${this.busy.next ? 'disabled' : ''}>${esc(na.label)}</button>`}<span class="muted" style="max-width:300px">${esc(na.note)}${na.warn ? `<br><span style="color:var(--degraded)">${esc(na.warn)}</span>` : ''}</span><span class="spacer"></span>${c.phase === 'debrief' ? `<button class="btn tiny" data-act="dstep-back">Back a step</button><button class="btn tiny" data-act="export-now">Export</button>` : ''}${['running', 'paused', 'quarter_open'].includes(c.phase) ? `<button class="btn tiny" data-act="advance" title="advance one tick">+1 tick</button><button class="btn tiny" data-act="skip">Skip to ${clockStr(c.quarter_end_t)}</button>` : ''}${this.last.next && this.last.next.kind === na.kind ? `<span class="dim" style="font-size:11px">${esc(resultText(this.last.next))}</span>` : ''}` : '');
-    const seats = priv.seats || [], clients = priv.clients || [], pending = priv.pending || [], calls = priv.calls || [];
+    const live = this.world.roster || priv, seats = live.seats || priv.seats || [], clients = live.clients || priv.clients || [], pending = priv.pending || [], calls = priv.calls || [];
     setHTML($('tables-n'), `${seats.filter(s => s.console === 'held').length}/${ROSTER.length} consoles · ${clients.filter(x => x.role === 'phone' && x.connected).length} phones`);
     setHTML($('tables'), ROSTER.map(p => {
       const s = seats.find(x => x.parish === p) || { console: 'free', phones: 0 }, card = pending.find(x => x.parish_id === p), call = calls.find(x => x.holder === p), asked = calls.find(x => x.asker === p);
@@ -119,7 +119,7 @@ const DMUI = {
         ${this.last.enter ? `<div class="dim">${esc(resultText(this.last.enter))}</div>` : ''}</div></div>`;
     }
     if (this.dialog === 'promote') {
-      const p = this.sel.table, phones = (priv.clients || []).filter(x => x.parish === p && x.connected && x.role !== 'console' && !x.bot), seat = (priv.seats || []).find(s => s.parish === p);
+      const p = this.sel.table, live = this.world.roster || priv, phones = (live.clients || priv.clients || []).filter(x => x.parish === p && x.connected && x.role !== 'console' && !x.bot), seat = (live.seats || priv.seats || []).find(s => s.parish === p);
       return `<div class="dialog"><div class="box panel"><div class="row"><h2 style="color:${pcolor(p)}">${esc(pname(p))}'s console seat</h2>${close}</div><p class="dim">Console: ${esc(seat ? seat.console : 'free')}. Give the seat to a connected phone or a waiting device; the former holder becomes a phone.</p><div class="list">${phones.map(x => `<div class="it"><span>${esc(x.name || x.client_id)} <span class="dim">${esc(x.role)}</span></span><button class="btn tiny" data-act="reassign" data-client="${esc(x.client_id)}" data-parish="${p}">Make console</button></div>`).join('') || '<span class="dim">No other device of this table is connected.</span>'}</div>${this.last.seat ? `<div class="dim">${esc(resultText(this.last.seat))}</div>` : ''}</div></div>`;
     }
     if (this.dialog === 'swap') {

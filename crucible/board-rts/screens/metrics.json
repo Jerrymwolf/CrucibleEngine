@@ -2,120 +2,120 @@
   "speed": 36,
   "pages": {
     "dm": {
-      "boot_ms": 1781,
+      "boot_ms": 1828,
       "stages": {
-        "engine": 169,
-        "island": 179,
-        "shore": 224,
-        "routes": 225,
-        "welcome": 604,
-        "renderer": 698
+        "engine": 176,
+        "island": 200,
+        "shore": 246,
+        "routes": 247,
+        "welcome": 670,
+        "renderer": 775
       }
     },
     "projector": {
-      "boot_ms": 4521,
+      "boot_ms": 4404,
       "stages": {
-        "engine": 228,
-        "island": 242,
-        "shore": 310,
-        "routes": 312,
-        "welcome": 510,
-        "renderer": 601
+        "engine": 283,
+        "island": 309,
+        "shore": 383,
+        "routes": 384,
+        "welcome": 590,
+        "renderer": 702
       }
     },
     "table": {
-      "boot_ms": 2774,
+      "boot_ms": 2378,
       "stages": {
-        "engine": 272,
-        "island": 283,
-        "shore": 348,
-        "routes": 349,
-        "welcome": 605,
-        "renderer": 708
+        "engine": 237,
+        "island": 261,
+        "shore": 305,
+        "routes": 306,
+        "welcome": 477,
+        "renderer": 574
       }
     },
     "phone": {
-      "boot_ms": 893,
+      "boot_ms": 837,
       "stages": {
-        "engine": 288,
-        "island": 311,
-        "shore": 366,
-        "routes": 367,
-        "welcome": 567
+        "engine": 221,
+        "island": 255,
+        "shore": 300,
+        "routes": 301,
+        "welcome": 459
       }
     },
     "lobby-phone": {
-      "boot_ms": 762,
+      "boot_ms": 789,
       "stages": {
-        "engine": 188,
-        "island": 209,
-        "shore": 331,
-        "routes": 333
+        "engine": 177,
+        "island": 189,
+        "shore": 314,
+        "routes": 315
       }
     },
     "print": {
-      "boot_ms": 1116,
+      "boot_ms": 1114,
       "stages": {
-        "engine": 312
+        "engine": 222
       }
     },
     "projector-reduced": {
-      "boot_ms": 3688,
+      "boot_ms": 2190,
       "stages": {
-        "engine": 170,
-        "island": 184,
-        "shore": 223,
-        "routes": 224,
-        "welcome": 466,
-        "renderer": 551
+        "engine": 266,
+        "island": 296,
+        "shore": 336,
+        "routes": 337,
+        "welcome": 555,
+        "renderer": 655
       }
     },
     "ws-dm": {
-      "boot_ms": 1269,
+      "boot_ms": 1100,
       "stages": {
-        "engine": 183,
-        "island": 212,
-        "shore": 262,
-        "routes": 263,
-        "welcome": 461,
-        "renderer": 547
+        "engine": 192,
+        "island": 202,
+        "shore": 252,
+        "routes": 253,
+        "welcome": 431,
+        "renderer": 511
       }
     },
     "ws-projector": {
-      "boot_ms": 9104,
+      "boot_ms": 5843,
       "stages": {
-        "engine": 199,
-        "island": 214,
-        "shore": 335,
-        "routes": 336,
-        "welcome": 561,
-        "renderer": 2992
+        "engine": 273,
+        "island": 285,
+        "shore": 451,
+        "routes": 452,
+        "welcome": 653,
+        "renderer": 2778
       }
     },
     "ws-table": {
-      "boot_ms": 5074,
+      "boot_ms": 2383,
       "stages": {
-        "engine": 251,
-        "island": 274,
-        "shore": 334,
-        "routes": 336,
-        "welcome": 555,
-        "renderer": 666
+        "engine": 215,
+        "island": 225,
+        "shore": 277,
+        "routes": 278,
+        "welcome": 512,
+        "renderer": 594
       }
     },
     "ws-phone": {
-      "boot_ms": 748,
+      "boot_ms": 701,
       "stages": {
-        "engine": 182,
-        "island": 195,
-        "shore": 257,
-        "routes": 258
+        "engine": 200,
+        "island": 215,
+        "shore": 254,
+        "routes": 254
       }
     },
     "ws-bare-link": {
-      "boot_ms": 1417,
+      "boot_ms": 732,
       "stages": {
-        "engine": 182
+        "engine": 204
       }
     }
   },
@@ -163,33 +163,33 @@
     "hash": "cf4a4b8c3064b3d7146a260d8dbea0b588745f39c6dcb2a8b8b76461b6501e31",
     "ticks": 481
   },
-  "projector_fps": 10.00100010000938,
+  "projector_fps": 10.112586799704633,
   "run": {
-    "hash": "34c39fd1556cff5b0a59e12d6fa3fa32daf9219a105abad017aa9c08d929f9f0",
+    "hash": "e90788de38b8951fd599424dfa083417e07a06b08008258b4d09330fb3f04841",
     "inputs": 85,
     "ticks": 481,
     "decisions_by_tables": 21,
     "decisions_by_storm": 3
   },
   "host": {
-    "runs": 49,
-    "ms": 166,
+    "runs": 47,
+    "ms": 74,
     "errors": [],
     "inputs": 85,
     "log": 179
   },
   "ws": {
-    "code": "R9V7Q6",
-    "hash": "687a3cd2d90959fb23ee8fde0f1f7af1467ff40072e890745fa3497d57ea6816",
+    "code": "Z3ZZ9H",
+    "hash": "e70b3771e748702cd44be5bcd05b82f3a54420e6fe485cd0fac9ca0a870eadb9",
     "inputs": 7,
     "clients": 5
   },
   "errors": [],
   "failures": [],
   "notes": [
-    "projector frame rate while running on the software GPU: 10.0 fps (2504 ms sample)",
+    "projector frame rate while running on the software GPU: 10.1 fps (2504 ms sample)",
     "fog at landfall as Haven sees it: gateway, heartland, keystone, sterling, summit out of contact",
     "decisions: 21 by tables, 3 by the storm at a deadline; 13 aid answers, 1 expired"
   ],
-  "checked": "2026-10-21T15:29:24.227Z"
+  "checked": "2026-10-21T16:18:27.420Z"
 }

@@ -190,10 +190,18 @@ class World extends Emitter {
       if (!storm) for (const [v, sig] of Object.entries(e.values_signaled || {})) { const cur = m.signals[v]; if (cur == null || Math.abs(sig) > Math.abs(cur) || (Math.abs(sig) === Math.abs(cur) && sig < cur)) m.signals[v] = sig; }
       if (m.dilemma_id) { const d = DATA.dilemmas[m.dilemma_id] || {}; const o = (d.options || []).find(x => x.id === m.option_id); m.pressure = o && o.pressure || null; m.debrief = d.debrief || ''; m.letter = letterOf(m.dilemma_id, m.option_id); m.option_label = o ? o.label : m.option_id; }
     }
+    // Capitulating is giving way to a pressure: a -2 on a moment that carried none reads as Faltering.
+    for (const m of out.values()) if (!m.pressure) for (const [v, sig] of Object.entries(m.signals)) if (sig === -2) m.signals[v] = -1;
     return [...out.values()].sort((a, b) => a.t - b.t);
   }
-  /* the engine's reading of one moment: its strongest signal on any value (ties to the negative); null when nothing was chosen */
-  reading(m) { let r = null; for (const s of Object.values(m.signals)) if (r == null || Math.abs(s) > Math.abs(r) || (Math.abs(s) === Math.abs(r) && s < r)) r = s; return m.storm ? null : r; }
+  /* the engine's reading of one moment: { lo, hi } over its values, a trade-off when one value was served at
+     another's cost; null when the storm decided or nothing carried a signal */
+  reading(m) {
+    const sigs = Object.entries(m.signals);
+    if (m.storm || !sigs.length) return null;
+    const lo = Math.min(...sigs.map(([, s]) => s)), hi = Math.max(...sigs.map(([, s]) => s));
+    return { lo, hi, tradeoff: lo < 0 && hi > 0, served: sigs.filter(([, s]) => s > 0).sort((a, b) => b[1] - a[1]), cost: sigs.filter(([, s]) => s < 0).sort((a, b) => a[1] - b[1]) };
+  }
   /* per stated value: the chosen moments that touched it and the storm's apart; tested once two chosen moments did */
   gapRows(parish) {
     const stated = (this.teams[parish] || {}).stated_values || [], ms = this.moments(parish);

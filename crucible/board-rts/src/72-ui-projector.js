@@ -79,12 +79,12 @@ const ProjectorUI = {
   },
   patternHTML(nav) {
     const w = this.world, rp = roomPattern(w), pairs = placementPairs(w), t = rp.totals;
-    const line = (label, x) => `<div class="pr"><span>${esc(label)}</span><span class="won">${x.won} gave way</span><span class="held">${x.held} held</span><span class="storm">${x.storm} to the storm</span></div>`;
+    const line = (label, x) => x.won + x.held + x.storm ? `<div class="pr"><span>${esc(label)}</span><span class="won">${x.won} gave way</span><span class="held">${x.held} held</span><span class="storm">${x.storm} to the storm</span></div>` : `<div class="pr none"><span>${esc(label)}</span><span class="storm">on no card in this deck</span></div>`;
     return `<div class="full"><div class="kicker">Permission and pressure in this room</div><h2>Where pressure won, and where tables held</h2>
-      <div class="pattern"><div class="pcol"><div class="lbl2">From people with power over you</div>${line('All social pressure', t.social)}${rp.rows.filter(r => r.form !== 'situational').slice(0, 4).map(r => line(`${PRESSURE_FORM[r.form] || r.form}: ${r.actor}`, r)).join('')}
+      <div class="pattern"><div class="pcol"><div class="lbl2">From people with power over you</div>${line('All social pressure', t.social)}${rp.rows.filter(r => r.form !== 'situational').map(r => line(PRESSURE_FORM[r.form] || r.form, r)).join('')}
         <div class="lbl2">From the storm and the odds</div>${line('Situational pressure', t.situational)}
-        ${rp.charters.map(c => `<div class="lbl2">Permission on the table</div><div class="pr charter-row"><span>${esc(c.clause.title)}, on ${esc(pname(c.parish))}'s console all game</span><span class="${c.state === 'invoked' ? 'held' : 'won'}">${esc(c.state)}</span></div>`).join('')}</div>
-      <div class="pcol"><div class="lbl2">Hardest moments: the table's placement beside the engine's</div>${pairs.length ? pairs.map(x => `<div class="pp"><span>Table: <b>${signed(x.self)} ${esc(anchorName(x.self))}</b></span><span>Engine: <b>${x.storm || x.engine == null ? 'not rated' : `${signed(x.engine)} ${esc(anchorName(x.engine))}`}</b></span></div>`).join('') : '<div class="dim">No table has placed its moment yet.</div>'}</div></div>
+        ${rp.charters.map(c => `<div class="lbl2">Permission on the table</div><div class="pr charter-row"><span>${esc(c.clause.title)}, on one table's console all game</span><span class="${c.state === 'invoked' ? 'held' : 'storm'}">${esc(c.state)}</span></div>`).join('')}</div>
+      <div class="pcol"><div class="lbl2">Hardest moments: the table's placement beside the engine's</div>${pairs.length ? pairs.map(x => `<div class="pp"><span>Table: <b>${signed(x.self)} ${esc(anchorName(x.self))}</b></span><span>Engine: <b>${x.storm ? 'not rated' : esc(readingText(x.engine))}</b></span></div>`).join('') : '<div class="dim">No table has placed its moment yet.</div>'}</div></div>
       <p class="small">Counts across the room. No table is named.</p>${nav}</div>`;
   },
 };

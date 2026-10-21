@@ -108,8 +108,17 @@ function debriefSteps(db) {
 }
 function debriefStepOf(world) { const steps = debriefSteps(world.debrief), ds = world.debriefStep; const i = ds && ds.step != null ? clamp(ds.step, 0, steps.length - 1) : 0; return { i, step: steps[i], steps }; }
 function anchorScaleHTML(opts = {}) {
-  return `<div class="anchors ${opts.big ? 'big' : ''}">${ANCHORS.map(a => `<button class="anc ${opts.sel === a.v ? 'on' : ''} ${opts.engine === a.v ? 'eng' : ''} ${a.v >= -1 && a.v <= 1 ? 'mid' : ''}" ${opts.pick ? `data-anchor="${a.v}"` : 'disabled'}><b>${signed(a.v)}</b><span>${esc(a.name)}</span>${opts.sel === a.v ? '<i>you</i>' : ''}${opts.engine === a.v ? '<i class="e">engine</i>' : ''}</button>`).join('')}</div>`;
+  const eng = [].concat(opts.engine ?? []);   // one anchor, or both ends of a trade-off
+  return `<div class="anchors ${opts.big ? 'big' : ''}">${ANCHORS.map(a => `<button class="anc ${opts.sel === a.v ? 'on' : ''} ${eng.includes(a.v) ? 'eng' : ''} ${a.v >= -1 && a.v <= 1 ? 'mid' : ''}" ${opts.pick ? `data-anchor="${a.v}"` : 'disabled'}><b>${signed(a.v)}</b><span>${esc(a.name)}</span>${opts.sel === a.v ? '<i>you</i>' : ''}${eng.includes(a.v) ? '<i class="e">engine</i>' : ''}</button>`).join('')}</div>`;
 }
+/* the engine's reading in words: one anchor, or what a trade-off served and what it cost */
+function readingText(r) {
+  if (!r) return 'not rated';
+  if (!r.tradeoff) return `${signed(r.lo)} ${anchorName(r.lo)}`;
+  const part = xs => xs.map(([v, s]) => `${vname(v)} ${signed(s)}`).join(', ');
+  return `a trade-off: served ${part(r.served)}, at a cost to ${part(r.cost)}`;
+}
+function readingEnds(r) { return !r ? [] : r.tradeoff ? [r.lo, r.hi] : [r.lo]; }
 function momentLineHTML(m, opts = {}) {
   const sig = opts.signal != null ? opts.signal : null;
   return `<div class="mom ${m.storm ? 'storm' : ''}"><div class="mh">${m.storm ? '<span class="tag storm">the storm decided</span>' : sig != null ? `<span class="anc-chip ${sig > 0 ? 'pos' : sig < 0 ? 'neg' : ''}">${signed(sig)} ${esc(anchorName(sig))}</span>` : ''}<b>${esc(m.label)}</b>${m.letter ? `<span class="dim">${m.storm ? 'default ' : ''}${esc(m.letter)}: ${esc(m.option_label || '')}</span>` : ''}</div>
@@ -125,15 +134,16 @@ function momentsHTML(parish, world) {
     ${r.evidence.map(m => momentLineHTML(m, { signal: m.signal, debrief: true })).join('')}
     ${r.storm.length ? `<div class="stormlist"><span class="lbl">Left to the storm (not rated)</span>${r.storm.map(m => momentLineHTML(m, { debrief: true })).join('')}</div>` : ''}</div>`).join('')}</div>`;
 }
-/* the room's pattern (S4 step 4): every card that carried a pressure, room-wide, with no table named */
+/* the room's pattern (S4 step 4): every card that carried a pressure, room-wide, by form. Not by actor: every
+   actor belongs to one parish, so naming one names the table. */
 function roomPattern(world) {
-  const byActor = new Map(), totals = { social: { won: 0, held: 0, storm: 0 }, situational: { won: 0, held: 0, storm: 0 } };
+  const byActor = new Map(Object.keys(PRESSURE_FORM).filter(f => f !== 'situational').map(f => [f, { form: f, won: 0, held: 0, storm: 0 }])), totals = { social: { won: 0, held: 0, storm: 0 }, situational: { won: 0, held: 0, storm: 0 } };
   for (const p of ROSTER) for (const m of world.moments(p)) {
     if (!m.dilemma_id) continue;
     const d = DATA.dilemmas[m.dilemma_id] || {}, pressed = (d.options || []).filter(o => o.pressure);
     if (!pressed.length) continue;
     for (const o of pressed) {
-      const k = `${o.pressure.form}|${o.pressure.actor}`, row = byActor.get(k) || { form: o.pressure.form, actor: o.pressure.actor, won: 0, held: 0, storm: 0 };
+      const k = o.pressure.form, row = byActor.get(k) || { form: o.pressure.form, won: 0, held: 0, storm: 0 };
       const how = m.storm ? 'storm' : m.option_id === o.id ? 'won' : 'held';
       row[how]++; byActor.set(k, row); totals[o.pressure.form === 'situational' ? 'situational' : 'social'][how]++;
     }
@@ -143,7 +153,7 @@ function roomPattern(world) {
 }
 function placementPairs(world) {
   const pl = ((world.debriefStep || {}).placements || []).map(x => { const m = world.moments(x.parish_id).find(y => y.key === x.moment); return { self: x.anchor, engine: m ? world.reading(m) : null, storm: !!(m && m.storm) }; });
-  return pl.sort((a, b) => b.self - a.self || (b.engine ?? -9) - (a.engine ?? -9));   // sorted by value, so the order names no one
+  return pl.sort((a, b) => b.self - a.self || (b.engine ? b.engine.lo : -9) - (a.engine ? a.engine.lo : -9));   // sorted by value, so the order names no one
 }
 function statementHTML(parish, world, opts = {}) {
   const tm = world.teams[parish];
