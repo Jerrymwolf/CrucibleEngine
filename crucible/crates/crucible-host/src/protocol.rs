@@ -139,8 +139,12 @@ pub fn intent_rejected(client_seq: u64, reason: &str, message: impl Into<String>
 
 /// Console kinds; the DM sends them too, with `parish_id` in the payload.
 pub const CONSOLE_KINDS: &[&str] = &["lock_values", "allocate", "decide", "mayday", "answer_aid", "declare_hidden", "repair_send", "credit_line"];
-/// Phone kinds: recorded, never seen by the core.
-pub const PHONE_KINDS: &[&str] = &["personal_pick", "vote", "commitment"];
+/// Phone kinds: recorded, never seen by the core. The commitment is not one:
+/// it stays on the phone and never reaches the host.
+pub const PHONE_KINDS: &[&str] = &["personal_pick", "vote"];
+/// Console kinds the core never sees: the table's own placement of its
+/// hardest moment at the debrief, logged so the replay holds it.
+pub const TABLE_NOTE_KINDS: &[&str] = &["self_place"];
 /// DM kinds beyond the console kinds.
 pub const DM_KINDS: &[&str] = &[
     "open_island",
@@ -157,6 +161,7 @@ pub const DM_KINDS: &[&str] = &[
     "reassign",
     "flag",
     "debrief",
+    "debrief_step",
     "export",
 ];
 

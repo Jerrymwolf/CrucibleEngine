@@ -51,7 +51,7 @@ for (const d of dilemmasFile.ALL_DILEMMAS) {
     id: d.id, title: d.title, phase: d.phase, quarter: d.quarter || null, parish: d.parishId || null, setup: d.setup || '',
     personaId: d.personaId || null, personaLine: d.personaLine || '', defaultOptionId: d.defaultOptionId || null, valuesTested: d.valuesTested || [],
     later: d.later || '', debrief: d.debrief || '', cards: d.cards || [],
-    options: d.options.map(o => ({ id: o.id, label: o.label, description: o.description || '', board: o.board || (o.consequenceSketch || {}).immediate || '' })),
+    options: d.options.map(o => ({ id: o.id, label: o.label, description: o.description || '', board: o.board || (o.consequenceSketch || {}).immediate || '', pressure: o.pressure || null, cost: o.cost || '' })),
   };
 }
 for (const [p, asks] of Object.entries(session.ask || {})) for (const a of asks) if (!dilemmas[a.dilemmaId]) { console.error(`schedule for ${p} names unknown dilemma ${a.dilemmaId}`); process.exit(1); }

@@ -765,14 +765,6 @@
     },
     {
       "t": 480,
-      "state": "lost",
-      "groupId": "harvester-watch",
-      "share": 1.0,
-      "from": "at_risk",
-      "narrative": "Nobody reached the Pacific Harvester."
-    },
-    {
-      "t": 480,
       "state": "injured",
       "groupId": "dialysis-patients",
       "share": 0.2,

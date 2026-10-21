@@ -5,8 +5,9 @@
    engine from the seed with every input so far, and sends each client the view its role may see.
    Wall-clock time lives here (the tick timer, log stamps) and never reaches the core. */
 const CONSOLE_KINDS = ['lock_values', 'allocate', 'decide', 'mayday', 'answer_aid', 'declare_hidden', 'repair_send', 'credit_line'];
-const PHONE_KINDS = ['personal_pick', 'vote', 'commitment'];
-const DM_KINDS = ['open_island', 'open_quarter', 'start', 'resume', 'pause', 'advance', 'skip_ahead', 'heat', 'cool', 'swap', 'admit', 'reassign', 'flag', 'debrief', 'export'];
+const PHONE_KINDS = ['personal_pick', 'vote'];            // a commitment stays on the phone and is never sent (S4.2)
+const NOTE_KINDS = ['self_place'];                         // console kinds the core never sees: the table's own placement at the debrief (D7)
+const DM_KINDS = ['open_island', 'open_quarter', 'start', 'resume', 'pause', 'advance', 'skip_ahead', 'heat', 'cool', 'swap', 'admit', 'reassign', 'flag', 'debrief', 'debrief_step', 'export'];
 const PUBLIC_EVENTS = ['mayday', 'aid_answer', 'aid_expired', 'values_locked', 'decision', 'allocation', 'credit_line', 'token_returned'];
 const HISTORY_EVENTS = ['window_transition', 'cascade', 'isolation', 'connectivity', 'dilemma_presented', 'decision', 'route_cut', 'route_reopened', 'convoy_departed', 'convoy_arrived', 'convoy_turned_back', 'token_returned', 'allocation', 'values_locked', 'credit_line', 'mayday', 'aid_answer', 'aid_expired', 'resident_state', 'ship_sailed', 'consignment_missed', 'doses_lost', 'rejected'];
 const HISTORY_CAP = 400;
@@ -68,7 +69,7 @@ class LocalHost {
     this.conns = new Map();                  // transport key -> { key, send, onClose, client, lobby, name }
     this.clients = new Map();                // client_id -> client record
     this.seats = Object.fromEntries(ROSTER.map(p => [p, { console: null }]));
-    this.log = []; this.inputs = []; this.heat = []; this.flags = []; this.picks = {}; this.votes = {}; this.commitments = {};
+    this.log = []; this.inputs = []; this.heat = []; this.flags = []; this.picks = {}; this.votes = {}; this.placements = {};
     this.phase = 'lobby'; this.quarter = null; this.running = false; this.horizon = T_START; this.timer = null;
     this.seq = 0; this.stream = []; this.lastPhase = null;
     this.run = null; this.dirty = true; this.runs = 0; this.errors = [];
@@ -177,16 +178,16 @@ class LocalHost {
     const tick = this.tick();
     if (client.role === 'console') {
       const p = client.parish;
-      return { parish: p, secret_brief: (PROFILE.secretBriefs || {})[p] || '', pending: this.openCards(p), calls: this.openCalls(p), entries: this.entriesOf(p), stock: (tick.stock || {})[p] || {}, votes: this.voteCounts(p),
+      return { parish: p, secret_brief: (PROFILE.secretBriefs || {})[p] || '', pending: this.openCards(p), calls: this.openCalls(p), entries: this.entriesOf(p), stock: (tick.stock || {})[p] || {}, votes: this.voteCounts(p), my_placement: this.placements[p] || null, vote_split: this.phase === 'debrief' ? this.voteSplit(p) : null,
         inputs: this.log.filter(l => l.core && l.source.parish === p).map(l => ({ seq: l.seq, t: l.t, kind: l.kind, payload: l.payload, by: l.source.role })) };
     }
     if (client.role === 'phone') {
       const p = client.parish;
-      return { parish: p, pending: this.openCards(p), my_votes: this.myVotes(client.client_id, p), my_pick: this.picks[client.client_id] || null, my_commitment: this.commitments[client.client_id] || null };
+      return { parish: p, pending: this.openCards(p), my_votes: this.myVotes(client.client_id, p), my_pick: this.picks[client.client_id] || null };
     }
     if (client.role === 'dm') {
       return { briefs: PROFILE.secretBriefs || {}, pending: this.openCards(), calls: this.openCalls(), entries: Object.fromEntries(ROSTER.map(p => [p, this.entriesOf(p)])), stock: tick.stock || {},
-        votes: Object.fromEntries(ROSTER.map(p => [p, this.voteSplit(p)])), picks: this.picksView(), commitments: Object.values(this.commitments).length, seats: this.seatsView(), clients: this.clientsView(), flags: this.flags,
+        votes: Object.fromEntries(ROSTER.map(p => [p, this.voteSplit(p)])), picks: this.picksView(), placements: this.placements, seats: this.seatsView(), clients: this.clientsView(), flags: this.flags,
         intensity_offset: this.heat.reduce((a, h) => a + h.delta, 0), log_len: this.log.length, runs: this.runs, last_run_ms: Math.round(this.lastRunMs || 0), errors: this.errors, speed: this.speed, autopilot: this.autopilot };
     }
     return null;
@@ -201,7 +202,11 @@ class LocalHost {
     return s;
   }
   frameFor(entry, client) {
-    if (entry.type === 'phase') return mkFrame('phase', { seq: entry.seq, t: entry.t, kind: entry.kind, payload: entry.payload });
+    if (entry.type === 'phase') {
+      const f = mkFrame('phase', { seq: entry.seq, t: entry.t, kind: entry.kind, payload: entry.payload });
+      if (String(entry.kind).startsWith('debrief') && client.role !== 'projector') f.private = this.privateFor(client);   // no state frame follows the debrief
+      return f;
+    }
     const tick = this.run.ticks[idx(entry.t)];
     const f = mkFrame('state', { seq: entry.seq, t: entry.t, hash: tick.state_hash, clock: this.clockView(), public: publicTick(tick, client.role, client.parish) });
     if (client.role !== 'projector') f.private = this.privateFor(client);
@@ -210,7 +215,10 @@ class LocalHost {
   sequenced(type, t, extra) {
     const entry = Object.assign({ seq: ++this.seq, type, t }, extra || {});
     this.stream.push(entry);
-    if (type === 'phase') this.lastPhase = { kind: entry.kind, payload: entry.payload, t, seq: entry.seq };
+    // a late joiner still needs the debrief's briefs, so a step rides on the debrief_open it belongs to
+    if (type === 'phase') this.lastPhase = entry.kind === 'debrief_step' && this.lastPhase && this.lastPhase.kind === 'debrief_open'
+      ? { ...this.lastPhase, payload: { ...this.lastPhase.payload, step: entry.payload.step, step_id: entry.payload.id, placements: entry.payload.placements } }
+      : { kind: entry.kind, payload: entry.payload, t, seq: entry.seq };
     for (const c of this.conns.values()) if (c.client) c.send(this.frameFor(entry, c.client));
     return entry;
   }
@@ -329,6 +337,8 @@ class LocalHost {
       if (!cl.parish) return this.reject('no_seat');
       return this.consoleIntent(cl, cl.parish, kind, p);
     }
+    if (NOTE_KINDS.includes(kind)) { if (cl.role !== 'console' || !cl.parish) return this.reject('bad_role', `${kind} is a console kind`); return this.noteIntent(cl, kind, p); }
+    if (kind === 'commitment' && cl.role === 'phone') return this.reject('private', 'a commitment stays on the phone; nothing is sent');
     if (PHONE_KINDS.includes(kind)) { if (cl.role !== 'phone') return this.reject('bad_role', `${kind} is a phone kind`); return this.phoneIntent(cl, kind, p); }
     if (DM_KINDS.includes(kind)) { if (cl.role !== 'dm') return this.reject('bad_role', `${kind} is for the DM`); return this.dmIntent(cl, kind, p); }
     return this.reject('unknown_kind', kind);
@@ -435,14 +445,17 @@ class LocalHost {
         const seq = this.record(cl, kind, { dilemma_id: p.dilemma_id, option_id: p.option_id, late }, this.horizon); this.changed();
         return { status: 'accepted', input_seq: seq, applied_t: this.horizon, late };
       }
-      case 'commitment': {
-        const text = txt(p.text, 280); if (!text) return this.reject('bad_payload', 'text is required');
-        this.commitments[cl.client_id] = text;
-        const seq = this.record(cl, kind, { text }, this.horizon); this.changed();
-        return { status: 'accepted', input_seq: seq, applied_t: this.horizon };
-      }
     }
     return this.reject('unknown_kind', kind);
+  }
+  noteIntent(cl, kind, p) {
+    if (this.phase !== 'debrief') return this.reject('bad_phase', 'a table places its moment at the debrief');
+    const moment = typeof p.moment === 'string' ? p.moment.trim().slice(0, 80) : ''; if (!moment) return this.reject('bad_payload', 'self_place needs a moment');
+    if (!Number.isInteger(p.anchor) || p.anchor < -3 || p.anchor > 3) return this.reject('bad_payload', 'anchor must be an integer from -3 to 3');
+    const label = typeof p.label === 'string' ? p.label.slice(0, 120) : undefined;
+    const seq = this.record(cl, kind, { moment, anchor: p.anchor, label }, this.horizon);
+    this.placements[cl.parish] = { moment, anchor: p.anchor, label, seq }; this.changed();
+    return { status: 'accepted', input_seq: seq, applied_t: this.horizon };
   }
   dmIntent(cl, kind, p) {
     const ok = seq => ({ status: 'accepted', input_seq: seq, applied_t: this.horizon });
@@ -519,7 +532,16 @@ class LocalHost {
         this.phase = 'debrief'; this.running = false; clearTimeout(this.timer);
         const seq = this.record(cl, kind, {}, this.horizon);
         this.sequenced('phase', this.horizon, { kind: 'debrief_open', payload: { secret_order: PROFILE.secretOrder || ROSTER, briefs: PROFILE.secretBriefs || {}, debrief_question: PROFILE.debriefQuestion || '', commitment: PROFILE.commitment || '' } });
-        if (this.autopilot) this.botCommitments();
+        if (this.autopilot) this.botPlacements();
+        this.changed(); return ok(seq);
+      }
+      case 'debrief_step': {
+        if (this.phase !== 'debrief') return this.reject('bad_phase', 'the debrief is not open');
+        if (!Number.isInteger(p.step) || p.step < 0) return this.reject('bad_payload', 'debrief_step needs a step number');
+        const id = typeof p.id === 'string' ? p.id.slice(0, 40) : null;
+        const seq = this.record(cl, kind, { step: p.step, id }, this.horizon);
+        const placements = Object.entries(this.placements).map(([parish_id, v]) => ({ parish_id, moment: v.moment, anchor: v.anchor }));
+        this.sequenced('phase', this.horizon, { kind: 'debrief_step', payload: { step: p.step, id, placements } });
         this.changed(); return ok(seq);
       }
       case 'export': {
@@ -628,23 +650,30 @@ class LocalHost {
       if (q && q.id === 'recovery' && !b.credit && chance(0.04)) { b.credit = true; const to = pick(others); this.handleIntent(b.cl, 'credit_line', { to, text: `${pname(to)}'s crews kept the road open when ours could not.` }); }
     }
   }
-  botCommitments() { for (const b of Object.values(this.bots)) for (const ph of b.phones) this.handleIntent(ph, 'commitment', { text: (PROFILE.commitment || 'I will ___').replace(/\[[^\]]*\]/g, 'this') }); }
+  // each bot table places a moment it chose (the latest card it decided) a step below or above the middle, as tables often do
+  botPlacements() {
+    for (const [parish, b] of Object.entries(this.bots)) {
+      if (!b.active) continue;
+      const d = [...this.inputs].reverse().find(i => i.kind === 'decide' && i.parish_id === parish); if (!d) continue;
+      this.handleIntent(b.cl, 'self_place', { moment: `dilemma:${d.dilemma_id}`, anchor: (parish.length % 3) - 1, label: (DATA.dilemmas[d.dilemma_id] || {}).title || d.dilemma_id });
+    }
+  }
 
   /* ----- export, persistence, restore ----- */
   exportRun() {
     const req = { seed: this.seed, session: PROFILE.id, teams: this.engineTeams(), inputs: this.engineInputs(), intensity: this.curve(), live: false, until: this.horizon };
     const run = Engine.run(req);
     const votes = {}; for (const [p, byD] of Object.entries(this.votes)) { votes[p] = {}; for (const [d, by] of Object.entries(byD)) votes[p][d] = by; }
-    return { run, votes: { votes, picks: this.picks, commitments: this.commitments }, flags: this.flags, input_log: this.log, session: { code: this.code, seed: this.seed, profile: PROFILE.id, content_hash: this.version.content_hash, roster: ROSTER, public_url: this.publicUrl } };
+    return { run, votes: { votes, picks: this.picks, placements: this.placements }, flags: this.flags, input_log: this.log, session: { code: this.code, seed: this.seed, profile: PROFILE.id, content_hash: this.version.content_hash, roster: ROSTER, public_url: this.publicUrl } };
   }
   persistSoon() { clearTimeout(this._persistTimer); this._persistTimer = setTimeout(() => this.persist(), 400); }
   persist() {
-    store.set('host.' + this.code, { code: this.code, seed: this.seed, speed: this.speed, tokens: this.tokens, log: this.log, inputs: this.inputs, heat: this.heat, flags: this.flags, picks: this.picks, votes: this.votes, commitments: this.commitments, phase: this.phase, quarter: this.quarter, horizon: this.horizon, seq: this.seq, lastPhase: this.lastPhase, saved: Date.now(),
+    store.set('host.' + this.code, { code: this.code, seed: this.seed, speed: this.speed, tokens: this.tokens, log: this.log, inputs: this.inputs, heat: this.heat, flags: this.flags, picks: this.picks, votes: this.votes, placements: this.placements, phase: this.phase, quarter: this.quarter, horizon: this.horizon, seq: this.seq, lastPhase: this.lastPhase, saved: Date.now(),
       clients: [...this.clients.values()].filter(c => !c.bot).map(c => ({ client_id: c.client_id, resume_token: c.resume_token, role: c.role, parish: c.parish, name: c.name })), seats: this.seats });
     store.set('host.latest', this.code);
   }
   restoreFrom(s) {
-    this.log = s.log || []; this.inputs = s.inputs || []; this.heat = s.heat || []; this.flags = s.flags || []; this.picks = s.picks || {}; this.votes = s.votes || {}; this.commitments = s.commitments || {};
+    this.log = s.log || []; this.inputs = s.inputs || []; this.heat = s.heat || []; this.flags = s.flags || []; this.picks = s.picks || {}; this.votes = s.votes || {}; this.placements = s.placements || {};
     this.quarter = s.quarter ?? null; this.horizon = s.horizon ?? T_START; this.seq = s.seq || 0; this.lastPhase = s.lastPhase || null;
     this.phase = s.phase === 'running' ? 'paused' : (s.phase || 'lobby'); this.running = false;
     for (const c of s.clients || []) this.clients.set(c.client_id, { ...c, connected: false, conn: null, last_seq: 0, results: new Map(), bot: false });

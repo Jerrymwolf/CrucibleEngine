@@ -4,7 +4,8 @@
    table may see is on the map behind; everything private to the table is in the right column. */
 const TableUI = {
   world: null, parish: null, busy: {}, last: {}, raised: new Set(), creditSent: false, repairSent: false, entered: [],
-  sel: { values: [], statement: null, tab: null, card: {}, rationale: {}, call: {}, alloc: { token: null, to: null, count: 1 }, credit: { to: null, text: '' }, repair: { token: null, to: null, count: 1 }, secretOpen: false, picked: null },
+  sel: { values: [], statement: null, tab: null, card: {}, rationale: {}, call: {}, alloc: { token: null, to: null, count: 1 }, credit: { to: null, text: '' }, repair: { token: null, to: null, count: 1 }, secretOpen: false, picked: null, hardest: null, anchor: null },
+  lockedNote: null,
   init(world, parish) {
     this.world = world; this.parish = parish;
     document.body.classList.add('role-table');
@@ -47,12 +48,14 @@ const TableUI = {
     const w = this.world, p = this.parish; if (!w.ready) return;
     const priv = w.private || {}, c = w.clock || {}, items = this.items(), cur = this.current(items);
     setHTML($('tb'), topbarHTML(w, `${pname(p)} · table console`, pcolor(p)));
+    document.body.classList.toggle('debrief', c.phase === 'debrief');
     const own = PARISH[p], selp = this.selected && this.selected !== p ? this.selected : null, rep = selp && w.report(selp);
-    setHTML($('ptag'), `<div class="panel" style="padding:8px 12px;max-width:300px"><div class="row"><span class="chip" style="color:${pcolor(p)}">${esc(own.name)}</span><span class="dim">${esc(GEO[p].tag)}</span></div><div class="routes" style="margin-top:6px">${routesTouching(p).map(r => `<div class="r ${w.routeCut(r.id) ? 'cut' : ''}"><i></i><span>${esc(r.name)}${w.routeCut(r.id) ? ` · cut ${w.routeCutAt[r.id] != null ? clockStr(w.routeCutAt[r.id]) : ''}` : ''}</span></div>`).join('')}</div></div>
+    const charter = (PROFILE.charterClauses || {})[p], inPlay = c.phase && c.phase !== 'lobby' && c.phase !== 'debrief';
+    setHTML($('ptag'), `${charter && inPlay ? `<div class="panel charter"><span class="lbl">${esc(charter.title)} · your authority</span><div>${esc(charter.text)}</div></div>` : ''}<div class="panel" style="padding:8px 12px;max-width:300px"><div class="row"><span class="chip" style="color:${pcolor(p)}">${esc(own.name)}</span><span class="dim">${esc(GEO[p].tag)}</span></div><div class="routes" style="margin-top:6px">${routesTouching(p).map(r => `<div class="r ${w.routeCut(r.id) ? 'cut' : ''}"><i></i><span>${esc(r.name)}${w.routeCut(r.id) ? ` · cut ${w.routeCutAt[r.id] != null ? clockStr(w.routeCutAt[r.id]) : ''}` : ''}</span></div>`).join('')}</div></div>
       ${selp ? `<div class="panel" style="padding:8px 12px;max-width:300px"><div class="row"><span class="chip" style="color:${pcolor(selp)}">${esc(pname(selp))}</span>${w.isFogged(selp) ? `<span class="tag bad">${rep ? 'last report ' + clockStr(rep.t) : 'no contact'}</span>` : '<span class="tag ok">in contact</span>'}</div>${rep ? `<div class="tiles" style="margin-top:6px">${SYSTEMS.map(s => { const v = rep.infrastructure[s] ?? 0; return `<div class="tile"><span class="lbl">${esc(SYS_LABEL[s])}</span><span class="v" style="color:${hexColor(STATUS_HEX[status(v)])}">${Math.round(v)}</span></div>`; }).join('')}</div><div class="dim" style="margin-top:4px">${rep.isolated ? 'Isolated. ' : ''}Sheet: ${Object.entries(rep.stock || {}).map(([k, n]) => `${TOKEN_GLYPH[k] || k} ${n}`).join(' · ') || 'unknown'}</div>` : '<div class="dim">Nothing heard from this parish.</div>'}</div>` : ''}`);
     setHTML($('now'), this.nowLine(cur, c));
     setHTML($('queue'), items.length > 1 ? items.map(i => `<button class="btn tiny ${cur && cur.id === i.id ? 'on' : ''}" data-tab="${esc(i.id)}">${esc(i.label)}${i.deadline != null ? ` <span class="num" data-countdown="${i.deadline}"></span>` : ''}</button>`).join('') : '');
-    const head = cur ? ({ values: 'Parish values', alloc: 'Allocation round', mayday: 'Call for aid', recovery: 'Recovery moves' }[cur.id] || (cur.card ? 'Decide' : cur.call ? 'Answer the mayday' : 'Your move')) : (c.phase === 'debrief' ? 'After-action card' : c.phase === 'quarter_close' ? 'Quarter closed' : 'Your move');
+    const head = cur ? ({ values: 'Parish values', alloc: 'Allocation round', mayday: 'Call for aid', recovery: 'Recovery moves' }[cur.id] || (cur.card ? 'Decide' : cur.call ? 'Answer the mayday' : 'Your move')) : (c.phase === 'debrief' ? `Debrief · ${debriefStepOf(w).step.title}` : c.phase === 'quarter_close' ? 'Quarter closed' : 'Your move');
     setHTML($('action-h'), esc(head));
     let body;
     if (!cur) body = this.idleHTML(c);
@@ -80,9 +83,11 @@ const TableUI = {
       if (c.phase === 'quarter_open') return nowHTML(`Read the quarter card aloud at your table. The clock starts when the DM starts it.`, { label: w.quarter ? w.quarter.title : 'Quarter' });
       if (c.phase === 'paused') return nowHTML('The DM paused the clock. Keep talking; nothing moves.', { quiet: true, label: 'Paused' });
       if (c.phase === 'quarter_close') return nowHTML('Quarter closed. Say what you did and why. The DM opens the next quarter.', { quiet: true, label: 'Closed' });
-      if (c.phase === 'debrief') return nowHTML('Debrief. Your after-action card is here; the room sees the mirror on the wall.', { label: 'Debrief' });
+      if (c.phase === 'debrief') { const pl = (w.private || {}).my_placement || (this.last.place && this.last.place.status === 'accepted'); return nowHTML(pl ? 'Your record is on this console, for your table only. The wall shows the room, never a table.' : 'First: pick your hardest moment and place it on the scale, together, before you see anything else.', { label: 'Debrief' }); }
+      if (this.lockedNote) return nowHTML(`Locked in: <b style="color:var(--fg)">${esc(this.lockedNote.text)}</b>. Watch the island; the next card or mayday arrives with its own deadline.`, { quiet: true, label: 'Locked in' });
       return nowHTML('Watch the island. Your next card arrives with its deadline; a mayday may come first.', { quiet: true });
     }
+    if (this.lockedNote && !cur.card && !cur.call && w.t - this.lockedNote.t <= 8 * STEP) return nowHTML(`Locked in: <b style="color:var(--fg)">${esc(this.lockedNote.text)}</b>. The next card or mayday arrives with its own deadline.`, { quiet: true, label: 'Locked in' });
     if (cur.card) { const s = w.secondsLeft(cur.card.deadline_t); return nowHTML(`Decide <b style="color:var(--fg)">${esc(cur.card.title)}</b> by ${clockStr(cur.card.deadline_t)}. Tap an option, then lock it in. If the deadline passes, the storm decides.`, { urgent: s < 60, label: 'Decide' }); }
     if (cur.call) { const s = w.secondsLeft(cur.call.deadline_t); return nowHTML(`Answer <b style="color:var(--fg)">${esc(pname(cur.call.asker))}</b> on ${esc(cur.call.call_id)} by ${clockStr(cur.call.deadline_t)}. Silence counts as a refusal.`, { urgent: s < 60, label: 'Mayday' }); }
     if (cur.id === 'values') return nowHTML('Pick three values in order, write the one line your parish will be held to, then lock it.', { label: 'Step 1' });
@@ -94,10 +99,10 @@ const TableUI = {
   idleHTML(c) {
     const w = this.world, p = this.parish;
     if (c.phase === 'quarter_open' && w.quarterCard) return `<div class="dcard"><div class="lbl">${esc(w.quarterCard.title)}</div><div class="title">${esc(QUARTERS[w.quarterCard.quarter].name)}</div><p class="setup" style="font-size:15px">${esc(w.quarterCard.card)}</p><p class="dim">${esc(clockStr(w.quarterCard.from_t))} → ${esc(clockStr(w.quarterCard.to_t))}${w.quarterCard.second_move ? ` · second move: ${esc(w.quarterCard.second_move)}` : ''}</p></div>`;
-    if (c.phase === 'debrief') return this.afterActionHTML();
+    if (c.phase === 'debrief') return this.debriefHTML();
     if (c.phase === 'quarter_close') { const q = w.quarter; return `<div class="dcard"><div class="title">${esc(q ? q.title : 'Quarter')} closed</div><p class="muted">What you decided this quarter, and what the storm decided for you:</p>${decisionsHTML(p, w, { limit: 6, since: q ? q.fromT : T_START })}<div><span class="lbl">Your people</span>${peopleHTML(p, w, { why: true })}</div></div>`; }
     if (c.phase === 'lobby' || c.phase === 'island') return `<div class="dcard">${statementHTML(p, w)}${this.briefHTML()}</div>`;
-    return `<div class="dcard"><p class="muted">Nothing needs a decision right now. Cards and maydays arrive with the clock; the map shows what your parish can see.</p>${decisionsHTML(p, w, { limit: 4 })}</div>`;
+    return `<div class="dcard">${this.lockedNote ? `<div class="confirm" style="border-color:var(--ok);border-style:solid"><span>Locked in: <b>${esc(this.lockedNote.text)}</b> at ${clockStr(this.lockedNote.t)}.</span></div>` : ''}<p class="muted">Nothing needs a decision right now. Cards and maydays arrive with the clock; the map shows what your parish can see.</p>${decisionsHTML(p, w, { limit: 4 })}</div>`;
   },
   briefHTML() {
     const p = this.parish, own = PARISH[p], priv = this.world.private || {};
@@ -120,7 +125,7 @@ const TableUI = {
     const w = this.world, d = DATA.dilemmas[card.dilemma_id] || {}, sel = this.sel.card[card.dilemma_id], q = w.quarter, total = q && q.humanDeadlineTicks ? q.humanDeadlineTicks : Math.max(1, (card.deadline_t - card.t) / STEP);
     const votes = ((w.private || {}).votes || {})[card.dilemma_id] || 0, res = this.last['decide:' + card.dilemma_id], o = sel && card.options.find(x => x.id === sel);
     return `<div class="dcard"><div class="row">${radialHTML(card.deadline_t, total, 'Decide by')}<span class="spacer"></span><span class="votes">${votes ? `${votes} phone${votes === 1 ? '' : 's'} voted` : 'phones may vote'}</span></div>
-      <div class="title">${esc(card.title)}</div>${personaHTML(card.persona_id || d.personaId, d.personaLine)}<div class="setup">${esc(card.setup)}</div>
+      <div class="title">${esc(card.title)}</div>${personaHTML(card.persona_id || d.personaId, d.personaLine)}<div class="setup">${esc(card.setup)}</div>${(() => { const ch = (PROFILE.charterClauses || {})[this.parish]; return ch && ch.card === card.dilemma_id ? `<div class="charter-inline"><span class="lbl">${esc(ch.title)}</span> ${esc(ch.text)}</div>` : ''; })()}
       ${optionsHTML(card, sel, { disabled: !!res && res.status === 'accepted' })}
       ${res && res.status === 'accepted' ? `<div class="confirm" style="border-color:var(--ok)"><span>Locked in: <b>${letterOf(card.dilemma_id, this.sel.card[card.dilemma_id])}</b>. ${esc(resultText(res))}</span></div>` : sel ? `<div class="confirm"><input id="rationale" placeholder="One line on why (optional, goes in the record)" maxlength="280" value="${esc(this.sel.rationale[card.dilemma_id] || '')}" style="flex:1"><button class="btn primary" data-act="decide" data-card="${esc(card.dilemma_id)}" ${this.busy['decide:' + card.dilemma_id] ? 'disabled' : ''}>Lock in ${letterOf(card.dilemma_id, sel)}</button></div><div class="dim">${esc(o ? o.board || '' : '')}</div>` : `<div class="dim">Tap one option. You can change it until you lock it in.</div>`}
       ${res && res.status === 'rejected' ? `<div class="dim" style="color:#ffb4ad">${esc(resultText(res))}</div>` : ''}</div>`;
@@ -162,14 +167,32 @@ const TableUI = {
         ${this.repairSent ? `<div class="confirm" style="border-color:var(--ok)"><span>Sent. ${esc(resultText(this.last.repair))}</span></div>` : `<div class="row">${Object.entries(stock).filter(([, n]) => n > 0).map(([k, n]) => `<button class="btn tiny ${rp.token === k ? 'on' : ''}" data-act="repair-token" data-token="${esc(k)}">${esc(TOKEN_GLYPH[k] || k)} × ${n}</button>`).join('') || '<span class="dim">Nothing left on the sheet.</span>'}</div>
         ${rp.token ? `<div class="row"><span class="lbl">To</span>${others.map(x => `<button class="btn tiny ${rp.to === x ? 'on' : ''}" data-act="repair-to" data-to="${esc(x)}" style="color:${pcolor(x)}">${esc(pname(x))}</button>`).join('')}<span class="spacer"></span><button class="btn tiny" data-act="repair-count-">−</button><b class="num">${rp.count}</b><button class="btn tiny" data-act="repair-count+">+</button><button class="btn primary" style="min-height:36px;font-size:13px;padding:6px 12px" data-act="repair" ${rp.to && !this.busy.repair ? '' : 'disabled'}>Send ${rp.count} ${esc(TOKEN_GLYPH[rp.token] || rp.token)}</button></div>` : ''}${this.last.repair && this.last.repair.status === 'rejected' ? `<div class="dim" style="color:#ffb4ad">${esc(resultText(this.last.repair))}</div>` : ''}`}</div></div>`;
   },
-  afterActionHTML() {
-    const w = this.world, p = this.parish, db = w.debrief || {}, order = db.secret_order || ROSTER, briefs = db.briefs || {};
-    return `<div class="dcard"><div class="title">After-action card · ${esc(pname(p))}</div>${statementHTML(p, w)}
-      <div><span class="lbl">Stated against enacted</span>${gapHTML(p, w, { evidence: true })}</div>
-      <div><span class="lbl">What you decided</span>${decisionsHTML(p, w, { limit: 12 })}</div>
-      <div><span class="lbl">Your people</span>${peopleHTML(p, w, { why: true })}</div>
-      ${Object.keys(briefs).length ? `<div><span class="lbl">The six secrets</span><div class="list">${order.filter(x => briefs[x]).map(x => `<div class="it" style="border-left:3px solid ${pcolor(x)};${x === p ? 'background:rgba(143,184,255,.08)' : ''}"><span><b>${esc(pname(x))}</b><br><span class="muted">${esc(briefs[x])}</span></span></div>`).join('')}</div></div>` : ''}
-      ${db.debrief_question ? `<div class="now quiet"><b>Question</b><span>${esc(db.debrief_question)}</span></div>` : ''}</div>`;
+  /* the debrief on the console: private to the table (D2). The table places its hardest moment before it sees
+     the engine's reading (D7); then its record by value; later steps unlock the two questions, the gap and the secrets. */
+  debriefHTML() {
+    const w = this.world, p = this.parish, db = w.debrief || {}, priv = w.private || {}, { i, steps } = debriefStepOf(w);
+    const at = id => i >= steps.findIndex(x => x.id === id || x.id.startsWith(id));
+    const ms = w.moments(p), s = this.sel, placed = priv.my_placement || (this.last.place && this.last.place.status === 'accepted' ? s.placed : null);
+    let first;
+    if (!placed) {
+      const m = ms.find(x => x.key === s.hardest);
+      first = `<div class="place"><span class="lbl">1 · Your hardest moment</span><p class="muted">Which moment was hardest for this table? Pick one, agree where it sits on the scale, then place it. You see the engine's reading after.</p>
+        <div class="momlist">${ms.length ? ms.map(x => `<button class="btn mpick ${s.hardest === x.key ? 'on' : ''}" data-moment="${esc(x.key)}">${x.storm ? '<span class="tag storm">storm</span> ' : ''}${esc(x.label)}${x.letter ? ` · ${esc(x.letter)}` : ''}</button>`).join('') : '<span class="dim">No moments recorded.</span>'}</div>
+        ${m ? `${anchorScaleHTML({ pick: true, sel: s.anchor })}<div class="confirm"><span style="flex:1">${s.anchor != null ? `Place <b>${esc(m.label)}</b> at <b>${signed(s.anchor)} ${esc(anchorName(s.anchor))}</b>?` : 'Choose where it sits.'}</span><button class="btn primary" data-act="place" ${s.anchor != null && !this.busy.place ? '' : 'disabled'}>Place it</button></div>` : ''}
+        ${this.last.place && this.last.place.status === 'rejected' ? `<div class="dim" style="color:#ffb4ad">${esc(resultText(this.last.place))}</div>` : ''}</div>`;
+    } else {
+      const m = ms.find(x => x.key === placed.moment), eng = m ? w.reading(m) : null;
+      first = `<div class="place"><span class="lbl">1 · Your hardest moment</span><div class="row"><b>${esc(m ? m.label : placed.label || placed.moment)}</b></div>${anchorScaleHTML({ sel: placed.anchor, engine: m && !m.storm && eng != null ? eng : undefined })}
+        <p class="muted">${m && m.storm ? 'The storm decided this one, so the engine did not rate it. What would you have chosen?' : eng == null ? 'The engine found no value signal in this moment.' : eng === placed.anchor ? 'You and the engine read it the same way.' : `You placed it at ${esc(anchorName(placed.anchor))}; the engine read ${esc(anchorName(eng))}. Which reading would the people it touched give?`}</p>
+        ${m ? momentLineHTML(m, { signal: m.storm ? null : eng, debrief: true }) : ''}</div>
+        <div><span class="lbl">2 · Your record, value by value</span>${momentsHTML(p, w)}</div>`;
+    }
+    const qs = at('questions') ? `<div><span class="lbl">3 · Talk at your table</span><div class="qs small">${DEBRIEF_QUESTIONS.map((q, k) => `<div class="q"><b>${k + 1}</b><span>${esc(q)}</span></div>`).join('')}</div></div>` : '';
+    const split = priv.vote_split || {}, ds = w.decisionsOf(p);
+    const gap = at('gap') ? `<div><span class="lbl">5 · The gap: your phones against your table</span><div class="list">${ds.map(c => { const v = split[c.dilemma_id] || { count: 0, split: {} }, agree = v.split[c.decision.option_id] || 0; return `<div class="it"><span>${esc(c.title || c.dilemma_id)}<br><span class="dim">${c.decision.decided_by === 'storm' ? 'the storm decided' : `table chose ${letterOf(c.dilemma_id, c.decision.option_id)}`}</span></span><span class="num">${v.count ? `${agree} with · ${v.count - agree} against` : 'no phone votes'}</span></div>`; }).join('') || '<span class="dim">No cards.</span>'}</div></div>` : '';
+    const briefs = db.briefs || {}, shown = steps.slice(0, i + 1).filter(x => x.id.startsWith('secret:')).map(x => x.id.slice(7));
+    const secrets = shown.length ? `<div><span class="lbl">6 · The secrets so far</span><div class="list">${shown.filter(x => briefs[x]).map(x => `<div class="it" style="border-left:3px solid ${pcolor(x)};${x === p ? 'background:rgba(143,184,255,.08)' : ''}"><span><b>${esc(pname(x))}</b><br><span class="muted">${esc(briefs[x])}</span></span></div>`).join('')}</div></div>` : '';
+    return `<div class="dcard"><div class="title">${esc(pname(p))} · for this table only</div>${statementHTML(p, w)}${first}${qs}${gap}${secrets}<div><span class="lbl">Your people</span>${peopleHTML(p, w, { why: true })}</div></div>`;
   },
   afterRender() {
     const stm = $('stm'); if (stm) { stm.addEventListener('input', () => { this.sel.statement = stm.value; const c = $('stm-count'); if (c) c.textContent = `${stm.value.length}/140`; const ok = this.sel.values.length === VALUES_TO_PICK && stm.value.trim() && !stm.value.includes('___'); const b = document.querySelector('[data-act="lock"]'); if (b) b.disabled = !ok; }); }
@@ -188,11 +211,14 @@ const TableUI = {
     onClick(root, '[data-act="secret"]', () => { s.secretOpen = !s.secretOpen; this.render(); });
     onClick(root, '[data-act="lock"]', () => this.send('lock', 'lock_values', { values: s.values.slice(), statement: (s.statement || '').trim() }));
     onClick(root, '[data-opt]', el => { const cur = this.current(this.items()); if (!cur || !cur.card) return; s.card[cur.card.dilemma_id] = el.dataset.opt; this.render(); });
-    onClick(root, '[data-act="decide"]', el => { const id = el.dataset.card, ra = $('rationale'); this.send('decide:' + id, 'decide', { dilemma_id: id, option_id: s.card[id], rationale: (ra ? ra.value : s.rationale[id] || '').trim() || undefined }); });
+    onClick(root, '[data-act="decide"]', el => { const id = el.dataset.card, ra = $('rationale'), opt = s.card[id]; this.send('decide:' + id, 'decide', { dilemma_id: id, option_id: opt, rationale: (ra ? ra.value : s.rationale[id] || '').trim() || undefined }, r => { if (r.status === 'accepted') this.lockedNote = { text: `${letterOf(id, opt)} on ${(DATA.dilemmas[id] || { title: id }).title}`, t: r.applied_t }; }); });
+    onClick(root, '[data-moment]', el => { s.hardest = el.dataset.moment; this.render(); });
+    onClick(root, '[data-anchor]', el => { s.anchor = Number(el.dataset.anchor); this.render(); });
+    onClick(root, '[data-act="place"]', () => { const m = this.world.moments(this.parish).find(x => x.key === s.hardest); if (!m || s.anchor == null) return; s.placed = { moment: m.key, anchor: s.anchor, label: m.label }; this.send('place', 'self_place', { moment: m.key, anchor: s.anchor, label: m.label }); });
     onClick(root, '[data-answer]', el => { const id = el.dataset.call; s.call[id] = { ...(s.call[id] || {}), answer: el.dataset.answer }; this.render(); });
     onClick(root, '[data-reason]', el => { const id = el.dataset.call; s.call[id] = { ...(s.call[id] || {}), reason: el.dataset.reason }; this.render(); });
     onClick(root, '[data-act="count-"],[data-act="count+"]', el => { const id = el.dataset.call, c = s.call[id], call = (this.world.private.calls || []).find(x => x.call_id === id); if (!c || !call) return; const max = call.answers[c.answer].count || 1; c.count = clamp((c.count || max) + (el.dataset.act === 'count+' ? 1 : -1), 1, max); this.render(); });
-    onClick(root, '[data-act="answer"]', el => { const id = el.dataset.call, c = s.call[id], call = (this.world.private.calls || []).find(x => x.call_id === id); if (!c || !call) return; const payload = { call_id: id, answer: c.answer }; if (call.answers[c.answer] && call.answers[c.answer].count != null) payload.count = c.count || call.answers[c.answer].count; if (c.reason) payload.reason = c.reason; this.send('answer:' + id, 'answer_aid', payload); });
+    onClick(root, '[data-act="answer"]', el => { const id = el.dataset.call, c = s.call[id], call = (this.world.private.calls || []).find(x => x.call_id === id); if (!c || !call) return; const payload = { call_id: id, answer: c.answer }; if (call.answers[c.answer] && call.answers[c.answer].count != null) payload.count = c.count || call.answers[c.answer].count; if (c.reason) payload.reason = c.reason; this.send('answer:' + id, 'answer_aid', payload, r => { if (r.status === 'accepted') this.lockedNote = { text: `${call.answers[c.answer] ? call.answers[c.answer].label : c.answer} to ${pname(call.asker)} on ${id}`, t: r.applied_t }; }); });
     onClick(root, '[data-act="alloc-open"]', el => { s.alloc = { token: s.alloc.token === el.dataset.token ? null : el.dataset.token, to: null, count: 1 }; this.render(); });
     onClick(root, '[data-act="alloc-to"]', el => { s.alloc.to = el.dataset.to; this.render(); });
     onClick(root, '[data-act="alloc-count-"],[data-act="alloc-count+"]', el => { s.alloc.count = clamp(s.alloc.count + (el.dataset.act.endsWith('+') ? 1 : -1), 1, 9); this.render(); });

@@ -367,6 +367,21 @@
     "gateway"
   ],
   "debriefQuestion": "Which secret, had it been on the table at T-72h, would have changed the most decisions?",
-  "commitment": "The next time I feel [this pressure], I will [this action] to stay aligned with [this value].",
-  "pacingNote": "2026-10-21 audit fix (S6, D5): each quarter's cards open together; windows ~180 s prep, ~140 s approach, ~95 s landfall, ~150 s recovery; maydays never open while the holder's card is open; heat and cool move later windows by heatStepTicks. A1, L1 and L3 are answered by the holder's own card, so they open with it and share its window."
+  "commitment": "When ___ happens, I will ___.",
+  "pacingNote": "2026-10-21 audit fix (S6, D5): each quarter's cards open together; windows ~180 s prep, ~140 s approach, ~95 s landfall, ~150 s recovery; maydays never open while the holder's card is open; heat and cool move later windows by heatStepTicks. A1, L1 and L3 are answered by the holder's own card, so they open with it and share its window.",
+  "debriefQuestions": [
+    "What made compromise feel acceptable?",
+    "What made holding firm costly?"
+  ],
+  "charterClauses": {
+    "heartland": {
+      "title": "The Authority's charter",
+      "text": "The Priority Schedule 'yields to a declared public emergency'. Your board may set it aside when the Council has declared one.",
+      "card": "v3-recovery-heartland",
+      "invokedBy": [
+        "a",
+        "c"
+      ]
+    }
+  }
 }

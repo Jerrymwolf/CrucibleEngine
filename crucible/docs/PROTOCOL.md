@@ -45,8 +45,8 @@ The client reads the code from the path and the token from the fragment, keeps `
 
 | Role | Sends | Receives in `private` | Fog |
 |---|---|---|---|
-| `console` | `lock_values`, `allocate`, `decide`, `mayday`, `answer_aid`, `declare_hidden`, `repair_send`, `credit_line` | Own parish: open cards, open calls, allocation entries, stock, vote counts, the secret brief, own inputs | Yes |
-| `phone` | `personal_pick`, `vote`, `commitment` | Own parish: open cards, own votes and pick | Yes |
+| `console` | `lock_values`, `allocate`, `decide`, `mayday`, `answer_aid`, `declare_hidden`, `repair_send`, `credit_line`; at the debrief `self_place` | Own parish: open cards, open calls, allocation entries, stock, vote counts, the secret brief, own inputs; at the debrief its own placement and its own phones' vote split | Yes |
+| `phone` | `personal_pick`, `vote` (a `commitment` is refused as `private`: it stays on the phone) | Own parish: open cards, own votes and pick | Yes |
 | `projector` | `ack`, `ping` only | nothing | No |
 | `dm` | Every DM kind (section 9.3), and every console kind with `parish_id` in the payload (entering for a table) | Everything: true state, all six briefs, all open cards and calls, every table's entries and vote counts with their split, seats, clients, flags | No |
 
@@ -205,13 +205,15 @@ The run log's tick (`RUN_LOG_SCHEMA.md`) with its per-parish maps reduced to the
   "entries": [ { "token": "FUEL", "to": "summit", "count": 1, "seq": 12, "t": -4005 } ],   // own allocation entries before the lock (sealed to others)
   "stock": { "FUEL": 4, "GEN": 2 },
   "votes": { "v3-prep-haven": 4 },                                   // how many phones have voted on each open card; never the split
-  "inputs": [ { "seq": 12, "t": -4005, "kind": "allocate", "payload": { … }, "by": "console" } ] }   // this table's accepted inputs, oldest first
+  "inputs": [ { "seq": 12, "t": -4005, "kind": "allocate", "payload": { … }, "by": "console" } ],   // this table's accepted inputs, oldest first
+  "my_placement": { "moment": "dilemma:v3-landfall-haven", "anchor": -1, "label": "…", "seq": 610 },   // the table's own placement (D7), or null
+  "vote_split": { "v3-prep-haven": { "count": 4, "split": { "a": 3, "c": 1 }, "late": 0 } } }   // only once the debrief is open; null before
 ```
 
 **phone**
 ```jsonc
 { "parish": "haven", "pending": [ … as console … ],
-  "my_votes": { "v3-prep-haven": "a" }, "my_pick": ["service", "candor", "safety"], "my_commitment": "…" }
+  "my_votes": { "v3-prep-haven": "a" }, "my_pick": ["service", "candor", "safety"] }   // no commitment: it never leaves the phone
 ```
 
 **dm**
@@ -292,7 +294,14 @@ The payload is the core input's fields (`ENGINE_SPEC.md`, amendment of 2026-10-2
 |---|---|
 | `personal_pick` | `{ values: [3 deck ids] }` |
 | `vote` | `{ dilemma_id, option_id }` |
-| `commitment` | `{ text }` |
+
+A `commitment` from a phone is refused with reason `private`: the if-then commitment is kept on the phone and is never sent, logged or exported (spec S4.2).
+
+### 11.3a Console note kinds (logged, never seen by the core)
+
+| `kind` | payload | When |
+|---|---|---|
+| `self_place` | `{ moment, anchor, label? }`: `moment` is a moment key (`dilemma:<id>`, `aid:<call>`, `allocation`, `declare`, `recovery-support`), `anchor` an integer from −3 (Villainous) to +3 (Heroic) | At the debrief only (`bad_phase` otherwise). The table's own placement of its hardest moment before it sees the engine's reading (D7). The latest one counts. |
 
 ### 11.4 DM kinds
 
@@ -310,7 +319,8 @@ The payload is the core input's fields (`ENGINE_SPEC.md`, amendment of 2026-10-2
 | `reassign` | `{ parish_id, client_id }` | Gives the parish's console seat to that connected client (a phone promoted, a replacement tablet); the former holder becomes a phone |
 | `flag` | `{ text, parish_id? }` | A notable moment, recorded for the debrief |
 | `debrief` | `{}` | After the last quarter closes: phase `debrief_open` with every brief |
-| `export` | `{}` | Writes `run.json`, `votes.json` and `flags.json` to the session directory |
+| `debrief_step` | `{ step, id }` | At the debrief: the wall and the consoles move to that step of the eight (S4); phase `debrief_step`. Nothing advances on its own. |
+| `export` | `{}` | Writes `run.json`, `votes.json` (votes, picks, placements) and `flags.json` to the session directory |
 
 Reaching a quarter's last tick stops the clock and emits `quarter_close`. Every DM action is appended to the input log; there is no control that sets a level, undoes a consequence or deletes an input.
 
@@ -326,7 +336,10 @@ Reaching a quarter's last tick stops the clock and emits `quarter_close`. Every 
 | `resumed` | `{ quarter, seconds_per_tick }` |
 | `paused` | `{ quarter }` |
 | `quarter_close` | `{ quarter, id, title }` |
-| `debrief_open` | `{ secret_order, briefs: { parish: text }, debrief_question, commitment }` |
+| `debrief_open` | `{ secret_order, briefs: { parish: text }, debrief_question, commitment }` (`commitment` is the phone's if-then template) |
+| `debrief_step` | `{ step, id, placements: [ { parish_id, moment, anchor } ] }` |
+
+No `state` frame follows the debrief, so `debrief_open` and `debrief_step` frames also carry the recipient's `private` block (as in a `state` frame) to every role that has one.
 
 `welcome.bundle_hash` is the SHA-256 of the page the host serves. A client that knows its own build's hash may send it in `hello`; when it differs from the host's, the host answers `reload` so a stale cached page never plays. The hard check is `v`.
 

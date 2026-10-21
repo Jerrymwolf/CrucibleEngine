@@ -533,7 +533,18 @@ async fn play(sessions_dir: &Path) -> Played {
         let f = c.until(|f| f["type"] == "phase" && f["kind"] == "debrief_open").await;
         assert_eq!(f["payload"]["briefs"].as_object().unwrap().len(), 6, "every brief is read at the debrief");
     }
-    phones[0].accepted("commitment", json!({ "text": "The next time I feel the line, I will ask who is not in the room." })).await;
+    // the commitment never leaves the phone (S4.2)
+    phones[0].rejected("commitment", json!({ "text": "When I feel the line, I will ask who is not in the room." }), "private").await;
+    // D7: the table places its hardest moment, then the DM steps the wall
+    consoles.get_mut("haven").unwrap().rejected("self_place", json!({ "moment": "dilemma:v3-landfall-haven", "anchor": 4 }), "bad_payload").await;
+    consoles.get_mut("haven").unwrap().accepted("self_place", json!({ "moment": "dilemma:v3-landfall-haven", "anchor": -1, "label": "Landfall" })).await;
+    phones[0].rejected("self_place", json!({ "moment": "x", "anchor": 0 }), "bad_role").await;
+    dm.accepted("debrief_step", json!({ "step": 3, "id": "pattern" })).await;
+    let f = consoles.get_mut("gateway").unwrap().until(|f| f["type"] == "phase" && f["kind"] == "debrief_step").await;
+    assert_eq!(f["payload"]["step"], 3);
+    let placed = f["payload"]["placements"].as_array().unwrap();
+    assert_eq!(placed.len(), 1);
+    assert_eq!(placed[0]["anchor"], -1);
     consoles.get_mut("haven").unwrap().rejected("decide", json!({ "dilemma_id": "v3-recovery-haven", "option_id": "a" }), "session_over").await;
     dm.accepted("export", json!({})).await;
     for f in ["run.json", "votes.json", "flags.json", "input-log.jsonl", "session.json", "profile.json", "clients.json"] {

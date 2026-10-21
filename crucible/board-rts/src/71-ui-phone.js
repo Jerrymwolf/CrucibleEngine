@@ -1,9 +1,10 @@
 /* ---------- phone (portrait, private) ----------
    Three private moves and nothing else: the personal pick of values before the table locks, a vote on
    each card while the table talks, a commitment at the debrief. The screen never shows another
-   table's business and never shows the table's own secret. */
+   table's business and never shows the table's own secret. The commitment never leaves the phone (S4.2):
+   it is kept in this browser only, never sent to the host, never exported. */
 const PhoneUI = {
-  world: null, parish: null, busy: {}, last: {}, sel: { pick: [], vote: {}, commitment: null, pickSaved: false },
+  world: null, parish: null, busy: {}, last: {}, sel: { pick: [], vote: {}, when: null, will: null, pickSaved: false },
   init(world, parish) {
     this.world = world; this.parish = parish;
     document.body.classList.add('role-phone');
@@ -22,10 +23,14 @@ const PhoneUI = {
     const open = (priv.pending || []).filter(card => !(priv.my_votes || {})[card.dilemma_id] && !this.last['vote:' + card.dilemma_id]);
     let now, main;
     if (c.phase === 'debrief') {
-      const saved = priv.my_commitment || (this.last.commit && this.last.commit.status === 'accepted');
-      now = nowHTML(saved ? 'Saved. Thank you; keep it.' : 'Write the one commitment you will keep. Private to you.', { label: 'Debrief' });
-      main = `<div class="panel"><div class="body">${this.mineHTML(myPick)}
-        <div><span class="lbl">My commitment</span>${saved ? `<div class="statement">“${esc(priv.my_commitment || this.sel.commitment)}”</div>` : `<textarea id="commit" rows="3" maxlength="280" placeholder="${esc(PROFILE.commitment || 'The next time…, I will…')}">${esc(this.sel.commitment == null ? (PROFILE.commitment || '') : this.sel.commitment)}</textarea><button class="btn primary" data-act="commit" ${this.busy.commit ? 'disabled' : ''}>Save my commitment</button>`}${this.last.commit && this.last.commit.status === 'rejected' ? `<div class="dim">${esc(resultText(this.last.commit))}</div>` : ''}</div></div></div>`;
+      const kept = this.kept(), s = this.sel;
+      if (s.when == null) s.when = kept ? kept.when : ''; if (s.will == null) s.will = kept ? kept.will : '';
+      now = nowHTML(kept ? 'Kept on this phone. Nothing was sent; nobody else can see it.' : 'One commitment, for you alone. It stays on this phone: nothing is sent, nothing is exported.', { label: 'Debrief' });
+      main = `<div class="panel"><div class="body">
+        <div class="ifthen-form"><span class="lbl">My commitment</span>
+          ${kept && !this.editing ? `<div class="statement">“When ${esc(kept.when)}, I will ${esc(kept.will)}.”</div><button class="btn" data-act="commit-edit">Change it</button>` : `<label>When <input id="c-when" maxlength="140" placeholder="HQ asks me to keep the numbers quiet" value="${esc(s.when)}"></label><label>I will <input id="c-will" maxlength="140" placeholder="ask who is not in the room, out loud" value="${esc(s.will)}"></label><button class="btn primary" data-act="commit" ${s.when.trim() && s.will.trim() ? '' : 'disabled'}>Keep it on this phone</button>`}
+          <div class="dim">Write it as the moment you will meet again and the first thing you will do. Screenshot it if you want it later.</div></div>
+        ${this.mineHTML(myPick)}</div></div>`;
     } else if (open.length) {
       const card = open[0], d = DATA.dilemmas[card.dilemma_id] || {}, sel = this.sel.vote[card.dilemma_id], q = w.quarter, total = q && q.humanDeadlineTicks ? q.humanDeadlineTicks : Math.max(1, (card.deadline_t - card.t) / STEP);
       now = nowHTML('Your private vote. The table decides on the console; the gap between the two is shown at the debrief.', { label: 'Vote' });
@@ -40,7 +45,7 @@ const PhoneUI = {
       main = `<div class="panel"><div class="body">${this.mineHTML(myPick)}</div></div>`;
     }
     setHTML($('now'), now);
-    if (setHTML($('main'), main)) { const ct = $('commit'); if (ct) ct.addEventListener('input', () => { this.sel.commitment = ct.value; }); }
+    if (setHTML($('main'), main)) for (const [id, k] of [['c-when', 'when'], ['c-will', 'will']]) { const el = $(id); if (el) el.addEventListener('input', () => { this.sel[k] = el.value; const b = document.querySelector('[data-act="commit"]'); if (b) b.disabled = !(this.sel.when.trim() && this.sel.will.trim()); }); }
     setHTML($('feed'), feedHTML(w.feed.filter(f => f.sev !== 'private'), { limit: 15, empty: 'The radio is quiet.' }));
   },
   mineHTML(myPick) {
@@ -51,6 +56,9 @@ const PhoneUI = {
     const list = ds.length || voted.length ? `<div><span class="lbl">My votes against the table's calls</span><div class="mine">${ds.map(c => { const mine = votes[c.dilemma_id]; return `<div class="m"><span>${esc(c.title || c.dilemma_id)}</span><span>table ${letterOf(c.dilemma_id, c.decision.option_id)}${c.decision.decided_by === 'storm' ? ' <span class="tag storm">storm</span>' : ''}</span><span class="${mine && mine !== c.decision.option_id ? 'diff' : 'dim'}">${mine ? 'me ' + letterOf(c.dilemma_id, mine) : 'no vote'}</span></div>`; }).join('')}</div></div>` : '';
     return `${statementHTML(p, w, { pending: 'The table has not locked yet.' })}${picks}${list}`;
   },
+  commitKey() { return `commitment.${(this.world.session || {}).code || 'local'}.${this.parish}`; },
+  kept() { try { const v = JSON.parse(localStorage.getItem(this.commitKey()) || 'null'); return v && v.when && v.will ? v : null; } catch (e) { return this.sel.keptMem || null; } },
+  keep(v) { this.sel.keptMem = v; try { localStorage.setItem(this.commitKey(), JSON.stringify(v)); } catch (e) { /* private window: kept in memory for this visit */ } },
   async send(key, kind, payload, after) { if (this.busy[key]) return; this.busy[key] = true; this.render(); const r = await this.world.intent(kind, payload); this.busy[key] = false; this.last[key] = r; if (after) after(r); this.render(); },
   bind() {
     const root = $('app'), s = this.sel;
@@ -58,6 +66,7 @@ const PhoneUI = {
     onClick(root, '[data-act="pick"]', () => this.send('pick', 'personal_pick', { values: s.pick.slice() }, r => { if (r.status === 'accepted') s.pickSaved = true; }));
     onClick(root, '[data-opt]', el => { const card = ((this.world.private || {}).pending || [])[0]; const open = ((this.world.private || {}).pending || []).filter(c => !((this.world.private || {}).my_votes || {})[c.dilemma_id] && !this.last['vote:' + c.dilemma_id])[0] || card; if (!open) return; s.vote[open.dilemma_id] = el.dataset.opt; this.render(); });
     onClick(root, '[data-act="vote"]', el => { const id = el.dataset.card; this.send('vote:' + id, 'vote', { dilemma_id: id, option_id: s.vote[id] }); });
-    onClick(root, '[data-act="commit"]', () => { const ct = $('commit'); const text = (ct ? ct.value : s.commitment || '').trim(); if (!text) return; s.commitment = text; this.send('commit', 'commitment', { text }); });
+    onClick(root, '[data-act="commit"]', () => { const when = ($('c-when') || {}).value || s.when || '', will = ($('c-will') || {}).value || s.will || ''; if (!when.trim() || !will.trim()) return; this.keep({ when: when.trim().replace(/[.]+$/, ''), will: will.trim().replace(/[.]+$/, '') }); this.editing = false; this.render(); });
+    onClick(root, '[data-act="commit-edit"]', () => { this.editing = true; this.render(); });
   },
 };

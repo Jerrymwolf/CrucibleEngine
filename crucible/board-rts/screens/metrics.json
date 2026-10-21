@@ -2,120 +2,120 @@
   "speed": 36,
   "pages": {
     "dm": {
-      "boot_ms": 1778,
+      "boot_ms": 1766,
       "stages": {
-        "engine": 180,
+        "engine": 170,
         "island": 190,
-        "shore": 235,
-        "routes": 236,
-        "welcome": 599,
-        "renderer": 692
+        "shore": 236,
+        "routes": 237,
+        "welcome": 633,
+        "renderer": 722
       }
     },
     "projector": {
-      "boot_ms": 3756,
+      "boot_ms": 4102,
       "stages": {
-        "engine": 193,
-        "island": 217,
-        "shore": 261,
-        "routes": 262,
-        "welcome": 464,
-        "renderer": 542
+        "engine": 237,
+        "island": 249,
+        "shore": 315,
+        "routes": 316,
+        "welcome": 521,
+        "renderer": 634
       }
     },
     "table": {
-      "boot_ms": 2731,
+      "boot_ms": 2666,
       "stages": {
-        "engine": 243,
-        "island": 257,
-        "shore": 303,
-        "routes": 303,
-        "welcome": 488,
-        "renderer": 560
+        "engine": 305,
+        "island": 316,
+        "shore": 363,
+        "routes": 364,
+        "welcome": 567,
+        "renderer": 641
       }
     },
     "phone": {
-      "boot_ms": 815,
+      "boot_ms": 801,
       "stages": {
         "engine": 200,
-        "island": 227,
-        "shore": 277,
-        "routes": 278,
-        "welcome": 447
+        "island": 211,
+        "shore": 258,
+        "routes": 259,
+        "welcome": 429
       }
     },
     "lobby-phone": {
-      "boot_ms": 740,
+      "boot_ms": 698,
       "stages": {
-        "engine": 187,
-        "island": 202,
-        "shore": 309,
-        "routes": 310
+        "engine": 195,
+        "island": 209,
+        "shore": 264,
+        "routes": 265
       }
     },
     "print": {
-      "boot_ms": 833,
+      "boot_ms": 873,
       "stages": {
-        "engine": 180
+        "engine": 323
       }
     },
     "projector-reduced": {
-      "boot_ms": 20585,
+      "boot_ms": 2084,
       "stages": {
-        "engine": 206,
-        "island": 219,
-        "shore": 464,
-        "routes": 466,
-        "welcome": 673,
-        "renderer": 16393
+        "engine": 384,
+        "island": 406,
+        "shore": 503,
+        "routes": 504,
+        "welcome": 847,
+        "renderer": 939
       }
     },
     "ws-dm": {
-      "boot_ms": 1033,
+      "boot_ms": 1126,
       "stages": {
-        "engine": 171,
-        "island": 181,
-        "shore": 222,
-        "routes": 229,
-        "welcome": 418,
-        "renderer": 489
+        "engine": 242,
+        "island": 266,
+        "shore": 321,
+        "routes": 322,
+        "welcome": 513,
+        "renderer": 583
       }
     },
     "ws-projector": {
-      "boot_ms": 5847,
+      "boot_ms": 5334,
       "stages": {
-        "engine": 244,
-        "island": 254,
-        "shore": 353,
-        "routes": 354,
-        "welcome": 545,
-        "renderer": 2698
+        "engine": 168,
+        "island": 192,
+        "shore": 236,
+        "routes": 238,
+        "welcome": 411,
+        "renderer": 2420
       }
     },
     "ws-table": {
-      "boot_ms": 2508,
+      "boot_ms": 1860,
       "stages": {
-        "engine": 235,
-        "island": 265,
-        "shore": 316,
-        "routes": 317,
-        "welcome": 498,
-        "renderer": 616
+        "engine": 163,
+        "island": 186,
+        "shore": 239,
+        "routes": 240,
+        "welcome": 403,
+        "renderer": 501
       }
     },
     "ws-phone": {
-      "boot_ms": 734,
+      "boot_ms": 714,
       "stages": {
-        "engine": 187,
-        "island": 196,
-        "shore": 244,
-        "routes": 245
+        "engine": 174,
+        "island": 192,
+        "shore": 232,
+        "routes": 233
       }
     },
     "ws-bare-link": {
-      "boot_ms": 1167,
+      "boot_ms": 947,
       "stages": {
-        "engine": 192
+        "engine": 166
       }
     }
   },
@@ -141,12 +141,17 @@
     "19-phone-landfall",
     "20-table-recovery",
     "21-projector-debrief-counters",
-    "22-table-after-action",
-    "23-phone-commitment",
-    "24-projector-debrief-secret",
-    "25-projector-debrief-mirror",
-    "26-projector-debrief-credits",
+    "22-table-debrief-place",
+    "22b-table-debrief-moments",
+    "23-projector-debrief-moments",
+    "23b-projector-debrief-questions",
+    "24-projector-debrief-pattern",
+    "25-table-debrief-gap",
+    "26-projector-debrief-secret",
+    "26b-projector-debrief-credits",
     "27-projector-debrief-replay",
+    "27b-projector-debrief-commitment",
+    "23-phone-commitment",
     "28-print-pack",
     "ws-01-projector-q1",
     "ws-02-table-card",
@@ -155,36 +160,36 @@
     "ws-05-dm-debrief"
   ],
   "golden": {
-    "hash": "a92f76cb9c729157c1e0b772f5ebd2c7949c17fed7530bce9fd77360aeca2578",
+    "hash": "cf4a4b8c3064b3d7146a260d8dbea0b588745f39c6dcb2a8b8b76461b6501e31",
     "ticks": 481
   },
-  "projector_fps": 9.269272362119573,
+  "projector_fps": 10.018701576274468,
   "run": {
-    "hash": "79e5e39b0208b3f250627da0131dee1600f077c74969ef7c77a8e98ed9ab9325",
-    "inputs": 84,
+    "hash": "99ba7546da9e05349febc89203095e8d502ccc1b3a7e69fd5cbfeb9f96cb31bb",
+    "inputs": 85,
     "ticks": 481,
     "decisions_by_tables": 21,
     "decisions_by_storm": 3
   },
   "host": {
     "runs": 48,
-    "ms": 84,
+    "ms": 96,
     "errors": [],
-    "inputs": 84,
-    "log": 169
+    "inputs": 85,
+    "log": 178
   },
   "ws": {
-    "code": "WABJSG",
-    "hash": "e5249674b4f0b553abf6fb38538c0c6108063f606fb860810d9a44cf8e757703",
+    "code": "RJ77UX",
+    "hash": "687a3cd2d90959fb23ee8fde0f1f7af1467ff40072e890745fa3497d57ea6816",
     "inputs": 7,
     "clients": 5
   },
   "errors": [],
   "failures": [],
   "notes": [
-    "projector frame rate while running on the software GPU: 9.3 fps (2502 ms sample)",
+    "projector frame rate while running on the software GPU: 10.0 fps (2502 ms sample)",
     "fog at landfall as Haven sees it: gateway, heartland, keystone, sterling, summit out of contact",
-    "decisions: 21 by tables, 3 by the storm at a deadline; 12 aid answers, 1 expired"
+    "decisions: 21 by tables, 3 by the storm at a deadline; 13 aid answers, 1 expired"
   ],
-  "checked": "2026-10-21T06:10:29.736Z"
+  "checked": "2026-10-21T14:46:24.242Z"
 }

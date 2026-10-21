@@ -7,7 +7,7 @@
 use crate::codes;
 use crate::filter::{self, View, HISTORY_CAP};
 use crate::profile::{Profile, Quarter};
-use crate::protocol::{self as proto, Hello, Role, CONSOLE_KINDS, DM_KINDS, PHONE_KINDS};
+use crate::protocol::{self as proto, Hello, Role, CONSOLE_KINDS, DM_KINDS, PHONE_KINDS, TABLE_NOTE_KINDS};
 use crate::store::{LogEntry, Source, Store, CLIENTS_FILE, FLAGS_FILE, RUN_FILE, SESSION_FILE, VOTES_FILE};
 use anyhow::{anyhow, Context, Result};
 use crucible_core::log::{clock as sim_clock, RunLog};
@@ -154,7 +154,8 @@ pub struct Host {
     /// parish -> dilemma -> client -> vote
     votes: BTreeMap<String, BTreeMap<String, BTreeMap<String, Vote>>>,
     picks: BTreeMap<String, Vec<String>>,
-    commitments: BTreeMap<String, String>,
+    /// parish -> the table's placement of its hardest moment (D7).
+    placements: BTreeMap<String, Value>,
     flags: Vec<Value>,
     /// (t, ±2) from heat and cool.
     offsets: Vec<(i64, i64)>,
@@ -323,7 +324,7 @@ impl Host {
             clients: BTreeMap::new(),
             votes: BTreeMap::new(),
             picks: BTreeMap::new(),
-            commitments: BTreeMap::new(),
+            placements: BTreeMap::new(),
             flags: vec![],
             offsets: vec![],
             store,
@@ -534,6 +535,18 @@ impl Host {
             "heat" => self.offsets.push((e.t, 2)),
             "cool" => self.offsets.push((e.t, -2)),
             "flag" => self.flags.push(json!({ "seq": e.seq, "t": e.t, "text": str_field(&e.payload, "text"), "parish": str_field(&e.payload, "parish_id") })),
+            "debrief_step" => {
+                let placements: Vec<Value> =
+                    self.placements.iter().map(|(p, v)| json!({ "parish_id": p, "moment": v["moment"], "anchor": v["anchor"] })).collect();
+                let payload = json!({ "step": e.payload.get("step"), "id": str_field(&e.payload, "id"), "placements": placements });
+                self.emit_phase("debrief_step", e.t, payload);
+            }
+            "self_place" => {
+                if let Some(parish) = &e.source.parish {
+                    let label = str_field(&e.payload, "label");
+                    self.placements.insert(parish.clone(), json!({ "moment": e.payload["moment"], "anchor": e.payload["anchor"], "label": label, "seq": e.seq }));
+                }
+            }
             "vote" => {
                 if let (Some(parish), Some(client), Some(d), Some(o)) =
                     (&e.source.parish, &e.source.client_id, str_field(&e.payload, "dilemma_id"), str_field(&e.payload, "option_id"))
@@ -546,11 +559,6 @@ impl Host {
                 if let Some(client) = &e.source.client_id {
                     let values: Vec<String> = e.payload.get("values").and_then(|v| serde_json::from_value(v.clone()).ok()).unwrap_or_default();
                     self.picks.insert(client.clone(), values);
-                }
-            }
-            "commitment" => {
-                if let (Some(client), Some(text)) = (&e.source.client_id, str_field(&e.payload, "text")) {
-                    self.commitments.insert(client.clone(), text);
                 }
             }
             _ => {}
@@ -604,7 +612,15 @@ impl Host {
                 if client.role == Role::Lobby {
                     return None;
                 }
-                Some(proto::frame_from("phase", json!({ "seq": seq, "t": t, "kind": kind, "payload": payload })))
+                let mut f = json!({ "seq": seq, "t": t, "kind": kind, "payload": payload });
+                // no state frame follows the debrief, so its phase frames carry the private view
+                // (the console's own vote split and placement) to the roles that have one
+                if kind.starts_with("debrief") {
+                    if let Some(p) = self.private_view(client) {
+                        f["private"] = p;
+                    }
+                }
+                Some(proto::frame_from("phase", f))
             }
         }
     }
@@ -742,6 +758,27 @@ impl Host {
         Value::Object(m)
     }
 
+    /// dilemma -> { count, split: { option: n }, late }: counts only, never who.
+    fn vote_split(&self, parish: &str) -> Value {
+        let per: Map<String, Value> = self
+            .votes
+            .get(parish)
+            .map(|dilemmas| {
+                dilemmas
+                    .iter()
+                    .map(|(d, vs)| {
+                        let mut split: BTreeMap<&str, i64> = BTreeMap::new();
+                        for v in vs.values() {
+                            *split.entry(v.option_id.as_str()).or_default() += 1;
+                        }
+                        (d.clone(), json!({ "count": vs.len(), "split": split, "late": vs.values().filter(|v| v.late).count() }))
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+        Value::Object(per)
+    }
+
     fn private_view(&self, client: &Client) -> Option<Value> {
         match client.role {
             Role::Console => {
@@ -749,6 +786,9 @@ impl Host {
                 Some(json!({
                     "parish": p, "secret_brief": self.profile.brief(p), "pending": self.pending_for(Some(p)), "calls": self.calls_for(Some(p)),
                     "entries": self.entries_for(p), "stock": self.stock_of(p), "votes": self.vote_counts(p), "inputs": self.inputs_for(p),
+                    "my_placement": self.placements.get(p),
+                    // the table's own phones against its cards, as counts, once play is over (S4 step 5)
+                    "vote_split": if self.phase == Phase::Debrief { self.vote_split(p) } else { Value::Null },
                 }))
             }
             Role::Phone => {
@@ -760,32 +800,16 @@ impl Host {
                     .unwrap_or_default();
                 Some(json!({
                     "parish": p, "pending": self.pending_for(Some(p)), "my_votes": my_votes,
-                    "my_pick": self.picks.get(&client.id), "my_commitment": self.commitments.get(&client.id),
+                    "my_pick": self.picks.get(&client.id),
                 }))
             }
             Role::Dm => {
                 let entries: Map<String, Value> = self.profile.roster.iter().map(|p| (p.clone(), json!(self.entries_for(p)))).collect();
                 let stock: Map<String, Value> = self.parish_ids.iter().map(|p| (p.clone(), self.stock_of(p))).collect();
-                let votes: Map<String, Value> = self
-                    .votes
-                    .iter()
-                    .map(|(parish, dilemmas)| {
-                        let per: Map<String, Value> = dilemmas
-                            .iter()
-                            .map(|(d, vs)| {
-                                let mut split: BTreeMap<&str, i64> = BTreeMap::new();
-                                for v in vs.values() {
-                                    *split.entry(v.option_id.as_str()).or_default() += 1;
-                                }
-                                (d.clone(), json!({ "count": vs.len(), "split": split, "late": vs.values().filter(|v| v.late).count() }))
-                            })
-                            .collect();
-                        (parish.clone(), Value::Object(per))
-                    })
-                    .collect();
+                let votes: Map<String, Value> = self.votes.keys().map(|parish| (parish.clone(), self.vote_split(parish))).collect();
                 Some(json!({
                     "briefs": self.profile.secret_briefs, "pending": self.pending_for(None), "calls": self.calls_for(None), "entries": entries, "stock": stock,
-                    "votes": votes, "seats": self.seats_block(), "clients": self.clients_block(), "flags": self.flags,
+                    "votes": votes, "seats": self.seats_block(), "clients": self.clients_block(), "flags": self.flags, "placements": self.placements,
                     "intensity_offset": self.intensity_offset(), "log_len": self.log.len(),
                 }))
             }
@@ -1108,6 +1132,9 @@ impl Host {
         match role {
             Role::Lobby | Role::Projector => Err(("bad_role", format!("a {} sends no intents", role.as_str()))),
             Role::Phone => {
+                if kind == "commitment" {
+                    return Err(("private", "a commitment stays on the phone; nothing is sent".to_string()));
+                }
                 if !PHONE_KINDS.contains(&kind) {
                     return Err(("bad_role", format!("a phone does not send {kind}")));
                 }
@@ -1119,6 +1146,21 @@ impl Host {
                 Ok((seq, t))
             }
             Role::Console => {
+                if TABLE_NOTE_KINDS.contains(&kind) {
+                    let parish = seat.ok_or_else(|| ("no_seat", "no parish".to_string()))?.to_string();
+                    self.validate_note(kind, &payload)?;
+                    let t = self.horizon;
+                    let seq = self.record(LogEntry {
+                        seq: 0,
+                        t,
+                        wall: codes::wall_now(),
+                        source: source(Some(parish), role),
+                        kind: kind.into(),
+                        payload,
+                        core: false,
+                    });
+                    return Ok((seq, t));
+                }
                 if !CONSOLE_KINDS.contains(&kind) {
                     return Err(("bad_role", format!("a console does not send {kind}")));
                 }
@@ -1181,13 +1223,25 @@ impl Host {
                 Ok(())
             }
             "personal_pick" => self.check_values(payload),
-            "commitment" => {
-                if str_field(payload, "text").map(|t| t.trim().is_empty()).unwrap_or(true) {
-                    return Err(("bad_payload", "commitment needs text".to_string()));
-                }
-                Ok(())
-            }
             _ => Err(("unknown_kind", format!("no phone kind {kind}"))),
+        }
+    }
+
+    /// `self_place`: at the debrief, one moment of the table's own and an
+    /// anchor from Villainous (−3) to Heroic (+3).
+    fn validate_note(&self, kind: &str, payload: &Value) -> Result<(), Rejection> {
+        if kind != "self_place" {
+            return Err(("unknown_kind", format!("no console kind {kind}")));
+        }
+        if self.phase != Phase::Debrief {
+            return Err(("bad_phase", "a table places its moment at the debrief".to_string()));
+        }
+        if str_field(payload, "moment").map(|m| m.trim().is_empty()).unwrap_or(true) {
+            return Err(("bad_payload", "self_place needs a moment".to_string()));
+        }
+        match payload.get("anchor").and_then(|a| a.as_i64()) {
+            Some(a) if (-3..=3).contains(&a) => Ok(()),
+            _ => Err(("bad_payload", "anchor must be an integer from -3 to 3".to_string())),
         }
     }
 
@@ -1469,6 +1523,15 @@ impl Host {
                 }
                 Ok((self.record(entry(t, kind, payload, false)), t))
             }
+            "debrief_step" => {
+                if phase != Phase::Debrief {
+                    return bad_phase("debrief_step");
+                }
+                if payload.get("step").and_then(|v| v.as_u64()).is_none() {
+                    return Err(("bad_payload", "debrief_step needs a step number".to_string()));
+                }
+                Ok((self.record(entry(t, kind, payload, false)), t))
+            }
             "export" => {
                 let seq = self.record(entry(t, kind, payload, false));
                 self.export().map_err(|e| ("export_failed", e.to_string()))?;
@@ -1542,7 +1605,7 @@ impl Host {
     // ------------------------------------------------------------- export
 
     fn votes_export(&self) -> Value {
-        json!({ "votes": self.votes, "picks": self.picks, "commitments": self.commitments })
+        json!({ "votes": self.votes, "picks": self.picks, "placements": self.placements })
     }
 
     /// Writes `run.json`, `votes.json` and `flags.json` to the session

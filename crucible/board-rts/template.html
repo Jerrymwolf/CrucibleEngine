@@ -248,7 +248,7 @@ body.role-phone #app,body.role-print #app{position:static;pointer-events:auto}
 .role-projector .tcard b{font-family:var(--cond);letter-spacing:.1em;text-transform:uppercase;font-size:15px}
 .role-projector .tcard .s{font-size:13px;color:var(--fg-2)}
 .role-projector .tcard .s.card{color:var(--fg);font-weight:700}
-.role-projector .eye{position:absolute;left:50%;top:84px;transform:translateX(-50%);padding:10px 22px;font-family:var(--cond);font-size:34px;letter-spacing:.12em;text-transform:uppercase;border:1px solid #fff;background:rgba(10,14,20,.8);border-radius:4px}
+.role-projector .eye{position:absolute;left:50%;top:108px;transform:translateX(-50%);padding:10px 22px;font-family:var(--cond);font-size:34px;letter-spacing:.12em;text-transform:uppercase;border:1px solid #fff;background:rgba(10,14,20,.8);border-radius:4px}
 .role-projector .eye small{display:block;font-family:var(--ui);font-size:13px;letter-spacing:.04em;text-transform:none;color:var(--fg-2);font-weight:400;text-align:center}
 .role-projector .mm-label{display:none}
 .full{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:18px;padding:40px;background:rgba(10,14,20,.86);text-align:center}
@@ -287,6 +287,85 @@ body.role-phone #app,body.role-print #app{position:static;pointer-events:auto}
 .scrub{width:min(1200px,90vw);display:flex;flex-direction:column;gap:8px;align-items:stretch}
 .scrub input[type=range]{width:100%;accent-color:var(--accent)}
 .scrub .marks{display:flex;justify-content:space-between;font-size:12px;color:var(--fg-3);font-family:var(--mono)}
+
+/* the debrief: anchors, moments, the room's pattern (S4) */
+.anchors{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.anc{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border:1px solid var(--line);border-radius:3px;background:var(--panel-2);color:var(--fg-2);min-height:44px;position:relative}
+.anc.mid{background:var(--panel-3)}
+.anc b{font-family:var(--mono);font-size:15px;color:var(--fg)}
+.anc span{font-size:10.5px;line-height:1.15;text-align:center}
+.anc i{font-style:normal;font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--accent)}
+.anc i.e{color:var(--private)}
+.anc.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.anc.eng{border-color:var(--private)}
+.anc.on.eng{border-color:var(--ok)}
+.anc:disabled{cursor:default;opacity:1}
+.anchors.big{width:min(1500px,94vw);gap:10px}
+.anchors.big .anc{padding:16px 6px;background:rgba(21,28,37,.95)}
+.anchors.big .anc b{font-size:34px}
+.anchors.big .anc span{font-size:22px}
+.place{display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--line);border-radius:4px;background:var(--panel-2)}
+.momlist{display:flex;flex-wrap:wrap;gap:6px}
+.momlist .btn{white-space:normal;text-align:left;min-height:44px;font-size:12.5px}
+.vrec{display:flex;flex-direction:column;gap:10px}
+.vr{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:4px}
+.vr .vh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.vr .vh b{font-family:var(--cond);letter-spacing:.08em;text-transform:uppercase;font-size:15px}
+.mom{display:flex;flex-direction:column;gap:3px;padding:6px 8px;border-left:3px solid var(--line);background:var(--panel-2);font-size:13px}
+.mom.storm{border-left-color:var(--fg-3);opacity:.9}
+.mom .mh{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.mom .why{color:var(--fg);font-style:italic}
+.mom .press{font-size:12px;color:var(--degraded)}
+.mom .later{font-size:12px;color:var(--fg-2)}
+.anc-chip{font-family:var(--cond);letter-spacing:.06em;text-transform:uppercase;font-size:12px;padding:1px 6px;border-radius:2px;border:1px solid var(--line);white-space:nowrap}
+.anc-chip.pos{border-color:var(--ok);color:var(--ok)}
+.anc-chip.neg{border-color:var(--degraded);color:var(--degraded)}
+.stormlist{display:flex;flex-direction:column;gap:4px}
+.qs{display:flex;flex-direction:column;gap:18px;max-width:70ch;text-align:left}
+.qs .q{display:grid;grid-template-columns:56px 1fr;gap:16px;align-items:center;font-size:36px;line-height:1.25}
+.qs .q b{font-family:var(--mono);color:var(--accent);font-size:40px}
+.qs.small .q{grid-template-columns:24px 1fr;gap:8px;font-size:15px}
+.qs.small .q b{font-size:16px}
+.pattern{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;width:min(1700px,95vw);text-align:left}
+.pattern .pcol{display:flex;flex-direction:column;gap:10px}
+.pattern .lbl2{font-family:var(--cond);letter-spacing:.14em;text-transform:uppercase;font-size:22px;color:var(--accent);margin-top:6px}
+.pattern .pr{display:grid;grid-template-columns:1fr auto auto auto;gap:16px;align-items:baseline;font-size:22px;padding:8px 12px;background:rgba(21,28,37,.92);border-left:4px solid var(--line)}
+.pattern .pp{display:flex;justify-content:space-between;gap:16px;font-size:22px;padding:8px 12px;background:rgba(21,28,37,.92)}
+.pattern .won{color:var(--degraded);white-space:nowrap}
+.pattern .held{color:var(--ok);white-space:nowrap}
+.pattern .storm{color:var(--fg-3);white-space:nowrap}
+.full .ifthen{font-family:var(--cond);font-size:48px;letter-spacing:.04em}
+.charter{padding:8px 12px;max-width:300px;border-left:4px solid var(--ok);font-size:13px;display:flex;flex-direction:column;gap:4px}
+.charter-inline{border-left:3px solid var(--ok);padding:4px 10px;font-size:13px;background:rgba(155,227,176,.06)}
+.ifthen-form{display:flex;flex-direction:column;gap:8px}
+.ifthen-form label{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:15px}
+.ifthen-form input{font-size:16px;padding:10px;min-height:44px}
+.role-table.debrief .side .lower{display:none}
+.role-table.debrief .side{width:min(58vw,760px)}
+/* S5.2: the primary button stays in reach on a 1280x800 or 1024x768 tablet */
+.role-table .side .action .body .confirm{position:sticky;bottom:0;z-index:2;background:var(--bg);box-shadow:0 -8px 12px var(--bg)}
+@media (max-height:820px){.role-table .side .lower{max-height:22%}.dcard .setup{max-height:22vh}}
+/* S5.3: nothing on the wall under 22 px; headlines 28 px and up */
+.role-projector .full p.small,.role-projector .full .bigcounters .b,.role-projector .full .bigcounters .l,.role-projector .credits .c b,.role-projector .scrub .marks,.role-projector .stm .txt,.role-projector .stm .pending,.role-projector .stm .vals span,.role-projector .col,.role-projector .col .person,.role-projector .col .person .n,.role-projector .col .st,.role-projector .tag,.role-projector .full .kicker,.role-projector .secretcard .kicker,.role-projector .scrub .dim{font-size:22px}
+.role-projector .stm b,.role-projector .col b.pn{font-size:28px}
+.role-projector .credits .c,.role-projector .secretcard{font-size:26px}
+.role-projector .strip .feed,.role-projector .strip .al,.role-projector .tcard .s{font-size:22px}
+.role-projector .strip .al .t{font-size:22px}
+.role-projector .strip .al{grid-template-columns:96px 8px 1fr}
+.role-projector .strip .feed{max-height:190px}
+.role-projector .tcard b{font-size:24px}
+.role-projector .tcard{min-width:200px}
+.role-projector .topbar{height:96px}
+.role-projector .topbar .lbl,.role-projector .topbar .sub{font-size:22px;white-space:nowrap}
+.role-projector .topbar .sub .dim,.role-projector .topbar .sub .muted,.role-projector .topbar .chip,.role-projector .brand .who,.role-projector .topbar .conn,.role-projector .counter>.dim,.role-projector .counter>span.dim{display:none}
+.role-projector .strip .feed{flex:0 0 560px}
+.role-projector .strip>.panel:last-child{flex:1;min-width:0}
+.role-projector .tables .tcard{flex:1;min-width:0}
+.role-projector.overlay .strip{visibility:hidden}
+.role-projector .full{background:rgba(10,14,20,.94)}
+.role-projector .brand h1{font-size:28px}
+.role-projector .counter .bar{display:none}
+.role-projector .panel>header h2{font-size:22px}
 
 /* layout: DM console */
 .role-dm .rail{position:absolute;left:12px;top:72px;bottom:12px;width:230px;display:flex;flex-direction:column}

@@ -5,13 +5,20 @@
    count down from deadline_t at seconds_per_tick, re-anchored by every state frame (PROTOCOL.md 8). */
 const SEV = { info: '', warn: 'warn', critical: 'critical', good: 'good', human: 'human', private: 'private' };
 const FEED_SKIP = new Set(['degradation', 'consequence', 'chance', 'directive', 'narrative']);
-const ANSWER_LABEL = { grant: 'GRANT', refuse: 'REFUSE', part: 'PART', refuse_silent: 'SILENCE', warn_only: 'WARN ONLY', boats_to_hill: 'BOATS TO THE HILL', lobby: 'LOBBY' };
+const ANSWER_LABEL = { grant: 'GRANT', refuse: 'REFUSE', part: 'PART', refuse_silent: 'NO ANSWER (THE STORM DECIDED)', warn_only: 'WARN ONLY', boats_to_hill: 'BOATS TO THE HILL', lobby: 'LOBBY' };
 const answerLabel = (callId, answer) => { const c = CALL[callId]; return (c && c.answers[answer] && c.answers[answer].label) || ANSWER_LABEL[answer] || String(answer || '').toUpperCase(); };
 const optLabel = (dilemmaId, optionId) => { const d = DATA.dilemmas[dilemmaId]; const o = d && d.options.find(x => x.id === optionId); return o ? o.label : optionId; };
 const residentName = e => { if (e.card_id) { const c = DATA.residentCards.find(x => x.id === e.card_id); return c ? c.name : e.card_id; } const g = DATA.residentGroups.find(x => x.id === e.group_id); return g ? g.name : (e.group_id || 'residents'); };
 // a phase frame carries no clock block; the clock's phase follows the frame until the next state frame (none arrive while paused)
-const PHASE_CLOCK = { values_open: 'lobby', island_open: 'island', quarter_open: 'quarter_open', resumed: 'running', paused: 'paused', quarter_close: 'quarter_close', debrief_open: 'debrief' };
+const PHASE_CLOCK = { values_open: 'lobby', island_open: 'island', quarter_open: 'quarter_open', resumed: 'running', paused: 'paused', quarter_close: 'quarter_close', debrief_open: 'debrief', debrief_step: 'debrief' };
 
+function momentKey(e) { return e.gkind === 'dilemma' ? `dilemma:${e.gid}` : e.gkind === 'aid' ? `aid:${e.gid}` : e.gkind === 'repair' || e.gkind === 'credit' ? 'recovery-support' : e.gid === 'declare_hidden' ? 'declare' : 'allocation'; }
+function momentLabel(e) {
+  if (e.gkind === 'dilemma') return (DATA.dilemmas[e.gid] || { title: e.gid }).title;
+  if (e.gkind === 'aid') { const c = CALL[e.gid]; return `Mayday ${e.gid}${c ? ` from ${pname(c.asker)}` : ''}`; }
+  if (e.gkind === 'repair' || e.gkind === 'credit') return 'Recovery: repairs and credit';
+  return e.gid === 'declare_hidden' ? 'Declaring the hidden stock' : 'The allocation round';
+}
 function describe(e) {
   const P = id => pname(id);
   switch (e.kind) {
@@ -39,7 +46,7 @@ function describe(e) {
     case 'values_locked': return { sev: 'human', text: `${P(e.parish_id)} stated its values: ${(e.values || []).map(vname).join(', ')}${e.statement ? ` — "${e.statement}"` : ''}` };
     case 'credit_line': return { sev: 'good', text: `${P(e.parish_id)} credits ${P(e.to)}: "${e.text}"` };
     case 'mayday': return { sev: 'critical', text: `MAYDAY ${e.call_id}: ${P(e.asker)} asks ${P(e.holder)}${e.token ? ` for ${e.count} ${tname(e.token)}` : ''}. Answer by ${clockStr(e.deadline_t)}.` };
-    case 'aid_answer': return { sev: e.answer === 'grant' || e.answer === 'part' ? 'good' : 'critical', text: `${P(e.holder)} answers ${P(e.asker)} on ${e.call_id}: ${e.label || answerLabel(e.call_id, e.answer)}${e.count ? ` (${e.count})` : ''}${e.controller === 'silence' ? ' by silence' : ''}${e.delivered === false ? ` — ${e.note || 'nothing could travel'}` : ''}` };
+    case 'aid_answer': return { sev: e.answer === 'grant' || e.answer === 'part' ? 'good' : 'critical', text: e.controller === 'silence' ? `${P(e.holder)} gave ${P(e.asker)} no answer on ${e.call_id} (the storm decided: ${e.label || answerLabel(e.call_id, e.answer)})` : `${P(e.holder)} answers ${P(e.asker)} on ${e.call_id}: ${e.label || answerLabel(e.call_id, e.answer)}${e.count ? ` (${e.count})` : ''}${e.delivered === false ? ` — ${e.note || 'nothing could travel'}` : ''}` };
     case 'aid_expired': return { sev: 'critical', text: `${e.call_id}: no answer from ${P(e.holder)} before the window closed` };
     case 'resident_state': return { sev: e.state === 'lost' ? 'critical' : e.state === 'injured' || e.state === 'at_risk' ? 'warn' : 'good', text: `${residentName(e)}${e.count && e.group_id ? ` (${e.count})` : ''}: ${RES_LABEL[e.state] || e.state}${e.narrative ? ` — ${e.narrative}` : ''}` };
     case 'ship_sailed': return { sev: 'good', text: `${e.consignment === 'next' ? 'The next consignment' : `The ${e.consignment}`} sails with ${fmt(e.doses)} doses` };
@@ -137,7 +144,9 @@ class World extends Emitter {
       this.clock = c; this.anchor = { wall: performance.now(), t: this.t };
     }
     if (f.kind === 'quarter_open') this.quarterCard = f.payload;
-    if (f.kind === 'debrief_open') this.debrief = f.payload;
+    if (f.kind === 'debrief_open') { this.debrief = f.payload; const p = f.payload || {}; this.debriefStep = p.step != null ? { step: p.step, id: p.step_id, placements: p.placements || [] } : { step: 0, id: 'counters', placements: [] }; }
+    if (f.kind === 'debrief_step') this.debriefStep = f.payload || this.debriefStep;
+    if (f.private) this.private = f.private;
     if (f.kind === 'values_locked' && f.payload && f.payload.parish_id) this.teams[f.payload.parish_id] = { ...(this.teams[f.payload.parish_id] || {}), stated_values: f.payload.values || [], statement: f.payload.statement || null };
     if (!fromSnapshot) this.emit('phase', f);
     this.changed();
@@ -145,9 +154,9 @@ class World extends Emitter {
   ingest(t, e, live) {
     switch (e.kind) {
       case 'dilemma_presented': this.cards[e.parish_id + '|' + e.dilemma_id] = { parish_id: e.parish_id, dilemma_id: e.dilemma_id, title: e.title, presented_t: t, deadline_t: e.deadline_t, decision: null }; break;
-      case 'decision': { const k = e.parish_id + '|' + e.dilemma_id; const c = this.cards[k] || (this.cards[k] = { parish_id: e.parish_id, dilemma_id: e.dilemma_id, title: (DATA.dilemmas[e.dilemma_id] || {}).title, presented_t: null, deadline_t: null }); c.decision = { t, option_id: e.option_id, option_label: e.option_label, decided_by: e.decided_by || 'table', controller: e.controller, rationale: e.rationale }; this.scored.push({ t, parish_id: e.parish_id, gkind: 'dilemma', gid: e.dilemma_id, gopt: e.option_id, glabel: `${letterOf(e.dilemma_id, e.option_id)} on ${(DATA.dilemmas[e.dilemma_id] || { title: e.dilemma_id }).title}`, values_signaled: e.values_signaled || {}, decided_by: e.decided_by }); break; }
-      case 'allocation': this.scored.push({ t, parish_id: e.parish_id, gkind: e.entry === 'repair_send' ? 'repair' : 'allocation', gid: e.entry === 'declare_hidden' ? 'declare_hidden' : e.entry === 'keep_everything' ? 'allocate:keep' : `allocate:${e.token}`, gopt: e.entry === 'send' || e.entry === 'repair_send' ? `send:${e.to}` : e.entry === 'declare_hidden' ? 'declare' : e.entry, glabel: describe(e).text.replace(pname(e.parish_id) + ' ', ''), values_signaled: e.values_signaled || {} }); break;
-      case 'aid_answer': { const c = this.calls[e.call_id] || (this.calls[e.call_id] = { call_id: e.call_id, asker: e.asker, holder: e.holder }); c.answer = { t, answer: e.answer, label: e.label, count: e.count, controller: e.controller, delivered: e.delivered !== false }; this.scored.push({ t, parish_id: e.holder, gkind: 'aid', gid: e.call_id, gopt: e.answer, glabel: `${e.label || answerLabel(e.call_id, e.answer)} to ${pname(e.asker)} (${e.call_id})`, values_signaled: e.values_signaled || {} }); break; }
+      case 'decision': { const k = e.parish_id + '|' + e.dilemma_id; const c = this.cards[k] || (this.cards[k] = { parish_id: e.parish_id, dilemma_id: e.dilemma_id, title: (DATA.dilemmas[e.dilemma_id] || {}).title, presented_t: null, deadline_t: null }); c.decision = { t, option_id: e.option_id, option_label: e.option_label, decided_by: e.decided_by || 'table', controller: e.controller, rationale: e.rationale }; this.scored.push({ t, parish_id: e.parish_id, gkind: 'dilemma', gid: e.dilemma_id, gopt: e.option_id, glabel: `${letterOf(e.dilemma_id, e.option_id)} on ${(DATA.dilemmas[e.dilemma_id] || { title: e.dilemma_id }).title}`, values_signaled: e.values_signaled || {}, decided_by: e.decided_by, reason: e.rationale || '' }); break; }
+      case 'allocation': this.scored.push({ t, parish_id: e.parish_id, gkind: e.entry === 'repair_send' ? 'repair' : 'allocation', gid: e.entry === 'declare_hidden' ? 'declare_hidden' : e.entry === 'keep_everything' ? 'allocate:keep' : `allocate:${e.token}`, gopt: e.entry === 'send' || e.entry === 'repair_send' ? `send:${e.to}` : e.entry === 'declare_hidden' ? 'declare' : e.entry, glabel: describe(e).text.replace(pname(e.parish_id) + ' ', ''), values_signaled: e.values_signaled || {}, decided_by: e.entry === 'keep_everything' ? 'storm' : undefined }); break;
+      case 'aid_answer': { const c = this.calls[e.call_id] || (this.calls[e.call_id] = { call_id: e.call_id, asker: e.asker, holder: e.holder }); c.answer = { t, answer: e.answer, label: e.label, count: e.count, controller: e.controller, delivered: e.delivered !== false }; this.scored.push({ t, parish_id: e.holder, gkind: 'aid', gid: e.call_id, gopt: e.answer, glabel: e.controller === 'silence' ? `no answer to ${pname(e.asker)} (${e.call_id}): the storm decided` : `${e.label || answerLabel(e.call_id, e.answer)} to ${pname(e.asker)} (${e.call_id})`, values_signaled: e.values_signaled || {}, decided_by: e.controller === 'silence' ? 'storm' : undefined, reason: e.rationale || e.reason || '' }); break; }
       case 'aid_expired': { const c = this.calls[e.call_id] || (this.calls[e.call_id] = { call_id: e.call_id, holder: e.holder }); c.answer = { t, answer: 'expired', label: 'no answer', controller: 'silence' }; break; }
       case 'mayday': this.calls[e.call_id] = { call_id: e.call_id, asker: e.asker, holder: e.holder, token: e.token, count: e.count, opened_t: t, deadline_t: e.deadline_t, ask: e.ask, line: e.line, persona_id: e.persona_id, raised_by: e.raised_by, answer: null }; break;
       case 'credit_line': this.scored.push({ t, parish_id: e.parish_id, gkind: 'credit', gid: `credit:${e.to}`, gopt: 'credit', glabel: `credit to ${pname(e.to)}`, values_signaled: e.values_signaled || {}, text: e.text, to: e.to }); break;
@@ -167,14 +176,31 @@ class World extends Emitter {
     }
     if (live) this.emit('event', t, e);
   }
-  /* the stated-vs-enacted mirror, as crucible-core computes values_gap: the mean signal of the decisions that touched each stated value */
+  /* the record, as crucible-core 0.3 keeps it (values.rs): one moment per card, call, allocation round, declaration
+     or recovery move; within a moment the strongest signal per value (ties to the negative); a moment the storm
+     decided (a card or call left to the clock, an allocation never made) is listed, never rated. No mean. */
+  moments(parish) {
+    const out = new Map();
+    for (const e of this.scored.filter(x => x.parish_id === parish)) {
+      const key = momentKey(e), storm = e.decided_by === 'storm';
+      let m = out.get(key);
+      if (!m) { m = { key, label: momentLabel(e), t: e.t, storm, kind: e.gkind, dilemma_id: e.gkind === 'dilemma' ? e.gid : null, option_id: e.gkind === 'dilemma' ? e.gopt : null, signals: {}, reasons: [], pressure: null, events: [] }; out.set(key, m); }
+      m.events.push(e); m.storm = m.storm && storm;
+      if (e.reason && !storm) m.reasons.push(e.reason);
+      if (!storm) for (const [v, sig] of Object.entries(e.values_signaled || {})) { const cur = m.signals[v]; if (cur == null || Math.abs(sig) > Math.abs(cur) || (Math.abs(sig) === Math.abs(cur) && sig < cur)) m.signals[v] = sig; }
+      if (m.dilemma_id) { const d = DATA.dilemmas[m.dilemma_id] || {}; const o = (d.options || []).find(x => x.id === m.option_id); m.pressure = o && o.pressure || null; m.debrief = d.debrief || ''; m.letter = letterOf(m.dilemma_id, m.option_id); m.option_label = o ? o.label : m.option_id; }
+    }
+    return [...out.values()].sort((a, b) => a.t - b.t);
+  }
+  /* the engine's reading of one moment: its strongest signal on any value (ties to the negative); null when nothing was chosen */
+  reading(m) { let r = null; for (const s of Object.values(m.signals)) if (r == null || Math.abs(s) > Math.abs(r) || (Math.abs(s) === Math.abs(r) && s < r)) r = s; return m.storm ? null : r; }
+  /* per stated value: the chosen moments that touched it and the storm's apart; tested once two chosen moments did */
   gapRows(parish) {
-    const stated = (this.teams[parish] || {}).stated_values || [];
-    const evs = this.scored.filter(e => e.parish_id === parish);
+    const stated = (this.teams[parish] || {}).stated_values || [], ms = this.moments(parish);
     return stated.map((v, i) => {
-      const evidence = evs.filter(e => e.values_signaled && Object.prototype.hasOwnProperty.call(e.values_signaled, v)).map(e => ({ kind: e.gkind, id: e.gid, option: e.gopt, label: e.glabel, signal: e.values_signaled[v], decided_by: e.decided_by, t: e.t }));
-      const n = evidence.length;
-      return { value: v, stated_rank: i + 1, enacted_score: n ? Math.round(evidence.reduce((a, e) => a + e.signal, 0) / n * 1000) / 1000 : 0, n_decisions: n, evidence };
+      const chosen = ms.filter(m => !m.storm && Object.prototype.hasOwnProperty.call(m.signals, v)).map(m => ({ ...m, signal: m.signals[v] }));
+      const storm = ms.filter(m => m.storm && m.dilemma_id && ((DATA.dilemmas[m.dilemma_id] || {}).valuesTested || []).includes(v));
+      return { value: v, stated_rank: i + 1, tested: chosen.length >= 2, n_chosen: chosen.length, evidence: chosen, storm };
     });
   }
   decisionsOf(parish) { return Object.values(this.cards).filter(c => c.parish_id === parish && c.decision).sort((a, b) => a.decision.t - b.decision.t); }

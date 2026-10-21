@@ -82,10 +82,68 @@ function peopleHTML(parish, world, opts = {}) {
   if (!cards.length) return `<span class="dim">No named residents on this sheet.</span>`;
   return `<div class="people">${cards.map(c => { const r = world.residents.cards[c.id]; const st = r ? r.state : 'safe'; const changed = r && world.t - r.t <= 4 * STEP; return `<div class="person ${changed ? 'changed' : ''}"><div><div class="n">${esc(c.name)}</div><div class="l">${esc(c.line)}</div></div><span class="st st-${esc(st)}">${esc(RES_LABEL[st] || st)}</span>${opts.why && r && r.narrative ? `<div class="why">${esc(r.narrative)}</div>` : ''}</div>`; }).join('')}</div>`;
 }
-function gapHTML(parish, world, opts = {}) {
+/* ---------- the debrief: a witness, not a judge (decision-2026-10-21-audit-fix-spec, S4) ----------
+   Seven anchors from the dissertation place moments, never people. A table places its own hardest moment
+   before it sees the engine's reading (D7); the wall shows the room's pattern and never names a table
+   against a rating (D2); the storm's moments are listed apart and never rated (D1). */
+const ANCHORS = [{ v: 3, name: 'Heroic' }, { v: 2, name: 'Exemplifying' }, { v: 1, name: 'Striving' }, { v: 0, name: 'Minimum expectations', long: 'Minimum Organizational Expectations' }, { v: -1, name: 'Faltering' }, { v: -2, name: 'Capitulating' }, { v: -3, name: 'Villainous' }];
+const anchorName = v => { const a = ANCHORS.find(x => x.v === v); return a ? a.name : '–'; };
+const signed = v => `${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v)}`;
+const PRESSURE_FORM = { coercive_authority: 'Coercive authority', conditional_belonging: 'Conditional belonging', enforced_silence: 'Enforced silence', shame_devaluation: 'Shame and devaluation', situational: 'Situational pressure' };
+const DEBRIEF_QUESTIONS = PROFILE.debriefQuestions || ['What made compromise feel acceptable?', 'What made holding firm costly?'];
+// the eight steps, with the six secrets and the replay as sub-steps the DM walks one by one
+function debriefSteps(db) {
+  const briefs = (db && db.briefs) || {}, order = ((db && db.secret_order) || ROSTER).filter(p => briefs[p]);
+  return [
+    { id: 'counters', n: 1, title: 'Where Concordia stands', where: 'wall' },
+    { id: 'moments', n: 2, title: 'Your moments', where: 'consoles' },
+    { id: 'questions', n: 3, title: 'The two questions', where: 'tables' },
+    { id: 'pattern', n: 4, title: 'Permission and pressure in this room', where: 'wall' },
+    { id: 'gap', n: 5, title: 'The gap', where: 'consoles' },
+    ...order.map((p, i) => ({ id: 'secret:' + p, n: 6, title: `Secret ${i + 1} of ${order.length}`, where: 'wall' })),
+    { id: 'credits', n: 7, title: 'Credit lines', where: 'wall' },
+    { id: 'replay', n: 7, title: 'Replay', where: 'wall' },
+    { id: 'commitment', n: 8, title: 'Commitment', where: 'phones' },
+  ];
+}
+function debriefStepOf(world) { const steps = debriefSteps(world.debrief), ds = world.debriefStep; const i = ds && ds.step != null ? clamp(ds.step, 0, steps.length - 1) : 0; return { i, step: steps[i], steps }; }
+function anchorScaleHTML(opts = {}) {
+  return `<div class="anchors ${opts.big ? 'big' : ''}">${ANCHORS.map(a => `<button class="anc ${opts.sel === a.v ? 'on' : ''} ${opts.engine === a.v ? 'eng' : ''} ${a.v >= -1 && a.v <= 1 ? 'mid' : ''}" ${opts.pick ? `data-anchor="${a.v}"` : 'disabled'}><b>${signed(a.v)}</b><span>${esc(a.name)}</span>${opts.sel === a.v ? '<i>you</i>' : ''}${opts.engine === a.v ? '<i class="e">engine</i>' : ''}</button>`).join('')}</div>`;
+}
+function momentLineHTML(m, opts = {}) {
+  const sig = opts.signal != null ? opts.signal : null;
+  return `<div class="mom ${m.storm ? 'storm' : ''}"><div class="mh">${m.storm ? '<span class="tag storm">the storm decided</span>' : sig != null ? `<span class="anc-chip ${sig > 0 ? 'pos' : sig < 0 ? 'neg' : ''}">${signed(sig)} ${esc(anchorName(sig))}</span>` : ''}<b>${esc(m.label)}</b>${m.letter ? `<span class="dim">${m.storm ? 'default ' : ''}${esc(m.letter)}: ${esc(m.option_label || '')}</span>` : ''}</div>
+    ${m.reasons && m.reasons.length ? `<div class="why">You said: “${esc(m.reasons[m.reasons.length - 1])}”</div>` : ''}
+    ${m.pressure ? `<div class="press">${esc(PRESSURE_FORM[m.pressure.form] || m.pressure.form)} · ${esc(m.pressure.actor || '')}</div>` : ''}
+    ${opts.debrief && m.debrief ? `<div class="later">${esc(m.debrief)}</div>` : ''}</div>`;
+}
+/* the console's private record (S4 step 2): each stated value, its chosen moments on the anchors, the storm's apart */
+function momentsHTML(parish, world) {
   const rows = world.gapRows(parish);
-  if (!rows.length) return `<span class="dim">No values stated yet.</span>`;
-  return `<div class="mirror"><div class="vals">${rows.map(r => { const s = clamp(r.enacted_score / 3, -1, 1), w = Math.abs(s) * 50; return `<div class="val"><b>${r.stated_rank}. ${esc(vname(r.value))}</b><div class="gapbar"><i class="${s >= 0 ? 'pos' : 'neg'}" style="left:${s >= 0 ? 50 : 50 - w}%;width:${w}%"></i></div><div class="gaplbl"><span>against</span><span>${r.n_decisions ? `${r.enacted_score > 0 ? '+' : ''}${r.enacted_score.toFixed(1)} over ${r.n_decisions}` : 'untested'}</span><span>for</span></div>${opts.evidence ? `<div class="evid">${r.evidence.slice(-6).map(e => `<span class="${e.signal > 0 ? 'pos' : e.signal < 0 ? 'neg' : ''} ${e.decided_by === 'storm' ? 'storm' : ''}" title="${esc(e.label)}">${e.signal > 0 ? '+' : ''}${e.signal} ${esc(e.label.length > 34 ? e.label.slice(0, 32) + '…' : e.label)}</span>`).join('') || '<span class="dim">no evidence yet</span>'}</div>` : ''}</div>`; }).join('')}</div></div>`;
+  if (!rows.length) return `<span class="dim">No values stated.</span>`;
+  return `<div class="vrec">${rows.map(r => `<div class="vr"><div class="vh"><b>${r.stated_rank}. ${esc(vname(r.value))}</b><span class="dim">${r.tested ? `${r.n_chosen} moments you chose touched it` : r.n_chosen === 1 ? 'tested once: not enough to read a pattern' : 'untested: nothing you chose touched it'}</span></div>
+    ${r.evidence.map(m => momentLineHTML(m, { signal: m.signal, debrief: true })).join('')}
+    ${r.storm.length ? `<div class="stormlist"><span class="lbl">Left to the storm (not rated)</span>${r.storm.map(m => momentLineHTML(m, { debrief: true })).join('')}</div>` : ''}</div>`).join('')}</div>`;
+}
+/* the room's pattern (S4 step 4): every card that carried a pressure, room-wide, with no table named */
+function roomPattern(world) {
+  const byActor = new Map(), totals = { social: { won: 0, held: 0, storm: 0 }, situational: { won: 0, held: 0, storm: 0 } };
+  for (const p of ROSTER) for (const m of world.moments(p)) {
+    if (!m.dilemma_id) continue;
+    const d = DATA.dilemmas[m.dilemma_id] || {}, pressed = (d.options || []).filter(o => o.pressure);
+    if (!pressed.length) continue;
+    for (const o of pressed) {
+      const k = `${o.pressure.form}|${o.pressure.actor}`, row = byActor.get(k) || { form: o.pressure.form, actor: o.pressure.actor, won: 0, held: 0, storm: 0 };
+      const how = m.storm ? 'storm' : m.option_id === o.id ? 'won' : 'held';
+      row[how]++; byActor.set(k, row); totals[o.pressure.form === 'situational' ? 'situational' : 'social'][how]++;
+    }
+  }
+  const charters = Object.entries(PROFILE.charterClauses || {}).map(([p, c]) => { const m = world.moments(p).find(x => x.dilemma_id === c.card); return { parish: p, clause: c, state: !m ? 'not reached' : m.storm ? 'the storm decided' : (c.invokedBy || []).includes(m.option_id) ? 'invoked' : 'not invoked' }; });
+  return { rows: [...byActor.values()].sort((a, b) => (a.form === 'situational') - (b.form === 'situational') || (b.won + b.held + b.storm) - (a.won + a.held + a.storm)), totals, charters };
+}
+function placementPairs(world) {
+  const pl = ((world.debriefStep || {}).placements || []).map(x => { const m = world.moments(x.parish_id).find(y => y.key === x.moment); return { self: x.anchor, engine: m ? world.reading(m) : null, storm: !!(m && m.storm) }; });
+  return pl.sort((a, b) => b.self - a.self || (b.engine ?? -9) - (a.engine ?? -9));   // sorted by value, so the order names no one
 }
 function statementHTML(parish, world, opts = {}) {
   const tm = world.teams[parish];

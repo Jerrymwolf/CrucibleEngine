@@ -38,6 +38,18 @@ fn add_signals(into: &mut BTreeMap<String, i64>, more: &BTreeMap<String, i64>) {
     }
 }
 
+/// One keep is one move: across the tokens it keeps, each value takes its
+/// strongest signal (ties to the negative), never the sum, so keeping three
+/// kinds of surplus is not three times the falter.
+fn strongest_signals(into: &mut BTreeMap<String, i64>, more: &BTreeMap<String, i64>) {
+    for (k, v) in more {
+        let cur = into.entry(k.clone()).or_insert(*v);
+        if v.abs() > cur.abs() || (v.abs() == cur.abs() && *v < *cur) {
+            *cur = *v;
+        }
+    }
+}
+
 fn clamp3(mut m: BTreeMap<String, i64>) -> BTreeMap<String, i64> {
     for v in m.values_mut() {
         *v = (*v).clamp(-3, 3);
@@ -195,11 +207,11 @@ pub fn lock(ctx: &mut Ctx) {
             let needs_total = ctx.content.resources.need(&parish, token, &all);
             let needs_soon = ctx.content.resources.need(&parish, token, &["approach", "landfall"]);
             if kept <= needs_total && needs_soon > 0 {
-                add_signals(&mut keep_sig, &rule_signals(ctx.content, "keepNeededByLandfall"));
+                strongest_signals(&mut keep_sig, &rule_signals(ctx.content, "keepNeededByLandfall"));
             } else if kept > needs_total {
                 let others_need = ctx.content.parish_ids().iter().filter(|p| **p != parish).any(|p| ctx.content.resources.need(p, token, &all) > 0);
                 if others_need {
-                    add_signals(&mut keep_sig, &rule_signals(ctx.content, "keepUnneededWhileListed"));
+                    strongest_signals(&mut keep_sig, &rule_signals(ctx.content, "keepUnneededWhileListed"));
                 }
             }
         }
@@ -333,4 +345,22 @@ pub fn lock_values(ctx: &mut Ctx, parish: &str, values: &[String], statement: Op
     }
     ctx.events.push(Event::ValuesLocked { parish_id: parish.into(), values: canon, statement: statement.map(String::from) });
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn keeping_three_surpluses_is_one_falter_not_three() {
+        let falter: BTreeMap<String, i64> = [("fairness".to_string(), -1), ("loyalty".to_string(), 1)].into_iter().collect();
+        let mut keep = BTreeMap::new();
+        for _ in 0..3 {
+            strongest_signals(&mut keep, &falter);
+        }
+        assert_eq!(keep["fairness"], -1);
+        assert_eq!(keep["loyalty"], 1);
+        strongest_signals(&mut keep, &[("loyalty".to_string(), -1)].into_iter().collect());
+        assert_eq!(keep["loyalty"], -1, "ties go to the negative");
+    }
 }

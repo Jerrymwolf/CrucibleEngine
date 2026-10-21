@@ -178,10 +178,13 @@ fn print_summary(log: &RunLog) {
         );
     }
     println!();
-    println!("values gap (stated rank vs enacted mean signal, -3..3)");
-    println!("{:<10} {:<16} {:>4} {:>8} {:>4}", "parish", "value", "rank", "enacted", "n");
+    // the record, not a score: one reading per chosen moment, the storm's moments counted apart (log 0.3)
+    println!("values record (stated rank; readings of the moments the table chose, -3..3; storm moments unrated)");
+    println!("{:<10} {:<16} {:>4} {:<8} {:>5}  readings", "parish", "value", "rank", "tested", "storm");
     for r in &s.values_gap {
-        println!("{:<10} {:<16} {:>4} {:>8.2} {:>4}", r.parish_id, r.value, r.stated_rank, r.enacted_score, r.n_decisions);
+        let readings: Vec<String> =
+            r.evidence.iter().filter(|e| e.decided_by.as_deref() != Some("storm")).map(|e| format!("{:+}", e.signal)).collect();
+        println!("{:<10} {:<16} {:>4} {:<8} {:>5}  {}", r.parish_id, r.value, r.stated_rank, if r.tested { "yes" } else { "no" }, r.n_storm, readings.join(" "));
     }
 }
 

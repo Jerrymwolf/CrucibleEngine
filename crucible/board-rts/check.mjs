@@ -86,11 +86,11 @@ async function privacy(where, pages, briefs, debrief = false) {
   for (const [label, p] of pages) {
     const r = await p.evaluate(sn => {
       const w = __crucible.world, text = document.body.innerText, priv = w.private;
-      return { role: w.role, parish: w.parish, hasPrivate: !!priv, keys: Object.keys(priv || {}), leaked: sn.filter(([, s]) => text.includes(s)).map(([q]) => q), voteShapes: priv && priv.votes ? Object.values(priv.votes).map(v => typeof v) : [] };
+      return { role: w.role, parish: w.parish, hasPrivate: !!priv, keys: Object.keys(priv || {}), leaked: sn.filter(([, s]) => text.includes(s)).map(([q]) => q), voteShapes: priv && priv.votes ? Object.values(priv.votes).map(v => typeof v) : [], split: !!(priv && priv.vote_split) };
     }, snippets);
     if (r.role === 'projector') { ok(!r.hasPrivate, `${where}: projector gets no private block`); if (!debrief) ok(r.leaked.length === 0, `${where}: projector shows no secret brief (${r.leaked.join(',') || 'none'})`); }
     if (r.role === 'phone') { ok(!r.keys.includes('secret_brief') && !r.keys.includes('briefs'), `${where}: ${label} private has no brief`); ok(r.leaked.length === 0, `${where}: ${label} shows no secret brief (${r.leaked.join(',') || 'none'})`); }
-    if (r.role === 'console') { ok(r.leaked.every(q => q === r.parish), `${where}: ${label} shows no other table's brief (${r.leaked.join(',') || 'none'})`); ok(r.voteShapes.every(s => s === 'number'), `${where}: ${label} sees vote counts, not the split`); }
+    if (r.role === 'console') { ok(r.leaked.every(q => q === r.parish), `${where}: ${label} shows no other table's brief (${r.leaked.join(',') || 'none'})`); ok(r.voteShapes.every(s => s === 'number') && (debrief || !r.split), `${where}: ${label} sees vote counts, not the split`); }
   }
 }
 
@@ -255,30 +255,53 @@ async function rehearsal() {
   await intent(dm, 'start');
   await waitFor(dm, () => __crucible.host.phase === 'debrief', null, 'the run ends and the autopilot opens the debrief', 300000);
 
-  log(' debrief');
+  log(' debrief: a witness, not a judge');
+  const accepted = p => waitResult(p, () => { const r = __crucible.world.results.slice(-1)[0]; return r && r.status === 'accepted'; }, 'accepted');
+  const dmStep = async id => { await click(dm, '[data-act="next"]'); await waitFor(proj, x => (__crucible.world.debriefStep || {}).id === x, id, `the wall follows the DM to ${id}`); await settle(proj, 300); };
   await settle(proj, 400);
   await shot(proj, '21-projector-debrief-counters');
-  await shot(tbl, '22-table-after-action');
-  await shot(ph, '23-phone-commitment');
-  await ph.fill('#commit', 'The next time a neighbour calls for fuel, I will answer before I count what is left.');
-  await click(ph, '[data-act="commit"]');
-  await waitResult(ph, () => { const r = __crucible.world.results.slice(-1)[0]; return r && r.status === 'accepted'; }, 'commitment saved');
-  await proj.bringToFront(); await proj.keyboard.press('ArrowRight'); await settle(proj, 300); await shot(proj, '24-projector-debrief-secret');
-  const steps = await proj.evaluate(() => ProjectorUI.steps().length);
-  for (let i = 1; i < steps - 3; i++) await proj.keyboard.press('ArrowRight');
-  await settle(proj, 300); await shot(proj, '25-projector-debrief-mirror');
-  ok(await proj.evaluate(() => /stated|enacted/i.test(document.body.innerText) && document.querySelectorAll('.gapbar').length > 0), 'the mirror shows stated against enacted for the six tables');
-  await proj.keyboard.press('ArrowRight'); await settle(proj, 300); await shot(proj, '26-projector-debrief-credits');
-  await proj.keyboard.press('ArrowRight'); await settle(proj, 300);
+  ok(await proj.evaluate(() => /low point/i.test(document.body.innerText) && /people-hours/i.test(document.body.innerText)), 'the wall opens on the counters, the low point and people-hours at risk');
+  await sleep(1500);
+  ok(await proj.evaluate(() => (__crucible.world.debriefStep || {}).id === 'counters' && /Where Concordia stands/.test(document.body.innerText)), 'the wall does not advance by itself');
+  await shot(tbl, '22-table-debrief-place');
+  ok(await tbl.evaluate(() => !document.querySelector('.vrec') && !!document.querySelector('[data-moment]')), 'the console asks for the hardest moment before it shows any reading (D7)');
+  await click(tbl, '[data-moment]'); await click(tbl, '[data-anchor="-1"]'); await click(tbl, '[data-act="place"]');
+  await accepted(tbl);
+  await waitFor(tbl, () => !!document.querySelector('.vrec'), null, 'the record by value appears once the table has placed its moment');
+  ok(await tbl.evaluate(() => !document.querySelector('.gapbar') && !/over \d/.test(document.body.innerText)), 'no signed score or mean anywhere on the console');
+  await shot(tbl, '22b-table-debrief-moments');
+  await dmStep('moments'); await shot(proj, '23-projector-debrief-moments');
+  await dmStep('questions'); await shot(proj, '23b-projector-debrief-questions');
+  await dmStep('pattern'); await shot(proj, '24-projector-debrief-pattern');
+  ok(await proj.evaluate(() => { const rows = [...document.querySelectorAll('.pattern .pr:not(.charter-row)')].map(x => x.innerText), pp = [...document.querySelectorAll('.pattern .pp')].map(x => x.innerText).join(' '); return rows.length > 0 && rows.every(r => /gave way/.test(r) && /held/.test(r)) && !PIDS.some(p => pp.includes(pname(p))); }), 'the room pattern counts pressure won and held, by actor, and names no table beside a reading');
+  ok(await proj.evaluate(() => document.querySelectorAll('.pattern .pp').length >= 1), 'the wall shows tables\' placements beside the engine\'s reading');
+  await dmStep('gap'); await settle(tbl, 300); await shot(tbl, '25-table-debrief-gap');
+  ok(await tbl.evaluate(() => /phones against your table/i.test(document.body.innerText) && /\d+ with · \d+ against/.test(document.body.innerText)), 'the console shows its own phones against its cards, as counts');
+  const first = await proj.evaluate(() => debriefSteps(__crucible.world.debrief).find(s => s.id.startsWith('secret:')).id);
+  await dmStep(first); await shot(proj, '26-projector-debrief-secret');
+  for (let i = 0; i < 8 && (await proj.evaluate(() => (__crucible.world.debriefStep || {}).id)) !== 'credits'; i++) { await click(dm, '[data-act="next"]'); await sleep(250); }
+  await settle(proj, 300); await shot(proj, '26b-projector-debrief-credits');
+  await dmStep('replay');
   await proj.evaluate(() => { __crucible.world.scrub = 0; __crucible.world.changed(); }); await settle(proj, 400);
   await shot(proj, '27-projector-debrief-replay');
   ok(await proj.evaluate(() => __crucible.world.viewT === 0 && !!document.getElementById('scrub')), 'the replay scrub drives the map back to landfall');
+  await dmStep('commitment'); await shot(proj, '27b-projector-debrief-commitment');
+  await shot(ph, '23-phone-commitment');
+  await ph.fill('#c-when', 'a neighbour calls for fuel and I am counting what is left');
+  await ph.fill('#c-will', 'answer before I count');
+  await click(ph, '[data-act="commit"]'); await settle(ph, 200);
+  ok(await ph.evaluate(() => /Kept on this phone/.test(document.body.innerText) && Object.keys(localStorage).some(k => k.startsWith('commitment.'))), 'the commitment is kept on the phone');
+  ok(await hostOf(dm, () => !__crucible.host.log.some(l => l.kind === 'commitment') && !JSON.stringify(__crucible.host.exportRun().votes).includes('answer before I count')), 'the commitment never reaches the host or the export');
+  const refused = await intent(ph, 'commitment', { text: 'x' });
+  ok(refused && refused.status === 'rejected' && refused.reason === 'private', 'a commitment sent anyway is refused as private');
   const mirror = await dm.evaluate(() => __crucible.world.gapRows('haven'));
-  ok(mirror.length === 3 && mirror.every(r => typeof r.enacted_score === 'number' && r.stated_rank >= 1), 'values gap computed for the three stated values');
+  ok(mirror.length === 3 && mirror.every(r => typeof r.tested === 'boolean' && r.enacted_score === undefined && r.evidence.every(m => !m.storm)), 'the record per value lists chosen moments, storm moments apart, and no mean');
+  const placedLog = await hostOf(dm, () => __crucible.host.log.filter(l => l.kind === 'self_place').length);
+  ok(placedLog >= 1, `${placedLog} self-placements are in the input log`);
 
   log(' export, determinism');
   const downloads = []; dm.on('download', d => downloads.push(d));
-  await click(dm, '[data-act="next"]');                          // debrief → Export (soft)
+  await click(dm, '[data-act="next"]');                          // the last debrief step → Export (soft)
   for (let i = 0; i < 100 && downloads.length < 3; i++) await sleep(100);
   ok(downloads.length === 3, `the export downloads three files (${downloads.map(d => d.suggestedFilename()).join(', ')})`);
   const runDl = downloads.find(d => /^run-/.test(d.suggestedFilename()));
@@ -293,7 +316,7 @@ async function rehearsal() {
     const mismatch = seen.filter(([t, h]) => { const x = hostTicks.find(k => k[0] === t); return !x || x[1] !== h; });
     ok(seen.length > 100 && mismatch.length === 0, `${label}: ${seen.length} state frames carry the engine's hash for their tick`);
   }
-  if (ok(!!run && run.version === '0.2' && Array.isArray(run.inputs) && run.inputs.length > 20, `run.json is log version ${run && run.version} with ${run && run.inputs && run.inputs.length} inputs`)) {
+  if (ok(!!run && run.version === '0.3' && Array.isArray(run.inputs) && run.inputs.length > 20, `run.json is log version ${run && run.version} with ${run && run.inputs && run.inputs.length} inputs`)) {
     const re = await proj.evaluate(r => __crucible.replay(r), run);
     ok(re.hash === run.summary.state_hash && re.hash === hostHash, `the export replays from seed, inputs and session to the same hash (${re.hash.slice(0, 12)})`);
     const storm = run.ticks.flatMap(t => t.events).filter(e => e.kind === 'decision' && e.decided_by === 'storm').length;
@@ -399,7 +422,9 @@ async function websocket(bin) {
     await settle(proj, 400); await shot(proj, 'ws-04-projector-debrief');
     await shot(dm, 'ws-05-dm-debrief');
     const downloads = []; dm.on('download', d => downloads.push(d));
-    await click(dm, '[data-act="next"]');                        // export
+    await click(dm, '[data-act="next"]');                        // step 2 of the debrief, over crucible-host
+    ok(await waitFor(proj, () => (__crucible.world.debriefStep || {}).id === 'moments', null, 'over WebSockets the wall follows the DM to step 2'), 'crucible-host carries the DM\'s debrief step to the wall');
+    await click(dm, '[data-act="export-now"]');                  // export
     for (let i = 0; i < 100 && downloads.length < 1; i++) await sleep(100);
     const health = await fetch(`${pub}/health`).then(r => r.json());
     const exported = await fetch(`${pub}/export?dm=${dmTok}`).then(r => r.text());

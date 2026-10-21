@@ -29,7 +29,7 @@ const DMUI = {
   steps() {
     const out = [{ id: 'values', label: 'Values open', sub: 'tables lock their statements' }, { id: 'island', label: 'Island open', sub: 'the map goes on the wall' }];
     for (const q of QUARTERS) out.push({ id: `card:${q.index}`, label: `${q.short} card`, sub: `${q.cardSeconds} s` }, { id: `play:${q.index}`, label: `${q.short} ${q.name}`, sub: `${Math.round(q.playSeconds / 60)} min · ${clockStr(q.fromT)} → ${clockStr(q.toT)}` }, { id: `close:${q.index}`, label: `${q.short} close`, sub: `${Math.round(q.closeSeconds / 60)} min at the tables` });
-    out.push({ id: 'debrief', label: 'Debrief', sub: 'counters · secrets · mirror · credit · replay' });
+    out.push({ id: 'debrief', label: 'Debrief', sub: 'counters · moments · questions · pattern · gap · secrets · credit · commitment' });
     return out;
   },
   currentStep(c) { switch (c.phase) { case 'lobby': return 'values'; case 'island': return 'island'; case 'quarter_open': return `card:${c.quarter}`; case 'running': case 'paused': return `play:${c.quarter}`; case 'quarter_close': return `close:${c.quarter}`; case 'debrief': return 'debrief'; default: return 'values'; } },
@@ -42,7 +42,9 @@ const DMUI = {
       case 'running': return { kind: 'pause', label: 'Pause', note: `the quarter runs to ${clockStr(c.quarter_end_t)}`, soft: true };
       case 'paused': return { kind: 'resume', label: 'Resume', note: 'the clock is stopped', soft: true };
       case 'quarter_close': return c.quarter < QUARTERS.length - 1 ? { kind: 'open_quarter', label: `Open the ${QUARTERS[c.quarter + 1].short} card`, note: QUARTERS[c.quarter + 1].title } : { kind: 'debrief', label: 'Open the debrief', note: 'the six secrets go on the wall' };
-      case 'debrief': return { kind: 'export', label: 'Export the run', note: 'run.json, votes.json, flags.json', soft: true };
+      case 'debrief': { const { i, steps } = debriefStepOf(w), nx = steps[i + 1];
+        return nx ? { kind: 'debrief_step', label: `Next: ${nx.title}`, note: `Now: step ${steps[i].n} of 8, ${steps[i].title}. Take as long as the room needs; nothing advances by itself.`, soft: true, payload: { step: i + 1, id: nx.id } }
+          : { kind: 'export', label: 'Export the run', note: 'run.json, votes.json (votes, picks, placements), flags.json. Commitments stay on the phones.', soft: true }; }
     }
     return null;
   },
@@ -53,7 +55,7 @@ const DMUI = {
     const cur = this.currentStep(c), steps = this.steps(), ci = steps.findIndex(s => s.id === cur);
     setHTML($('rail'), steps.map((s, i) => `<div class="step ${i < ci ? 'done' : i === ci ? 'now' : ''}"><i>${i < ci ? '✓' : i + 1}</i><span>${esc(s.label)}<br><span class="dim" style="font-size:11px">${esc(s.sub)}</span></span></div>`).join(''));
     const na = this.nextAction(c);
-    setHTML($('next'), na ? `${this.armed === na.kind ? `<button class="btn primary" data-act="confirm">Confirm: ${esc(na.label)}</button><button class="btn" data-act="disarm">Cancel</button>` : `<button class="btn primary" data-act="next" ${this.busy.next ? 'disabled' : ''}>${esc(na.label)}</button>`}<span class="muted" style="max-width:300px">${esc(na.note)}${na.warn ? `<br><span style="color:var(--degraded)">${esc(na.warn)}</span>` : ''}</span><span class="spacer"></span>${['running', 'paused', 'quarter_open'].includes(c.phase) ? `<button class="btn tiny" data-act="advance" title="advance one tick">+1 tick</button><button class="btn tiny" data-act="skip">Skip to ${clockStr(c.quarter_end_t)}</button>` : ''}${this.last.next && this.last.next.kind === na.kind ? `<span class="dim" style="font-size:11px">${esc(resultText(this.last.next))}</span>` : ''}` : '');
+    setHTML($('next'), na ? `${this.armed === na.kind ? `<button class="btn primary" data-act="confirm">Confirm: ${esc(na.label)}</button><button class="btn" data-act="disarm">Cancel</button>` : `<button class="btn primary" data-act="next" ${this.busy.next ? 'disabled' : ''}>${esc(na.label)}</button>`}<span class="muted" style="max-width:300px">${esc(na.note)}${na.warn ? `<br><span style="color:var(--degraded)">${esc(na.warn)}</span>` : ''}</span><span class="spacer"></span>${c.phase === 'debrief' ? `<button class="btn tiny" data-act="dstep-back">Back a step</button><button class="btn tiny" data-act="export-now">Export</button>` : ''}${['running', 'paused', 'quarter_open'].includes(c.phase) ? `<button class="btn tiny" data-act="advance" title="advance one tick">+1 tick</button><button class="btn tiny" data-act="skip">Skip to ${clockStr(c.quarter_end_t)}</button>` : ''}${this.last.next && this.last.next.kind === na.kind ? `<span class="dim" style="font-size:11px">${esc(resultText(this.last.next))}</span>` : ''}` : '');
     const seats = priv.seats || [], clients = priv.clients || [], pending = priv.pending || [], calls = priv.calls || [];
     setHTML($('tables-n'), `${seats.filter(s => s.console === 'held').length}/${ROSTER.length} consoles · ${clients.filter(x => x.role === 'phone' && x.connected).length} phones`);
     setHTML($('tables'), ROSTER.map(p => {
@@ -90,7 +92,17 @@ const DMUI = {
     if (c.phase === 'island') return `<p>“The island is open. Find your parish on the wall. Read your brief and your sheet; some of you hold a sealed envelope. Nothing moves until the first quarter card.”</p>`;
     if (c.phase === 'quarter_open' && q) return `<p><b>${esc(q.title)}</b> — “${esc(q.card)}”</p><p class="dim">Then start the clock. ${q.humanDeadlineTicks ? `Cards give ${q.humanDeadlineTicks * STEP / 60} simulated hours to decide (${mmss(q.humanDeadlineTicks * q.playSeconds / q.ticks)} real).` : ''}${q.maydayAnswerTicks ? ` Maydays give ${mmss(q.maydayAnswerTicks * q.playSeconds / q.ticks)} real to answer.` : ''}</p>`;
     if (c.phase === 'quarter_close') return `<p>“Clock stopped. At your table: what did you decide, who did it cost, and which of your three values did it serve? Two minutes.”</p>${q && q.index === QUARTERS.length - 1 ? '<p class="dim">Then open the debrief.</p>' : ''}`;
-    if (c.phase === 'debrief') { const db = w.debrief || {}; return `<p><b>Secrets, in order:</b> ${(db.secret_order || ROSTER).map(p => `<span style="color:${pcolor(p)}">${esc(pname(p))}</span>`).join(' → ')}</p><p>“${esc(db.debrief_question || '')}”</p><p class="dim">The wall steps with the space bar on the projector laptop. Commitments are private to each phone: “${esc(db.commitment || '')}”</p>`; }
+    if (c.phase === 'debrief') { const { step } = debriefStepOf(w), db = w.debrief || {}, placed = Object.keys((w.private || {}).placements || {}).length;
+      const say = {
+        counters: '“This is where Concordia stands. The low point is the hour the fewest people were safe. Hold that number.”',
+        moments: `“Turn to your console. Before anything else, pick the moment that was hardest for your table and agree where it sits on the scale. Then you will see how the engine read it.” (${placed}/${ROSTER.length} placed)`,
+        questions: `“At your table, two questions. ${DEBRIEF_QUESTIONS.join(' ')} Start from the moment you placed.” Four minutes.`,
+        pattern: '“This is the room, not any one table. Where pressure from people with power won, where it did not, and what the storm took when nobody chose.”',
+        gap: '“On your console: how your phones voted against what your table chose. Counts, no names. Who knew and did not say?”',
+        credits: '“The lines of credit: who named whose people.”', replay: '“The storm, from the start. Watch for your hardest moment.”',
+        commitment: '“On your phone, one sentence: when that moment comes again, what will you do first? It stays on your phone. Nothing is sent.”' };
+      const line = step.id.startsWith('secret:') ? `“${esc(pname(step.id.slice(7)))} knew this.” Then: “${esc(db.debrief_question || '')}”` : say[step.id] || '';
+      return `<p><b>Step ${step.n} of 8 · ${esc(step.title)}</b></p><p>${line}</p><p class="dim">Each step waits for you; the wall never advances by itself. Tables see their own record only on their own console.</p>`; }
     const lastCard = [...w.feed].reverse().find(f => f.event.kind === 'dilemma_presented'), lastMayday = [...w.feed].reverse().find(f => f.event.kind === 'mayday');
     return `${lastCard ? `<p><b style="color:${pcolor(lastCard.event.parish_id)}">${esc(pname(lastCard.event.parish_id))}</b> · ${esc(lastCard.event.title)}: ${personaHTML(lastCard.event.persona_id, (DATA.dilemmas[lastCard.event.dilemma_id] || {}).personaLine)}</p>` : ''}${lastMayday ? `<p><b>MAYDAY ${esc(lastMayday.event.call_id)}</b> · ${personaHTML(lastMayday.event.persona_id, lastMayday.event.line)}</p>` : ''}${!lastCard && !lastMayday ? '<p class="dim">The radio lines to read appear here as cards and maydays open.</p>' : ''}`;
   },
@@ -138,8 +150,10 @@ const DMUI = {
   },
   bind() {
     const root = $('app');
-    onClick(root, '[data-act="next"]', () => { const na = this.nextAction(this.world.clock || {}); if (!na) return; if (na.soft) this.send('next', na.kind, {}); else { this.armed = na.kind; this.render(); } });
-    onClick(root, '[data-act="confirm"]', () => { const na = this.nextAction(this.world.clock || {}); this.armed = null; if (na) this.send('next', na.kind, {}); });
+    onClick(root, '[data-act="next"]', () => { const na = this.nextAction(this.world.clock || {}); if (!na) return; if (na.soft) this.send('next', na.kind, na.payload || {}); else { this.armed = na.kind; this.render(); } });
+    onClick(root, '[data-act="confirm"]', () => { const na = this.nextAction(this.world.clock || {}); this.armed = null; if (na) this.send('next', na.kind, na.payload || {}); });
+    onClick(root, '[data-act="dstep-back"]', () => { const { i, steps } = debriefStepOf(this.world); if (i > 0) this.send('next', 'debrief_step', { step: i - 1, id: steps[i - 1].id }); });
+    onClick(root, '[data-act="export-now"]', () => this.send('export', 'export', {}));
     onClick(root, '[data-act="disarm"]', () => { this.armed = null; this.render(); });
     onClick(root, '[data-act="advance"]', () => this.send('lever', 'advance', { ticks: 1 }));
     onClick(root, '[data-act="skip"]', () => { if (confirm('Skip ahead to the end of this quarter? Open cards expire on the way.')) this.send('lever', 'skip_ahead', {}); });
