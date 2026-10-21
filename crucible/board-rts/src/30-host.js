@@ -101,8 +101,22 @@ class LocalHost {
     return [...pts].sort((a, b) => a - b).map(t => [t, clamp(level(t) + off(t), 1, 10)]);
   }
   engineInputs() { return this.inputs.map(i => { const { kind, ...rest } = i; return { kind: kind === 'swap' ? 'swap_dilemma' : kind, ...rest }; }); }
+  // The profile's schedule with the DM's heat and cool applied, as crucible-host's
+  // effective_session: each heat shortens every card and mayday window that opens
+  // after it by its quarter's step, each cool lengthens them. The run log carries
+  // the schedule used, so replay holds.
+  session() {
+    if (!this.heat.length) return PROFILE.id;
+    if (!this.baseSession) this.baseSession = Engine.run({ seed: this.seed, session: PROFILE.id, until: QUARTERS[0].fromT }).session;
+    const step = t => { const q = QUARTERS.find(q => q.fromT <= t && t < q.toT); return q ? q.heatStepTicks || 0 : 0; };
+    const shift = t => this.heat.filter(h => h.t <= t).reduce((a, h) => a - Math.sign(h.delta) * step(t), 0);
+    const s = JSON.parse(JSON.stringify(this.baseSession));
+    for (const asks of Object.values(s.schedule || {})) for (const a of asks) a.deadlineTicks = Math.max(2, a.deadlineTicks + shift(a.presentT));
+    for (const m of s.maydays || []) if (m.answerTicks != null) m.answerTicks = Math.max(2, m.answerTicks + shift(m.t));
+    return s;
+  }
   recompute() {
-    const req = { seed: this.seed, session: PROFILE.id, teams: this.engineTeams(), inputs: this.engineInputs(), intensity: this.curve(), live: false };
+    const req = { seed: this.seed, session: this.session(), teams: this.engineTeams(), inputs: this.engineInputs(), intensity: this.curve(), live: false };
     const t0 = performance.now();
     const log = Engine.run(req);
     this.lastRunMs = performance.now() - t0;
@@ -661,7 +675,7 @@ class LocalHost {
 
   /* ----- export, persistence, restore ----- */
   exportRun() {
-    const req = { seed: this.seed, session: PROFILE.id, teams: this.engineTeams(), inputs: this.engineInputs(), intensity: this.curve(), live: false, until: this.horizon };
+    const req = { seed: this.seed, session: this.session(), teams: this.engineTeams(), inputs: this.engineInputs(), intensity: this.curve(), live: false, until: this.horizon };
     const run = Engine.run(req);
     const votes = {}; for (const [p, byD] of Object.entries(this.votes)) { votes[p] = {}; for (const [d, by] of Object.entries(byD)) votes[p][d] = by; }
     return { run, votes: { votes, picks: this.picks, placements: this.placements }, flags: this.flags, input_log: this.log, session: { code: this.code, seed: this.seed, profile: PROFILE.id, content_hash: this.version.content_hash, roster: ROSTER, public_url: this.publicUrl } };

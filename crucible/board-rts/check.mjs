@@ -218,6 +218,18 @@ async function rehearsal() {
   await dm.evaluate(() => { __crucible.host.autopilot = true; });
   await click(dm, '[data-act="heat"]');
   await waitFor(dm, () => (__crucible.world.private || {}).intensity_offset === 2, null, 'heat lever: +2 on the curve');
+  const heatShift = await dm.evaluate(() => {
+    const h = __crucible.host, base = h.baseSession, s = h.run && h.run.session;
+    if (!base || !s || !s.schedule) return null;
+    const after = a => a.presentT >= h.heat[0].t;
+    const was = base.schedule.haven.filter(after).map(a => a.deadlineTicks), now = s.schedule.haven.filter(after).map(a => a.deadlineTicks);
+    return { was, now };
+  });
+  ok(heatShift && heatShift.now.length > 0 && heatShift.now.every((n, k) => n < heatShift.was[k]), `heat lever: every later card window is shorter (${heatShift ? heatShift.was.join('/') + ' -> ' + heatShift.now.join('/') : 'no schedule'} ticks)`);
+  // At rehearsal speed a heated mayday window is a few real seconds, too short for the
+  // scripted answer below, so cool back to the profile's windows.
+  await click(dm, '[data-act="cool"]');
+  await waitFor(dm, () => (__crucible.world.private || {}).intensity_offset === 0, null, 'cool lever: back to the profile curve');
   const fps0 = Date.now(); await sleep(2500); const fps = await proj.evaluate(() => __crucible.R.fps); metrics.projector_fps = fps; note(`projector frame rate while running on the software GPU: ${fps ? fps.toFixed(1) : 'n/a'} fps (${Date.now() - fps0} ms sample)`);
 
   log(' a mayday to answer');
