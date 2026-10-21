@@ -2,7 +2,8 @@
 type: decision
 date: 2026-10-21
 revision: 2
-status: proposed
+status: accepted
+accepted: 2026-10-21 (Jerry: "Lets build that in and run the player audit again")
 title: Audit fix spec and plan
 supersedes: []
 related:
@@ -37,19 +38,20 @@ content; the rest are the audit's.
 
 ## Decisions
 
-Each was put to Jerry as a card. Rows marked *pending* use the recommended
-option; the spec section named in the last column changes if he picks
-otherwise.
+Each was put to Jerry as a card. On 2026-10-21 he answered in words, "Lets
+build that in and run the player audit again", taken as yes to every
+recommended option. Cut A is built: see
+[[2026-10-21-audit-fix-cut-a-build-log]].
 
 | # | Question | Assumed (recommended) | If he picks otherwise | Status |
 |---|---|---|---|---|
-| D1 | How a storm-decided card or silent mayday is rated | No rating, marked "the storm decided" and examined in the debrief; effects still play (revised 2026-10-21 to match the revised audit: a timeout shows no answer was given, not that a value was surrendered) | S1.2 emits −2 (or −1) instead; nothing else moves | pending (card re-posted) |
-| D2 | What the wall shows about each table's values | Room pattern on the wall; each table's evidence only on its own console | S4 steps 2 and 4 swap screens | pending |
-| D3 | How to make hard choices actually hard (re-asked) | Rewrite option wording so every option costs something, and re-rate honestly into the mortal middle | "Numbers only" drops the wording half of S2.1; "worst cases only" keeps S2.2 and S2.4 | pending (card re-posted) |
-| D4 | When tables see the Authority charter clause | During play | S5.9 dropped; S4 step 4 reveals it instead | pending |
-| D5 | How pressure rises | Storm curve, ~180 / 140 / 95 / 150 s, heat and cool ±20 s | S6.1 table changes | pending |
-| D6 | Smallest version that still teaches (re-asked) | Minimum unbroken chain first (Plan, cut A), then the rest | "Every phase in order" drops the cut; "scoring only" ships phase 1 on the legacy profile | pending (card re-posted) |
-| D7 | Who says what a moment meant (new) | Each table places its hardest moment on the scale first, then sees the engine's reading | "Engine only" drops S4.4; "no scale" shows moments without anchors | pending |
+| D1 | How a storm-decided card or silent mayday is rated | No rating, marked "the storm decided" and examined in the debrief; effects still play (revised 2026-10-21 to match the revised audit: a timeout shows no answer was given, not that a value was surrendered) | S1.2 emits −2 (or −1) instead; nothing else moves | accepted |
+| D2 | What the wall shows about each table's values | Room pattern on the wall; each table's evidence only on its own console | S4 steps 2 and 4 swap screens | accepted |
+| D3 | How to make hard choices actually hard (re-asked) | Rewrite option wording so every option costs something, and re-rate honestly into the mortal middle | "Numbers only" drops the wording half of S2.1; "worst cases only" keeps S2.2 and S2.4 | accepted |
+| D4 | When tables see the Authority charter clause | During play | S5.9 dropped; S4 step 4 reveals it instead | accepted |
+| D5 | How pressure rises | Storm curve, ~180 / 140 / 95 / 150 s, heat and cool ±20 s | S6.1 table changes | accepted |
+| D6 | Smallest version that still teaches (re-asked) | Minimum unbroken chain first (Plan, cut A), then the rest | "Every phase in order" drops the cut; "scoring only" ships phase 1 on the legacy profile | accepted |
+| D7 | Who says what a moment meant (new) | Each table places its hardest moment on the scale first, then sees the engine's reading | "Engine only" drops S4.4; "no scale" shows moments without anchors | accepted |
 
 ## Design principles
 
