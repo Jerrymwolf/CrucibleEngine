@@ -38,6 +38,7 @@ h1{font-size:30px} h2{font-size:22px;border-bottom:2px solid var(--ink);padding-
 h3{font-size:16px;margin-top:14px}
 p{margin:0 0 .6em} ul,ol{margin:0 0 .6em;padding-left:1.25em} li{margin:.15em 0}
 small,.muted{color:var(--muted)}
+code{font-size:.9em;background:var(--soft);padding:0 3px;border-radius:3px}
 .wrap{max-width:8.5in;margin:0 auto}
 .intro{margin-bottom:20px}
 .intro p{max-width:62ch}
@@ -119,6 +120,10 @@ th{background:var(--soft);font-weight:700}
   table{font-size:9.6pt}
   a{color:inherit;text-decoration:none}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .tokens{grid-template-columns:repeat(10,1fr)}
+  .tok{font-size:8pt}
+  .tok b{font-size:9pt}
+  h3{margin-top:8px}
 }
 </style>
 </head>
@@ -126,13 +131,13 @@ th{background:var(--soft);font-weight:700}
 <div class="wrap">
 
 <header class="intro">
-  <span class="tag">Values Crucible · phase 0 · first cut 2026-10-22</span>
+  <span class="tag">Values Crucible · phase 0 · revision 2, 2026-10-22</span>
   <h1>Paper prototype: Keystone and Haven</h1>
   <p>A printable kit for one hour with four to eight players and you as the Crucible master (CM). Two parishes, two teams each, twelve storm turns. It tests the rules decided on 2026-10-22 (storm turns, yields, two meters, promises, leaders, goals and projects) before any Godot code. Print it from your browser on letter paper; each section starts a new page.</p>
-  <p class="muted">Every number here is a first cut for the playtest to break. Names marked “placeholder” and all card wording are yours to change.</p>
+  <p class="muted">The numbers have been run through a seeded ledger of these rules (1,000 games per line; section 12), but no person has played them yet. Names marked “placeholder” and all card wording are yours to change.</p>
   <ul class="toc">
     <li><a href="#cm">1 · CM guide</a></li><li><a href="#rules">2 · Player rules</a></li><li><a href="#map">3 · Map and tracks</a></li>
-    <li><a href="#track">4 · Storm run sheet</a></li><li><a href="#teams">5 · Team sheets</a></li><li><a href="#moments">6 · Moment cards</a></li>
+    <li><a href="#track">4 · Storm run sheet</a></li><li><a href="#react">4b · Resolving and reactions</a></li><li><a href="#teams">5 · Team sheets</a></li><li><a href="#moments">6 · Moment cards</a></li>
     <li><a href="#leaders">7 · Leader cards</a></li><li><a href="#tokens">8 · Tokens</a></li><li><a href="#slips">9 · Slips</a></li>
     <li><a href="#news">10 · News and CM log</a></li><li><a href="#debrief">11 · Debrief</a></li><li><a href="#balance">12 · Balance notes</a></li>
   </ul>
@@ -160,6 +165,7 @@ th{background:var(--soft);font-weight:700}
         <li><b style="color:var(--hm)">Haven Meridian</b> (HM): the berth, the cranes, the fuel terminal, the tug.</li>
       </ul>
       <p>With three players, one person plays both Haven teams. With two, drop Haven and play Keystone alone with the off-board calls only.</p>
+      <p class="muted">Ask each team to keep its own coins and tokens and to count itself at each Mission brief; you only keep the meters, the turn marker and the CM log.</p>
     </div>
     <div>
       <h3>The hour</h3>
@@ -167,14 +173,14 @@ th{background:var(--soft);font-weight:700}
         <tr><th>Min</th><th>What happens</th></tr>
         <tr><td>0–5</td><td>Read the opening (below). Hand out team sheets, tokens and the two secret cards (KM and HM only, face down).</td></tr>
         <tr><td>5–10</td><td><b>Stance.</b> Each person picks three values on a stance card and folds it. Each team writes one sentence: “In this storm, we will…”</td></tr>
-        <tr><td>10–55</td><td><b>Twelve storm turns</b> in four quarters, with a 2-minute Mission brief after turns 3, 6 and 9 (standings, goals scored, one question).</td></tr>
+        <tr><td>10–55</td><td><b>Twelve storm turns</b> of about 3 minutes, in four quarters, with a 2-minute Mission brief after turns 3, 6 and 9 (standings, goals scored, one question).</td></tr>
         <tr><td>55–65</td><td><b>Debrief</b> (section 11).</td></tr>
       </table>
       <h3>One storm turn (about 3 minutes)</h3>
       <ol>
         <li><b>Read</b> the storm hour and its news line from the run sheet. Read any moment or leader card that fires.</li>
-        <li><b>Plan</b> (2 minutes on the timer). All four teams at once: talk, move their own tokens, trade, write promises, vote on a moment. The owner of a decision announces the final call.</li>
-        <li><b>“Hands off.”</b> Then you resolve the turn in the order printed on the run sheet, and read one news line or social post.</li>
+        <li><b>Plan</b> (90 seconds on the timer; give 2 minutes in turns 1–2 while people learn, and at t7). All four teams at once: talk, move their own tokens, trade, write promises, vote on a moment. The owner of a decision announces the final call.</li>
+        <li><b>“Hands off.”</b> Then you resolve the turn in the order printed on the run sheet (about a minute), read how the town reacts (section 5), and read one news line or social post.</li>
       </ol>
       <div class="note"><b>Your stance as CM:</b> you shape the questions and voice the leaders, but you never override a consequence. The engine is a witness, not a judge: say what happened, never which value it showed.</div>
     </div>
@@ -190,12 +196,12 @@ th{background:var(--soft);font-weight:700}
   <div class="cols">
     <div>
       <h3>How you win</h3>
-      <p>Every team starts with <b>30</b>. At the end, count: coins, plus <b>3</b> for each of your groups that is safe, plus <b>1</b> per dose or fuel token, plus the printed value of each asset still intact. Most resources wins.</p>
+      <p>Every team starts with <b>30</b>. At the end, count: coins, plus <b>3</b> for each of your groups not lost (injured still counts), plus <b>1</b> per dose or fuel token you hold, plus the printed value of each asset still intact. Most resources wins.</p>
       <h3>Each turn</h3>
-      <p>Two minutes to plan, all teams at once. Move your own tokens, trade, promise, vote. When the CM says “hands off”, the storm hour plays out.</p>
+      <p>Ninety seconds to plan, all teams at once. Move your own tokens, trade, promise, vote. When the CM says “hands off”, the storm hour plays out.</p>
       <h3>Moving</h3>
       <ul>
-        <li>A group walks one zone per turn inside its parish.</li>
+        <li>A group walks one zone per turn to a zone that shares a border: Plant–Southfield; Berth–Fuel terminal; Berth–Waterfront; Fuel terminal–Union hall; Waterfront–Union hall. Nobody walks into or through a flooded zone.</li>
         <li>The roads to Summit and the coast road need a vehicle. A vehicle carries <b>1 group</b> or <b>2 tokens</b> (doses or fuel) one road per turn.</li>
         <li>A family group may enter the Plant only as a worker or, if it is open, into the cafeteria shelter.</li>
         <li>Roads close at the turn printed on the map. A closed road cannot be used.</li>
@@ -203,9 +209,9 @@ th{background:var(--soft);font-weight:700}
       <h3>Where a group can be</h3>
       <ul>
         <li><b>Home</b>: earns 1 coin a turn. Not safe if its zone floods.</li>
-        <li><b>At a job</b> (clean rooms, cranes): earns 1 coin for its team, and the job produces for Meridian.</li>
+        <li><b>At a job</b>: earns 1 coin for its team, and the job produces for Meridian. The clean rooms take 1 group; the cranes take 2. Any community group can work a job if the Meridian team agrees.</li>
         <li><b>Sheltered</b> (union hall, cafeteria, Summit): safe, earns nothing.</li>
-        <li><b>Stranded</b>: in a flooded zone. Earns nothing. Only a vehicle can bring it out, and only in the eye (t8) unless a card says otherwise: a truck into Southfield, the tug onto the Waterfront or the Berth. Rescued groups go to the Plant cafeteria (it opens for rescues) or the union hall. Still stranded at the end of turn 9, it is <b>lost</b>: remove it and your team pays 4 coins.</li>
+        <li><b>Stranded</b>: in a flooded zone. Earns nothing. At the end of the peak (t7) roll the storm die for each stranded group: on 1–2 it is <b>lost</b>. In the eye (t8) each truck can bring 1 group out of Southfield and the tug 1 group off the Waterfront or the Berth, to the Plant cafeteria (it opens for rescues) or the union hall. Still stranded at the end of t9, it is lost. A lost group is removed and its team pays 5 coins.</li>
       </ul>
     </div>
     <div>
@@ -213,8 +219,8 @@ th{background:var(--soft);font-weight:700}
       <ul>
         <li><b>Clean rooms</b> (Keystone): +1 dose token a turn when a crew group works there and the plant has power.</li>
         <li><b>Power</b>: the grid fails at the end of turn 6. From turn 7 the plant’s generator burns 1 fuel a turn. With no fuel, the clean rooms stop and the vault spoils 2 doses a turn.</li>
-        <li><b>Cranes</b> (Haven): +1 coin to Haven Meridian per crew group on them while the harbour is open. Each crew group loads 1 dose token aboard a turn. From turn 10 the cranes need 1 fuel a turn.</li>
-        <li><b>The ships</b>: the <i>Kestrel Reach</i> sails at the end of turn 4. Each dose aboard pays Keystone Meridian 3 and Haven Meridian 1. The recovery ship sails at the end of turn 12 and pays 2 and 1.</li>
+        <li><b>Cranes</b> (Haven): work only while a ship is at the berth (t1–t4, then t10–t12). Each group on them earns its team 1 coin, earns Haven Meridian 2, and loads 1 dose aboard. From t10 the cranes need 1 fuel a turn.</li>
+        <li><b>The ships</b>: the <i>Kestrel Reach</i> sails at the end of t4; each dose aboard pays Keystone Meridian 6 and Haven Meridian 1. The recovery ship arrives at t10 and sails at the end of t12; each dose aboard pays 5 and 1.</li>
       </ul>
       <h3>The two meters (one pair per parish)</h3>
       <ul>
@@ -340,19 +346,24 @@ th{background:var(--soft);font-weight:700}
     <tr><td>t2</td><td>T−60 to −48</td><td><b>Moment: The drainage memo</b> (Keystone Meridian, privately).</td><td>—</td></tr>
     <tr><td>t3</td><td>T−48 to −36</td><td>First rain bands. Last turn to buy projects.</td><td>Score Q1 goals. <b>Mission brief 1.</b></td></tr>
     <tr><td colspan="4"><b>Q2 Approach.</b> Goals Q2 announced.</td></tr>
-    <tr><td>t4</td><td>T−36 to −26</td><td><b>Moment: Batch 47</b> (Keystone; Haven Meridian is asked to hold the ship).</td><td><i>Kestrel Reach</i> sails (unless held to t5). Pay for doses aboard.</td></tr>
+    <tr><td>t4</td><td>T−36 to −26</td><td><b>Moment: Batch 47</b> (Keystone; Haven Meridian is asked to hold the ship).</td><td><i>Kestrel Reach</i> sails (unless held to t5). Pay for doses aboard. The cranes stand idle until t10.</td></tr>
     <tr><td>t5</td><td>T−26 to −16</td><td><b>Moment: Four tankers</b> (Haven). Calls for aid: Summit hospital asks for 2 fuel, Heartland’s dam for 1.</td><td>Keystone road and coast road close.</td></tr>
     <tr><td>t6</td><td>T−16 to −6</td><td>Wind rising; last bus out of Haven.</td><td>Haven road and harbour close. Grid fails. <b>Surge:</b> Waterfront floods; Berth floods unless sandbagged (doses there are lost; cranes worth 1 until repaired for 3); <b>Southfield floods</b> unless sandbagged (then end of t7). Groups there are stranded. Score Q2 goals. <b>Mission brief 2.</b></td></tr>
     <tr><td colspan="4"><b>Q3 Landfall.</b> Goals Q3 announced.</td></tr>
-    <tr><td>t7</td><td>T−6 to −1</td><td>Peak. <b>Moments: Southfield</b> (Keystone) and <b>Tank 3</b> (Haven). Generator burns fuel from now.</td><td>Stranded groups: trust −1 each.</td></tr>
-    <tr><td>t8</td><td>T−1 to +2</td><td>The eye: one calm turn. Vehicles may reach stranded groups without a roll.</td><td>Stranded groups: trust −1 each.</td></tr>
-    <tr><td>t9</td><td>T+2 to +6</td><td>Back side of the storm.</td><td>Groups still stranded are <b>lost</b> (−4 coins each, trust −2 each). Score Q3 goals. <b>Mission brief 3.</b></td></tr>
-    <tr><td colspan="4"><b>Q4 Recovery.</b> Goals Q4 announced. The recovery ship is at the berth.</td></tr>
-    <tr><td>t10</td><td>T+6 to +20</td><td>Haven road and harbour reopen. <b>Moment: The signature</b> (Keystone). Cranes need fuel from now.</td><td>Waterfront and Southfield drain.</td></tr>
+    <tr><td>t7</td><td>T−6 to −1</td><td>Peak. Read <b>Tank 3</b> (Haven) first, then <b>Southfield</b> (Keystone); give 2 minutes. Generator burns fuel from now.</td><td><b>Peak roll</b> for each stranded group: on 1–2 it is lost. Stranded groups: trust −1 each.</td></tr>
+    <tr><td>t8</td><td>T−1 to +2</td><td>The eye: one calm turn. Each truck and the tug can bring 1 stranded group out (the tug 2 with its project).</td><td>Stranded groups: trust −1 each.</td></tr>
+    <tr><td>t9</td><td>T+2 to +6</td><td>Back side of the storm.</td><td>Groups still stranded are <b>lost</b> (−5 coins each, trust −2 each). Score Q3 goals. <b>Mission brief 3.</b></td></tr>
+    <tr><td colspan="4"><b>Q4 Recovery.</b> Goals Q4 announced.</td></tr>
+    <tr><td>t10</td><td>T+6 to +20</td><td>Haven road and harbour reopen. The Coast Guard cutter <i>Resolute</i> lands <b>3 fuel</b> at Haven (to Haven Meridian). The recovery ship is at the berth; the cranes work again and need fuel from now. <b>Moment: The signature</b> (Keystone).</td><td>Waterfront and Southfield drain.</td></tr>
     <tr><td>t11</td><td>T+20 to +34</td><td>Keystone road and coast road reopen. <b>Moment: The report and the pay</b> (Haven). Summit and Heartland repay fuel they received: 1 coin per fuel.</td><td>—</td></tr>
     <tr><td>t12</td><td>T+34 to +48</td><td>Last turn.</td><td>Recovery ship sails; pay for doses aboard. Return loans. Score Q4 goals. <b>Final count.</b></td></tr>
   </table>
   </div>
+</section>
+
+<section class="sheet" id="react">
+  <span class="tag">For the CM · 2 pages · keep them face down</span>
+  <h2>4b · Resolving a turn, and how the town reacts</h2>
   <h3>Resolve every turn in this order</h3>
   <ol>
     <li>Moment and leader effects the teams chose.</li>
@@ -360,10 +371,23 @@ th{background:var(--soft);font-weight:700}
     <li>The storm: closures and floods from the table above. Mark stranded groups.</li>
     <li>Yields: each team takes its coins and dose tokens. Loading: crews put doses aboard.</li>
     <li>Upkeep: generator and crane fuel; vault spoilage; Chicago’s 2 coins if confidence is 3 or below.</li>
-    <li>Meters (standard moves below), then promises that fall due.</li>
+    <li>Meters: read the reaction (section 4b), then promises that fall due.</li>
     <li>One news line or social post (section 10).</li>
   </ol>
-  <h3>Standard meter moves</h3>
+  <p>Players see the meters move, not the rule that moved them. Read the reaction aloud as a fact (“Southfield’s families hear you told the shift the truth”), never as a verdict.</p>
+  <h3>After each moment</h3>
+  <div class="scroll"><table>
+    <tr><th>Moment</th><th>A</th><th>B</th><th>C</th><th>D or no answer</th></tr>
+    <tr><td>Load now (Haven)</td><td>Conf +1, trust −1</td><td>Trust +1</td><td>Trust +2, conf −1</td><td>No answer: trust −1</td></tr>
+    <tr><td>Drainage memo (Keystone)</td><td>Trust +2, conf −1</td><td>Trust −1 at the reveal (t5)</td><td>Conf +1; trust −3 if any group is in Southfield when it floods</td><td>No answer: as C</td></tr>
+    <tr><td>Batch 47 (Keystone)</td><td>Trust −1 when the real time comes out</td><td>Trust +1</td><td>Conf −1</td><td>No answer: as C</td></tr>
+    <tr><td>Four tankers (Haven)</td><td>Conf +1</td><td>Trust +2, conf −1</td><td>Conf +1, trust −1</td><td>No answer: as C</td></tr>
+    <tr><td>Southfield (Keystone)</td><td>Trust +2</td><td>Trust +3, conf −1</td><td>Conf +1</td><td>No answer: as C</td></tr>
+    <tr><td>Tank 3 (Haven)</td><td>Trust −1 if the crew is injured</td><td>Conf −2 if the seal fails</td><td>Conf −1 if the seal fails; trust −1 if the crew is injured</td><td>No crew goes: as B</td></tr>
+    <tr><td>The signature (Keystone)</td><td>Trust +1, conf −1</td><td>Conf −1</td><td>Conf +1, trust −1</td><td>D: trust −1</td></tr>
+    <tr><td>Report and pay (Haven)</td><td>Trust +3, conf −1</td><td>Trust −2</td><td>Trust +1</td><td>No answer: as B</td></tr>
+  </table></div>
+  <h3>Every turn</h3>
   <div class="cols">
     <ul>
       <li>Trust +1: a group reaches shelter before its zone floods (once per group).</li>
@@ -373,10 +397,18 @@ th{background:var(--soft);font-weight:700}
     <ul>
       <li>Confidence +1: the <i>Kestrel Reach</i> sails with 6 or more doses. −1: fewer than 4.</li>
       <li>Confidence −1: each turn the clean rooms are dark from t7.</li>
-      <li>Confidence −2: an asset destroyed (a truck lost, the cranes flooded, a spill).</li>
+      <li>Confidence −2: a truck lost, or the cranes flooded.</li>
     </ul>
   </div>
-  <p class="muted">When a meter reaches 3 or below, read that parish’s leader pressure card (section 7).</p>
+  <p>Meters run from 0 to 10. When one reaches 3 or below, read that parish’s pressure card (section 7) and keep it on the table until the meter is back to 4.</p>
+  <h3>Standings (fill at each Mission brief)</h3>
+  <table>
+    <tr><th>Team</th><th>Start</th><th>After t3</th><th>After t6</th><th>After t9</th><th>End</th></tr>
+    <tr><td style="color:var(--kc)">Keystone community</td><td>30</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td style="color:var(--km)">Keystone Meridian</td><td>30</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td style="color:var(--hc)">Haven community</td><td>30</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td style="color:var(--hm)">Haven Meridian</td><td>30</td><td></td><td></td><td></td><td></td></tr>
+  </table>
 </section>
 
 <!-- ============ 5 TEAM SHEETS ============ -->
@@ -431,7 +463,8 @@ th{background:var(--soft);font-weight:700}
       <h3>You earn</h3>
       <ul>
         <li>+1 dose token a turn while a crew group works the clean rooms and the plant has power.</li>
-        <li>3 coins per dose aboard the <i>Kestrel Reach</i> when she sails (end of t4); 2 per dose on the recovery ship (end of t12).</li>
+        <li>6 coins per dose aboard the <i>Kestrel Reach</i> when she sails (end of t4); 5 per dose on the recovery ship (end of t12).</li>
+        <li>Doses still in the vault at the end count 1 each.</li>
       </ul>
       <h3>Your leaders</h3>
       <p><b>Frank Reeves</b>, plant manager: knows every name on every shift.<br><b>Marcus Webb</b>, Regional President, and <b>Chicago</b> (head office, by email): “We have a responsibility to 340,000 patients.”</p>
@@ -465,7 +498,7 @@ th{background:var(--soft);font-weight:700}
         <tr><td>Coins</td><td>11</td></tr>
       </table>
       <h3>You earn each turn</h3>
-      <ul><li>1 coin per family group at home.</li><li>1 coin per crew group on the cranes while the harbour is open.</li></ul>
+      <ul><li>1 coin per family group at home.</li><li>1 coin per group on the cranes while a ship is at the berth (t1–t4, t10–t12).</li></ul>
       <h3>Your leaders</h3>
       <p><b>Maria Santos</b>, union representative, Local 847: she does not report to anyone, and she can stop the port.<br><b>Dmitri Volkov</b>, crane operator, two months from retirement: the only one certified on the big crane.</p>
       <h3>What you know</h3>
@@ -501,7 +534,7 @@ th{background:var(--soft);font-weight:700}
       </table>
       <h3>You earn</h3>
       <ul>
-        <li>1 coin per crew group on the cranes while the harbour is open.</li>
+        <li>2 coins per group on the cranes while a ship is at the berth (t1–t4, t10–t12). The cranes need 1 fuel a turn from t10.</li>
         <li>1 coin per dose aboard each ship when she sails.</li>
         <li>Whatever you sell: fuel is the island’s scarcest thing after the roads close.</li>
       </ul>
@@ -525,9 +558,9 @@ th{background:var(--soft);font-weight:700}
 
 <!-- ============ 6 MOMENTS ============ -->
 <section class="sheet" id="moments">
-  <span class="tag">Cut apart · the CM reads each at the start of its turn</span>
+  <span class="tag">Cut apart · 2 pages · the CM reads each at the start of its turn</span>
   <h2>6 · Moment cards</h2>
-  <p class="muted">Each card names the two values at stake and nothing more. Both teams of the parish vote; the owner makes the final call. If the timer runs out, read the card’s last line.</p>
+  <p class="muted">Each card names the two values at stake and what each option costs in resources. How residents and the board react is not printed: the CM reads it from section 4b after the choice, as it happens. Both teams of the parish vote; the owner makes the final call. If the timer runs out, read the card’s last line.</p>
   <div class="cards">
 
     <div class="card hm">
@@ -537,11 +570,11 @@ th{background:var(--soft);font-weight:700}
       <p>Loading takes most of four turns and must start now to fill the ship. Maria Santos wants a two-hour meeting on shift first: the real forecast, hazard pay, and who stays.</p>
       <p class="quote">Maria: “You can have every crane I’ve got. Ask me first.”</p>
       <ol>
-        <li><b class="o">A</b>Load now; meet later. Haven crews are <b>Tired</b> (a Tired crew cannot take a peak job in t7–t8). <span class="fx">Confidence +1, trust −1.</span></li>
-        <li><b class="o">B</b>Hold the meeting, share the forecast, pay hazard rate: Haven Meridian pays Haven community 2 coins. No loading this turn. <span class="fx">Trust +1.</span></li>
-        <li><b class="o">C</b>Meet, and let the union decide who stays: from now Haven community alone decides whether its crews are on the cranes. No loading this turn. <span class="fx">Trust +2, confidence −1.</span></li>
+        <li><b class="o">A</b>Load now; meet later. Haven crews are <b>Tired</b> (a Tired crew cannot take a peak job in t7–t8).</li>
+        <li><b class="o">B</b>Hold the meeting, share the forecast, pay hazard rate: Haven Meridian pays Haven community 2 coins. No loading this turn.</li>
+        <li><b class="o">C</b>Meet, and let the union decide who stays: from now Haven community alone decides whether its crews are on the cranes. No loading this turn.</li>
       </ol>
-      <p class="muted">No answer: the crews start on their own (A without the confidence).</p>
+      <p class="muted">No answer: the crews start on their own, as A.</p>
     </div>
 
     <div class="card km">
@@ -550,9 +583,9 @@ th{background:var(--soft);font-weight:700}
       <span class="stake">At stake: candor · compassion</span>
       <p>The day shift wants to go home and prepare Southfield. You hold a 2024 memo: the flat’s storm drainage was never load-tested. Chicago says the line runs until the port closes. If you tell them, the crew walks and families drive to Summit in the rain with nowhere confirmed.</p>
       <ol>
-        <li><b class="o">A</b>Tell the shift and Southfield now. Show Keystone community your secret card. The crew group leaves the clean rooms for t2 and t3 (no production; no crew wage). <span class="fx">Trust +2, confidence −1.</span></li>
-        <li><b class="o">B</b>Tell them when the line closes. The CM reveals the memo at the start of t5. <span class="fx">Trust −1 at the reveal.</span></li>
-        <li><b class="o">C</b>The company stands by “built to code”. No reveal. <span class="fx">Confidence +1. If any group is in Southfield when it floods: trust −3 and the news finds the memo.</span></li>
+        <li><b class="o">A</b>Tell the shift and Southfield now. Show Keystone community your secret card. The crew group leaves the clean rooms for t2 and t3 (no production; no crew wage).</li>
+        <li><b class="o">B</b>Tell them when the line closes. The CM reveals the memo at the start of t5.</li>
+        <li><b class="o">C</b>The company stands by “built to code”. No reveal. <span class="fx">If any group is in Southfield when it floods, the news finds the memo.</span></li>
       </ol>
       <p class="muted">No answer: C.</p>
     </div>
@@ -563,9 +596,9 @@ th{background:var(--soft);font-weight:700}
       <span class="stake">At stake: candor · duty</span>
       <p>Batch 47 (2 dose tokens, on top of the normal dose) is Anh Tran’s shift. The published number says it finishes this turn. The real number, which only you know, says the end of t5. Haven can hold the ship one turn; Haven will ask how long. Anh’s children are in Southfield Block C.</p>
       <ol>
-        <li><b class="o">A</b>Ask Haven to hold “a few hours”. The crew stays through t5. At the end of t4 the CM reveals the real time and Haven decides again. <span class="fx">Trust −1.</span></li>
-        <li><b class="o">B</b>Tell Haven and the crew the real time and let Haven decide. The crew stays through t5 only if Haven holds. <span class="fx">Trust +1.</span></li>
-        <li><b class="o">C</b>Ship what is ready. Batch 47 finishes in the vault at the end of t5 if the clean rooms run. <span class="fx">Confidence −1.</span></li>
+        <li><b class="o">A</b>Ask Haven to hold “a few hours”. The crew stays through t5. At the end of t4 the CM reveals the real time and Haven decides again.</li>
+        <li><b class="o">B</b>Tell Haven and the crew the real time and let Haven decide. The crew stays through t5 only if Haven holds.</li>
+        <li><b class="o">C</b>Ship what is ready. Batch 47 finishes in the vault at the end of t5 if the clean rooms run.</li>
       </ol>
       <p class="fx">If Haven holds to the end of t5: a truck must carry batch 47 down the coast road in t5. Haven’s crews load in the wind: roll the storm die; on 1–2 one Haven crew group is <b>Injured</b> (out until t11).</p>
       <p class="muted">No answer: C.</p>
@@ -577,9 +610,9 @@ th{background:var(--soft);font-weight:700}
       <span class="stake">At stake: honesty · stewardship</span>
       <p>The roads close soon. Summit’s hospital asks for 2 fuel, Heartland’s dam controls for 1, and Keystone may ask for its generator. The books say you hold 4. The tanks hold 6. The port’s own cranes need 1 a turn when the harbour reopens.</p>
       <ol>
-        <li><b class="o">A</b>Share fairly on the books: Summit 2, Heartland 1, Keystone 1 if asked. Keep the 2 nobody knows about. <span class="fx">Confidence +1.</span></li>
-        <li><b class="o">B</b>Declare all six. Send Summit 2, Heartland 1, Keystone 2; keep 1. <span class="fx">Trust +2, confidence −1.</span></li>
-        <li><b class="o">C</b>Port first: send Summit 2 and keep the rest; others may trade. <span class="fx">Confidence +1, trust −1. Heartland’s dam goes dark at t8 (news).</span></li>
+        <li><b class="o">A</b>Share fairly on the books: Summit 2, Heartland 1, Keystone 1 if asked. Keep the 2 nobody knows about.</li>
+        <li><b class="o">B</b>Declare all six. Send Summit 2, Heartland 1, Keystone 2; keep 1.</li>
+        <li><b class="o">C</b>Port first: send Summit 2 and keep the rest; others may trade. <span class="fx">Heartland’s dam goes dark at t8 (news).</span></li>
       </ol>
       <p class="fx">Fuel sent off the board comes back as 1 coin per fuel at t11. Tankers deliver it; no token moves on the map.</p>
       <p class="muted">No answer: C.</p>
@@ -591,9 +624,9 @@ th{background:var(--soft);font-weight:700}
       <span class="stake">At stake: respect · duty</span>
       <p>Water is on Southfield’s ground floors. Block C is on its roofs. The skeleton crew holds the clean rooms; their families are in the blocks. Kofi Mensah says he can get the trucks along the canal berm, once, and maybe back.</p>
       <ol>
-        <li><b class="o">A</b>Send the trucks now. Each truck brings one stranded group to the Plant (the cafeteria opens). Roll for each truck: on 1–2 the truck is lost. <span class="fx">Trust +2.</span></li>
-        <li><b class="o">B</b>The crew leaves the line and goes too: as A, and the crew carries one more group. The clean rooms stop for t7. <span class="fx">Trust +3, confidence −1.</span></li>
-        <li><b class="o">C</b>Hold the line and wait for the eye (t8, no roll). Roll for each stranded group now: on a 1 it is lost. <span class="fx">Confidence +1.</span></li>
+        <li><b class="o">A</b>Send the trucks now, before the peak roll. Each truck brings one stranded group to the Plant (the cafeteria opens). Roll for each truck: on 1–2 the truck is lost.</li>
+        <li><b class="o">B</b>The crew leaves the line and goes too: as A, and the crew carries one more group. The clean rooms stop for t7.</li>
+        <li><b class="o">C</b>Hold the line and wait for the eye (t8). The stranded groups face the peak roll at the end of this turn.</li>
       </ol>
       <p class="fx">If nobody is stranded: Anh Tran asks to leave the line to check her mother’s flat. Let her go (clean rooms stop for t7) or keep her.</p>
       <p class="muted">No answer: C.</p>
@@ -605,8 +638,8 @@ th{background:var(--soft);font-weight:700}
       <span class="stake">At stake: courage · stewardship</span>
       <p>Elena Marsh and Jonah Baptiste are in the terminal’s control room. Tank 3’s seal is failing. If it goes, the fuel goes into the harbour and the yard, the union hall downwind. A transfer to Tank 5 means four hours on a manifold outside, in the peak.</p>
       <ol>
-        <li><b class="o">A</b>Attempt the transfer. A Haven crew group that is not Tired goes to the terminal. Roll: on a 1 it is Injured (out until t11). Otherwise Tank 3 holds.</li>
-        <li><b class="o">B</b>Leave the control room. Roll: on 1–3 the seal fails: Haven Meridian loses 2 fuel; Waterfront groups cannot go home until t12. <span class="fx">Confidence −2.</span></li>
+        <li><b class="o">A</b>Attempt the transfer. A Haven crew group that is not Tired goes to the terminal. Roll: on a 1 it is Injured (out until t11). Tank 3 holds.</li>
+        <li><b class="o">B</b>Leave the control room. Roll: on 1–3 the seal fails: Haven Meridian loses 2 fuel; the Waterfront stays closed until t12.</li>
         <li><b class="o">C</b>Stay and shut valves if it goes. A crew group stays at the terminal. Roll: on 1–2 the seal fails but half spills (lose 1 fuel); on a 1 the crew is also Injured.</li>
       </ol>
       <p class="fx">Both keys: Haven Meridian asks; Haven community decides whether its people go. If they will not, it is B.</p>
@@ -618,10 +651,10 @@ th{background:var(--soft);font-weight:700}
       <span class="stake">At stake: integrity · stewardship</span>
       <p>Two dose tokens in the vault (batch 47 if it is there; otherwise the last two made, or whatever is left) were cold the whole time and pass every test. The custody log has a four-hour gap where the night tech left for Southfield. Rubén Castillo, in quality, will not sign the release.</p>
       <ol>
-        <li><b class="o">A</b>Destroy the batch and tell the distributor why. Remove 2 doses. <span class="fx">Trust +1, confidence −1.</span></li>
-        <li><b class="o">B</b>Hold it for 48 hours of testing. It misses the recovery ship and counts 1 per dose in the vault. <span class="fx">Confidence −1.</span></li>
-        <li><b class="o">C</b>Ship it on a deviation report signed by the site, not quality. It sails on the recovery ship. Before the final count, roll: on a 1 the regulator audits (−6 coins). <span class="fx">Confidence +1, trust −1.</span></li>
-        <li><b class="o">D</b>Send it to Chicago’s decision. Chicago ships it on the recovery ship (no audit roll); the report carries the site’s name. <span class="fx">Trust −1.</span></li>
+        <li><b class="o">A</b>Destroy the batch and tell the distributor why. Remove 2 doses.</li>
+        <li><b class="o">B</b>Hold it for 48 hours of testing. It misses the recovery ship and counts 1 per dose in the vault.</li>
+        <li><b class="o">C</b>Ship it on a deviation report signed by the site, not quality. It sails on the recovery ship. Before the final count, roll: on a 1 the regulator audits (−6 coins).</li>
+        <li><b class="o">D</b>Send it to Chicago’s decision. Chicago ships it on the recovery ship (no audit roll); the report carries the site’s name.</li>
       </ol>
       <p class="muted">No answer: D.</p>
     </div>
@@ -632,9 +665,9 @@ th{background:var(--soft);font-weight:700}
       <span class="stake">At stake: honesty · loyalty</span>
       <p>Sterling offers half pay for the shutdown days and no hazard bonus, “given losses”. Maria Santos wants full pay, the bonus, and a report that says who ordered what and when, with the names of anyone injured next to the names of who gave the orders.</p>
       <ol>
-        <li><b class="o">A</b>Facts in order, names included; full pay and the bonus: Haven Meridian pays Haven community 4. <span class="fx">Trust +3, confidence −1.</span></li>
-        <li><b class="o">B</b>Facts only, no names; accept half pay: pay 1. <span class="fx">Trust −2. Cranes earn half in t12.</span></li>
-        <li><b class="o">C</b>Full report with names; half pay; ask Sterling for a relief fund: pay 2, then roll: on 4–6 the fund pays Haven community 2 more. <span class="fx">Trust +1.</span></li>
+        <li><b class="o">A</b>Facts in order, names included; full pay and the bonus: Haven Meridian pays Haven community 4.</li>
+        <li><b class="o">B</b>Facts only, no names; accept half pay: pay 1. <span class="fx">Cranes earn half in t12.</span></li>
+        <li><b class="o">C</b>Full report with names; half pay; ask Sterling for a relief fund: pay 2, then roll: on 4–6 the fund pays Haven community 2 more.</li>
       </ol>
       <p class="muted">No answer: B.</p>
     </div>
@@ -644,7 +677,7 @@ th{background:var(--soft);font-weight:700}
 
 <!-- ============ 7 LEADERS, SECRETS, GOALS, PROJECTS ============ -->
 <section class="sheet" id="leaders">
-  <span class="tag">Cut apart</span>
+  <span class="tag">Cut apart · 2 pages</span>
   <h2>7 · Leader cards: secrets, projects, goals and pressure</h2>
   <h3>Secret cards (hand out face down at the start)</h3>
   <div class="cards">
@@ -681,7 +714,7 @@ th{background:var(--soft);font-weight:700}
     <tr><td>Q1 (t1–t3)</td><td>4 or more Keystone doses at the Berth or aboard by the end of t3. <small>Marcus Webb</small></td><td>Loading under way (a dose aboard) by the end of t2. <small>Marcus Webb</small></td></tr>
     <tr><td>Q2 (t4–t6)</td><td>Every Southfield family group sheltered or at work on high ground at the end of t6. <small>Pastor Ruth</small></td><td>The <i>Kestrel Reach</i> sails with 6 or more doses. <small>Owen Pryce</small></td></tr>
     <tr><td>Q3 (t7–t9)</td><td>The clean rooms run every turn of t7–t9. <small>Frank Reeves</small></td><td>Tank 3 holds. <small>Owen Pryce</small></td></tr>
-    <tr><td>Q4 (t10–t12)</td><td>Every surviving Keystone group home or at work at the end of t12. <small>Pastor Ruth</small></td><td>Both crews on the cranes at the end of t11. <small>Maria Santos</small></td></tr>
+    <tr><td>Q4 (t10–t12)</td><td>Every surviving Keystone group home or at work at the end of t12. <small>Pastor Ruth</small></td><td>Both crews on the cranes at the end of t12. <small>Maria Santos</small></td></tr>
   </table>
 
   <h3>Pressure cards (read when a meter reaches 3 or below)</h3>
@@ -791,14 +824,7 @@ th{background:var(--soft);font-weight:700}
     <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
   </table>
   </div>
-  <h3>Standings (fill at each Mission brief)</h3>
-  <table>
-    <tr><th>Team</th><th>Start</th><th>After t3</th><th>After t6</th><th>After t9</th><th>End</th></tr>
-    <tr><td style="color:var(--kc)">Keystone community</td><td>30</td><td></td><td></td><td></td><td></td></tr>
-    <tr><td style="color:var(--km)">Keystone Meridian</td><td>30</td><td></td><td></td><td></td><td></td></tr>
-    <tr><td style="color:var(--hc)">Haven community</td><td>30</td><td></td><td></td><td></td><td></td></tr>
-    <tr><td style="color:var(--hm)">Haven Meridian</td><td>30</td><td></td><td></td><td></td><td></td></tr>
-  </table>
+
 </section>
 
 <!-- ============ 11 DEBRIEF ============ -->
@@ -838,9 +864,9 @@ th{background:var(--soft);font-weight:700}
         <tr><td>Signature</td><td>integrity</td><td>integrity, slower</td><td>stewardship over integrity</td><td>passes the decision up</td></tr>
         <tr><td>Report and pay</td><td>honesty</td><td>loyalty to Sterling</td><td>honesty, half loyalty</td><td></td></tr>
       </table></div>
-      <h3>Pressure (from the decided rules)</h3>
+      <h3>Pressure and silence</h3>
       <ul>
-        <li>A choice made after a leader pressure card is noted as made <b>under pressure</b>; giving way to it is what the dissertation scale calls capitulating.</li>
+        <li>A choice made while a pressure card is on the table is logged as made <b>under pressure</b>. Ask what the pressure asked for and what the team gave; do not name it for them.</li>
         <li>Only off-board voices press: the leaders, Webb, Chicago, Sterling. Never another table.</li>
         <li>Silence when the timer ends is no value signal: “the storm decided”. Ask about it.</li>
       </ul>
@@ -854,34 +880,36 @@ th{background:var(--soft);font-weight:700}
   <h2>12 · Balance notes and what to watch</h2>
   <div class="cols">
     <div>
-      <h3>Does doing nothing lose? (rough count)</h3>
+      <h3>Does doing nothing lose?</h3>
+      <p>A seeded ledger plays these rules turn by turn with the storm die, 1,000 games per line (<code>crucible/paper/balance_ledger.py</code>). “Careful” is one sensible scripted way to play; “does nothing” moves nothing and lets every moment time out. Mean final resources; every team starts at 30.</p>
       <table>
-        <tr><th>Team</th><th>Does nothing</th><th>Plays it carefully</th></tr>
-        <tr><td>Keystone community</td><td>≈ 33 (four families lost)</td><td>≈ 57 (bus to Summit t2–t5)</td></tr>
-        <tr><td>Keystone Meridian</td><td>≈ 19 (vault spoils, Chicago)</td><td>≈ 45+ (ships, buys fuel)</td></tr>
-        <tr><td>Haven community</td><td>≈ 25 (all five stranded)</td><td>≈ 65 (hall plus two bus trips)</td></tr>
-        <tr><td>Haven Meridian</td><td>≈ 41</td><td>≈ 50</td></tr>
+        <tr><th>Team</th><th>All careful</th><th>This team does nothing</th><th>Games it wins doing nothing</th></tr>
+        <tr><td>Keystone community</td><td>68</td><td>61</td><td>0 of 1,000</td></tr>
+        <tr><td>Keystone Meridian</td><td>68</td><td>27</td><td>0 of 1,000</td></tr>
+        <tr><td>Haven community</td><td>73</td><td>63</td><td>0 of 1,000</td></tr>
+        <tr><td>Haven Meridian</td><td>63</td><td>48</td><td>0 of 1,000</td></tr>
       </table>
-      <p>The best score for a community team needs Meridian’s help: trucks, the cafeteria, or the truth about Southfield. That is the conflict the prototype is testing.</p>
-      <p><b>Weakest spot:</b> Haven Meridian earns mostly from what other teams do. If doing nothing comes within 5 points of active play in your test, raise the flood cost for the cranes or make the recovery ship need Haven fuel.</p>
-      <h3>Variant if the room is sharp</h3>
-      <p>Haven Meridian’s secret card gets a second line: <i>Captain Solheim will sail at the end of t3, not t4, whatever anyone says.</i> Keystone loses a turn of loading unless Haven tells it.</p>
+      <p><b>What the ledger changed from the first cut:</b> the eye rescue was free, so a community team that did nothing beat careful play; the Meridian teams finished 25 to 35 points behind; and the recovery ship never loaded because the island ran out of fuel. Fixes: a peak roll for stranded groups, one rescue per vehicle, a lost group costs 5, higher dose prices, cranes earn only with a ship in, and the <i>Resolute</i>’s 3 fuel at t10.</p>
+      <p><b>Closest call:</b> Keystone community, 7 points. Its doing-nothing score depends on Keystone Meridian spending trucks to rescue it. That free ride is worth a debrief question.</p>
+      <p class="muted">Limits: two scripted strategies are not people. Hoarding, side deals and broken promises are not modelled. Trust that the playtest tells you more than this table.</p>
     </div>
     <div>
       <h3>What to watch and note</h3>
       <ol>
-        <li>Was 2 minutes enough to plan? (The Godot target is 60–90 seconds.)</li>
+        <li>Was 90 seconds enough to plan? (The Godot target is 60–90 seconds.) How long did each quarter take?</li>
         <li>Did the two teams in a parish argue, or just cooperate? Where?</li>
-        <li>Did anyone hoard, and did hoarding win?</li>
-        <li>Did players read a moment card as a quiz with a right answer?</li>
-        <li>Did the two meters change any decision?</li>
+        <li>Did anyone hoard, and did hoarding pay?</li>
+        <li>Did players treat a moment card as a quiz with a right answer, or as a real trade-off?</li>
+        <li>Did the meters moving change any later decision?</li>
         <li>Were promises made? Kept?</li>
         <li>Did the leaders’ voices land as pressure, or as noise?</li>
-        <li>Turns 7 and 8: too much at once for the CM?</li>
+        <li>Turn 7: too much at once for you?</li>
         <li>Which rule did you have to explain twice?</li>
-        <li>How long did each quarter take?</li>
+        <li>Did the team that won feel it had won something worth having?</li>
       </ol>
-      <p>Bring the notes back to the thread; the numbers that survive become the first content JSON for the Godot build and the bot balance gate.</p>
+      <p>Bring the notes back to the thread. The numbers that survive become the first content JSON for the Godot build, and the ledger becomes the first draft of the bot balance gate.</p>
+      <h3>Variant if the room is sharp</h3>
+      <p>Haven Meridian’s secret card gets a second line: <i>Captain Solheim will sail at the end of t3, not t4, whatever anyone says.</i> Keystone loses a turn of loading unless Haven tells it.</p>
       <h3>What this prototype leaves out</h3>
       <p class="muted">The other three parishes, the hex grid, phones, generated news, the run log and replay, and the reflexive issue engine. Calls for aid from Summit and Heartland are read by the CM.</p>
     </div>
