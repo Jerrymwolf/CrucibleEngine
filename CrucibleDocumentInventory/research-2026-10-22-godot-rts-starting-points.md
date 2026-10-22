@@ -2,7 +2,7 @@
 title: "Research: open-source Godot starting points for the Crucible"
 date: 2026-10-22
 type: research
-status: proposed
+status: accepted
 tags: [crucible-engine, research, godot, rts, open-source]
 related:
   - "[[decision-2026-10-21-all-godot]]"
@@ -26,7 +26,11 @@ Jerry asked (2026-10-22): "There's no GODOT open source RTS ENGINE out there we 
 | **OpenCiv3** (C7-Game) | An open remake of Civilization III. | MIT | 4.2+ | Active | Not confirmed | Weak fit. It is written in C#, which complicates the web build, and it is pre-alpha. |
 | **netfox** (foxssake) | A Godot networking add-on: timing, rollback, client-server. About 1.1k stars. | MIT | 4.x | Active | Yes, that is what it is | Built for fast action games that need rollback. Simultaneous storm turns do not need rollback; Godot's own WebSocket multiplayer is enough. |
 
-## Recommendation
+## Decision
+
+Jerry chose "Hex toolkit + borrowed RTS parts" on a decision card on 2026-10-22 (01:01 UTC). The Godot build starts from the free hex map toolkit and Godot's WebSocket multiplayer, borrowing Open RTS code where useful.
+
+## Recommendation (as proposed)
 
 Build our own game on proven parts rather than fork a whole game:
 
