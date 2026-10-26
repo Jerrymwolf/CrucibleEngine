@@ -18,6 +18,10 @@ related:
 
 **Status:** accepted. Jerry chose "Frostpunk 2 + Diplomacy" on the decision card, 2026-10-26 00:43. Paper prototype failed because "the choices weren't dynamic related to the values people chose. Ai can do that better at speed" (Jerry 00:44). See [[teardown-2026-10-26-frostpunk2-diplomacy]].
 
+## Addendum 2026-10-26 00:57: storm-and-map reference
+
+After research on games with weather and changing maps ([[research-2026-10-26-rts-weather-map-conditions]]), Jerry chose **Dune: Spice Wars + Northgard** on a card: Dune's moving storm on a region map and flash warnings, Northgard's forecast calendar. Full design in [[teardown-2026-10-26-frostpunk2-diplomacy]] section 7. The references are now Frostpunk 2 (parish politics), Diplomacy (simultaneous turns), Dune: Spice Wars + Northgard (storm and map).
+
 ## What REA can and cannot do (checked 2026-10-26)
 
 REA (Reverse Engineer Anything) is an MCP server for agents. It disassembles native binaries (Ghidra/Hopper/IDA), reads .NET CIL, decodes Unity IL2CPP metadata (type and method names, versions 24-39), extracts Godot PCK archives (formats 2-4), maps JS/Electron modules, and observes runtime behaviour. Its showcases each recover a single formula. It does not export an engine. So the target is the game whose **rules** best match our spec; we reimplement those rules clean-room in Godot (mechanics are not copyrightable; code and assets are; many EULAs forbid decompiling, so REA is for narrow formulas only).

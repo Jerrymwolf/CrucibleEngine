@@ -11,9 +11,12 @@ related:
   - "[[decision-2026-10-21-reflexive-issue-engine]]"
   - "[[paper-prototype-2026-10-22]]"
   - "[[audit-2026-10-26-teardown]]"
+  - "[[research-2026-10-26-rts-weather-map-conditions]]"
 ---
 
 # Rules teardown: Frostpunk 2 + Diplomacy
+
+> **v3, 2026-10-26 00:57.** Jerry chose Dune: Spice Wars + Northgard as the storm-and-map reference. Added section 7 (map, storm track, forecast calendar, units, site states).
 
 > **v2, 2026-10-26.** Revised after the 1-100 audit ([[audit-2026-10-26-teardown]], v1 63, v2 100). Changes: dilemmas per parish built from both teams' values; storm-turn sequence (section 2b); win condition; dilemma cadence; timing fix; validator; 40-template offline fallback; data shapes (section 6).
 
@@ -124,8 +127,58 @@ One parish (Keystone), both teams, 3 storm turns, AI-written dilemmas from a typ
 
 Both go into the run log as inputs, which is what makes replay exact.
 
+## 7. The map and the storm (Dune: Spice Wars + Northgard)
+
+### 7a. Map: parishes split into sites (Diplomacy provinces, Dune regions)
+
+Five parishes, four around the edge and one in the centre (2026-10-21). Each has 3-4 **sites**; units move site to site along roads. First cut, names from current lore; Jerry owns the canon:
+
+| Parish | Sites (first cut) | Who owns what |
+|---|---|---|
+| Sterling (north) | Capitol, General Hospital, Old Town, Heliport | Government and hospital: community; heliport: shared |
+| Heartland (centre, name pending) | Meridian HQ, the Dam, Pump Station, Crater Road | Dam and HQ: Meridian (built for the community) |
+| Gateway | Kelp Beds, Airport, Beach Hotels, Fishers' Quay | Kelp and airport: Meridian; quay: community |
+| Keystone | Biotech Plant, Low Ward, St. Brendan's, Tech Housing | Plant: Meridian; ward and church: community |
+| Haven | Port, Cold Store, Harbour Town, Breakwater | Port and cold store: Meridian; town: community |
+
+Roads link sites inside a parish and link neighbouring parishes through the centre and along the coast. The ring road and crater roads already exist in `concordia.json` (`CRATER_ROADS`).
+
+### 7b. Site states (Company of Heroes 2 ground, Dune hazards)
+
+Each site is in one state at a time; the engine changes it at resolve:
+
+- **Dry**: normal.
+- **Flooded**: road units cannot enter; boats can; people there are at risk each turn.
+- **Cut off**: roads in or out closed; only boats or the helicopter reach it.
+- **Dark**: power out; facilities stop and yields from it are zero unless a generator is there.
+- **Wrecked**: assets destroyed; needs a repair project in Q4.
+
+### 7c. The storm track (Dune sandstorms)
+
+Hurricane Midas is drawn on the wall as a moving eye with an outer band. Each storm turn it advances along a track stored in `crucible/content/timeline.json`. Sites under the band take damage by intensity: rising chance of Flooded, Cut off or Dark, decided by the seeded RNG so replay is exact. Units in a site under the eyewall that are not in shelter are lost. The track is fixed per scenario seed; the CM can pick one of several tracks at setup.
+
+### 7d. Forecast calendar (Northgard)
+
+A strip across the top of every tablet and the wall shows the next 3 storm turns: which sites the band will reach, surge warnings at coastal sites, and planned power cuts. Accuracy falls with distance: next turn certain, two out likely, three out possible. Prep projects in Q1 (sandbags, moving people, fuelling generators) target sites named on the calendar, so teams can see why prep pays.
+
+### 7e. Flash warnings (Dune sandworms)
+
+Once or twice a quarter, one site gets a one-turn warning: "Breakwater fails next turn" or "Dam spillway opens in 3 hours". Units and people there must move now or be lost. These are the sharpest prompts for the Dilemma Director: the dilemma is written around the warned site.
+
+### 7f. Units (Emergency series, light)
+
+Each parish starts with a handful of units, owned by one team: buses, trucks, boats, work crews, generators, medical teams; Sterling holds the island's one helicopter. A unit moves one road link per storm turn (two on the ring road while dry). Sending a unit is an order; units can be lent across parishes as gift, loan or trade (2026-10-21).
+
+### 7g. How it feeds the rest
+
+- **Yields:** dry, powered, staffed sites earn; flooded, dark or wrecked sites don't. Saved people return to work in Q4.
+- **Dilemmas:** the director always places a dilemma at a site that is warned, flooded or cut off, so the map makes the moral problem.
+- **Meters:** people lost at community sites drop community trust; lost Meridian output drops board confidence.
+- **Debrief:** the replay shows the storm track over the choices, so tables see what they knew when they chose.
+
 ## Sources
 
 - Frostpunk 2 council, voting, promises, trust: https://frostpunk-2.game-vault.net/wiki/Council ; https://en.wikipedia.org/wiki/Frostpunk_2
 - Diplomacy rules and adjudication (DATC): standard Avalon Hill rulebook; open-source adjudicators
 - REA capabilities: https://github.com/morluto/rea
+- Storm and map references: [[research-2026-10-26-rts-weather-map-conditions]]
