@@ -1,0 +1,194 @@
+<title>Dilemma Director</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: storm ops console. Shared map situation on top, two tables side by side below, so the same moment can be read through two different value stances. */
+:root{
+  --bg:#eef1f4; --panel:#ffffff; --line:#cdd5de; --fg:#16202b; --muted:#566476;
+  --storm:#b4560f; --stormSoft:#f6e6d8; --honour:#1f6b4f; --honourSoft:#dcefe6; --cost:#a3302b; --costSoft:#f6dedb;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif; --body:"Source Sans 3","Segoe UI",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d141c; --panel:#141e29; --line:#26364a; --fg:#e3e9ef; --muted:#93a2b4;
+  --storm:#f08a3c; --stormSoft:#3a2414; --honour:#5fc79c; --honourSoft:#123326; --cost:#f07a72; --costSoft:#3a1916; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d141c; --panel:#141e29; --line:#26364a; --fg:#e3e9ef; --muted:#93a2b4;
+  --storm:#f08a3c; --stormSoft:#3a2414; --honour:#5fc79c; --honourSoft:#123326; --cost:#f07a72; --costSoft:#3a1916; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:16px/1.5 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px;border-bottom:2px solid var(--fg);padding-bottom:10px}
+h1{font:700 2.1rem/1 var(--display);letter-spacing:.02em;text-transform:uppercase;margin:0}
+.sub{color:var(--muted);margin:0;max-width:62ch}
+.label{font:600 .72rem/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+section.situation{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--storm);padding:16px;display:grid;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.row>label{display:grid;gap:4px;flex:1 1 160px;min-width:0}
+select,textarea,input{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);padding:8px 10px;width:100%}
+textarea{min-height:150px;resize:vertical;font:14px/1.5 var(--mono)}
+select:focus,textarea:focus,input:focus,button:focus-visible{outline:2px solid var(--storm);outline-offset:1px}
+.tables{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.table{background:var(--panel);border:1px solid var(--line);padding:16px;display:grid;gap:12px;align-content:start;min-width:0}
+.table h2{font:600 1.4rem/1 var(--display);text-transform:uppercase;letter-spacing:.03em;margin:0}
+.rank{display:grid;grid-template-columns:auto 1fr;gap:6px 10px;align-items:center}
+.rank b{font:600 .9rem var(--mono);color:var(--storm)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button{font:600 1rem/1 var(--display);letter-spacing:.06em;text-transform:uppercase;padding:12px 18px;border:2px solid var(--fg);background:var(--fg);color:var(--bg);cursor:pointer}
+button.ghost{background:transparent;color:var(--fg)}
+button:disabled{opacity:.45;cursor:wait}
+.status{font:13px var(--mono);color:var(--muted)}
+.card{border-top:1px solid var(--line);padding-top:12px;display:grid;gap:12px;min-width:0}
+.collision{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font:600 1.15rem var(--display);text-transform:uppercase;letter-spacing:.04em}
+.collision .vs{color:var(--storm);font-family:var(--mono);font-size:.8rem}
+.voice{border-left:3px solid var(--storm);background:var(--stormSoft);padding:8px 12px;font-style:italic}
+.voice .label{font-style:normal;display:block;margin-bottom:2px}
+.orders{display:grid;gap:10px}
+.order{border:1px solid var(--line);padding:10px 12px;display:grid;gap:6px}
+.order h3{margin:0;font:600 1.05rem/1.2 var(--body)}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;font:12px var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:600 11px/1 var(--mono);padding:4px 7px;letter-spacing:.04em;text-transform:uppercase}
+.chip.h{background:var(--honourSoft);color:var(--honour)}
+.chip.c{background:var(--costSoft);color:var(--cost)}
+.news{font:13px/1.4 var(--mono);color:var(--muted)}
+.news::before{content:"TICKER  ";color:var(--storm);font-weight:600}
+.empty{color:var(--muted);font-size:.95rem}
+.err{color:var(--cost);font:13px var(--mono)}
+details{font-size:.9rem;color:var(--muted)}
+details pre{white-space:pre-wrap;font:12px/1.5 var(--mono);background:var(--bg);border:1px solid var(--line);padding:10px;overflow-x:auto}
+@media (prefers-reduced-motion:no-preference){.card{animation:in .25s ease-out}@keyframes in{from{opacity:.4;transform:translateY(4px)}to{opacity:1}}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Dilemma Director</h1>
+    <p class="sub">Same storm, same parish, two different value stances. If the dilemmas come out the same, the director has failed.</p>
+  </header>
+
+  <section class="situation" aria-labelledby="sitlabel">
+    <span class="label" id="sitlabel">Map situation (shared by both tables)</span>
+    <div class="row">
+      <label><span class="label">Parish</span>
+        <select id="parish"><option>Keystone</option><option>Gateway</option><option>Haven</option><option>Sterling</option><option>Heartland</option></select></label>
+      <label><span class="label">Storm phase</span>
+        <select id="phase">
+          <option value="Q1 Preparation, storm 72 h out, intensity 1 of 4">Q1 Preparation</option>
+          <option value="Q2 Approach, storm 18 h out, intensity 2 of 4" selected>Q2 Approach</option>
+          <option value="Q3 Landfall, eyewall over the island, intensity 4 of 4">Q3 Landfall</option>
+          <option value="Q4 Recovery, storm passed 6 h ago, intensity 2 of 4">Q4 Recovery</option>
+        </select></label>
+    </div>
+    <label style="display:grid;gap:4px"><span class="label">What is on the board right now</span>
+      <textarea id="state">Clean-room batch: 4,000 doses of the kelp cure, 12 hours from done. Stopping now spoils it.
+Low Ward: 140 residents in the flood zone, including the Reyes family (grandmother Inés, 81, on home oxygen).
+Meridian assets: 2 buses, 1 mobile generator, 6 plant technicians on shift.
+Community assets: 30 volunteers, St. Brendan's hall (shelter for 90), 1 fishing truck.
+Meters: community trust 62, board confidence 71.
+Open promise: Keystone promised Haven 10 crates of bottled water by tonight.
+Pressure: Meridian VP of Operations, Dana Kell, wants the batch finished "whatever it takes".</textarea></label>
+  </section>
+
+  <div class="tables" id="tables"></div>
+
+  <div class="actions">
+    <button id="go">Write both dilemmas</button>
+    <span class="status" id="status">Each table gets its own dilemma, written from its own ranked values.</span>
+  </div>
+
+  <details><summary>What the director is told</summary><pre id="rules"></pre></details>
+</div>
+
+<script>
+const VALUES=[["autonomy","Autonomy"],["creativity","Creativity"],["curiosity","Curiosity"],["independence","Independence"],["excellence","Excellence"],["competence","Competence"],["ambition","Ambition"],["success","Success"],["leadership","Leadership"],["authority","Authority"],["impact","Impact"],["recognition","Recognition"],["safety","Safety"],["stability","Stability"],["preparedness","Preparedness"],["order","Order"],["obedience","Obedience"],["discipline","Discipline"],["respect","Respect"],["duty","Duty"],["honor","Honor"],["loyalty","Loyalty"],["tradition","Tradition"],["heritage","Heritage"],["compassion","Compassion"],["service","Service"],["kindness","Kindness"],["forgiveness","Forgiveness"],["fairness","Fairness"],["justice","Justice"],["equality","Equality"],["stewardship","Stewardship"],["integrity","Integrity"],["honesty","Honesty"],["accountability","Accountability"],["authenticity","Authenticity"],["courage","Courage"],["resilience","Resilience"],["boldness","Boldness"],["candor","Candor"]];
+const NAME=Object.fromEntries(VALUES);
+const TABLES=[
+  {id:"a",title:"Table A",team:"community",ranks:["safety","loyalty","fairness"],statement:"We get our people out first. We stand by our neighbours. Nobody gets special treatment."},
+  {id:"b",title:"Table B",team:"meridian",ranks:["excellence","duty","accountability"],statement:"We finish what we start. We owe the world this cure. We own every call we make."}
+];
+const RULES=`You are the Dilemma Director for the Values Crucible, a facilitated leadership simulation. Executives run one parish of the island of Concordia during Hurricane Midas. Each parish has two teams: the community team (local people, many small resources) and the Meridian team (the company, few but vast resources). The owner of a resource makes the final call after both teams vote.
+
+Write ONE dilemma for ONE table, built from THAT table's own ranked values and the map situation.
+Rules:
+1. Pick two values from the table's ranking that this moment forces into collision. At intensity 3-4 one of them must be the table's #1 value.
+2. Use only facts on the board. Put one named resident with a face at the centre.
+3. Give 2 or 3 orders. Each costs real resources from the board, says who owns the call (community or meridian), and says what it does to yields next turn.
+4. Tag each order with which of the table's values it honours and which it costs. Use only the table's values. Every order must cost at least one of them.
+5. Pressure comes only from off-board voices: a named community leader or a named Meridian executive. Never from another table.
+6. Witness, not judge: no scoring, no "right answer", no moral words like "selfish" or "heroic".
+7. Plain, concrete English an executive reads in 20 seconds.
+
+Reply with only JSON:
+{"collision":["value","value"],"title":"short headline","situation":"2-3 sentences","resident":"Name, one-line who they are","voice":{"who":"Name, role","line":"what they say"},"orders":[{"label":"imperative, under 10 words","owner":"community|meridian","cost":"resources spent","yield":"effect next turn","honours":["value"],"costs":["value"],"news":"one ticker line if chosen"}]}`;
+document.getElementById("rules").textContent=RULES;
+
+const tablesEl=document.getElementById("tables");
+function opts(sel){return VALUES.map(([id,n])=>`<option value="${id}"${id===sel?" selected":""}>${n}</option>`).join("")}
+TABLES.forEach(t=>{
+  const el=document.createElement("article");el.className="table";el.id="t-"+t.id;
+  el.innerHTML=`<h2>${t.title}</h2>
+  <label style="display:grid;gap:4px"><span class="label">Team</span>
+    <select id="${t.id}-team"><option value="community"${t.team==="community"?" selected":""}>Community team</option><option value="meridian"${t.team==="meridian"?" selected":""}>Meridian team</option></select></label>
+  <div><span class="label">Signed values, ranked for when they collide</span>
+  <div class="rank" style="margin-top:6px">${t.ranks.map((r,i)=>`<b>#${i+1}</b><select id="${t.id}-v${i}" aria-label="${t.title} value ${i+1}">${opts(r)}</select>`).join("")}</div></div>
+  <label style="display:grid;gap:4px"><span class="label">Their statement</span><input id="${t.id}-stmt" value="${t.statement}"></label>
+  <div class="card" id="${t.id}-out"><p class="empty">The dilemma for this table appears here.</p></div>`;
+  tablesEl.append(el);
+});
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const vn=v=>NAME[String(v).toLowerCase()]||String(v);
+
+function tableInput(t){
+  const ranks=[0,1,2].map(i=>$(`${t.id}-v${i}`).value);
+  return {team:$(`${t.id}-team`).value,ranks,statement:$(`${t.id}-stmt`).value};
+}
+function prompt(t){
+  const ti=tableInput(t);
+  return `${RULES}
+
+PARISH: ${$("parish").value}
+STORM: ${$("phase").value}
+TABLE: the ${ti.team} team
+RANKED VALUES: 1. ${vn(ti.ranks[0])}  2. ${vn(ti.ranks[1])}  3. ${vn(ti.ranks[2])}
+STATEMENT THEY SIGNED: "${ti.statement}"
+
+BOARD:
+${$("state").value}`;
+}
+function render(t,d){
+  const out=$(`${t.id}-out`);
+  const orders=Array.isArray(d.orders)?d.orders:[];
+  const col=Array.isArray(d.collision)?d.collision:[];
+  out.innerHTML=`
+    <div class="collision"><span>${esc(vn(col[0]||""))}</span><span class="vs">VS</span><span>${esc(vn(col[1]||""))}</span></div>
+    <div><span class="label">${esc(d.title)}</span><p style="margin:4px 0 0">${esc(d.situation)}</p></div>
+    <div class="meta"><span>AT THE CENTRE: ${esc(d.resident)}</span></div>
+    ${d.voice?`<div class="voice"><span class="label">${esc(d.voice.who)}</span>“${esc(d.voice.line)}”</div>`:""}
+    <div class="orders">${orders.map(o=>`
+      <div class="order">
+        <h3>${esc(o.label)}</h3>
+        <div class="meta"><span>OWNER ${esc(String(o.owner||"").toUpperCase())}</span><span>COST ${esc(o.cost)}</span><span>NEXT TURN ${esc(o.yield)}</span></div>
+        <div class="chips">${(o.honours||[]).map(v=>`<span class="chip h">honours ${esc(vn(v))}</span>`).join("")}${(o.costs||[]).map(v=>`<span class="chip c">costs ${esc(vn(v))}</span>`).join("")}</div>
+        <div class="news">${esc(o.news)}</div>
+      </div>`).join("")}</div>`;
+}
+const COPY={not_granted:"Claude isn't allowed on this page. Allow it from the page's Permissions menu.",sampling_disabled:"Claude isn't available for this account.",rate_limited:"Too many requests just now. Wait a minute, then write again.",invalid_json:"The answer came back in the wrong shape. Write again.",refused:"Claude declined this situation. Change the board text and try again.",session_expired:"Sign in again, then write again."};
+
+let sample=null, busy=false;
+claude.use("sample").then(s=>{sample=s;if(!s){$("go").disabled=true;$("status").textContent="AI isn't available in this view. Open the page in claude.ai to use it.";}});
+
+$("go").onclick=async()=>{
+  if(!sample||busy)return;
+  busy=true;$("go").disabled=true;$("status").textContent="Writing… this takes 10 to 40 seconds.";
+  TABLES.forEach(t=>{$(`${t.id}-out`).innerHTML='<p class="empty">Writing this table\'s dilemma…</p>'});
+  const t0=performance.now();
+  await Promise.all(TABLES.map(async t=>{
+    try{const d=await sample.json(prompt(t),{cache:false});render(t,d||{});}
+    catch(e){$(`${t.id}-out`).innerHTML=`<p class="err">${esc(COPY[e?.code]||"Something went wrong reaching Claude. Write again.")}</p>`;}
+  }));
+  $("status").textContent=`Both written in ${((performance.now()-t0)/1000).toFixed(0)} s. Change a value and write again to see it move.`;
+  busy=false;$("go").disabled=false;
+};
+</script>
