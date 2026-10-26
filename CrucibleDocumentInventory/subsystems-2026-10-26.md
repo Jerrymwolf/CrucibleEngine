@@ -41,17 +41,21 @@ Status: **D** designed (teardown section), **P** partly, **N** not yet. **Slice*
 | 7 | People | Named residents per site, at-risk counts, saved and lost, who works where | Frostpunk citizens, Civ tiles | D (9) | Yes |
 | 8 | Values stance builder | 20 min: me, then us, then the ranked trade-off; signed statement | Our andragogy grill, 2026-10-21 | D (10) | Yes |
 | 9 | Team tablet | Order pad: dilemma vote, unit moves, convoys, promises, forecast strip | Diplomacy order sheet | D (11) | Yes |
-| 10 | Facilitator console | Timers, dilemma veto and cruise, pressure levers, pause, rehearsal bots | Earlier DM card | P | Thin |
-| 11 | Pressure voices | Named community leaders (elder, pastor, mayor) and Meridian executives, plus HQ and the Governor; asks and deadlines tied to the meters | Against the Storm impatience | P (decided) | Later |
+| 10 | Facilitator console | Timers, dilemma veto and cruise, pressure levers, pause, rehearsal bots | Left 4 Dead "AI Director" pacing (build-up, peak, relax) + earlier DM card | P | Thin |
+| 11 | Pressure voices | Named community leaders (elder, pastor, mayor) and Meridian executives, plus HQ and the Governor; asks and deadlines tied to the meters | Against the Storm impatience; Paradox event scripts (triggers, weights, mean time to happen) | P (decided) | Later |
 | 12 | Quarter goals and prep projects | One public goal per parish per quarter; Q1 projects that pay off in the storm | Rebel Inc initiatives | P (decided) | Later |
-| 13 | News and social feed | Ticker and reactions from events; reports facts, never names values | Templates, AI later | P (decided) | Later |
-| 14 | Record and debrief | Values log, replay with storm path, Mission briefs, private records, research export | Our witness model | P | Later |
+| 13 | News and social feed | Ticker and reactions from events; reports facts, never names values | Tropico radio and Democracy 4 voter reactions; templates, AI later | P (decided) | Later |
+| 14 | Record and debrief | Values log, replay with storm path, Mission briefs, private records, research export | Age of Empires II post-game timeline and replay scrubbing; our witness model | P | Later |
 | 15 | Commitment card | What each person commits to after the session (open question since 2026-10-21) | None yet | N | Later |
-| 16 | Wall display | Map, forecast, standings, meters, ticker, readable from the back of the room | Dune / Northgard HUD | N | Later |
-| 17 | Session network | Tablets join the host, reconnect, survive bad wifi | Earlier LAN host work | P (old Rust host) | Later |
+| 16 | Wall display | Map, forecast, standings, meters, ticker, readable from the back of the room | Esports observer view (StarCraft II, AoE II); Dune / Northgard HUD | N | Later |
+| 17 | Session network | Tablets join the host, reconnect, survive bad wifi | Jackbox (room code, devices join one host screen); earlier LAN host work | P (old Rust host) | Later |
 | 18 | Practice round | ~10 min to learn the controls before the storm | Tutorial missions | N | Later |
 | 19 | Content and scenarios | Parishes, sites, tracks, goods, templates as JSON; CM picks a scenario | Paradox plaintext scripts | P (content/*.json exists) | Yes |
 | 20 | Phones (later layer) | Optional personal phones; falls back to the tablet | Decision 3, 2026-10-22 | Later | No |
+
+## Do the other subsystems need new reference games? (Jerry, 01:03)
+
+No new research round is needed. The game layers (politics, turns, storm, supplies) were the hard part. The rest borrow from known games, added to the Reference column above: Left 4 Dead's AI Director for pacing, Paradox events for pressure voices, Tropico and Democracy 4 for reactions, Age of Empires II for replay, esports observer views for the wall, and Jackbox for joining. The stance builder, commitment card and debrief come from facilitation practice and Jerry's dissertation, not games.
 
 ## Keystone slice needs
 
