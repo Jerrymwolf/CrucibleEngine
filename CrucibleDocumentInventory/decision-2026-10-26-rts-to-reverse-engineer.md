@@ -16,7 +16,7 @@ related:
 
 **Asked (Jerry, 2026-10-26 00:36):** "We built a paper version that just doesn't work. I think we need to build from scratch reverse engineering a RTS. https://github.com/morluto/rea. Which one most fits our context?" Clarified 00:37: REA is the skill; find the best game to reverse engineer with it.
 
-**Status:** accepted. Jerry chose "Frostpunk 2 + Diplomacy" on the decision card, 2026-10-26 00:43. What failed in the paper version is still to hear.
+**Status:** accepted. Jerry chose "Frostpunk 2 + Diplomacy" on the decision card, 2026-10-26 00:43. Paper prototype failed because "the choices weren't dynamic related to the values people chose. Ai can do that better at speed" (Jerry 00:44). See [[teardown-2026-10-26-frostpunk2-diplomacy]].
 
 ## What REA can and cannot do (checked 2026-10-26)
 
