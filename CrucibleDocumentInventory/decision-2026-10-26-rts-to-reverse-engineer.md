@@ -2,7 +2,7 @@
 title: "Decision: which game to reverse engineer for the rebuild"
 date: 2026-10-26
 type: decision-record
-status: proposed
+status: accepted
 project: Crucible Engine (The Values Crucible)
 tags: [crucible-engine, decision, reverse-engineering, rea, godot, strategy-games]
 related:
@@ -16,7 +16,7 @@ related:
 
 **Asked (Jerry, 2026-10-26 00:36):** "We built a paper version that just doesn't work. I think we need to build from scratch reverse engineering a RTS. https://github.com/morluto/rea. Which one most fits our context?" Clarified 00:37: REA is the skill; find the best game to reverse engineer with it.
 
-**Status:** proposed. Sent to Jerry as a decision card; the pick and what failed in the paper version are pending.
+**Status:** accepted. Jerry chose "Frostpunk 2 + Diplomacy" on the decision card, 2026-10-26 00:43. What failed in the paper version is still to hear.
 
 ## What REA can and cannot do (checked 2026-10-26)
 
