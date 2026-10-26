@@ -43,19 +43,30 @@ Status: **D** designed (teardown section), **P** partly, **N** not yet. **Slice*
 | 9 | Team tablet | Order pad: dilemma vote, unit moves, convoys, promises, forecast strip | Diplomacy order sheet | D (11) | Yes |
 | 10 | Facilitator console | Timers, dilemma veto and cruise, pressure levers, pause, rehearsal bots | Left 4 Dead "AI Director" pacing (build-up, peak, relax) + earlier DM card | P | Thin |
 | 11 | Pressure voices | Named community leaders (elder, pastor, mayor) and Meridian executives, plus HQ and the Governor; asks and deadlines tied to the meters | Against the Storm impatience; Paradox event scripts (triggers, weights, mean time to happen) | P (decided) | Later |
-| 12 | Quarter goals and prep projects | One public goal per parish per quarter; Q1 projects that pay off in the storm | Rebel Inc initiatives | P (decided) | Later |
+| 12 | Quarter goals and prep projects | One public goal per parish per quarter; Q1 projects that pay off in the storm | Rebel Inc initiatives (pay now, effect lands later); Civilization wonders as public goals | P (decided) | Later |
 | 13 | News and social feed | Ticker and reactions from events; reports facts, never names values | Tropico radio and Democracy 4 voter reactions; templates, AI later | P (decided) | Later |
-| 14 | Record and debrief | Values log, replay with storm path, Mission briefs, private records, research export | Age of Empires II post-game timeline and replay scrubbing; our witness model | P | Later |
-| 15 | Commitment card | What each person commits to after the session (open question since 2026-10-21) | None yet | N | Later |
+| 14 | Record and debrief | Values log, replay with storm path, Mission briefs, private records, research export | Age of Empires II post-game timeline graph; StarCraft II replays (rewind, seek, per-player view); our witness model | P | Later |
+| 15 | Commitment card | What each person commits to after the session (open question since 2026-10-21) | Not a game: facilitation practice and the dissertation's commitment stage | N | Later |
 | 16 | Wall display | Map, forecast, standings, meters, ticker, readable from the back of the room | Esports observer view (StarCraft II, AoE II); Dune / Northgard HUD | N | Later |
-| 17 | Session network | Tablets join the host, reconnect, survive bad wifi | Jackbox (room code, devices join one host screen); earlier LAN host work | P (old Rust host) | Later |
-| 18 | Practice round | ~10 min to learn the controls before the storm | Tutorial missions | N | Later |
+| 17 | Session network | Tablets join the host, reconnect, survive bad wifi | Jackbox join flow (room code, devices join one host screen); UX only, since Jackbox runs on internet servers and ours must run on a local host; earlier LAN host work | P (old Rust host) | Later |
+| 18 | Practice round | ~10 min to learn the controls before the storm | Into the Breach (shows the threat's next move, so cause and effect is learned by looking); a no-stakes first round like Jackbox's | N | Later |
 | 19 | Content and scenarios | Parishes, sites, tracks, goods, templates as JSON; CM picks a scenario | Paradox plaintext scripts | P (content/*.json exists) | Yes |
 | 20 | Phones (later layer) | Optional personal phones; falls back to the tablet | Decision 3, 2026-10-22 | Later | No |
 
 ## Do the other subsystems need new reference games? (Jerry, 01:03)
 
-No new research round is needed. The game layers (politics, turns, storm, supplies) were the hard part. The rest borrow from known games, added to the Reference column above: Left 4 Dead's AI Director for pacing, Paradox events for pressure voices, Tropico and Democracy 4 for reactions, Age of Empires II for replay, esports observer views for the wall, and Jackbox for joining. The stance builder, commitment card and debrief come from facilitation practice and Jerry's dissertation, not games.
+No new research round is needed. The four game layers (politics, turns, storm, supplies) were the hard part and each has a reference. Every other subsystem now has one in the Reference column above, or is marked as not a game problem.
+
+What to take from each, in our terms:
+- **Left 4 Dead AI Director:** it watches player stress and alternates build-up, peak and relief. The CM console uses the same rhythm to space dilemmas and pressure, so Q3 peaks and Q4 relaxes (storm-shaped hour, 2026-10-21).
+- **Paradox event scripts:** each pressure-voice ask is a data entry with a trigger (e.g. board confidence under 40), a weight and a mean time to happen. That keeps voices in content JSON, not code.
+- **Tropico radio, Democracy 4 voter groups:** reactions come from named groups (fishers, plant workers, Meridian investors) responding to facts.
+- **Age of Empires II timeline, StarCraft II replays:** the debrief shows a per-parish timeline of stock and people, and a replay you can stop at any choice.
+- **Esports observer views:** the wall switches between the island view and one parish, with standings always visible.
+- **Jackbox:** the join flow only (room code on the wall, tablets join). Not its networking.
+- **Into the Breach:** the practice round shows the storm's next move on the map before it happens, which teaches the forecast by sight.
+
+**Audit of the 01:03 answer (Jerry asked 01:04):** 72 -> 100. v1 skipped the practice round, commitment card, and goals and projects; credited AoE II with replay scrubbing (StarCraft II is the safer example); did not say what to borrow from each game; and did not warn that Jackbox's online networking is the opposite of our offline host.
 
 ## Keystone slice needs
 
