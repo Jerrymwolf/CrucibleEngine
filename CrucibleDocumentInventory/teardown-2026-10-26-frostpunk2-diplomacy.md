@@ -19,6 +19,8 @@ related:
 > **v3, 2026-10-26 00:57.** Jerry chose Dune: Spice Wars + Northgard as the storm-and-map reference. Added section 7 (map, storm track, forecast calendar, units, site states).
 >
 > **v4, 2026-10-26 00:58.** Jerry chose Anno 1800 + Civilization for supplies. Added section 8.
+>
+> **v5, 2026-10-26 01:01.** Jerry chose "All three, in that order". Added sections 9 (people), 10 (values stance builder), 11 (team tablet).
 
 > **v2, 2026-10-26.** Revised after the 1-100 audit ([[audit-2026-10-26-teardown]], v1 63, v2 100). Changes: dilemmas per parish built from both teams' values; storm-turn sequence (section 2b); win condition; dilemma cadence; timing fix; validator; 40-template offline fallback; data shapes (section 6).
 
@@ -212,6 +214,86 @@ Each turn every populated site consumes food and water. Unmet needs drop communi
 ### 8f. Score
 
 Each team's stockpile is the sum of the goods it owns at a fixed value per good (set in content JSON, shown on the wall). The highest stockpile wins (2026-10-21). Because yields only flow from staffed sites and moving goods, a team that hoards and lets people go loses its workforce and falls behind by Q4; the ledger (`crucible/paper/balance_ledger.py` style) must confirm do-nothing never wins.
+
+## 9. People
+
+**Why it exists:** the scenario must land on its own (Jerry, 2026-10-21): people with names and faces. People are also the workforce (section 8b), so every life is both a moral stake and a yield.
+
+### 9a. Who is on the map
+
+- **Counts per site, in two groups.** *Able* people can work and walk out. *Vulnerable* people (elderly, on medical equipment, children, patients) need a unit to move and cannot work. Parish totals come from `concordia.json` (Keystone 3,200); content splits them across sites.
+- **Named residents.** 4-6 per parish with a face, a name, one line and one need (Inés Reyes, 81, Low Ward, on home oxygen). Each lives at a site and is part of its count. Personas in `personas.json` (Frank Reeves, plant manager; Maria Santos) can be named residents or leader voices.
+
+### 9b. Status
+
+Each person group at a site is in one status: **Home**, **At risk** (site warned, flooded or under the band), **Moving** (on a unit), **Sheltered** (at a shelter site with capacity), **Evacuated** (off-island via port, airport or heliport), **Injured**, **Lost**.
+
+### 9c. Rules (deterministic, seeded)
+
+1. At resolve, people *At risk* face a loss chance set by site state and storm intensity (content table). Vulnerable people's chance is higher.
+2. Moving people takes a unit: a bus carries 40, a boat 25, the helicopter 6 (vulnerable first). One road link per turn.
+3. Shelters have capacity (St. Brendan's 90). Over capacity, community trust falls each turn.
+4. Sheltered or evacuated able people **do not work** until Q4; lost people never return. Saved people come back to work in Q4 and their sites yield again (section 8b).
+5. Injured people need a medical team or the hospital within 2 turns or become Lost.
+
+### 9d. How it shows
+
+The wall shows counts per site and a running island tally (safe, at risk, lost), never a moral label. Named residents appear in dilemmas and the ticker, and their fate is shown in the debrief ("Inés Reyes was moved to St. Brendan's in turn 7"). The engine reports what happened; the table draws the meaning (witness model).
+
+## 10. Values stance builder (the opening, ~20 min)
+
+Built from decisions already made (andragogy grill 2026-10-21; tablet-first 2026-10-22). Each of the 10 teams builds its own stance; the parish's two stances meet in the dilemmas (section 3).
+
+| Step | Time | What happens | Device |
+|---|---|---|---|
+| 1. Me | 6 min | Each person picks 3 values from the 40-card deck (`values.json`) | Paper value card (phones later); personal picks stay private |
+| 2. Story | 6 min | Each person tells a 60-second story of a time one value cost them | Spoken; nothing recorded |
+| 3. Us | 5 min | The team agrees 3 values, the tablet shows the room's count of each value (no names) | Team tablet |
+| 4. Trade-off | 3 min | The team ranks the 3 for when they collide and signs a one-sentence statement | Team tablet; the CM sees all 10 |
+
+**Output (to the engine and the Dilemma Director):** team id, ranked values [1, 2, 3], statement text, time signed. This is the only stance data the AI ever sees (section 3).
+
+**Rules:** nothing is scored (CM says "the island remembers what you do, not what you say", 2026-10-21); the seven-anchor scale appears only in the debrief; a team that runs out of time keeps its top three by vote count in the order picked, and the CM can extend.
+
+**Debrief tie-in:** me / us / did. The private record (QR code to view your own, no phones needed) shows what you picked, what the team signed, and what the team's choices honoured or cost.
+
+## 11. Team tablet
+
+One 10-inch tablet per team, landscape, readable by 3-6 people standing round it. Host-authoritative: the tablet sends orders, the host resolves. Command-centre look, not a video game.
+
+### 11a. Screen
+
+```
++----------------------------------------------------------------+
+| FORECAST  T+1 Low Ward floods | T+2 Crater Road closes | T+3 ? |
+| STOCK  Food 40  Water 30  Fuel 12 ...   TRUST 62   CONF 71     |
++-------------------------------------------+--------------------+
+|                                           |  DILEMMA (if due)  |
+|   PARISH MAP (sites, units, people)       |  Safety vs Excell. |
+|   tap a site: state, people, goods, slots |  orders + votes    |
+|   drag a unit onto a site to send it      +--------------------+
+|                                           |  ORDERS THIS TURN  |
+|                                           |  cost, undo        |
++-------------------------------------------+--------------------+
+| PROMISES  |  TRADE / GIFT / LOAN  |  ISLAND MAP  |  LOCK  0:47  |
++----------------------------------------------------------------+
+```
+
+### 11b. What a team can do in a planning window
+
+- **Move units:** drag a bus, boat, crew or generator onto a site (the RTS act Jerry asked for, 2026-10-21). The path, travel turns and risk show before release.
+- **Staff sites:** move able people between work slots (section 8b).
+- **Vote the dilemma:** both teams vote; the owner's tablet shows a "Final call: yours" badge and the other team's vote as advice. Each order shows its cost, owner, and which of *this team's* values it honours or costs.
+- **Send convoys:** gift, loan or trade to another parish; the other parish confirms trades on its tablet.
+- **Log promises:** type, pick the receiving parish, they confirm (decision 5).
+- **Lock:** both teams lock or the timer ends. Undo is free until lock.
+
+### 11c. Guard rails
+
+- Big targets (at least 48 px), no gesture-only controls, every order readable as a sentence ("Send Bus 1 to Low Ward, back in 2 turns").
+- Orders that the resource owner has not approved show as "proposed" until the owner taps.
+- Lost connection: the tablet keeps its planned orders, shows a countdown, and re-sends on reconnect; the host's copy wins.
+- The tablet never shows another team's private data, and never a value score during play.
 
 ## Sources
 

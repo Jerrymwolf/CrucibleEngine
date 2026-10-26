@@ -38,9 +38,9 @@ Status: **D** designed (teardown section), **P** partly, **N** not yet. **Slice*
 | 4 | Supplies and score | 8 goods, staffed sites yield, cure chain, convoys, needs, stockpile score | Anno 1800 + Civilization | D (8) | Yes |
 | 5 | Parish politics | Both teams vote, owner decides; two meters; promises ledger | Frostpunk 2 | D (1) | Yes |
 | 6 | Dilemma Director | AI writes each dilemma from both teams' values and the map; validator; fallback | New (test page live) | D (3) | Yes |
-| 7 | People | Named residents per site, at-risk counts, saved and lost, who works where | Frostpunk citizens, Civ tiles | N | Yes |
-| 8 | Values stance builder | 20 min: me, then us, then the ranked trade-off; signed statement | Our andragogy grill, 2026-10-21 | P (decided, not designed) | Yes |
-| 9 | Team tablet | Order pad: dilemma vote, unit moves, convoys, promises, forecast strip | Diplomacy order sheet | N | Yes |
+| 7 | People | Named residents per site, at-risk counts, saved and lost, who works where | Frostpunk citizens, Civ tiles | D (9) | Yes |
+| 8 | Values stance builder | 20 min: me, then us, then the ranked trade-off; signed statement | Our andragogy grill, 2026-10-21 | D (10) | Yes |
+| 9 | Team tablet | Order pad: dilemma vote, unit moves, convoys, promises, forecast strip | Diplomacy order sheet | D (11) | Yes |
 | 10 | Facilitator console | Timers, dilemma veto and cruise, pressure levers, pause, rehearsal bots | Earlier DM card | P | Thin |
 | 11 | Pressure voices | Named community leaders (elder, pastor, mayor) and Meridian executives, plus HQ and the Governor; asks and deadlines tied to the meters | Against the Storm impatience | P (decided) | Later |
 | 12 | Quarter goals and prep projects | One public goal per parish per quarter; Q1 projects that pay off in the storm | Rebel Inc initiatives | P (decided) | Later |
@@ -55,4 +55,4 @@ Status: **D** designed (teardown section), **P** partly, **N** not yet. **Slice*
 
 ## Keystone slice needs
 
-1, 2, 3, 4, 5, 6, 7, 8, 9, 19, plus a thin 10. Of these, 7 (people), 8 (stance builder) and 9 (team tablet) are the undesigned ones.
+1, 2, 3, 4, 5, 6, 7, 8, 9, 19, plus a thin 10. 7, 8 and 9 were designed 2026-10-26 01:01 (teardown sections 9-11). Every slice system now has a design; 1 (core engine) and 10 (console) are partial.
