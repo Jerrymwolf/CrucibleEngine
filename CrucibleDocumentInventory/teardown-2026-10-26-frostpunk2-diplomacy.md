@@ -17,6 +17,8 @@ related:
 # Rules teardown: Frostpunk 2 + Diplomacy
 
 > **v3, 2026-10-26 00:57.** Jerry chose Dune: Spice Wars + Northgard as the storm-and-map reference. Added section 7 (map, storm track, forecast calendar, units, site states).
+>
+> **v4, 2026-10-26 00:58.** Jerry chose Anno 1800 + Civilization for supplies. Added section 8.
 
 > **v2, 2026-10-26.** Revised after the 1-100 audit ([[audit-2026-10-26-teardown]], v1 63, v2 100). Changes: dilemmas per parish built from both teams' values; storm-turn sequence (section 2b); win condition; dilemma cadence; timing fix; validator; 40-template offline fallback; data shapes (section 6).
 
@@ -175,6 +177,41 @@ Each parish starts with a handful of units, owned by one team: buses, trucks, bo
 - **Dilemmas:** the director always places a dilemma at a site that is warned, flooded or cut off, so the map makes the moral problem.
 - **Meters:** people lost at community sites drop community trust; lost Meridian output drops board confidence.
 - **Debrief:** the replay shows the storm track over the choices, so tables see what they knew when they chose.
+
+## 8. Supplies (Anno 1800 + Civilization)
+
+### 8a. Goods (first cut, values in content JSON)
+
+| Good | Made at | Mostly owned by | Used for |
+|---|---|---|---|
+| Food | Fishers' Quay, Harbour Town, Cold Store (stores it) | Community | Feeding people at every site each turn |
+| Water | Pump Station (needs Dam power) | Meridian (built for the community) | People; the Biotech Plant needs ultrapure water |
+| Power | The Dam; mobile generators | Meridian | Keeps sites from going Dark |
+| Fuel | Port, Airport | Shared | Moving units, running generators |
+| Kelp | Kelp Beds | Meridian | Raw input for the cure |
+| Cure doses | Biotech Plant | Meridian | Shipped from the Port for Funds; also saves lives |
+| Funds | Shipping doses; Meridian HQ | Meridian | Buying help from off-island; trades |
+| Volunteers | Every community site | Community | Staffing sites; crews |
+
+### 8b. People work sites (Civilization worked tiles)
+
+Every site has staff slots. Each turn a staffed site yields its goods; an empty or Dark site yields nothing. Residents are the workforce: people moved to shelter stop working until it is safe, people lost never come back, and people saved return to work in Q4. That is the "yields with people as workforce" rule (decision 2, 2026-10-22) made concrete: saving people costs now and earns later.
+
+### 8c. Production chain across parishes (Anno 1800)
+
+Kelp Beds (Gateway) -> Biotech Plant (Keystone, needs Power + Water from Heartland) -> Port (Haven) -> Funds. Each link is a different parish, so the most valuable chain on the island depends on four parishes cooperating, exactly when the storm makes each one want to hoard.
+
+### 8d. Goods physically move (Anno shipping)
+
+Goods between parishes travel as convoys (truck, boat) along the map's roads and sea lanes, one link per storm turn. Gifts, loans and trades (2026-10-21) are convoys too. A convoy entering a Flooded or Cut-off site stops; under the eyewall it is lost. A loan comes back if the storm spares it. The forecast calendar tells teams when a route is about to close.
+
+### 8e. Needs (Anno population needs)
+
+Each turn every populated site consumes food and water. Unmet needs drop community trust; missed dose shipments drop board confidence. Food in the Cold Store is safe from flooding; food left at a site that floods is lost (Northgard silos).
+
+### 8f. Score
+
+Each team's stockpile is the sum of the goods it owns at a fixed value per good (set in content JSON, shown on the wall). The highest stockpile wins (2026-10-21). Because yields only flow from staffed sites and moving goods, a team that hoards and lets people go loses its workforce and falls behind by Q4; the ledger (`crucible/paper/balance_ledger.py` style) must confirm do-nothing never wins.
 
 ## Sources
 
