@@ -1,0 +1,794 @@
+<title>Keystone Storm Slice</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a command-centre console. Parish map in the middle, the community team's console on the left,
+   Meridian's on the right, the moment (dilemma) under the map, the forecast strip and ticker framing it. */
+:root{
+  --bg:#e9edf1; --panel:#ffffff; --sunk:#f3f5f8; --line:#cad3dd; --fg:#15202b; --muted:#566476;
+  --storm:#b4560f; --stormSoft:#f6e6d8;
+  --comm:#17707a; --commSoft:#d9eef0; --meri:#3d5c99; --meriSoft:#dfe6f4;
+  --honour:#1f6b4f; --honourSoft:#dcefe6; --cost:#a3302b; --costSoft:#f6dedb;
+  --sea:#d3e2ec; --land:#f1f0ea; --water:#5b8db3;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif; --body:"Source Sans 3","Segoe UI",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c131a; --panel:#131d27; --sunk:#0f1820; --line:#26364a; --fg:#e3e9ef; --muted:#93a2b4;
+  --storm:#f08a3c; --stormSoft:#3a2414; --comm:#4fc1c9; --commSoft:#0f2d31; --meri:#8fa8e0; --meriSoft:#1a2540;
+  --honour:#5fc79c; --honourSoft:#123326; --cost:#f07a72; --costSoft:#3a1916;
+  --sea:#102536; --land:#18222c; --water:#4f86b0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c131a; --panel:#131d27; --sunk:#0f1820; --line:#26364a; --fg:#e3e9ef; --muted:#93a2b4;
+  --storm:#f08a3c; --stormSoft:#3a2414; --comm:#4fc1c9; --commSoft:#0f2d31; --meri:#8fa8e0; --meriSoft:#1a2540;
+  --honour:#5fc79c; --honourSoft:#123326; --cost:#f07a72; --costSoft:#3a1916;
+  --sea:#102536; --land:#18222c; --water:#4f86b0; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:16px/1.45 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:14px 32px}
+h1,h2,h3{font-family:var(--display);font-weight:600;letter-spacing:.02em;margin:0;text-wrap:balance}
+button{font:600 15px/1.2 var(--body);color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 14px;min-height:44px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--fg)}
+button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--storm);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:var(--storm);border-color:var(--storm);color:#fff}
+select,input,textarea{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;min-height:44px;width:100%}
+.label{font:600 12px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1440px;margin:0 auto;display:grid;gap:12px}
+.muted{color:var(--muted)}
+
+/* setup */
+.setup{display:grid;gap:16px;max-width:1100px;margin:0 auto}
+.setup header{display:grid;gap:6px}
+.setup h1{font-size:clamp(34px,5vw,52px);line-height:1}
+.setup .lede{max-width:68ch;margin:0;color:var(--muted)}
+.stances{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.stance{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;display:grid;gap:10px;border-top:4px solid var(--c)}
+.stance.community{--c:var(--comm)} .stance.meridian{--c:var(--meri)}
+.stance h2{font-size:26px;color:var(--c)}
+.rank{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
+.rank b{font:600 14px var(--mono);color:var(--muted)}
+.opts{display:flex;flex-wrap:wrap;gap:14px;align-items:end;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px}
+.opts label{display:grid;gap:4px;min-width:160px;flex:1}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:0;padding:0;list-style:none}
+.how li{background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.how b{font-family:var(--display);font-size:19px;display:block}
+
+/* console */
+.topbar{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 14px}
+.topbar h1{font-size:28px}
+.topbar .turn{font:600 15px var(--mono)}
+.pips{display:inline-flex;gap:3px;vertical-align:middle}
+.pips i{width:10px;height:16px;border-radius:2px;background:var(--line)}
+.pips i.on{background:var(--storm)}
+.clock{margin-left:auto;display:flex;gap:8px;align-items:center}
+.clock .time{font:600 30px/1 var(--mono);min-width:3.4ch;text-align:right}
+.clock .time.low{color:var(--cost)}
+.forecast{display:grid;grid-template-columns:auto repeat(3,minmax(0,1fr));gap:8px;align-items:stretch}
+.forecast .fc{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-width:0}
+.forecast .fc.now{border-color:var(--storm);background:var(--stormSoft)}
+.forecast .fc p{margin:2px 0 0;font-size:14px}
+.forecast .tag{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:3px;background:var(--sunk);border:1px solid var(--line);margin-right:4px}
+.forecast .tag.certain{background:var(--storm);border-color:var(--storm);color:#fff}
+.flash{grid-column:1/-1;background:var(--costSoft);border:1px solid var(--cost);color:var(--cost);border-radius:8px;padding:8px 12px;font-weight:700}
+.grid{display:grid;gap:12px;grid-template-columns:minmax(260px,1fr) minmax(0,2.1fr) minmax(260px,1fr);grid-template-areas:"comm map meri" "comm dil meri";align-items:start}
+@media (max-width:1100px){.grid{grid-template-columns:1fr 1fr;grid-template-areas:"map map" "dil dil" "comm meri"}}
+@media (max-width:700px){.grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"map" "dil" "comm" "meri"}.forecast{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;gap:12px;min-width:0}
+.team{border-top:4px solid var(--c)} .team.community{grid-area:comm;--c:var(--comm);--cs:var(--commSoft)} .team.meridian{grid-area:meri;--c:var(--meri);--cs:var(--meriSoft)}
+.team h2{font-size:24px;color:var(--c);display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.team h2 small{font:600 12px var(--mono);color:var(--muted);letter-spacing:.06em}
+.stance-line{font-size:14px;color:var(--muted);margin:0}
+.vals{display:flex;gap:6px;flex-wrap:wrap}
+.vals span{font:600 13px var(--mono);background:var(--cs);color:var(--c);border-radius:3px;padding:2px 7px}
+.stock{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.stock div{background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:6px 8px}
+.stock b{display:block;font:600 22px/1.1 var(--mono)}
+.meter{display:grid;gap:4px}
+.meter .bar{height:10px;border-radius:5px;background:var(--sunk);border:1px solid var(--line);overflow:hidden;position:relative}
+.meter .bar i{position:absolute;inset:0 auto 0 0;background:var(--c)}
+.meter .bar i.low{background:var(--cost)}
+.meter .bar::after{content:"";position:absolute;left:40%;top:0;bottom:0;border-left:1px dashed var(--muted)}
+.units{display:grid;gap:6px}
+.unit{display:grid;grid-template-columns:1fr auto;gap:2px 8px;text-align:left;padding:8px 10px;border-radius:6px;background:var(--sunk)}
+.unit.sel{border-color:var(--c);box-shadow:inset 0 0 0 2px var(--c);background:var(--cs)}
+.unit .nm{font-weight:700}
+.unit .kd{font:600 11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;align-self:center}
+.unit .ord{grid-column:1/-1;font-size:14px;color:var(--muted)}
+.unit.lent{opacity:.6}
+.dests{display:flex;flex-wrap:wrap;gap:6px}
+.dests button{min-height:36px;padding:6px 10px;font-size:14px}
+.dests button.on{background:var(--c);border-color:var(--c);color:#fff}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.row>button{flex:1}
+.lockbtn.on{background:var(--c);border-color:var(--c);color:#fff}
+.promise{background:var(--sunk);border:1px dashed var(--line);border-radius:6px;padding:8px 10px;font-size:14px;display:grid;gap:6px}
+.toggle{display:flex;gap:8px;align-items:center;font-size:15px}
+.toggle input{width:22px;height:22px;min-height:0}
+
+/* map */
+.mapbox{grid-area:map;padding:0;overflow:hidden}
+.mapbox svg{display:block;width:100%;height:auto;max-width:100%}
+.maphint{padding:8px 14px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);min-height:38px}
+.site{cursor:default}
+.site.target{cursor:pointer}
+.site rect.body{fill:var(--panel);stroke:var(--line);stroke-width:1.5}
+.site.target rect.body{stroke:var(--storm);stroke-width:3;stroke-dasharray:6 4}
+.site.flooded rect.body{fill:var(--sea);stroke:var(--water)}
+.site.dark rect.body{fill:var(--sunk)}
+.site text{fill:var(--fg);font-family:var(--body)}
+.site .nm{font:700 15px var(--display);letter-spacing:.03em}
+.site .ppl{font:12px var(--mono);fill:var(--muted)}
+.site .st{font:700 10px var(--mono);letter-spacing:.08em}
+.site .act{font:700 11px var(--mono);fill:var(--storm)}
+.flashring{fill:none;stroke:var(--cost);stroke-width:3}
+@media (prefers-reduced-motion:no-preference){.flashring{animation:pulse 1.4s ease-in-out infinite}.site.hit rect.body{animation:hit .9s ease-out 2}}
+@keyframes pulse{50%{stroke-opacity:.25}}
+@keyframes hit{40%{stroke:var(--storm);stroke-width:5}}
+
+/* dilemma */
+.dil{grid-area:dil;border-top:4px solid var(--storm)}
+.dil .head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline}
+.dil h2{font-size:28px}
+.collision{display:flex;gap:10px;align-items:center;font:700 20px var(--display);letter-spacing:.04em;text-transform:uppercase;flex-wrap:wrap}
+.collision .vs{font:600 12px var(--mono);color:var(--muted)}
+.collision .c{color:var(--comm)} .collision .m{color:var(--meri)}
+.voice{border-left:3px solid var(--storm);padding:4px 0 4px 12px;font-style:italic}
+.voice .label{font-style:normal;display:block}
+.orders{display:grid;gap:8px}
+.order{background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:8px}
+.order.chosen{border-color:var(--storm);box-shadow:inset 0 0 0 2px var(--storm)}
+.order h3{font-size:21px}
+.order .meta{display:flex;flex-wrap:wrap;gap:6px 14px;font:13px var(--mono);color:var(--muted)}
+.tagrow{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.tagrow{grid-template-columns:minmax(0,1fr)}}
+.tagrow>div{display:grid;gap:4px;align-content:start}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font:600 12px var(--mono);border-radius:3px;padding:2px 6px}
+.chip.h{background:var(--honourSoft);color:var(--honour)} .chip.c{background:var(--costSoft);color:var(--cost)}
+.votes{display:flex;flex-wrap:wrap;gap:8px}
+.votes button{flex:1;min-width:150px}
+.votes button.comm.on{background:var(--comm);border-color:var(--comm);color:#fff}
+.votes button.meri.on{background:var(--meri);border-color:var(--meri);color:#fff}
+.final{font:700 12px var(--mono);letter-spacing:.06em;padding:3px 8px;border-radius:3px;color:#fff}
+.final.community{background:var(--comm)} .final.meridian{background:var(--meri)}
+.src{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.writing{padding:18px;text-align:center;color:var(--muted)}
+.writing .dots::after{content:"…"}
+
+.ticker{background:var(--fg);color:var(--bg);border-radius:8px;padding:8px 14px;font:14px var(--mono);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ticker b{color:var(--storm);margin-right:10px}
+
+/* report + debrief */
+.report{display:grid;gap:12px}
+.events{display:grid;gap:4px;margin:0;padding:0;list-style:none}
+.events li{padding:6px 10px;border-radius:5px;background:var(--sunk);border-left:4px solid var(--line);font-size:15px}
+.events li.storm{border-left-color:var(--storm)} .events li.loss{border-left-color:var(--cost)} .events li.good{border-left-color:var(--honour)} .events li.bad{border-left-color:var(--cost)} .events li.choice{border-left-color:var(--fg);font-weight:600}
+.tally{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.tally div{background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
+.tally b{display:block;font:600 26px/1.1 var(--mono)}
+.stand{display:grid;gap:8px}
+.stand .bar{display:grid;grid-template-columns:110px 1fr 60px;gap:10px;align-items:center}
+.stand .track{height:18px;background:var(--sunk);border:1px solid var(--line);border-radius:4px;position:relative;overflow:hidden}
+.stand .track i{position:absolute;inset:0 auto 0 0}
+.choices{display:grid;gap:10px}
+.choice{background:var(--sunk);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:6px}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+.res div{background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:14px}
+pre.log{max-height:280px;overflow:auto;background:var(--sunk);border:1px solid var(--line);border-radius:6px;padding:10px;font:12px/1.4 var(--mono);white-space:pre-wrap;word-break:break-word}
+.ok{color:var(--honour);font-weight:700} .bad{color:var(--cost);font-weight:700}
+</style>
+
+<div id="app"></div>
+
+<script>
+const C = /*CONTENT*/null;
+C.values = /*VALUES*/null;
+</script>
+<script>
+/*ENGINE*/
+</script>
+<script>
+"use strict";
+const E = window.Engine, TEAMS = E.TEAMS;
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const vn = (v) => (C.values[v] ? C.values[v][0] : String(v));
+const VALUE_IDS = Object.keys(C.values);
+const short = (t) => C.teams[t].short;
+const goodsOf = (t) => Object.keys(C.goods).filter((g) => C.goods[g].owner === t);
+const store = { get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+
+// ---------- app state (the engine state is the truth; the rest is this screen) ----------
+const G = {
+  screen: "setup",
+  setup: store.get("ks-setup") || {
+    seed: 4217, seconds: 90, play: "both",
+    stances: {
+      community: { ranks: ["safety", "loyalty", "fairness"], statement: "We get our people out first. We stand by our neighbours. Nobody gets special treatment." },
+      meridian: { ranks: ["excellence", "duty", "accountability"], statement: "We finish what we start. We owe the world this cure. We own every call we make." },
+    },
+  },
+  state: null, log: null, draft: null, dil: null, selected: null, locked: {}, timer: null, left: 0, paused: false,
+  report: null, pending: null, sample: undefined, aiStats: [], tickerLines: [],
+};
+
+let sampleReady = (window.claude && claude.use) ? claude.use("sample").then((s) => (G.sample = s || null)).catch(() => (G.sample = null)) : Promise.resolve((G.sample = null));
+
+// ---------- AI Dilemma Director ----------
+const DIRECTOR = `You are the Dilemma Director for the Values Crucible, a facilitated leadership simulation for executives. This is the parish of Keystone on the island of Concordia during Hurricane Midas. Keystone has two teams who share one set of resources and must agree:
+- the community team speaks for the people who live here (buses, a boat, volunteers, food);
+- the Meridian team speaks for the company that runs the Biotech Plant, which makes the island's kelp cancer cure (a shuttle, a generator, the plant crew, funds, cure doses).
+The owner of the resource makes the final call after both teams vote.
+
+Write ONE moment for this storm turn that forces values these two teams SIGNED into collision, using only what is on the board below.
+Rules:
+1. The collision is the community team's #1 value against the Meridian team's #1 value when they can honestly collide here; otherwise two values from one team's ranking. At intensity 3 or 4 a #1 value must be in it.
+2. Put the moment at one site that is warned, flooded, dark or at risk this turn. Put one named resident with a face at the centre (use the named residents listed when they fit).
+3. Give 2 or 3 orders. Each has an owner (community or meridian) who makes the final call for it, and costs only that owner's goods, never more than they hold. At least one order must spend goods that would help that team's stockpile score.
+4. Give each order mechanical effects chosen ONLY from this menu (omit any you do not use):
+   "trust": -10..10 (community trust), "confidence": -10..10 (Meridian board confidence),
+   "doses": -10..10 (cure doses gained or lost now), "save": {"site": one of low_ward|tech_housing|st_brendans|plant, "n": 0..60} (vulnerable people taken to safety),
+   "expose": 0..100 (plant workers kept in harm's way this turn), "power": site (backup power there this turn),
+   "sandbag": site (flood defence there this turn), "open_tower": true (Meridian opens Tech Tower as a shelter).
+5. Tag each order, for EACH team, with which of that team's signed values it honours and which it costs. Use only that team's own values. Every order must cost at least one signed value for someone.
+6. Set "final_call" to the team whose resources the moment is mostly about, and "default" to the order that happens if that team does not decide in time.
+7. Pressure comes only from off-board voices: a named community leader or a named Meridian executive. Never from the other team.
+8. Witness, not judge: no scoring, no right answer, no moral words such as selfish, heroic, greedy or noble.
+9. Plain, concrete English. The whole moment must be readable in 15 seconds: situation under 45 words, order labels under 9 words.
+
+Reply with only JSON in exactly this shape:
+{"final_call":"community|meridian","site":"site id","collision":["value id","value id"],"title":"headline under 8 words","situation":"...","resident":"Name, age, one line","voice":{"who":"Name, role","line":"what they say"},"orders":[{"label":"...","owner":"community|meridian","cost":{"good id":number},"effects":{},"tags":{"community":{"honours":["value id"],"costs":["value id"]},"meridian":{"honours":[],"costs":[]}},"news":"one ticker line if chosen"}],"default":0}
+Good ids: community owns food, volunteers, c_fuel; meridian owns doses, funds, m_fuel.`;
+
+function boardText(s) {
+  const T = C.turns[s.turn - 1], next = C.turns[s.turn];
+  const site = (id) => {
+    const x = s.sites[id], n = C.sites[id];
+    const st = [x.flooded && "FLOODED", x.dark && "DARK", x.closed && "CLOSED"].filter(Boolean).join(", ") || "dry";
+    const ppl = n.people ? ` people home: ${x.home.vuln} vulnerable, ${x.home.able} able` : "";
+    return `- ${id} (${n.name}, owner ${n.owner}): ${st};${ppl}`;
+  };
+  const sh = s.shelter;
+  const units = Object.entries(C.units).map(([id, u]) => `${id} "${u.name}" (${u.team}${u.carry ? `, carries ${u.carry}` : ""})`).join("; ");
+  const hz = (t) => t.hazards.map((h) => `${h.text} (${h.p >= 0.85 ? "certain" : h.p >= 0.5 ? "likely" : "possible"}${h.sandbag_p !== undefined ? ", sandbags help" : ""})`).join("; ");
+  const res = C.residents.map((r) => `${r.name}, ${r.age}, ${C.sites[r.site].name}: ${r.line} Now: ${s.residents[r.id].status}`).join("\n");
+  const last = s.history.filter((h) => h.choice).map((h) => `turn ${h.turn}: "${h.dilemma.orders[h.choice.index].label}" (${h.choice.stormDecided ? "storm decided" : h.choice.by + " decided"})`).join("; ") || "none yet";
+  return `TURN ${s.turn} of ${C.turns.length}: ${T.label}, ${T.hours}, intensity ${T.intensity} of 4.
+THIS TURN THE STORM BRINGS: ${hz(T)}.${T.flash ? `\nFLASH WARNING: ${T.flash.text}.` : ""}
+${next ? `NEXT TURN: ${hz(next)}.` : "This is the last storm turn."}
+SITES:
+${["low_ward", "tech_housing", "plant", "st_brendans", "crater_road"].map(site).join("\n")}
+SHELTERED: St. Brendan's ${sh.st_brendans.vuln + sh.st_brendans.able} of ${C.sites.st_brendans.capacity}; Tech Tower ${s.towerOpen ? "open" : "closed"} (${sh.tech_tower.vuln + sh.tech_tower.able} of 60); evacuated to Heartland ${sh.heartland.vuln + sh.heartland.able}. Lost so far: ${s.lost.vuln + s.lost.able}.
+STOCKS: community food ${s.stock.community.food}, volunteers ${s.stock.community.volunteers}, c_fuel ${s.stock.community.c_fuel}; meridian doses ${s.stock.meridian.doses}, funds ${s.stock.meridian.funds}, m_fuel ${s.stock.meridian.m_fuel}.
+METERS: community trust ${s.meters.trust}, board confidence ${s.meters.confidence} (below 40 hurts).
+UNITS: ${units}.
+NAMED RESIDENTS:
+${res}
+VOICES YOU MAY USE: ${C.voices.community.who}; ${C.voices.meridian.who}; also any named elder, mayor or Meridian executive.
+EARLIER CHOICES: ${last}.`;
+}
+function stanceText() {
+  const st = G.setup.stances;
+  return TEAMS.map((t) => `${t.toUpperCase()} TEAM signed, ranked for when they collide: 1. ${st[t].ranks[0]} 2. ${st[t].ranks[1]} 3. ${st[t].ranks[2]}. Statement: "${st[t].statement}"`).join("\n");
+}
+
+// Ask for the moment as soon as the last turn resolves; the planning window waits at most 20 s for it.
+function requestDilemma() {
+  const s = G.state, turn = s.turn;
+  const p = { turn, t0: performance.now(), done: false, result: null };
+  G.pending = p;
+  const run = async () => {
+    await sampleReady;
+    if (!G.sample) return { raw: null, why: "AI not available in this view" };
+    const prompt = `${DIRECTOR}\n\n${stanceText()}\n\nBOARD:\n${boardText(s)}`;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        const raw = await G.sample.json(prompt, { cache: false });
+        const v = E.validateDilemma(C, s, raw, G.setup.stances);
+        if (v.ok) return { raw, v, attempt };
+        if (attempt === 2) return { raw, v, why: "failed the validator twice: " + v.notes.join("; ") };
+      } catch (e) {
+        return { raw: null, why: e && e.code ? e.code : "could not reach Claude" };
+      }
+    }
+  };
+  run().then((r) => {
+    p.done = true; p.result = r; p.ms = Math.round(performance.now() - p.t0);
+    G.aiStats.push({ turn, ms: p.ms, ok: !!(r.v && r.v.ok), why: r.why || null });
+    if (G.screen === "plan" && G.dil && G.dil.status === "writing" && G.dil.turn === turn) useDilemma();
+  });
+}
+function useDilemma(forceFallback) {
+  const p = G.pending, s = G.state;
+  let d, source, notes = [];
+  if (!forceFallback && p && p.done && p.turn === s.turn && p.result.v && p.result.v.ok) {
+    d = p.result.v.dilemma; source = "ai"; notes = p.result.v.notes;
+  } else {
+    const f = E.fallbackDilemma(C, s, G.setup.stances);
+    d = f.dilemma; source = "fallback";
+    notes = [p && p.done ? (p.result.why || "AI moment rejected") : "AI moment not ready 20 s into planning"];
+  }
+  d.source = source;
+  G.dil = { status: "ready", turn: s.turn, d, source, notes, ms: p && p.ms };
+  botVote();
+  render();
+}
+
+// ---------- bots (for a team nobody is playing) ----------
+const plays = (t) => G.setup.play === "both" || G.setup.play === t;
+function botOrders(t, s) {
+  const o = {};
+  const room = C.sites.st_brendans.capacity - s.shelter.st_brendans.vuln - s.shelter.st_brendans.able;
+  if (t === "community") {
+    const src = !s.sites.low_ward.flooded && s.sites.low_ward.home.vuln + s.sites.low_ward.home.able ? "low_ward" : "tech_housing";
+    o.bus1 = { task: "evac", site: src, dest: room >= 40 ? "st_brendans" : "heartland" };
+    o.bus2 = { task: "evac", site: src, dest: room >= 80 ? "st_brendans" : "heartland" };
+    o.boat = { task: "evac", site: "low_ward", dest: "st_brendans" };
+    if (!s.sites.low_ward.flooded) o.vcrew = { task: "sandbag", site: "low_ward" };
+  } else {
+    o.pcrew = { task: "run", site: "plant" };
+    o.gen = { task: "power", site: "plant" };
+  }
+  return o;
+}
+function botVote() {
+  const d = G.dil && G.dil.d; if (!d) return;
+  for (const t of TEAMS) {
+    if (plays(t)) continue;
+    const top = G.setup.stances[t].ranks[0];
+    let best = 0, bestScore = -99;
+    d.orders.forEach((o, i) => {
+      const sc = (o.tags[t].honours.includes(top) ? 3 : 0) + o.tags[t].honours.length - o.tags[t].costs.length * 1.5 - (o.tags[t].costs.includes(top) ? 3 : 0);
+      if (sc > bestScore) { bestScore = sc; best = i; }
+    });
+    G.draft.votes[t] = best;
+  }
+}
+
+// ---------- game flow ----------
+function startGame() {
+  store.set("ks-setup", G.setup);
+  G.state = E.newGame(C, { seed: G.setup.seed });
+  G.log = { format: "keystone-slice/1", setup: { seed: G.setup.seed, stances: G.setup.stances, play: G.setup.play, seconds: G.setup.seconds }, turns: [], ai: [] };
+  G.tickerLines = ["Hurricane Midas: Keystone ordered to prepare. Landfall expected before midnight."];
+  requestDilemma();
+  beginTurn();
+}
+function beginTurn() {
+  const s = G.state;
+  G.draft = { orders: {}, lends: {}, towerOpen: false, votes: { community: null, meridian: null }, promises: [], confirms: [] };
+  for (const t of TEAMS) if (!plays(t)) Object.assign(G.draft.orders, botOrders(t, s));
+  if (!G.draft.orders.pcrew) G.draft.orders.pcrew = { task: "run", site: "plant" };
+  G.locked = { community: !plays("community"), meridian: !plays("meridian") };
+  G.selected = null; G.report = null; G.screen = "plan";
+  G.dil = { status: "writing", turn: s.turn };
+  if (G.pending && G.pending.done && G.pending.turn === s.turn) useDilemma();
+  G.left = G.setup.seconds; G.paused = false; G.planStart = G.left;
+  clearInterval(G.timer);
+  G.timer = setInterval(tick, 1000);
+  render();
+}
+function tick() {
+  if (G.paused || G.screen !== "plan") return;
+  G.left -= 1;
+  if (G.dil.status === "writing" && G.planStart - G.left >= 20) useDilemma(true);
+  if (G.left <= 0) return lockAndResolve();
+  const el = $("#time"); if (el) { el.textContent = fmt(G.left); el.classList.toggle("low", G.left <= 15); }
+}
+const fmt = (n) => `${Math.floor(n / 60)}:${String(Math.max(0, n) % 60).padStart(2, "0")}`;
+function lockAndResolve() {
+  clearInterval(G.timer);
+  if (G.dil.status === "writing") useDilemma(true);
+  const input = {
+    orders: JSON.parse(JSON.stringify(G.draft.orders)), lends: { ...G.draft.lends }, towerOpen: G.draft.towerOpen,
+    dilemma: G.dil.d, votes: { ...G.draft.votes }, promises: G.draft.promises, confirms: G.draft.confirms,
+  };
+  G.log.turns.push(input);
+  G.log.ai.push({ turn: G.state.turn, source: G.dil.source, ms: G.dil.ms ?? null, notes: G.dil.notes });
+  const { state, report } = E.resolveTurn(C, G.state, input);
+  G.prev = G.state; G.state = state; G.report = report;
+  G.tickerLines = report.ticker.concat(G.tickerLines).slice(0, 12);
+  if (!state.over) requestDilemma();
+  G.screen = "playout"; render();
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  setTimeout(() => { G.screen = state.over ? "debrief" : "report"; render(); window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" }); }, reduce ? 300 : 3200);
+}
+
+// ---------- orders on the map ----------
+function unitsFor(t) {
+  return Object.entries(C.units).filter(([id, u]) => (u.team === t && !G.draft.lends[id]) || (u.team !== t && G.draft.lends[id]));
+}
+function targetsFor(uid) {
+  const U = C.units[uid], s = G.state, out = {};
+  for (const id of Object.keys(C.sites)) {
+    const x = s.sites[id];
+    if (U.kind === "bus") {
+      const ppl = id === "st_brendans" ? s.shelter.st_brendans.vuln + s.shelter.st_brendans.able : C.sites[id].people ? x.home.vuln + x.home.able : 0;
+      if (ppl && !x.flooded) out[id] = "EVACUATE";
+    } else if (U.kind === "boat") { if (U.reach.includes(id) && (C.sites[id].people ? x.home.vuln + x.home.able : 0)) out[id] = "EVACUATE"; }
+    else if (U.kind === "crew") { if (!x.flooded && id !== "crater_road") out[id] = "SANDBAG"; }
+    else if (U.kind === "generator") { if (id !== "crater_road") out[id] = "POWER"; }
+    else if (U.kind === "plantcrew") { if (id === "plant" && !x.flooded) out[id] = "RUN"; else if (!x.flooded && id !== "crater_road") out[id] = "SANDBAG"; }
+  }
+  return out;
+}
+function orderSite(id) {
+  const uid = G.selected; if (!uid) return;
+  const act = targetsFor(uid)[id]; if (!act) return;
+  const task = { EVACUATE: "evac", SANDBAG: "sandbag", POWER: "power", RUN: "run" }[act];
+  const o = { task, site: id };
+  if (task === "evac") o.dest = id === "st_brendans" ? "heartland" : (G.draft.orders[uid] && G.draft.orders[uid].dest) || "st_brendans";
+  if (task === "evac" && C.units[uid].kind === "boat") o.dest = "st_brendans";
+  G.draft.orders[uid] = o;
+  render();
+}
+function sentence(uid) {
+  const o = G.draft.orders[uid], U = C.units[uid];
+  if (!o || o.task === "idle") return uid === "pcrew" ? "Holding: the plant will not run" : "Holding. Tap, then tap a site.";
+  const site = C.sites[o.site] ? C.sites[o.site].name : o.site;
+  if (o.task === "evac") return `Move up to ${U.carry} from ${site} to ${C.destinations[o.dest].name}${o.dest === "heartland" ? ` (${C.destinations.heartland.fuel} fuel)` : ""}`;
+  if (o.task === "sandbag") return `Sandbag ${site} (${Object.entries(U.sandbag_cost).map(([g, n]) => `${n} ${C.goods[g].name.toLowerCase()}`).join(", ")})`;
+  if (o.task === "power") return `Power ${site} (${U.power_cost_fuel} fuel)`;
+  if (o.task === "run") return "Run the plant";
+  return "";
+}
+
+// ---------- rendering ----------
+function render() {
+  const app = $("#app");
+  if (G.screen === "setup") { app.innerHTML = setupView(); bindSetup(); return; }
+  if (G.screen === "debrief") { app.innerHTML = debriefView(); bindDebrief(); return; }
+  app.innerHTML = consoleView(); bindConsole();
+}
+
+function setupView() {
+  const st = G.setup.stances;
+  const opts = (sel) => VALUE_IDS.map((id) => `<option value="${id}"${id === sel ? " selected" : ""}>${esc(vn(id))}</option>`).join("");
+  const card = (t) => `<section class="stance ${t}">
+      <h2>${esc(C.teams[t].name)}</h2>
+      <p class="muted" style="margin:0">${t === "community" ? "Speaks for the people of Keystone. Owns the buses, the boat, the volunteers and the food." : "Speaks for Meridian, which makes the cure here. Owns the shuttle, the generator, the plant crew, funds and doses."}</p>
+      <div><span class="label">Signed values, ranked for when they collide</span>
+      <div class="rank" style="margin-top:6px">${[0, 1, 2].map((i) => `<b>#${i + 1}</b><select id="${t}-v${i}" aria-label="${short(t)} value ${i + 1}">${opts(st[t].ranks[i])}</select>`).join("")}</div></div>
+      <label style="display:grid;gap:4px"><span class="label">Statement they signed</span><textarea id="${t}-stmt" rows="2">${esc(st[t].statement)}</textarea></label>
+    </section>`;
+  return `<div class="setup">
+    <header><span class="label">Values Crucible · Keystone slice · phase 2 go/no-go</span>
+      <h1>Hurricane Midas reaches Keystone tonight</h1>
+      <p class="lede">One parish, two teams, three storm turns. Plan your moves on the map, answer the moment the storm puts in front of you, and watch what happens. Most resources at the end wins, and people are the workforce. About 10 minutes.</p></header>
+    <ul class="how">
+      <li><b>Plan together</b>Tap a unit, then tap a site on the map. Buses move people, crews sandbag, the generator keeps a site powered.</li>
+      <li><b>Answer the moment</b>Claude writes it from both teams' signed values and the map. Both teams vote; the owner makes the final call.</li>
+      <li><b>The storm plays out</b>Three hours pass. The engine decides what happened from the seed and your orders. No dice, no judge.</li>
+    </ul>
+    <div class="stances">${card("community")}${card("meridian")}</div>
+    <div class="opts">
+      <label><span class="label">You play</span><select id="play"><option value="both"${G.setup.play === "both" ? " selected" : ""}>Both teams</option><option value="community"${G.setup.play === "community" ? " selected" : ""}>Community (a bot plays Meridian)</option><option value="meridian"${G.setup.play === "meridian" ? " selected" : ""}>Meridian (a bot plays community)</option></select></label>
+      <label><span class="label">Planning time per turn</span><select id="secs">${[60, 90, 120, 180].map((n) => `<option value="${n}"${G.setup.seconds === n ? " selected" : ""}>${n} seconds</option>`).join("")}</select></label>
+      <label><span class="label">Storm seed</span><input id="seed" class="mono" inputmode="numeric" value="${G.setup.seed}"></label>
+      <button class="primary" id="start" style="flex:1;min-width:220px">Start the storm</button>
+    </div>
+    <p class="muted" id="aistatus" style="margin:0;font-size:14px"></p>
+  </div>`;
+}
+function bindSetup() {
+  const read = () => {
+    for (const t of TEAMS) {
+      G.setup.stances[t].ranks = [0, 1, 2].map((i) => $(`#${t}-v${i}`).value);
+      G.setup.stances[t].statement = $(`#${t}-stmt`).value.trim().slice(0, 240);
+    }
+    G.setup.play = $("#play").value; G.setup.seconds = +$("#secs").value;
+    G.setup.seed = Math.abs(parseInt($("#seed").value, 10) || 4217);
+  };
+  $("#start").onclick = () => {
+    read();
+    const dup = TEAMS.find((t) => new Set(G.setup.stances[t].ranks).size < 3);
+    if (dup) { $("#aistatus").textContent = `The ${short(dup)} team picked the same value twice. Pick three different values.`; return; }
+    startGame();
+  };
+  sampleReady.then(() => { const el = $("#aistatus"); if (el) el.textContent = G.sample ? "Claude will write each moment live. If it is slow or offline, a written moment is used instead." : "Claude isn't available in this view, so the written moments will be used. Open the page in claude.ai for AI-written moments."; });
+}
+
+function consoleView() {
+  const s = G.state, T = C.turns[Math.min(s.turn, C.turns.length) - 1];
+  const showTurn = G.screen === "plan" ? s.turn : s.turn - 1;
+  const TT = C.turns[showTurn - 1];
+  return `<div class="wrap">
+    <div class="topbar">
+      <h1>Keystone</h1>
+      <span class="turn">TURN ${showTurn} OF ${C.turns.length} · ${esc(TT.label.toUpperCase())} · ${esc(TT.hours)}</span>
+      <span class="label">Intensity <span class="pips" aria-label="intensity ${TT.intensity} of 4">${[1, 2, 3, 4].map((i) => `<i class="${i <= TT.intensity ? "on" : ""}"></i>`).join("")}</span></span>
+      <div class="clock">${G.screen === "plan" ? `<span class="label">Planning</span><span class="time mono" id="time">${fmt(G.left)}</span>
+        <button id="pause">${G.paused ? "Resume" : "Pause"}</button><button id="more">+30 s</button>` : `<span class="label">${G.screen === "playout" ? "The storm plays out" : "Turn report"}</span>`}</div>
+    </div>
+    ${forecastView(showTurn)}
+    <div class="ticker" aria-live="polite"><b>NEWS</b>${esc(G.tickerLines.join("  ·  "))}</div>
+    <div class="grid">
+      ${teamView("community")}
+      <section class="panel mapbox" aria-label="Map of Keystone">${mapView(TT)}<div class="maphint" id="hint">${hint()}</div></section>
+      ${G.screen === "plan" ? dilemmaView() : reportView()}
+      ${teamView("meridian")}
+    </div>
+  </div>`;
+}
+function forecastView(n) {
+  const words = (h, dist) => {
+    const p = h.p; const w = dist === 0 ? (p >= 0.85 ? "certain" : p >= 0.5 ? "likely" : "possible") : dist === 1 ? (p >= 0.85 ? "likely" : "possible") : "possible";
+    return `<p><span class="tag ${w === "certain" ? "certain" : ""}">${w}</span>${esc(h.text)}${h.sandbag_p !== undefined ? " <span class=\"muted\">(sandbags help)</span>" : ""}</p>`;
+  };
+  const cell = (i, dist) => {
+    const T = C.turns[i - 1];
+    if (!T) return `<div class="fc"><span class="label">T+${dist}</span><p class="muted">Recovery. The storm has passed.</p></div>`;
+    return `<div class="fc ${dist === 0 ? "now" : ""}"><span class="label">${dist === 0 ? "This turn" : "T+" + dist} · ${esc(T.label)}</span>${T.hazards.map((h) => words(h, dist)).join("")}</div>`;
+  };
+  const T = C.turns[n - 1];
+  return `<div class="forecast" aria-label="Forecast"><div class="fc"><span class="label">Forecast</span><p class="muted" style="font-size:13px">Next turn sure,<br>later turns less so</p></div>${cell(n, 0)}${cell(n + 1, 1)}${cell(n + 2, 2)}${G.screen === "plan" && T.flash ? `<div class="flash">FLASH WARNING: ${esc(T.flash.text)}. Move people and crews now.</div>` : ""}</div>`;
+}
+function hint() {
+  if (G.screen !== "plan") return G.screen === "playout" ? "Three storm hours pass…" : "Read what happened, then start the next turn.";
+  if (!G.selected) return "Tap a unit in a team console, then tap a highlighted site.";
+  return `${esc(C.units[G.selected].name)} selected. Tap a highlighted site, or tap the unit again to hold it.`;
+}
+function mapView(T) {
+  const s = G.state, prev = G.screen === "playout" ? G.prev : null;
+  const targets = G.screen === "plan" && G.selected ? targetsFor(G.selected) : {};
+  const band = T.band;
+  const flashSite = G.screen === "plan" && T.flash ? C.sites[T.flash.site] : null;
+  const assigned = {};
+  if (G.draft) for (const [uid, o] of Object.entries(G.draft.orders)) if (o && o.task !== "idle" && o.site) (assigned[o.site] = assigned[o.site] || []).push(uid);
+  const roads = C.roads.map(([a, b]) => {
+    const A = C.sites[a], B = C.sites[b], closed = (a === "crater_road" || b === "crater_road") && s.sites.crater_road.closed;
+    return `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}" stroke="var(--line)" stroke-width="6" stroke-linecap="round"${closed ? ' stroke-dasharray="4 8"' : ""}/>`;
+  }).join("");
+  const sites = Object.entries(C.sites).map(([id, n]) => {
+    const x = s.sites[id], cls = ["site"];
+    if (targets[id]) cls.push("target");
+    if (x.flooded) cls.push("flooded"); if (x.dark) cls.push("dark");
+    if (prev && (prev.sites[id].flooded !== x.flooded || prev.sites[id].dark !== x.dark || prev.sites[id].closed !== x.closed)) cls.push("hit");
+    const st = [x.flooded && "FLOODED", x.dark && "DARK", x.closed && "CLOSED"].filter(Boolean).join(" · ") || "DRY";
+    let ppl = "";
+    if (n.people) ppl = `${x.home.vuln} vuln · ${x.home.able} able`;
+    if (id === "st_brendans") ppl = `sheltering ${s.shelter.st_brendans.vuln + s.shelter.st_brendans.able} of ${n.capacity}`;
+    if (id === "crater_road") ppl = `Heartland ${s.shelter.heartland.vuln + s.shelter.heartland.able}`;
+    if (id === "plant") ppl = s.residents.frank.status === "injured" ? "crew · Frank injured" : "crew on site";
+    if (id === "tech_housing" && s.towerOpen) ppl += " · tower open";
+    const w = 150, h = 66, ux = n.x - w / 2, uy = n.y - h / 2;
+    const tokens = (assigned[id] || []).map((uid, i) => `<g transform="translate(${ux + i * 50},${uy + h + 4})"><rect width="46" height="18" rx="3" fill="var(--${C.units[uid].team === "community" ? "comm" : "meri"})"/><text x="23" y="13" text-anchor="middle" style="font:700 10px var(--mono);fill:#fff">${esc(C.units[uid].name.split(" ").map((w) => w[0]).join("").toUpperCase() + (C.units[uid].name.match(/\d/) || [""])[0])}</text></g>`).join("");
+    const stColor = x.flooded ? "var(--water)" : x.dark || x.closed ? "var(--cost)" : "var(--honour)";
+    return `<g class="${cls.join(" ")}" data-site="${id}" ${targets[id] ? `role="button" tabindex="0" aria-label="${esc(targets[id])} ${esc(n.name)}"` : ""}>
+      <rect class="body" x="${ux}" y="${uy}" width="${w}" height="${h}" rx="6"/>
+      <text class="nm" x="${ux + 10}" y="${uy + 20}">${esc(n.name.toUpperCase())}</text>
+      <text class="st" x="${ux + w - 10}" y="${uy + 20}" text-anchor="end" style="fill:${stColor}">${st}</text>
+      <text class="ppl" x="${ux + 10}" y="${uy + 40}">${esc(ppl)}</text>
+      <text class="act" x="${ux + 10}" y="${uy + 57}">${targets[id] ? "▶ " + targets[id] : `<tspan class="ppl" style="font-size:10px">${esc(n.owner.toUpperCase())}</tspan>`}</text>
+      ${tokens}</g>`;
+  }).join("");
+  return `<svg viewBox="0 0 600 380" role="img" aria-label="Keystone parish map with storm band">
+    <defs><radialGradient id="eye"><stop offset="0" stop-color="var(--storm)" stop-opacity=".05"/><stop offset=".55" stop-color="var(--storm)" stop-opacity=".28"/><stop offset="1" stop-color="var(--storm)" stop-opacity="0"/></radialGradient></defs>
+    <rect width="600" height="380" fill="var(--land)"/>
+    <path d="M600 0 L600 380 L330 380 C390 350 400 330 395 300 C560 330 560 200 560 160 C555 90 560 40 545 0 Z" fill="var(--sea)"/>
+    <text x="585" y="210" text-anchor="end" style="font:600 11px var(--mono);fill:var(--water);letter-spacing:.2em">SEA</text>
+    <path d="M10 10 L120 10 L60 120 Z" fill="var(--sunk)" opacity=".8"/>
+    <text x="16" y="28" style="font:600 10px var(--mono);fill:var(--muted)">TO HEARTLAND</text>
+    ${roads}
+    <circle cx="${band.x}" cy="${band.y}" r="${band.r}" fill="url(#eye)" style="transition:all 2.5s ease"/>
+    <circle cx="${band.x}" cy="${band.y}" r="${band.r * 0.18}" fill="none" stroke="var(--storm)" stroke-width="2" stroke-dasharray="3 5"/>
+    ${flashSite ? `<rect class="flashring" x="${flashSite.x - 82}" y="${flashSite.y - 40}" width="164" height="80" rx="10"/>` : ""}
+    ${sites}
+  </svg>`;
+}
+
+function teamView(t) {
+  const s = G.state, mine = plays(t), st = G.setup.stances[t], meter = C.teams[t].meter, mv = s.meters[meter];
+  const stock = goodsOf(t).map((g) => `<div><span class="label">${esc(C.goods[g].name)}</span><b>${s.stock[t][g]}</b></div>`).join("");
+  const sd = E.standings(C, s)[t];
+  const plan = G.screen === "plan";
+  const units = unitsFor(t).map(([id, u]) => {
+    const lentIn = u.team !== t;
+    const o = G.draft.orders[id];
+    const dest = plan && mine && o && o.task === "evac" && C.units[id].road ? `<div class="dests" style="grid-column:1/-1">${["st_brendans", "tech_tower", "heartland"].filter((d) => d !== o.site).map((d) => `<button data-dest="${d}" data-unit="${id}" class="${o.dest === d ? "on" : ""}"${(d === "tech_tower" && !(s.towerOpen || G.draft.towerOpen)) || (d === "heartland" && s.sites.crater_road.closed) ? " disabled" : ""}>${esc(C.destinations[d].name)}</button>`).join("")}</div>` : "";
+    return `<button class="unit ${G.selected === id ? "sel" : ""}" data-unit="${id}" ${!plan || !mine ? "disabled" : ""}>
+      <span class="nm">${esc(u.name)}${lentIn ? ` <span class="label">lent by ${esc(short(u.team))}</span>` : ""}</span><span class="kd">${esc(u.kind)}</span>
+      <span class="ord">${esc(sentence(id))}</span></button>${dest}`;
+  }).join("");
+  const lendable = Object.entries(C.units).filter(([id, u]) => u.team === t);
+  const promisesTo = s.promises.map((p, i) => [p, i]).filter(([p]) => p.to === t && p.status === "open" && !p.confirmed && p.made === s.turn - 0);
+  const myPromise = G.draft.promises.find((p) => p.by === t);
+  const incoming = G.draft.promises.filter((p) => p.to === t);
+  const openFromBefore = s.promises.filter((p) => p.status === "open" && (p.by === t || p.to === t));
+  return `<section class="panel team ${t}" aria-label="${esc(C.teams[t].name)}">
+    <h2>${esc(C.teams[t].name)}<small>${mine ? "YOU" : "BOT"} · INDEX ${sd.index}</small></h2>
+    <div class="vals">${st.ranks.map((v, i) => `<span>#${i + 1} ${esc(vn(v))}</span>`).join("")}</div>
+    <p class="stance-line">“${esc(st.statement)}”</p>
+    <div class="stock">${stock}</div>
+    <div class="meter"><span class="label">${meter === "trust" ? "Community trust" : "Board confidence"} <span class="mono">${mv}</span></span><div class="bar"><i class="${mv < C.meters.low ? "low" : ""}" style="width:${mv}%"></i></div></div>
+    <div class="units"><span class="label">Units this turn</span>${units}</div>
+    ${plan && mine ? `
+      <details><summary class="label" style="cursor:pointer;min-height:32px;display:flex;align-items:center">Lend a unit for this turn</summary>
+        <div class="row" style="margin-top:6px">${lendable.map(([id, u]) => `<label class="toggle"><input type="checkbox" data-lend="${id}" ${G.draft.lends[id] ? "checked" : ""}> ${esc(u.name)}</label>`).join("")}</div></details>
+      ${t === "meridian" && !s.towerOpen ? `<label class="toggle"><input type="checkbox" id="tower" ${G.draft.towerOpen ? "checked" : ""}> Open Tech Tower to residents (${C.tower_open_cost.funds} funds, shelters 60)</label>` : ""}
+      ${promiseView(t, myPromise, incoming)}
+      <button class="lockbtn ${G.locked[t] ? "on" : ""}" data-lock="${t}">${G.locked[t] ? `Locked. Tap to unlock` : `Lock ${esc(short(t))} orders`}</button>` : ""}
+    ${!mine && plan ? `<p class="muted" style="margin:0;font-size:14px">A bot is playing this team from its signed values.</p>` : ""}
+    ${openFromBefore.length ? `<div class="promise"><span class="label">Promise due this turn</span>${openFromBefore.map((p) => `<span>${esc(p.text)} ${p.confirmed ? "" : "<span class=\"muted\">(not confirmed, not tracked)</span>"}</span>`).join("")}</div>` : ""}
+  </section>`;
+}
+function promiseView(t, mine, incoming) {
+  const s = G.state;
+  if (s.turn >= C.turns.length) return "";
+  const other = t === "community" ? "meridian" : "community";
+  const inc = incoming.map((p) => `<div class="promise"><span class="label">${esc(short(p.by))} promises you</span><span>${esc(p.text)}</span>${p.confirmedLocal ? `<span class="ok">Confirmed. The engine will check it next turn.</span>` : `<button data-confirm="${G.draft.promises.indexOf(p)}">Confirm this promise</button>`}</div>`).join("");
+  if (mine) return inc + `<div class="promise"><span class="label">Your promise to ${esc(short(other))}</span><span>${esc(mine.text)}</span><button data-unpromise="${t}">Withdraw</button></div>`;
+  const own = Object.entries(C.units).filter(([, u]) => u.team === t);
+  return inc + `<details><summary class="label" style="cursor:pointer;min-height:32px;display:flex;align-items:center">Make a promise to ${esc(short(other))}</summary>
+    <div style="display:grid;gap:6px;margin-top:6px">
+      <select id="${t}-pk"><option value="lend">Lend a unit next turn</option><option value="send">Send a unit to a site next turn</option></select>
+      <select id="${t}-pu">${own.map(([id, u]) => `<option value="${id}">${esc(u.name)}</option>`).join("")}</select>
+      <select id="${t}-ps">${Object.entries(C.sites).filter(([id]) => id !== "crater_road").map(([id, n]) => `<option value="${id}">${esc(n.name)}</option>`).join("")}</select>
+      <button data-promise="${t}">Log this promise</button></div></details>`;
+}
+
+function tagBlock(o) {
+  return `<div class="tagrow">${TEAMS.map((t) => `<div><span class="label" style="color:var(--${t === "community" ? "comm" : "meri"})">${esc(short(t))} values</span><div class="chips">${o.tags[t].honours.map((v) => `<span class="chip h">honours ${esc(vn(v))}</span>`).join("")}${o.tags[t].costs.map((v) => `<span class="chip c">costs ${esc(vn(v))}</span>`).join("")}${!o.tags[t].honours.length && !o.tags[t].costs.length ? `<span class="chip" style="color:var(--muted)">touches none</span>` : ""}</div></div>`).join("")}</div>`;
+}
+function costText(o) {
+  const c = Object.entries(o.cost).map(([g, n]) => `${n} ${C.goods[g].name.toLowerCase()}`).join(", ") || "nothing";
+  const e = o.effects, bits = [];
+  if (e.save) bits.push(`${e.save.n} people to safety`);
+  if (e.expose) bits.push(`${e.expose} workers at risk`);
+  if (e.power) bits.push(`power at ${C.sites[e.power].name}`);
+  if (e.sandbag) bits.push(`sandbags at ${C.sites[e.sandbag].name}`);
+  if (e.open_tower) bits.push("Tech Tower opens");
+  if (e.doses) bits.push(`${e.doses > 0 ? "+" : ""}${e.doses} doses`);
+  if (e.trust) bits.push(`trust ${e.trust > 0 ? "+" : ""}${e.trust}`);
+  if (e.confidence) bits.push(`confidence ${e.confidence > 0 ? "+" : ""}${e.confidence}`);
+  return { c, e: bits.join(" · ") || "no direct effect" };
+}
+function dilemmaView() {
+  const D = G.dil;
+  if (D.status === "writing") {
+    const waited = G.planStart - G.left;
+    return `<section class="panel dil" aria-live="polite"><div class="writing"><span class="label">The moment</span><p>Claude is writing this turn's moment from both teams' values<span class="dots"></span></p><p class="muted" style="font-size:14px">If it isn't ready ${Math.max(0, 20 - waited)} seconds from now, a written moment is used. Plan your units meanwhile.</p></div></section>`;
+  }
+  const d = D.d, votes = G.draft.votes;
+  const col = d.collision.map((v) => `<span class="${G.setup.stances.community.ranks.includes(v) ? "c" : "m"}">${esc(vn(v))}</span>`).join(`<span class="vs">VS</span>`);
+  return `<section class="panel dil" aria-label="This turn's moment">
+    <div class="head"><span class="label">The moment${d.site ? " · " + esc(C.sites[d.site].name) : ""}</span><span class="src">${D.source === "ai" ? `Written by Claude${D.ms ? ` in ${Math.round(D.ms / 1000)} s` : ""}` : "Written fallback"}</span></div>
+    ${d.collision.length ? `<div class="collision">${col}</div>` : ""}
+    <h2>${esc(d.title)}</h2>
+    <p style="margin:0">${esc(d.situation)}</p>
+    ${d.resident ? `<p style="margin:0"><span class="label">At the centre</span> ${esc(d.resident)}</p>` : ""}
+    ${d.voice ? `<div class="voice"><span class="label">${esc(d.voice.who)}</span>“${esc(d.voice.line)}”</div>` : ""}
+    <div class="head"><span class="label">Both teams vote. The final call is theirs:</span><span class="final ${d.final_call}">FINAL CALL · ${esc(short(d.final_call).toUpperCase())}</span></div>
+    <div class="orders">${d.orders.map((o, i) => {
+      const ct = costText(o);
+      return `<div class="order">
+        <h3>${esc(o.label)}</h3>
+        <div class="meta"><span>PAID BY ${esc(short(o.owner).toUpperCase())}: ${esc(ct.c)}</span><span>${esc(ct.e)}</span></div>
+        ${tagBlock(o)}
+        <div class="votes">${TEAMS.map((t) => `<button class="${t === "community" ? "comm" : "meri"} ${votes[t] === i ? "on" : ""}" data-vote="${t}" data-i="${i}" ${plays(t) ? "" : "disabled"}>${votes[t] === i ? "✓ " : ""}${esc(short(t))} votes this${t === d.final_call ? " (final)" : ""}</button>`).join("")}</div>
+      </div>`;
+    }).join("")}</div>
+    <p class="muted" style="margin:0;font-size:14px">No vote from the ${esc(short(d.final_call))} team by the end of planning means the storm decides: “${esc(d.orders[d.default].label)}”.</p>
+  </section>`;
+}
+function reportView() {
+  if (G.screen === "playout") return `<section class="panel dil"><div class="writing"><span class="label">Resolving</span><p>Hurricane Midas moves across Keystone<span class="dots"></span></p></div></section>`;
+  const r = G.report;
+  const ch = r.choice;
+  return `<section class="panel dil report" aria-label="Turn report">
+    <div class="head"><h2>Turn ${r.turn} · ${esc(r.label)}: what happened</h2>${G.dil && G.dil.source === "ai" ? `<span class="src">Moment written by Claude</span>` : `<span class="src">Written fallback moment</span>`}</div>
+    <div class="tally">
+      <div><span class="label">Moved to safety</span><b>${r.rescued.vuln + r.rescued.able}</b></div>
+      <div><span class="label">Lost this turn</span><b class="${r.lost.vuln + r.lost.able ? "bad" : ""}">${r.lost.vuln + r.lost.able}</b></div>
+      <div><span class="label">Community yield</span><b>+${r.yields.community.food} food · +${r.yields.community.volunteers} vol</b></div>
+      <div><span class="label">Meridian yield</span><b>+${r.yields.meridian.doses} doses</b></div>
+    </div>
+    <ul class="events">${r.events.map((e) => `<li class="${e.kind}">${esc(e.text)}</li>`).join("")}</ul>
+    <button class="primary" id="next">Start turn ${r.turn + 1}</button>
+  </section>`;
+}
+
+function bindConsole() {
+  const app = $("#app");
+  app.onclick = (ev) => {
+    const b = ev.target.closest("button, g.site.target"); if (!b) return;
+    if (b.matches("g.site")) return orderSite(b.dataset.site);
+    if (b.id === "pause") { G.paused = !G.paused; return render(); }
+    if (b.id === "more") { G.left += 30; G.planStart += 30; return render(); }
+    if (b.id === "next") return beginTurn();
+    if (b.dataset.dest) { G.draft.orders[b.dataset.unit].dest = b.dataset.dest; return render(); }
+    if (b.dataset.unit) {
+      if (G.selected === b.dataset.unit) { G.draft.orders[b.dataset.unit] = { task: "idle" }; G.selected = null; }
+      else G.selected = b.dataset.unit;
+      return render();
+    }
+    if (b.dataset.vote) { const t = b.dataset.vote, i = +b.dataset.i; G.draft.votes[t] = G.draft.votes[t] === i ? null : i; return render(); }
+    if (b.dataset.lock) {
+      const t = b.dataset.lock; G.locked[t] = !G.locked[t]; G.selected = null;
+      if (G.locked.community && G.locked.meridian) return lockAndResolve();
+      return render();
+    }
+    if (b.dataset.promise) {
+      const t = b.dataset.promise, to = t === "community" ? "meridian" : "community";
+      const kind = $(`#${t}-pk`).value, unit = $(`#${t}-pu`).value, site = $(`#${t}-ps`).value;
+      const text = kind === "lend" ? `${short(t)} will lend ${C.units[unit].name} to ${short(to)} next turn.` : `${short(t)} will send ${C.units[unit].name} to ${C.sites[site].name} next turn.`;
+      const p = { by: t, to, kind, unit, site: kind === "send" ? site : null, text };
+      G.draft.promises.push(p);
+      if (!plays(to)) { p.confirmedLocal = true; G.draft.confirms.push(G.state.promises.length + G.draft.promises.length - 1); }
+      return render();
+    }
+    if (b.dataset.unpromise) { const t = b.dataset.unpromise; G.draft.promises = G.draft.promises.filter((p) => p.by !== t); G.draft.confirms = []; return render(); }
+    if (b.dataset.confirm !== undefined) {
+      const i = +b.dataset.confirm, p = G.draft.promises[i]; p.confirmedLocal = true;
+      G.draft.confirms.push(G.state.promises.length + i); return render();
+    }
+  };
+  app.onkeydown = (ev) => { const g = ev.target.closest && ev.target.closest("g.site.target"); if (g && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); orderSite(g.dataset.site); } };
+  app.onchange = (ev) => {
+    const el = ev.target;
+    if (el.dataset.lend) { G.draft.lends[el.dataset.lend] = el.checked; if (!el.checked) delete G.draft.lends[el.dataset.lend]; G.selected = null; return render(); }
+    if (el.id === "tower") { G.draft.towerOpen = el.checked; return render(); }
+  };
+}
+
+// ---------- debrief ----------
+function debriefView() {
+  const s = G.state, sd = E.standings(C, s);
+  const winner = sd.community.index === sd.meridian.index ? null : sd.community.index > sd.meridian.index ? "community" : "meridian";
+  const rep = E.replay(C, G.log), live = E.hash(s), match = rep.hash === live;
+  const maxI = Math.max(sd.community.index, sd.meridian.index, 120);
+  const saved = s.rescued.vuln + s.rescued.able, lost = s.lost.vuln + s.lost.able;
+  const choices = s.history.filter((h) => h.choice).map((h) => {
+    const o = h.dilemma.orders[h.choice.index];
+    const said = TEAMS.map((t) => {
+      const hn = o.tags[t].honours.map(vn), cs = o.tags[t].costs.map(vn);
+      return `<div><span class="label" style="color:var(--${t === "community" ? "comm" : "meri"})">${esc(short(t))} signed values</span> ${hn.length ? `This choice honoured ${esc(hn.join(" and "))}.` : ""} ${cs.length ? `It cost ${esc(cs.join(" and "))}.` : ""}${!hn.length && !cs.length ? "It touched none of them." : ""} ${h.choice.votes[t] === null ? "No vote." : h.choice.votes[t] === h.choice.index ? "Voted for it." : `Voted for “${esc(h.dilemma.orders[h.choice.votes[t]].label)}”.`}</div>`;
+    }).join("");
+    return `<div class="choice"><span class="label">Turn ${h.turn} · ${esc(h.dilemma.title)} · ${h.dilemma.source === "ai" ? "written by Claude" : "written fallback"}</span>
+      <b>${h.choice.stormDecided ? "The storm decided" : esc(short(h.choice.by)) + " decided"}: ${esc(o.label)}</b>${said}</div>`;
+  }).join("");
+  const ai = G.log.ai.filter((a) => a.source === "ai").length;
+  return `<div class="wrap" style="max-width:1100px">
+    <div class="topbar"><h1>Keystone · after the storm</h1><span class="turn">DEBRIEF · TWO RECOVERY TURNS COUNTED</span></div>
+    <section class="panel">
+      <span class="label">Standings: resources now, as a share of what each team started with</span>
+      <h2 style="font-size:30px">${winner ? `${esc(C.teams[winner].name)} finishes ahead` : "A dead heat"}</h2>
+      <div class="stand">${TEAMS.map((t) => `<div class="bar"><span class="label">${esc(short(t))}</span><div class="track"><i style="width:${(sd[t].index / maxI) * 100}%;background:var(--${t === "community" ? "comm" : "meri"})"></i></div><span class="mono">${sd[t].index}</span></div>`).join("")}</div>
+      <p class="muted" style="margin:0;font-size:14px">Recovery added ${s.recovery.community.volunteers} volunteers and ${s.recovery.community.food} food to the community team (survivors back at work, aid that follows trust), and ${s.recovery.meridian.doses} doses and ${s.recovery.meridian.funds} funds to Meridian (the plant restarting, scaled by board confidence and community trust).</p>
+    </section>
+    <section class="panel"><span class="label">People of Keystone</span>
+      <div class="tally">
+        <div><span class="label">Moved to safety</span><b>${saved}</b></div>
+        <div><span class="label">Lost</span><b class="${lost ? "bad" : ""}">${lost}</b></div>
+        <div><span class="label">Vulnerable lost</span><b>${s.lost.vuln}</b></div>
+        <div><span class="label">Community trust</span><b>${s.meters.trust}</b></div>
+        <div><span class="label">Board confidence</span><b>${s.meters.confidence}</b></div>
+      </div>
+      <div class="res">${C.residents.map((r) => { const st = s.residents[r.id]; return `<div><b>${esc(r.name)}, ${r.age}</b><br>${esc(r.line)}<br><span class="${st.status === "lost" ? "bad" : st.status === "injured" ? "bad" : "ok"}">${st.status === "moved" ? `Moved to ${esc(C.destinations[st.where].name)}` : st.status === "home" ? "Rode out the storm at home" : st.status === "at work" ? "Kept the plant safe" : st.status === "injured" ? "Injured at the plant" : "Did not survive the night"}</span></div>`; }).join("")}</div>
+    </section>
+    <section class="panel"><span class="label">What you chose, read against what you signed</span>
+      <p class="muted" style="margin:0;font-size:14px">The island remembers what you did, not what you said. Nothing here is a score.</p>
+      <div class="choices">${choices}</div>
+      ${s.promises.length ? `<div class="promise"><span class="label">Promises</span>${s.promises.map((p) => `<span>${esc(p.text)}: <b>${esc(p.status)}</b></span>`).join("")}</div>` : ""}
+    </section>
+    <section class="panel"><span class="label">For the go/no-go</span>
+      <p style="margin:0">${ai} of ${G.log.ai.length} moments were written by Claude${G.aiStats.length ? `, in ${G.aiStats.filter((a) => a.ok).map((a) => Math.round(a.ms / 1000) + " s").join(", ") || "no successful calls"}` : ""}. Replay from the run log: <span class="${match ? "ok" : "bad"}">${match ? "matches" : "does not match"}</span> <span class="mono">${rep.hash}</span>${match ? "" : ` vs <span class="mono">${live}</span>`}.</p>
+      <details><summary class="label" style="cursor:pointer;min-height:32px;display:flex;align-items:center">Run log (every input, including the AI's text)</summary>
+        <pre class="log" id="log">${esc(JSON.stringify(G.log, null, 1))}</pre><button id="copy">Copy run log</button> <span id="copied" class="muted"></span></details>
+      <div class="row"><button class="primary" id="again">Play again with a new storm seed</button><button id="setupagain">Change the values</button></div>
+    </section>
+  </div>`;
+}
+function bindDebrief() {
+  $("#again").onclick = () => { G.setup.seed = (G.setup.seed * 31 + 7) % 99991; startGame(); };
+  $("#setupagain").onclick = () => { G.screen = "setup"; render(); };
+  $("#copy").onclick = () => {
+    const txt = JSON.stringify(G.log);
+    navigator.clipboard.writeText(txt).then(() => ($("#copied").textContent = "Copied."), () => { const r = document.createRange(); r.selectNodeContents($("#log")); getSelection().removeAllRanges(); getSelection().addRange(r); $("#copied").textContent = "Selected. Press Ctrl+C or Cmd+C."; });
+  };
+}
+
+render();
+</script>

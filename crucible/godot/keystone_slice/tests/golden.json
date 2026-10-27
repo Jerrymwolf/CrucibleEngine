@@ -1,0 +1,1311 @@
+{
+ "about": "Made by crucible/slice/golden.mjs from the JS reference engine. Do not edit by hand.",
+ "games": [
+  {
+   "seed": 42,
+   "stances": {
+    "community": {
+     "ranks": [
+      "safety",
+      "loyalty",
+      "fairness"
+     ]
+    },
+    "meridian": {
+     "ranks": [
+      "excellence",
+      "duty",
+      "accountability"
+     ]
+    }
+   },
+   "turns": [
+    {
+     "input": {
+      "orders": {
+       "bus1": {
+        "task": "evac",
+        "site": "low_ward",
+        "dest": "st_brendans"
+       },
+       "bus2": {
+        "task": "evac",
+        "site": "low_ward",
+        "dest": "st_brendans"
+       },
+       "boat": {
+        "task": "evac",
+        "site": "low_ward",
+        "dest": "st_brendans"
+       },
+       "vcrew": {
+        "task": "sandbag",
+        "site": "low_ward"
+       },
+       "gen": {
+        "task": "power",
+        "site": "plant"
+       },
+       "pcrew": {
+        "task": "run",
+        "site": "plant"
+       }
+      },
+      "lends": {},
+      "towerOpen": false,
+      "votes": {
+       "meridian": 0
+      },
+      "promises": [
+       {
+        "by": "meridian",
+        "to": "community",
+        "kind": "lend",
+        "unit": "shuttle",
+        "site": null,
+        "text": "Meridian will lend Plant shuttle to Community next turn."
+       }
+      ],
+      "confirms": [
+       0
+      ]
+     },
+     "expect": {
+      "stock": {
+       "community": {
+        "food": 24,
+        "volunteers": 22,
+        "c_fuel": 8
+       },
+       "meridian": {
+        "doses": 31,
+        "funds": 32,
+        "m_fuel": 9
+       }
+      },
+      "meters": {
+       "trust": 66,
+       "confidence": 54
+      },
+      "lost": {
+       "vuln": 1,
+       "able": 0
+      },
+      "rescued": {
+       "vuln": 120,
+       "able": 15
+      },
+      "shelter": {
+       "st_brendans": {
+        "vuln": 89,
+        "able": 15
+       },
+       "tech_tower": {
+        "vuln": 0,
+        "able": 0
+       },
+       "heartland": {
+        "vuln": 30,
+        "able": 0
+       }
+      },
+      "towerOpen": false,
+      "sites": {
+       "crater_road": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "tech_housing": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 700,
+         "vuln": 40
+        }
+       },
+       "plant": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "st_brendans": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "low_ward": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 885,
+         "vuln": 0
+        }
+       }
+      },
+      "residents": {
+       "ines": {
+        "where": "heartland",
+        "status": "moved"
+       },
+       "tomas": {
+        "where": "st_brendans",
+        "status": "moved"
+       },
+       "maria": {
+        "where": "tech_housing",
+        "status": "home"
+       },
+       "frank": {
+        "where": "plant",
+        "status": "at work"
+       }
+      },
+      "promises": [
+       "open"
+      ]
+     }
+    },
+    {
+     "input": {
+      "orders": {
+       "bus1": {
+        "task": "evac",
+        "site": "tech_housing",
+        "dest": "heartland"
+       },
+       "shuttle": {
+        "task": "evac",
+        "site": "tech_housing",
+        "dest": "st_brendans"
+       },
+       "gen": {
+        "task": "power",
+        "site": "st_brendans"
+       },
+       "pcrew": {
+        "task": "run",
+        "site": "plant"
+       }
+      },
+      "lends": {
+       "shuttle": true
+      },
+      "towerOpen": true,
+      "votes": {
+       "meridian": 1,
+       "community": 2
+      },
+      "promises": [],
+      "confirms": []
+     },
+     "expect": {
+      "stock": {
+       "community": {
+        "food": 21,
+        "volunteers": 23,
+        "c_fuel": 7
+       },
+       "meridian": {
+        "doses": 36,
+        "funds": 32,
+        "m_fuel": 5
+       }
+      },
+      "meters": {
+       "trust": 53,
+       "confidence": 60
+      },
+      "lost": {
+       "vuln": 7,
+       "able": 37
+      },
+      "rescued": {
+       "vuln": 160,
+       "able": 55
+      },
+      "shelter": {
+       "st_brendans": {
+        "vuln": 83,
+        "able": 55
+       },
+       "tech_tower": {
+        "vuln": 0,
+        "able": 0
+       },
+       "heartland": {
+        "vuln": 70,
+        "able": 0
+       }
+      },
+      "towerOpen": true,
+      "sites": {
+       "crater_road": {
+        "flooded": false,
+        "dark": false,
+        "closed": true,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "tech_housing": {
+        "flooded": true,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 644,
+         "vuln": 0
+        }
+       },
+       "plant": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "st_brendans": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "low_ward": {
+        "flooded": true,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 864,
+         "vuln": 0
+        }
+       }
+      },
+      "residents": {
+       "ines": {
+        "where": "heartland",
+        "status": "moved"
+       },
+       "tomas": {
+        "where": "st_brendans",
+        "status": "moved"
+       },
+       "maria": {
+        "where": "tech_housing",
+        "status": "home"
+       },
+       "frank": {
+        "where": "plant",
+        "status": "at work"
+       }
+      },
+      "promises": [
+       "kept"
+      ]
+     }
+    },
+    {
+     "input": {
+      "orders": {
+       "bus1": {
+        "task": "evac",
+        "site": "tech_housing",
+        "dest": "tech_tower"
+       },
+       "bus2": {
+        "task": "evac",
+        "site": "tech_housing",
+        "dest": "tech_tower"
+       },
+       "boat": {
+        "task": "evac",
+        "site": "low_ward",
+        "dest": "st_brendans"
+       },
+       "pcrew": {
+        "task": "sandbag",
+        "site": "plant"
+       }
+      },
+      "lends": {},
+      "towerOpen": false,
+      "votes": {
+       "community": 0
+      },
+      "promises": [],
+      "confirms": []
+     },
+     "expect": {
+      "stock": {
+       "community": {
+        "food": 25,
+        "volunteers": 39,
+        "c_fuel": 7
+       },
+       "meridian": {
+        "doses": 46,
+        "funds": 34,
+        "m_fuel": 5
+       }
+      },
+      "meters": {
+       "trust": 44,
+       "confidence": 54
+      },
+      "lost": {
+       "vuln": 14,
+       "able": 64
+      },
+      "rescued": {
+       "vuln": 160,
+       "able": 80
+      },
+      "shelter": {
+       "st_brendans": {
+        "vuln": 76,
+        "able": 80
+       },
+       "tech_tower": {
+        "vuln": 0,
+        "able": 0
+       },
+       "heartland": {
+        "vuln": 70,
+        "able": 0
+       }
+      },
+      "towerOpen": true,
+      "sites": {
+       "crater_road": {
+        "flooded": false,
+        "dark": false,
+        "closed": true,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "tech_housing": {
+        "flooded": true,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 632,
+         "vuln": 0
+        }
+       },
+       "plant": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "st_brendans": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "low_ward": {
+        "flooded": true,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 824,
+         "vuln": 0
+        }
+       }
+      },
+      "residents": {
+       "ines": {
+        "where": "heartland",
+        "status": "moved"
+       },
+       "tomas": {
+        "where": "st_brendans",
+        "status": "moved"
+       },
+       "maria": {
+        "where": "tech_housing",
+        "status": "home"
+       },
+       "frank": {
+        "where": "plant",
+        "status": "at work"
+       }
+      },
+      "promises": [
+       "kept"
+      ]
+     }
+    }
+   ],
+   "standings": {
+    "community": {
+     "points": 103,
+     "start": 84,
+     "index": 123
+    },
+    "meridian": {
+     "points": 182,
+     "start": 144,
+     "index": 126
+    }
+   },
+   "rng_first": [
+    0.47569905198179185,
+    0.9802568771410733
+   ]
+  },
+  {
+   "seed": 7,
+   "stances": {
+    "community": {
+     "ranks": [
+      "safety",
+      "loyalty",
+      "fairness"
+     ]
+    },
+    "meridian": {
+     "ranks": [
+      "excellence",
+      "duty",
+      "accountability"
+     ]
+    }
+   },
+   "turns": [
+    {
+     "input": {
+      "orders": {},
+      "lends": {},
+      "towerOpen": false,
+      "votes": {},
+      "promises": [],
+      "confirms": []
+     },
+     "expect": {
+      "stock": {
+       "community": {
+        "food": 21,
+        "volunteers": 22,
+        "c_fuel": 8
+       },
+       "meridian": {
+        "doses": 32,
+        "funds": 31,
+        "m_fuel": 12
+       }
+      },
+      "meters": {
+       "trust": 34,
+       "confidence": 59
+      },
+      "lost": {
+       "vuln": 19,
+       "able": 11
+      },
+      "rescued": {
+       "vuln": 0,
+       "able": 0
+      },
+      "shelter": {
+       "st_brendans": {
+        "vuln": 0,
+        "able": 0
+       },
+       "tech_tower": {
+        "vuln": 0,
+        "able": 0
+       },
+       "heartland": {
+        "vuln": 0,
+        "able": 0
+       }
+      },
+      "towerOpen": false,
+      "sites": {
+       "crater_road": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "tech_housing": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 700,
+         "vuln": 40
+        }
+       },
+       "plant": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "st_brendans": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "low_ward": {
+        "flooded": true,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 889,
+         "vuln": 101
+        }
+       }
+      },
+      "residents": {
+       "ines": {
+        "where": "low_ward",
+        "status": "home"
+       },
+       "tomas": {
+        "where": "low_ward",
+        "status": "home"
+       },
+       "maria": {
+        "where": "tech_housing",
+        "status": "home"
+       },
+       "frank": {
+        "where": "plant",
+        "status": "at work"
+       }
+      },
+      "promises": []
+     }
+    },
+    {
+     "input": {
+      "orders": {
+       "pcrew": {
+        "task": "run"
+       }
+      },
+      "lends": {},
+      "towerOpen": false,
+      "votes": {},
+      "promises": [],
+      "confirms": []
+     },
+     "expect": {
+      "stock": {
+       "community": {
+        "food": 18,
+        "volunteers": 23,
+        "c_fuel": 8
+       },
+       "meridian": {
+        "doses": 34,
+        "funds": 32,
+        "m_fuel": 10
+       }
+      },
+      "meters": {
+       "trust": 4,
+       "confidence": 59
+      },
+      "lost": {
+       "vuln": 51,
+       "able": 32
+      },
+      "rescued": {
+       "vuln": 0,
+       "able": 0
+      },
+      "shelter": {
+       "st_brendans": {
+        "vuln": 0,
+        "able": 0
+       },
+       "tech_tower": {
+        "vuln": 0,
+        "able": 0
+       },
+       "heartland": {
+        "vuln": 0,
+        "able": 0
+       }
+      },
+      "towerOpen": false,
+      "sites": {
+       "crater_road": {
+        "flooded": false,
+        "dark": false,
+        "closed": true,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "tech_housing": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 700,
+         "vuln": 40
+        }
+       },
+       "plant": {
+        "flooded": false,
+        "dark": true,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "st_brendans": {
+        "flooded": false,
+        "dark": true,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "low_ward": {
+        "flooded": true,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 868,
+         "vuln": 69
+        }
+       }
+      },
+      "residents": {
+       "ines": {
+        "where": "low_ward",
+        "status": "lost"
+       },
+       "tomas": {
+        "where": "low_ward",
+        "status": "lost"
+       },
+       "maria": {
+        "where": "tech_housing",
+        "status": "home"
+       },
+       "frank": {
+        "where": "plant",
+        "status": "at work"
+       }
+      },
+      "promises": []
+     }
+    },
+    {
+     "input": {
+      "orders": {},
+      "lends": {},
+      "towerOpen": false,
+      "votes": {
+       "community": 1
+      },
+      "promises": [],
+      "confirms": []
+     },
+     "expect": {
+      "stock": {
+       "community": {
+        "food": 2,
+        "volunteers": 31,
+        "c_fuel": 8
+       },
+       "meridian": {
+        "doses": 32,
+        "funds": 33,
+        "m_fuel": 10
+       }
+      },
+      "meters": {
+       "trust": 0,
+       "confidence": 43
+      },
+      "lost": {
+       "vuln": 66,
+       "able": 48
+      },
+      "rescued": {
+       "vuln": 20,
+       "able": 0
+      },
+      "shelter": {
+       "st_brendans": {
+        "vuln": 0,
+        "able": 0
+       },
+       "tech_tower": {
+        "vuln": 0,
+        "able": 0
+       },
+       "heartland": {
+        "vuln": 20,
+        "able": 0
+       }
+      },
+      "towerOpen": false,
+      "sites": {
+       "crater_road": {
+        "flooded": false,
+        "dark": false,
+        "closed": true,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "tech_housing": {
+        "flooded": false,
+        "dark": true,
+        "closed": false,
+        "home": {
+         "able": 700,
+         "vuln": 37
+        }
+       },
+       "plant": {
+        "flooded": true,
+        "dark": true,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "st_brendans": {
+        "flooded": false,
+        "dark": true,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "low_ward": {
+        "flooded": true,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 852,
+         "vuln": 37
+        }
+       }
+      },
+      "residents": {
+       "ines": {
+        "where": "low_ward",
+        "status": "lost"
+       },
+       "tomas": {
+        "where": "low_ward",
+        "status": "lost"
+       },
+       "maria": {
+        "where": "tech_housing",
+        "status": "home"
+       },
+       "frank": {
+        "where": "plant",
+        "status": "injured"
+       }
+      },
+      "promises": []
+     }
+    }
+   ],
+   "standings": {
+    "community": {
+     "points": 51,
+     "start": 84,
+     "index": 61
+    },
+    "meridian": {
+     "points": 149,
+     "start": 144,
+     "index": 103
+    }
+   },
+   "rng_first": [
+    0.8574436460621655,
+    0.756519221002236
+   ]
+  },
+  {
+   "seed": 4217,
+   "stances": {
+    "community": {
+     "ranks": [
+      "safety",
+      "loyalty",
+      "fairness"
+     ]
+    },
+    "meridian": {
+     "ranks": [
+      "excellence",
+      "duty",
+      "accountability"
+     ]
+    }
+   },
+   "turns": [
+    {
+     "input": {
+      "orders": {
+       "bus1": {
+        "task": "evac",
+        "site": "low_ward",
+        "dest": "heartland"
+       },
+       "shuttle": {
+        "task": "evac",
+        "site": "low_ward",
+        "dest": "heartland"
+       },
+       "vcrew": {
+        "task": "sandbag",
+        "site": "low_ward"
+       }
+      },
+      "lends": {},
+      "towerOpen": false,
+      "votes": {
+       "meridian": 2
+      },
+      "promises": [],
+      "confirms": []
+     },
+     "expect": {
+      "stock": {
+       "community": {
+        "food": 24,
+        "volunteers": 23,
+        "c_fuel": 7
+       },
+       "meridian": {
+        "doses": 24,
+        "funds": 30,
+        "m_fuel": 9
+       }
+      },
+      "meters": {
+       "trust": 62,
+       "confidence": 57
+      },
+      "lost": {
+       "vuln": 0,
+       "able": 0
+      },
+      "rescued": {
+       "vuln": 95,
+       "able": 0
+      },
+      "shelter": {
+       "st_brendans": {
+        "vuln": 0,
+        "able": 0
+       },
+       "tech_tower": {
+        "vuln": 0,
+        "able": 0
+       },
+       "heartland": {
+        "vuln": 95,
+        "able": 0
+       }
+      },
+      "towerOpen": false,
+      "sites": {
+       "crater_road": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "tech_housing": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 700,
+         "vuln": 40
+        }
+       },
+       "plant": {
+        "flooded": false,
+        "dark": true,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "st_brendans": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "low_ward": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 900,
+         "vuln": 25
+        }
+       }
+      },
+      "residents": {
+       "ines": {
+        "where": "heartland",
+        "status": "moved"
+       },
+       "tomas": {
+        "where": "heartland",
+        "status": "moved"
+       },
+       "maria": {
+        "where": "tech_housing",
+        "status": "home"
+       },
+       "frank": {
+        "where": "plant",
+        "status": "at work"
+       }
+      },
+      "promises": []
+     }
+    },
+    {
+     "input": {
+      "orders": {
+       "boat": {
+        "task": "evac",
+        "site": "low_ward",
+        "dest": "st_brendans"
+       },
+       "gen": {
+        "task": "power",
+        "site": "plant"
+       },
+       "vcrew": {
+        "task": "sandbag",
+        "site": "plant"
+       }
+      },
+      "lends": {},
+      "towerOpen": false,
+      "votes": {
+       "meridian": 0
+      },
+      "promises": [],
+      "confirms": []
+     },
+     "expect": {
+      "stock": {
+       "community": {
+        "food": 21,
+        "volunteers": 22,
+        "c_fuel": 7
+       },
+       "meridian": {
+        "doses": 23,
+        "funds": 32,
+        "m_fuel": 5
+       }
+      },
+      "meters": {
+       "trust": 56,
+       "confidence": 47
+      },
+      "lost": {
+       "vuln": 0,
+       "able": 22
+      },
+      "rescued": {
+       "vuln": 120,
+       "able": 0
+      },
+      "shelter": {
+       "st_brendans": {
+        "vuln": 25,
+        "able": 0
+       },
+       "tech_tower": {
+        "vuln": 0,
+        "able": 0
+       },
+       "heartland": {
+        "vuln": 95,
+        "able": 0
+       }
+      },
+      "towerOpen": false,
+      "sites": {
+       "crater_road": {
+        "flooded": false,
+        "dark": false,
+        "closed": true,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "tech_housing": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 700,
+         "vuln": 40
+        }
+       },
+       "plant": {
+        "flooded": false,
+        "dark": true,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "st_brendans": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "low_ward": {
+        "flooded": true,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 878,
+         "vuln": 0
+        }
+       }
+      },
+      "residents": {
+       "ines": {
+        "where": "heartland",
+        "status": "moved"
+       },
+       "tomas": {
+        "where": "heartland",
+        "status": "moved"
+       },
+       "maria": {
+        "where": "tech_housing",
+        "status": "home"
+       },
+       "frank": {
+        "where": "plant",
+        "status": "at work"
+       }
+      },
+      "promises": []
+     }
+    },
+    {
+     "input": {
+      "orders": {
+       "gen": {
+        "task": "power",
+        "site": "tech_housing"
+       },
+       "pcrew": {
+        "task": "run"
+       }
+      },
+      "lends": {},
+      "towerOpen": false,
+      "votes": {
+       "community": 2
+      },
+      "promises": [],
+      "confirms": []
+     },
+     "expect": {
+      "stock": {
+       "community": {
+        "food": 28,
+        "volunteers": 44,
+        "c_fuel": 7
+       },
+       "meridian": {
+        "doses": 26,
+        "funds": 27,
+        "m_fuel": 3
+       }
+      },
+      "meters": {
+       "trust": 40,
+       "confidence": 35
+      },
+      "lost": {
+       "vuln": 0,
+       "able": 38
+      },
+      "rescued": {
+       "vuln": 120,
+       "able": 0
+      },
+      "shelter": {
+       "st_brendans": {
+        "vuln": 25,
+        "able": 0
+       },
+       "tech_tower": {
+        "vuln": 0,
+        "able": 0
+       },
+       "heartland": {
+        "vuln": 95,
+        "able": 0
+       }
+      },
+      "towerOpen": false,
+      "sites": {
+       "crater_road": {
+        "flooded": false,
+        "dark": false,
+        "closed": true,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "tech_housing": {
+        "flooded": false,
+        "dark": true,
+        "closed": false,
+        "home": {
+         "able": 700,
+         "vuln": 40
+        }
+       },
+       "plant": {
+        "flooded": false,
+        "dark": true,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "st_brendans": {
+        "flooded": false,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 0,
+         "vuln": 0
+        }
+       },
+       "low_ward": {
+        "flooded": true,
+        "dark": false,
+        "closed": false,
+        "home": {
+         "able": 862,
+         "vuln": 0
+        }
+       }
+      },
+      "residents": {
+       "ines": {
+        "where": "heartland",
+        "status": "moved"
+       },
+       "tomas": {
+        "where": "heartland",
+        "status": "moved"
+       },
+       "maria": {
+        "where": "tech_housing",
+        "status": "home"
+       },
+       "frank": {
+        "where": "plant",
+        "status": "at work"
+       }
+      },
+      "promises": []
+     }
+    }
+   ],
+   "standings": {
+    "community": {
+     "points": 114,
+     "start": 84,
+     "index": 136
+    },
+    "meridian": {
+     "points": 111,
+     "start": 144,
+     "index": 77
+    }
+   },
+   "rng_first": [
+    0.7292144901584834,
+    0.14835014077834785
+   ]
+  }
+ ]
+}
