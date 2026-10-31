@@ -80,14 +80,14 @@ func _draw() -> void:
 	_k = minf(size.x / W, size.y / H)
 	_off = (size - Vector2(W, H) * _k) / 2.0
 	var font := get_theme_default_font()
-	var fs := func(n: float) -> int: return maxi(13, int(round(n * _k)))
+	var fs := func(n: float) -> int: return maxi(11, int(round(n * _k)))
 
 	draw_rect(Rect2(_p(0, 0), Vector2(W, H) * _k), LAND)
 	var sea := PackedVector2Array([_p(600, 0), _p(600, 380), _p(330, 380), _p(390, 350), _p(395, 300), _p(520, 300), _p(560, 200), _p(560, 160), _p(555, 90), _p(545, 0)])
 	draw_colored_polygon(sea, SEA)
 	draw_string(font, _p(470, 214), "SEA", HORIZONTAL_ALIGNMENT_RIGHT, 115 * _k, fs.call(11), WATER)
 	draw_colored_polygon(PackedVector2Array([_p(10, 10), _p(120, 10), _p(60, 120)]), SUNK)
-	draw_string(font, _p(16, 28), "TO HEARTLAND", HORIZONTAL_ALIGNMENT_LEFT, -1, fs.call(10), MUTED)
+	draw_string(font, _p(12, 146), "TO HEARTLAND ↑", HORIZONTAL_ALIGNMENT_LEFT, -1, fs.call(10), MUTED)
 
 	# roads, dashed when Crater Road is closed
 	for r in C["roads"]:
@@ -149,31 +149,31 @@ func _draw_site(id: String, font: Font, fs: Callable) -> void:
 	var l4 := ""
 	var sh: Dictionary = s["shelter"]
 	if n.has("people"):
-		l3 = "%d vulnerable at home" % x["home"]["vuln"]
-		l4 = "%d others at home" % x["home"]["able"]
+		l3 = "%d vulnerable" % x["home"]["vuln"]
+		l4 = "%d others" % x["home"]["able"]
 	if id == "st_brendans":
-		l3 = "Sheltering %d of %d" % [sh["st_brendans"]["vuln"] + sh["st_brendans"]["able"], n["capacity"]]
+		l3 = "Shelter %d/%d" % [sh["st_brendans"]["vuln"] + sh["st_brendans"]["able"], n["capacity"]]
 		var over: int = sh["st_brendans"]["vuln"] + sh["st_brendans"]["able"] - n["capacity"]
-		l4 = "%d over capacity" % over if over > 0 else ""
+		l4 = "%d over" % over if over > 0 else ""
 	elif id == "crater_road":
-		l3 = "Road to Heartland"
-		l4 = "%d evacuated there" % (sh["heartland"]["vuln"] + sh["heartland"]["able"])
+		l3 = "Road out"
+		l4 = "%d evacuated" % (sh["heartland"]["vuln"] + sh["heartland"]["able"])
 	elif id == "plant":
 		l3 = "Frank injured" if s["residents"]["frank"]["status"] == "injured" else "Plant crew on site"
 	if id == "tech_housing" and s["towerOpen"]:
-		l4 = "Tower open: %d sheltered" % (sh["tech_tower"]["vuln"] + sh["tech_tower"]["able"])
+		l4 = "Tower: %d in" % (sh["tech_tower"]["vuln"] + sh["tech_tower"]["able"])
 
 	var pad := 10 * _k
 	var w := r.size.x - pad * 2
-	var lh := 19.0 * _k
+	var lh := maxf(19.0 * _k, fs.call(12) * 1.3)
 	draw_string(font, r.position + Vector2(pad, lh), String(n["name"]).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(13), FG)
 	draw_string(font, r.position + Vector2(pad, lh * 2), st, HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), st_col)
 	draw_string(font, r.position + Vector2(pad, lh * 3), l3, HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), FG)
 	draw_string(font, r.position + Vector2(pad, lh * 4), l4, HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), MUTED)
 	if targets.has(id):
-		draw_string(font, r.position + Vector2(pad, lh * 5 - 2 * _k), "TAP TO " + String(targets[id]), HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), STORM)
+		draw_string(font, r.position + Vector2(pad, lh * 5 - 2 * _k), "TAP: " + String(targets[id]), HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), STORM)
 	else:
-		draw_string(font, r.position + Vector2(pad, lh * 5 - 2 * _k), String(n["owner"]).to_upper() + " SITE", HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(11), MUTED)
+		draw_string(font, r.position + Vector2(pad, lh * 5 - 2 * _k), String(n["owner"]).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(11), MUTED)
 
 	# unit tokens under the site
 	var i := 0

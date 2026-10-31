@@ -138,6 +138,10 @@ static func team_goods(C: Dictionary, team: String) -> Array:
 
 
 ## Same as JS int(): round half up, bounded, booleans and null are not numbers.
+## Only plain decimal numbers count when a number arrives as text (same rule as engine.js).
+static var _PLAIN_NUMBER := RegEx.create_from_string("^-?\\d+(\\.\\d+)?$")
+
+
 static func _int(v, d := 0) -> int:
 	var f := 0.0
 	if typeof(v) == TYPE_INT:
@@ -146,7 +150,7 @@ static func _int(v, d := 0) -> int:
 		if is_nan(v) or is_inf(v):
 			return d
 		f = v
-	elif typeof(v) == TYPE_STRING and v.strip_edges() != "" and v.is_valid_float():
+	elif typeof(v) == TYPE_STRING and _PLAIN_NUMBER.search(v) != null:
 		f = v.to_float()
 	else:
 		return d
@@ -164,18 +168,21 @@ static func _str(v, n: int) -> String:
 
 
 ## Words that judge. The engine is a witness: a moment that uses them is rejected.
-const JUDGING := ["selfish", "greedy", "greed", "heroic", "hero", "noble", "coward", "villain", "evil", "shameful", "right answer", "wrong answer", "right thing", "obvious choice"]
+## A trailing * matches any ending (coward* catches cowardly, cowardice).
+const JUDGING := ["selfish*", "greed*", "hero", "heroes", "heroic*", "noble", "nobly", "coward*", "villain*", "evil*", "shame*", "disgrace*", "monster*", "monstrous*", "decent", "decency", "immoral*", "morally", "unforgivable", "good company", "right answer", "wrong answer", "right thing", "obvious choice"]
 
 
 static func _judges(text: String):
 	var x := " " + text.to_lower() + " "
-	for w in JUDGING:
+	for j in JUDGING:
+		var stem: bool = j.ends_with("*")
+		var w: String = j.left(j.length() - 1) if stem else j
 		var at := x.find(w)
 		while at >= 0:
 			var before := x.unicode_at(at - 1)
 			var after := x.unicode_at(at + w.length())
-			if not _is_az(before) and not _is_az(after):
-				return w
+			if not _is_az(before) and (stem or not _is_az(after)):
+				return j
 			at = x.find(w, at + 1)
 	return null
 
@@ -265,9 +272,18 @@ static func validate_dilemma(C: Dictionary, s: Dictionary, raw, stances: Diction
 			notes.append('order "%s" dropped: it costs no signed value' % order["label"])
 			continue
 		var gains: bool = effects.has("save") or effects.has("power") or effects.has("sandbag") or effects.has("open_tower") or effects.has("cold_store") or effects.get("trust", 0) > 0 or effects.get("confidence", 0) > 0 or effects.get("doses", 0) > 0
-		var loses: bool = effects.has("expose") or effects.get("trust", 0) < 0 or effects.get("confidence", 0) < 0 or effects.get("doses", 0) < 0
+		var loses: bool = effects.get("expose", 0) >= 10 or effects.get("trust", 0) < 0 or effects.get("confidence", 0) < 0 or effects.get("doses", 0) < 0
 		if strict and cost.is_empty() and gains and not loses:
 			notes.append('order "%s" dropped: it costs nothing and only helps' % order["label"])
+			continue
+		var paid := 0
+		for g in cost:
+			paid += int(cost[g])
+		if strict and effects.has("save") and paid < floori(effects["save"]["n"] / 10.0):
+			notes.append('order "%s" dropped: it saves %d people for almost nothing' % [order["label"], effects["save"]["n"]])
+			continue
+		if strict and effects.get("trust", 0) > 0 and effects.get("confidence", 0) > 0 and not loses:
+			notes.append('order "%s" dropped: it helps both teams and harms nothing' % order["label"])
 			continue
 		orders.append(order)
 	if orders.size() < 2:
@@ -287,6 +303,13 @@ static func validate_dilemma(C: Dictionary, s: Dictionary, raw, stances: Diction
 			var id := str(v).to_lower()
 			if (id in signed["community"] or id in signed["meridian"]) and not id in collision and collision.size() < 2:
 				collision.append(id)
+	# Both teams signed the same #1: set it against the other team's #2, so a collision still shows.
+	if collision.size() == 1:
+		var other: Array = stances["meridian"]["ranks"] if stances["community"]["ranks"][0] == collision[0] else stances["community"]["ranks"]
+		for v in other:
+			if v != collision[0]:
+				collision.append(v)
+				break
 	# The standing plan (what happens with no decision) must be the deciding team's own order.
 	var def := _int(raw.get("default"), 0)
 	if def < 0 or def >= orders.size() or orders[def]["owner"] != final_call:
@@ -300,7 +323,7 @@ static func validate_dilemma(C: Dictionary, s: Dictionary, raw, stances: Diction
 		return {"ok": false, "notes": notes}
 	var voice = null
 	var rv = raw.get("voice")
-	if typeof(rv) == TYPE_DICTIONARY and rv.get("who") != null and str(rv.get("who")) != "":
+	if typeof(rv) == TYPE_DICTIONARY and typeof(rv.get("who")) == TYPE_STRING and rv["who"] != "":
 		voice = {"who": _str(rv["who"], 80), "line": _str(rv.get("line"), 220)}
 		var who: String = voice["who"].to_lower()
 		if who.find("community team") >= 0 or who.find("meridian team") >= 0:
@@ -316,7 +339,13 @@ static func validate_dilemma(C: Dictionary, s: Dictionary, raw, stances: Diction
 		var parts := PackedStringArray([d["title"], d["situation"], d["resident"], voice["who"] + " " + voice["line"] if voice != null else ""])
 		for o in orders:
 			parts.append(o["label"] + " " + o["news"])
-		var w = _judges(" ".join(parts))
+		var all := " ".join(parts)
+		for i in all.length():
+			var c := all.unicode_at(i)
+			if c >= 0x370 and c <= 0x52f:
+				notes.append("non-Latin letters in the text")
+				return {"ok": false, "notes": notes}
+		var w = _judges(all)
 		if w != null:
 			notes.append('judging word "%s": the engine is a witness' % w)
 			return {"ok": false, "notes": notes}
@@ -457,6 +486,8 @@ static func resolve_turn(C: Dictionary, state0: Dictionary, input: Dictionary) -
 
 	# 1. promises made or confirmed this turn
 	for p in input.get("promises", []):
+		if not (p.get("by") in TEAMS and p.get("to") in TEAMS):
+			continue
 		var np: Dictionary = p.duplicate(true)
 		np.merge({"made": s["turn"], "due": s["turn"] + 1, "confirmed": false, "status": "open"}, true)
 		s["promises"].append(np)
@@ -547,7 +578,7 @@ static func resolve_turn(C: Dictionary, state0: Dictionary, input: Dictionary) -
 				continue
 			if not U.get("road", false) and not site_id in U.get("reach", []):
 				continue
-			var dest: String = o.get("dest", "st_brendans")
+			var dest: String = o.get("dest", "st_brendans") if C["destinations"].has(o.get("dest", "")) else "st_brendans"
 			if dest == "heartland":
 				if s["sites"]["crater_road"]["closed"]:
 					_say(ev, "%s turned back: Crater Road is closed." % U["name"], "bad")

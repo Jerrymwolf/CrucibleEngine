@@ -6,12 +6,13 @@
   const TEAMS = ["community", "meridian"];
   const clone = (o) => JSON.parse(JSON.stringify(o));
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-  const int = (v, d = 0) => (typeof v === "boolean" || v === null || v === "" || !Number.isFinite(+v) ? d : Math.floor(clamp(+v, -1e9, 1e9) + 0.5));
+  const int = (v, d = 0) => (typeof v === "boolean" || (typeof v === "string" && !/^-?\d+(\.\d+)?$/.test(v)) || v === null || v === "" || !Number.isFinite(+v) ? d : Math.floor(clamp(+v, -1e9, 1e9) + 0.5));
   // Plain text only: no control characters, so both engines store and hash identical strings.
-  const str = (v, n) => String(v ?? "").replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, n);
+  const str = (v, n) => Array.from(String(v ?? "").replace(/[\u0000-\u001f\u007f]/g, " ")).slice(0, n).join(""); // code points, as Godot counts
   // Words that judge. The engine is a witness: a moment that uses them is rejected.
-  const JUDGING = ["selfish", "greedy", "greed", "heroic", "hero", "noble", "coward", "villain", "evil", "shameful", "right answer", "wrong answer", "right thing", "obvious choice"];
-  const judges = (t) => { const x = " " + t.toLowerCase() + " "; return JUDGING.find((w) => new RegExp("[^a-z]" + w + "[^a-z]").test(x)) || null; };
+  // A trailing * matches any ending (coward* catches cowardly, cowardice).
+  const JUDGING = ["selfish*", "greed*", "hero", "heroes", "heroic*", "noble", "nobly", "coward*", "villain*", "evil*", "shame*", "disgrace*", "monster*", "monstrous*", "decent", "decency", "immoral*", "morally", "unforgivable", "good company", "right answer", "wrong answer", "right thing", "obvious choice"];
+  const judges = (t) => { const x = " " + t.toLowerCase() + " "; return JUDGING.find((w) => new RegExp("[^a-z]" + (w.endsWith("*") ? w.slice(0, -1) : w + "[^a-z]")).test(x)) || null; };
 
   function mulberry32(a) {
     return function () {
@@ -110,8 +111,11 @@
       const order = { label: str(o.label, 70) || "Order", owner: o.owner, cost, effects, tags, news: str(o.news, 140) };
       if (strict && !TEAMS.some((t) => tags[t].costs.length)) { notes.push(`order "${order.label}" dropped: it costs no signed value`); continue; }
       const gains = effects.save || effects.power || effects.sandbag || effects.open_tower || effects.cold_store || effects.trust > 0 || effects.confidence > 0 || effects.doses > 0;
-      const loses = effects.expose || effects.trust < 0 || effects.confidence < 0 || effects.doses < 0;
+      const loses = effects.expose >= 10 || effects.trust < 0 || effects.confidence < 0 || effects.doses < 0;
       if (strict && !Object.keys(cost).length && gains && !loses) { notes.push(`order "${order.label}" dropped: it costs nothing and only helps`); continue; }
+      const paid = Object.values(cost).reduce((a, b) => a + b, 0);
+      if (strict && effects.save && paid < Math.floor(effects.save.n / 10)) { notes.push(`order "${order.label}" dropped: it saves ${effects.save.n} people for almost nothing`); continue; }
+      if (strict && effects.trust > 0 && effects.confidence > 0 && !loses) { notes.push(`order "${order.label}" dropped: it helps both teams and harms nothing`); continue; }
       orders.push(order);
     }
     if (orders.length < 2) return { ok: false, notes: notes.concat("fewer than 2 valid orders") };
@@ -121,11 +125,17 @@
       const id = String(v).toLowerCase();
       if ((signed.community.includes(id) || signed.meridian.includes(id)) && !collision.includes(id) && collision.length < 2) collision.push(id);
     }
+    // Both teams signed the same #1: set it against the other team's #2, so a collision still shows.
+    if (collision.length === 1) {
+      const other = stances.community.ranks[0] === collision[0] ? stances.meridian.ranks : stances.community.ranks;
+      const next = other.find((v) => v !== collision[0]);
+      if (next) collision.push(next);
+    }
     // The standing plan (what happens with no decision) must be the deciding team's own order.
     let def = int(raw.default, 0);
     if (def < 0 || def >= orders.length || orders[def].owner !== final_call) def = orders.findIndex((o) => o.owner === final_call);
     if (def < 0) return { ok: false, notes: notes.concat(`no order belongs to the ${final_call} team, which makes the call`) };
-    let voice = raw.voice && typeof raw.voice === "object" && raw.voice.who ? { who: str(raw.voice.who, 80), line: str(raw.voice.line, 220) } : null;
+    let voice = raw.voice && typeof raw.voice === "object" && typeof raw.voice.who === "string" && raw.voice.who ? { who: str(raw.voice.who, 80), line: str(raw.voice.line, 220) } : null;
     if (voice && /(community|meridian) team/i.test(voice.who)) { notes.push("voice dropped: pressure comes from off-board voices, never a team"); voice = null; }
     const d = {
       turn: state.turn, final_call, collision, default: def,
@@ -134,6 +144,7 @@
     };
     if (strict) {
       const text = [d.title, d.situation, d.resident, voice ? voice.who + " " + voice.line : ""].concat(orders.map((o) => o.label + " " + o.news)).join(" ");
+      if (/[\u0370-\u052f]/.test(text)) return { ok: false, notes: notes.concat("non-Latin letters in the text") };
       const w = judges(text);
       if (w) return { ok: false, notes: notes.concat(`judging word "${w}": the engine is a witness`) };
     }
@@ -203,7 +214,7 @@ function resolveTurn(C, state0, input) {
     const orders = input.orders || {}, lends = input.lends || {};
 
     // 1. promises made or confirmed this turn
-    for (const p of input.promises || []) s.promises.push({ ...p, made: s.turn, due: s.turn + 1, confirmed: false, status: "open" });
+    for (const p of input.promises || []) if (TEAMS.includes(p.by) && TEAMS.includes(p.to)) s.promises.push({ ...p, made: s.turn, due: s.turn + 1, confirmed: false, status: "open" });
     for (const i of input.confirms || []) if (Number.isInteger(i) && i >= 0 && s.promises[i]) s.promises[i].confirmed = true;
 
     // 2. Tech Tower
@@ -265,7 +276,7 @@ function resolveTurn(C, state0, input) {
         if (!site) continue;
         if (U.road && site.flooded) { say(`${U.name} could not reach ${C.sites[o.site].name}: the streets are under water.`, "bad"); continue; }
         if (!U.road && !(U.reach || []).includes(o.site)) continue;
-        const dest = o.dest || "st_brendans";
+        const dest = C.destinations[o.dest] ? o.dest : "st_brendans";
         if (dest === "heartland") {
           if (s.sites.crater_road.closed) { say(`${U.name} turned back: Crater Road is closed.`, "bad"); continue; }
           if (!U.road) continue;

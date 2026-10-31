@@ -288,7 +288,11 @@
      "sandbag_p": 0.1,
      "text": "Flash flooding in Tech Housing"
     }
-   ]
+   ],
+   "flash": {
+    "site": "plant",
+    "text": "Plant seawall forecast to overtop next turn. Sandbags placed now lower the risk"
+   }
   },
   {
    "n": 3,
@@ -520,7 +524,7 @@
      "owner": "meridian",
      "cost": {},
      "effects": {
-      "confidence": 3,
+      "confidence": -6,
       "trust": -4
      },
      "values": {
@@ -543,7 +547,8 @@
         "integrity",
         "fairness",
         "accountability",
-        "boldness"
+        "boldness",
+        "autonomy"
        ]
       },
       "meridian": {
@@ -576,7 +581,8 @@
         "respect",
         "authenticity",
         "boldness",
-        "independence"
+        "independence",
+        "candor"
        ]
       }
      },
@@ -601,7 +607,8 @@
         "fairness",
         "creativity",
         "respect",
-        "honesty"
+        "honesty",
+        "curiosity"
        ],
        "costs": [
         "safety",
@@ -682,7 +689,8 @@
         "honor",
         "integrity",
         "accountability",
-        "boldness"
+        "boldness",
+        "candor"
        ],
        "costs": [
         "impact",
@@ -735,7 +743,7 @@
      },
      "effects": {
       "power": "plant",
-      "confidence": 4,
+      "confidence": -6,
       "trust": -5
      },
      "values": {
@@ -779,7 +787,8 @@
         "stability",
         "obedience",
         "preparedness",
-        "honesty"
+        "honesty",
+        "candor"
        ],
        "costs": [
         "safety",
@@ -821,7 +830,8 @@
         "safety",
         "kindness",
         "integrity",
-        "accountability"
+        "accountability",
+        "autonomy"
        ],
        "costs": [
         "stewardship",
@@ -898,7 +908,8 @@
         "honor",
         "integrity",
         "accountability",
-        "boldness"
+        "boldness",
+        "candor"
        ],
        "costs": [
         "impact",
@@ -951,7 +962,7 @@
      },
      "effects": {
       "power": "plant",
-      "confidence": 4,
+      "confidence": -6,
       "trust": -5
      },
      "values": {
@@ -995,7 +1006,8 @@
         "stability",
         "obedience",
         "preparedness",
-        "honesty"
+        "honesty",
+        "candor"
        ],
        "costs": [
         "safety",
@@ -1037,7 +1049,8 @@
         "safety",
         "kindness",
         "integrity",
-        "accountability"
+        "accountability",
+        "autonomy"
        ],
        "costs": [
         "stewardship",
@@ -1121,7 +1134,10 @@
         "kindness",
         "justice",
         "equality",
-        "accountability"
+        "accountability",
+        "autonomy",
+        "independence",
+        "curiosity"
        ]
       },
       "meridian": {
@@ -1134,7 +1150,9 @@
         "success",
         "competence",
         "preparedness",
-        "accountability"
+        "accountability",
+        "boldness",
+        "courage"
        ],
        "costs": [
         "safety",
@@ -1176,7 +1194,8 @@
         "accountability",
         "boldness",
         "independence",
-        "autonomy"
+        "autonomy",
+        "curiosity"
        ],
        "costs": [
         "loyalty",
@@ -1190,7 +1209,8 @@
         "compassion",
         "kindness",
         "safety",
-        "justice"
+        "justice",
+        "candor"
        ],
        "costs": [
         "excellence",
@@ -1204,7 +1224,8 @@
         "recognition",
         "impact",
         "accountability",
-        "resilience"
+        "resilience",
+        "boldness"
        ]
       }
      },
@@ -1226,7 +1247,8 @@
         "fairness",
         "justice",
         "accountability",
-        "creativity"
+        "creativity",
+        "candor"
        ],
        "costs": [
         "independence",
@@ -1244,7 +1266,8 @@
         "stewardship",
         "leadership",
         "preparedness",
-        "creativity"
+        "creativity",
+        "curiosity"
        ],
        "costs": [
         "success",
@@ -1304,7 +1327,10 @@
         "kindness",
         "justice",
         "equality",
-        "accountability"
+        "accountability",
+        "autonomy",
+        "independence",
+        "curiosity"
        ]
       },
       "meridian": {
@@ -1317,7 +1343,9 @@
         "success",
         "competence",
         "preparedness",
-        "accountability"
+        "accountability",
+        "boldness",
+        "courage"
        ],
        "costs": [
         "safety",
@@ -1359,7 +1387,8 @@
         "accountability",
         "boldness",
         "independence",
-        "autonomy"
+        "autonomy",
+        "curiosity"
        ],
        "costs": [
         "loyalty",
@@ -1373,7 +1402,8 @@
         "compassion",
         "kindness",
         "safety",
-        "justice"
+        "justice",
+        "candor"
        ],
        "costs": [
         "excellence",
@@ -1387,7 +1417,8 @@
         "recognition",
         "impact",
         "accountability",
-        "resilience"
+        "resilience",
+        "boldness"
        ]
       }
      },
@@ -1409,7 +1440,8 @@
         "fairness",
         "justice",
         "accountability",
-        "creativity"
+        "creativity",
+        "candor"
        ],
        "costs": [
         "independence",
@@ -1427,7 +1459,8 @@
         "stewardship",
         "leadership",
         "preparedness",
-        "creativity"
+        "creativity",
+        "curiosity"
        ],
        "costs": [
         "success",

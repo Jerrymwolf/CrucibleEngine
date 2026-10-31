@@ -240,7 +240,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": 3
+            "confidence": -6
            },
            "tags": {
             "community": {
@@ -316,7 +316,7 @@
         }
        }
       ],
-      "hash": "debd97b7"
+      "hash": "1b19adf7"
      }
     },
     {
@@ -367,7 +367,7 @@
       },
       "meters": {
        "trust": 61,
-       "confidence": 65
+       "confidence": 55
       },
       "lost": {
        "vuln": 5,
@@ -522,7 +522,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": 3
+            "confidence": -6
            },
            "tags": {
             "community": {
@@ -654,7 +654,7 @@
            },
            "effects": {
             "trust": -5,
-            "confidence": 4,
+            "confidence": -6,
             "power": "plant"
            },
            "tags": {
@@ -730,7 +730,7 @@
         }
        }
       ],
-      "hash": "f5a8ebe2"
+      "hash": "1a7237c0"
      }
     },
     {
@@ -779,7 +779,7 @@
       },
       "meters": {
        "trust": 61,
-       "confidence": 58
+       "confidence": 48
       },
       "lost": {
        "vuln": 10,
@@ -934,7 +934,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": 3
+            "confidence": -6
            },
            "tags": {
             "community": {
@@ -1066,7 +1066,7 @@
            },
            "effects": {
             "trust": -5,
-            "confidence": 4,
+            "confidence": -6,
             "power": "plant"
            },
            "tags": {
@@ -1271,7 +1271,7 @@
         }
        }
       ],
-      "hash": "f79bdcb2"
+      "hash": "71d2f97e"
      }
     }
    ],
@@ -1488,7 +1488,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": 3
+            "confidence": -6
            },
            "tags": {
             "community": {
@@ -1564,7 +1564,7 @@
         }
        }
       ],
-      "hash": "1acdbf60"
+      "hash": "90fda7a0"
      }
     },
     {
@@ -1595,7 +1595,7 @@
       },
       "meters": {
        "trust": 27,
-       "confidence": 63
+       "confidence": 53
       },
       "lost": {
        "vuln": 45,
@@ -1748,7 +1748,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": 3
+            "confidence": -6
            },
            "tags": {
             "community": {
@@ -1880,7 +1880,7 @@
            },
            "effects": {
             "trust": -5,
-            "confidence": 4,
+            "confidence": -6,
             "power": "plant"
            },
            "tags": {
@@ -1956,7 +1956,7 @@
         }
        }
       ],
-      "hash": "8a532620"
+      "hash": "9a32039c"
      }
     },
     {
@@ -1978,14 +1978,14 @@
         "c_fuel": 8
        },
        "meridian": {
-        "doses": 25,
-        "funds": 33,
+        "doses": 23,
+        "funds": 27,
         "m_fuel": 8
        }
       },
       "meters": {
        "trust": 16,
-       "confidence": 46
+       "confidence": 36
       },
       "lost": {
        "vuln": 59,
@@ -2138,7 +2138,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": 3
+            "confidence": -6
            },
            "tags": {
             "community": {
@@ -2270,7 +2270,7 @@
            },
            "effects": {
             "trust": -5,
-            "confidence": 4,
+            "confidence": -6,
             "power": "plant"
            },
            "tags": {
@@ -2475,7 +2475,7 @@
         }
        }
       ],
-      "hash": "6cff2977"
+      "hash": "e88859cf"
      }
     }
    ],
@@ -2486,9 +2486,9 @@
      "index": 55
     },
     "meridian": {
-     "points": 124,
+     "points": 112,
      "start": 144,
-     "index": 86
+     "index": 78
     }
    },
    "rng_first": [
@@ -2709,7 +2709,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": 3
+            "confidence": -6
            },
            "tags": {
             "community": {
@@ -2785,7 +2785,7 @@
         }
        }
       ],
-      "hash": "9dead0e2"
+      "hash": "bd60397a"
      }
     },
     {
@@ -2981,7 +2981,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": 3
+            "confidence": -6
            },
            "tags": {
             "community": {
@@ -3113,7 +3113,7 @@
            },
            "effects": {
             "trust": -5,
-            "confidence": 4,
+            "confidence": -6,
             "power": "plant"
            },
            "tags": {
@@ -3189,7 +3189,7 @@
         }
        }
       ],
-      "hash": "090c5299"
+      "hash": "4e6b9c54"
      }
     },
     {
@@ -3379,7 +3379,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": 3
+            "confidence": -6
            },
            "tags": {
             "community": {
@@ -3511,7 +3511,7 @@
            },
            "effects": {
             "trust": -5,
-            "confidence": 4,
+            "confidence": -6,
             "power": "plant"
            },
            "tags": {
@@ -3717,7 +3717,7 @@
         }
        }
       ],
-      "hash": "ddde7d8a"
+      "hash": "1c24ee6d"
      }
     }
    ],

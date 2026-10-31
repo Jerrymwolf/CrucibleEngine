@@ -7,6 +7,7 @@ const Director = preload("res://scripts/director.gd")
 const MapView = preload("res://scripts/map_view.gd")
 const TEAMS := ["community", "meridian"]
 const SETTINGS := "user://settings.cfg"
+const SETTINGS_VERSION := 2  # bump when a default changes, so an old saved choice doesn't override it
 const PLAYOUT_S := 3.2
 const AI_WAIT_S := 20        # planning seconds the game waits for Claude's moment
 const AI_RETRY_WAIT_S := 35  # ...or this long when Claude's first answer failed the checks and a retry is running
@@ -70,6 +71,7 @@ var promise_inputs := {}
 var setup_inputs := {}
 var _scrolls := {}
 var _scroll_keep := {}
+var _restoring := false
 
 
 func _ready() -> void:
@@ -100,7 +102,10 @@ func _ready() -> void:
 func _load_settings() -> void:
 	var cf := ConfigFile.new()
 	if cf.load(SETTINGS) == OK:
-		for k in ["seed", "seconds", "play", "api_key", "model", "stances"]:
+		var keys := ["api_key", "model", "stances"]
+		if cf.get_value("setup", "version", 0) == SETTINGS_VERSION:
+			keys += ["seed", "seconds", "play"]
+		for k in keys:
 			if cf.has_section_key("setup", k):
 				setup[k] = cf.get_value("setup", k)
 	if String(setup["api_key"]).strip_edges() == "":
@@ -110,6 +115,7 @@ func _load_settings() -> void:
 
 func _save_settings() -> void:
 	var cf := ConfigFile.new()
+	cf.set_value("setup", "version", SETTINGS_VERSION)
 	for k in setup:
 		# a key that came from the environment stays there; only a pasted key is saved on this computer
 		if k == "api_key" and key_from_env:
@@ -539,9 +545,10 @@ func _rebuild_confirms() -> void:
 
 # ---------- rendering ----------
 func render() -> void:
-	for k in _scrolls:
-		if is_instance_valid(_scrolls[k]):
-			_scroll_keep[k] = _scrolls[k].scroll_vertical
+	if not _restoring:  # mid-restore the live value is still 0; keep the stored one
+		for k in _scrolls:
+			if is_instance_valid(_scrolls[k]):
+				_scroll_keep[k] = _scrolls[k].scroll_vertical
 	_scrolls = {}
 	for c in root.get_children():
 		root.remove_child(c)
@@ -561,8 +568,10 @@ func render() -> void:
 
 ## Rebuilding the screen on every tap would jump each list back to the top; put them back where they were.
 func _restore_scrolls() -> void:
+	_restoring = true
 	await get_tree().process_frame
 	await get_tree().process_frame
+	_restoring = false
 	for k in _scrolls:
 		if is_instance_valid(_scrolls[k]) and _scroll_keep.has(k):
 			_scrolls[k].scroll_vertical = _scroll_keep[k]
@@ -731,6 +740,11 @@ func console_view() -> Control:
 		var f := _panel(STORM, STORM)
 		f.add_child(_lbl("FLASH WARNING: %s. Plan for it now." % TT["flash"]["text"], 16, BG))
 		col.add_child(f)
+	if screen == "plan" and s["turn"] == 1 and _no_player_orders():
+		var cb := _panel(COMM_SOFT if plays("community") else MERI_SOFT, STORM, 2)
+		var first := "Bus 1" if plays("community") else "Plant shuttle"
+		cb.add_child(_lbl("START HERE: tap %s in your team panel, then tap a highlighted site on the map. Then read this turn's moment and vote. Lock your orders when you're ready." % first, 16, FG))
+		col.add_child(cb)
 	var tick := _panel(SUNK, LINE)
 	var trow := _hbox(10)
 	trow.add_child(_chip("NEWS", STORM, BG, 13))
@@ -748,7 +762,9 @@ func console_view() -> Control:
 	mid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var mp := _panel(PANEL, LINE, 1, 6)
 	mp.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	mp.size_flags_stretch_ratio = 1.15
+	# once the moment is ready it gets most of the centre column; the map stays tappable above it
+	var reading: bool = screen == "plan" and dil.get("status") == "ready"
+	mp.size_flags_stretch_ratio = 0.6 if reading else 1.15
 	var mv := _vbox(2)
 	mv.add_child(map_view(TT))
 	mv.add_child(_lbl(hint(), 14, STORM if selected != "" else MUTED))
@@ -778,6 +794,7 @@ func forecast_view(n: int) -> Control:
 		else:
 			var T: Dictionary = C["turns"][n + dist - 1]
 			v.add_child(_lbl(when + " · " + String(T["label"]).to_upper(), 13, STORM if dist == 0 else MUTED))
+			var hz := PackedStringArray()
 			for h in T["hazards"]:
 				var hp: float = h["p"]
 				var w := "possible"
@@ -785,10 +802,20 @@ func forecast_view(n: int) -> Control:
 					w = "certain" if hp >= 0.85 else ("likely" if hp >= 0.5 else "possible")
 				elif dist == 1:
 					w = "likely" if hp >= 0.85 else "possible"
-				v.add_child(_lbl("%s: %s%s" % [w.to_upper(), h["text"], " (sandbags lower the risk)" if h.has("sandbag_p") else ""], 14, COST if w == "certain" else FG))
+				hz.append("%s: %s%s" % [w.capitalize(), h["text"], " (sandbags help)" if h.has("sandbag_p") else ""])
+			# one wrapped line per turn keeps the moment in view
+			v.add_child(_lbl("; ".join(hz) + ".", 14, FG if dist == 0 else MUTED))
 		p.add_child(v)
 		row.add_child(p)
 	return row
+
+
+func _no_player_orders() -> bool:
+	for uid in draft.get("orders", {}):
+		var t: String = C["units"][uid]["team"]
+		if plays(t) and uid != "pcrew" and draft["orders"][uid].get("task", "idle") != "idle":
+			return false
+	return true
 
 
 func hint() -> String:
@@ -805,7 +832,7 @@ func map_view(T: Dictionary) -> Control:
 	m.s = state
 	m.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	m.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	m.custom_minimum_size = Vector2(0, 260)
+	m.custom_minimum_size = Vector2(0, 200)
 	if screen == "plan" and selected != "":
 		m.targets = targets_for(selected)
 	if screen == "plan" and T.has("flash"):
@@ -988,6 +1015,9 @@ func promise_view(t: String, v: VBoxContainer) -> void:
 			site.add_item(C["sites"][id]["name"])
 			site.set_item_metadata(site.item_count - 1, id)
 	for ob in [kind, unit, site]:
+		ob.fit_to_longest_item = false
+		ob.clip_text = true
+		ob.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		v.add_child(ob)
 	promise_inputs[t] = {"kind": kind, "unit": unit, "site": site}
 	v.add_child(_button("Log this promise", _on_promise.bind(t)))

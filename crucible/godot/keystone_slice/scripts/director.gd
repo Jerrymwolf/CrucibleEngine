@@ -50,18 +50,22 @@ func request(turn: int, prompt: String, keep_t0 := false) -> void:
 	if not available():
 		finished.emit(turn, {"error": "no API key", "ms": 0})
 		return
-	var body := {
+	var body := _body(prompt, 8000)
+	var err := _http.request(API_URL, _headers(), HTTPClient.METHOD_POST, JSON.stringify(body))
+	if err != OK:
+		finished.emit(turn, {"error": "could not start the request (%d)" % err, "ms": 0})
+
+
+func _body(prompt: String, max_tokens: int) -> Dictionary:
+	return {
 		"model": model,
-		"max_tokens": 8000,
-		# Low effort keeps a moment inside the 20-second window; the written fallback covers the rest.
+		"max_tokens": max_tokens,
+		# Low effort keeps a moment inside the 20-second window; the prepared moment covers the rest.
 		"output_config": {"effort": "low"},
 		# If a safety classifier declines, the API retries on a fallback model inside the same call.
 		"fallbacks": "default",
 		"messages": [{"role": "user", "content": prompt}],
 	}
-	var err := _http.request(API_URL, _headers(), HTTPClient.METHOD_POST, JSON.stringify(body))
-	if err != OK:
-		finished.emit(turn, {"error": "could not start the request (%d)" % err, "ms": 0})
 
 
 func _headers() -> PackedStringArray:
@@ -79,7 +83,7 @@ func test_key() -> void:
 		tested.emit(false, "No key given. Prepared moments will be used.")
 		return
 	_test.cancel_request()
-	var body := {"model": model, "max_tokens": 16, "messages": [{"role": "user", "content": "Reply with the word ready."}]}
+	var body := _body("Reply with the word ready.", 16)  # same fields as a real moment, so a rejected field shows here
 	var err := _test.request(API_URL, _headers(), HTTPClient.METHOD_POST, JSON.stringify(body))
 	if err != OK:
 		tested.emit(false, "Could not start the test (%d)." % err)
