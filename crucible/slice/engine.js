@@ -115,7 +115,7 @@
       if (strict && !Object.keys(cost).length && gains && !loses) { notes.push(`order "${order.label}" dropped: it costs nothing and only helps`); continue; }
       const paid = Object.values(cost).reduce((a, b) => a + b, 0) + Math.max(0, -(effects.doses || 0)) + Math.max(0, -(effects.confidence || 0)) + Math.max(0, -(effects.trust || 0)); // doses and meters given up count as payment
       if (strict && effects.save && paid < Math.floor(effects.save.n / 10)) { notes.push(`order "${order.label}" dropped: it saves ${effects.save.n} people for almost nothing`); continue; }
-      if (strict && effects.trust > 0 && effects.confidence > 0 && !loses && paid < 3) { notes.push(`order "${order.label}" dropped: it helps both teams and harms nothing`); continue; }
+      if (strict && effects.trust > 0 && effects.confidence > 0 && !loses && paid < (effects.trust + effects.confidence) / 2) { notes.push(`order "${order.label}" dropped: it helps both teams and harms nothing`); continue; }
       orders.push(order);
     }
     if (orders.length < 2) return { ok: false, notes: notes.concat("fewer than 2 valid orders") };

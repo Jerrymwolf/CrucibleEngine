@@ -174,10 +174,10 @@ func _draw_site(id: String, font: Font, fs: Callable) -> void:
 		lines = [[String(n["name"]).to_upper(), FG], [st, st_col], [l3, FG], [l4, MUTED], [act, act_col]]
 	else:
 		# small map: three lines that still fit inside the box
-		lines = [[String(n["name"]) + " · " + st.to_lower(), FG], [l3 + (" · " + l4 if l4 != "" else ""), FG], [act, act_col]]
+		lines = [[String(n["name"]), FG], [st.to_lower() + " · " + l3, st_col], [act, act_col]]
 		lh = minf(lh, (r.size.y - pad) / 3.0)
 	for i in lines.size():
-		draw_string(font, r.position + Vector2(pad, pad * 0.5 + lh * (i + 1) - lh * 0.25), lines[i][0], HORIZONTAL_ALIGNMENT_LEFT, w, f, lines[i][1])
+		draw_string(font, r.position + Vector2(pad, pad * 0.5 + lh * (i + 1) - lh * 0.25), _fit(font, lines[i][0], w, f), HORIZONTAL_ALIGNMENT_LEFT, w, f, lines[i][1])
 
 	# unit tokens under the site
 	var i := 0
@@ -187,6 +187,16 @@ func _draw_site(id: String, font: Font, fs: Callable) -> void:
 		draw_rect(tr, COMM if u["team"] == "community" else MERI)
 		draw_string(font, tr.position + Vector2(0, 13 * _k), token(u["name"]), HORIZONTAL_ALIGNMENT_CENTER, tr.size.x, fs.call(10), SUNK)
 		i += 1
+
+
+## Trim text to the box width, ending in an ellipsis, so nothing spills past the tap area.
+static func _fit(font: Font, text: String, w: float, size: int) -> String:
+	if font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x <= w:
+		return text
+	var t := text
+	while t.length() > 1 and font.get_string_size(t + "…", HORIZONTAL_ALIGNMENT_LEFT, -1, size).x > w:
+		t = t.left(t.length() - 1)
+	return t.strip_edges() + "…"
 
 
 ## "Bus 1" -> "B1", "Plant shuttle" -> "PS"

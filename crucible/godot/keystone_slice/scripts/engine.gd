@@ -284,7 +284,7 @@ static func validate_dilemma(C: Dictionary, s: Dictionary, raw, stances: Diction
 		if strict and effects.has("save") and paid < floori(effects["save"]["n"] / 10.0):
 			notes.append('order "%s" dropped: it saves %d people for almost nothing' % [order["label"], effects["save"]["n"]])
 			continue
-		if strict and effects.get("trust", 0) > 0 and effects.get("confidence", 0) > 0 and not loses and paid < 3:
+		if strict and effects.get("trust", 0) > 0 and effects.get("confidence", 0) > 0 and not loses and paid < (effects["trust"] + effects["confidence"]) / 2.0:
 			notes.append('order "%s" dropped: it helps both teams and harms nothing' % order["label"])
 			continue
 		orders.append(order)

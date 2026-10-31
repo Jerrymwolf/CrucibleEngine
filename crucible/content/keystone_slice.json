@@ -481,7 +481,8 @@
         "stability",
         "order",
         "loyalty",
-        "fairness"
+        "fairness",
+        "autonomy"
        ]
       },
       "meridian": {
@@ -697,7 +698,8 @@
         "stability",
         "ambition",
         "success",
-        "excellence"
+        "excellence",
+        "autonomy"
        ]
       },
       "meridian": {
@@ -729,7 +731,8 @@
         "stewardship",
         "order",
         "stability",
-        "obedience"
+        "obedience",
+        "candor"
        ]
       }
      },
@@ -859,7 +862,9 @@
         "duty",
         "leadership",
         "respect",
-        "honor"
+        "honor",
+        "courage",
+        "boldness"
        ]
       }
      },
@@ -916,7 +921,8 @@
         "stability",
         "ambition",
         "success",
-        "excellence"
+        "excellence",
+        "autonomy"
        ]
       },
       "meridian": {
@@ -948,7 +954,8 @@
         "stewardship",
         "order",
         "stability",
-        "obedience"
+        "obedience",
+        "candor"
        ]
       }
      },
@@ -1078,7 +1085,9 @@
         "duty",
         "leadership",
         "respect",
-        "honor"
+        "honor",
+        "courage",
+        "boldness"
        ]
       }
      },
