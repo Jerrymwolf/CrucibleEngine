@@ -169,7 +169,7 @@ static func _str(v, n: int) -> String:
 
 ## Words that judge. The engine is a witness: a moment that uses them is rejected.
 ## A trailing * matches any ending (coward* catches cowardly, cowardice).
-const JUDGING := ["selfish*", "greed*", "hero", "heroes", "heroic*", "noble", "nobly", "coward*", "villain*", "evil*", "shame*", "disgrace*", "monster*", "monstrous*", "decent", "decency", "immoral*", "morally", "unforgivable", "good company", "right answer", "wrong answer", "right thing", "obvious choice"]
+const JUDGING := ["selfish*", "greed*", "hero", "heroes", "heroic*", "noble", "nobly", "coward*", "villain*", "evil*", "shame*", "disgrace*", "monster*", "monstrous*", "decent", "decency", "immoral*", "morally", "unforgivable", "good company", "right answer", "wrong answer", "right thing", "obvious choice", "callous*", "heartless*", "unethical", "dishonourable", "dishonorable"]
 
 
 static func _judges(text: String):
@@ -272,17 +272,19 @@ static func validate_dilemma(C: Dictionary, s: Dictionary, raw, stances: Diction
 			notes.append('order "%s" dropped: it costs no signed value' % order["label"])
 			continue
 		var gains: bool = effects.has("save") or effects.has("power") or effects.has("sandbag") or effects.has("open_tower") or effects.has("cold_store") or effects.get("trust", 0) > 0 or effects.get("confidence", 0) > 0 or effects.get("doses", 0) > 0
-		var loses: bool = effects.get("expose", 0) >= 10 or effects.get("trust", 0) < 0 or effects.get("confidence", 0) < 0 or effects.get("doses", 0) < 0
+		var loses: bool = effects.get("expose", 0) >= 10 or effects.get("trust", 0) <= -3 or effects.get("confidence", 0) <= -3 or effects.get("doses", 0) <= -3  # a token loss is not a real cost
 		if strict and cost.is_empty() and gains and not loses:
 			notes.append('order "%s" dropped: it costs nothing and only helps' % order["label"])
 			continue
-		var paid := 0
+		var paid := 0  # doses and meters given up count as payment
 		for g in cost:
 			paid += int(cost[g])
+		for k in ["doses", "confidence", "trust"]:
+			paid += maxi(0, -int(effects.get(k, 0)))
 		if strict and effects.has("save") and paid < floori(effects["save"]["n"] / 10.0):
 			notes.append('order "%s" dropped: it saves %d people for almost nothing' % [order["label"], effects["save"]["n"]])
 			continue
-		if strict and effects.get("trust", 0) > 0 and effects.get("confidence", 0) > 0 and not loses:
+		if strict and effects.get("trust", 0) > 0 and effects.get("confidence", 0) > 0 and not loses and paid < 3:
 			notes.append('order "%s" dropped: it helps both teams and harms nothing' % order["label"])
 			continue
 		orders.append(order)

@@ -163,17 +163,21 @@ func _draw_site(id: String, font: Font, fs: Callable) -> void:
 	if id == "tech_housing" and s["towerOpen"]:
 		l4 = "Tower: %d in" % (sh["tech_tower"]["vuln"] + sh["tech_tower"]["able"])
 
-	var pad := 10 * _k
+	var pad := 8 * _k
 	var w := r.size.x - pad * 2
-	var lh := maxf(19.0 * _k, fs.call(12) * 1.3)
-	draw_string(font, r.position + Vector2(pad, lh), String(n["name"]).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(13), FG)
-	draw_string(font, r.position + Vector2(pad, lh * 2), st, HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), st_col)
-	draw_string(font, r.position + Vector2(pad, lh * 3), l3, HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), FG)
-	draw_string(font, r.position + Vector2(pad, lh * 4), l4, HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), MUTED)
-	if targets.has(id):
-		draw_string(font, r.position + Vector2(pad, lh * 5 - 2 * _k), "TAP: " + String(targets[id]), HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), STORM)
+	var f := int(fs.call(12))
+	var lh := f * 1.3
+	var lines := []  # [text, color, size]
+	var act: String = "TAP: " + String(targets[id]) if targets.has(id) else String(n["owner"]).to_upper()
+	var act_col := STORM if targets.has(id) else MUTED
+	if lh * 5 + pad <= r.size.y:
+		lines = [[String(n["name"]).to_upper(), FG], [st, st_col], [l3, FG], [l4, MUTED], [act, act_col]]
 	else:
-		draw_string(font, r.position + Vector2(pad, lh * 5 - 2 * _k), String(n["owner"]).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(11), MUTED)
+		# small map: three lines that still fit inside the box
+		lines = [[String(n["name"]) + " · " + st.to_lower(), FG], [l3 + (" · " + l4 if l4 != "" else ""), FG], [act, act_col]]
+		lh = minf(lh, (r.size.y - pad) / 3.0)
+	for i in lines.size():
+		draw_string(font, r.position + Vector2(pad, pad * 0.5 + lh * (i + 1) - lh * 0.25), lines[i][0], HORIZONTAL_ALIGNMENT_LEFT, w, f, lines[i][1])
 
 	# unit tokens under the site
 	var i := 0

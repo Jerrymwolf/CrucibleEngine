@@ -1239,7 +1239,9 @@
              "honours": [
               "fairness"
              ],
-             "costs": []
+             "costs": [
+              "loyalty"
+             ]
             },
             "meridian": {
              "honours": [
@@ -1271,7 +1273,7 @@
         }
        }
       ],
-      "hash": "71d2f97e"
+      "hash": "fa5cc9f0"
      }
     }
    ],
@@ -2443,7 +2445,9 @@
              "honours": [
               "fairness"
              ],
-             "costs": []
+             "costs": [
+              "loyalty"
+             ]
             },
             "meridian": {
              "honours": [
@@ -2475,7 +2479,7 @@
         }
        }
       ],
-      "hash": "e88859cf"
+      "hash": "5658fa09"
      }
     }
    ],
@@ -3684,7 +3688,9 @@
              "honours": [
               "fairness"
              ],
-             "costs": []
+             "costs": [
+              "loyalty"
+             ]
             },
             "meridian": {
              "honours": [
@@ -3717,7 +3723,7 @@
         }
        }
       ],
-      "hash": "1c24ee6d"
+      "hash": "6cea89d9"
      }
     }
    ],

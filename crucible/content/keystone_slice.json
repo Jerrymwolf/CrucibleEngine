@@ -291,7 +291,7 @@
    ],
    "flash": {
     "site": "plant",
-    "text": "Plant seawall forecast to overtop next turn. Sandbags placed now lower the risk"
+    "text": "Plant seawall forecast to overtop next turn. Sandbag it next turn to lower the risk"
    }
   },
   {
@@ -1255,7 +1255,8 @@
         "autonomy",
         "authority",
         "integrity",
-        "honor"
+        "honor",
+        "loyalty"
        ]
       },
       "meridian": {
@@ -1448,7 +1449,8 @@
         "autonomy",
         "authority",
         "integrity",
-        "honor"
+        "honor",
+        "loyalty"
        ]
       },
       "meridian": {

@@ -763,7 +763,8 @@ func console_view() -> Control:
 	var mp := _panel(PANEL, LINE, 1, 6)
 	mp.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	# once the moment is ready it gets most of the centre column; the map stays tappable above it
-	var reading: bool = screen == "plan" and dil.get("status") == "ready"
+	# ...but only after you've given an order, and never while a unit is selected and waiting for a site
+	var reading: bool = screen == "plan" and dil.get("status") == "ready" and selected == "" and not _no_player_orders()
 	mp.size_flags_stretch_ratio = 0.6 if reading else 1.15
 	var mv := _vbox(2)
 	mv.add_child(map_view(TT))
@@ -1039,6 +1040,21 @@ func _chips(o: Dictionary) -> Control:
 	return col
 
 
+## One wrapped line per team instead of rows of chips, so three orders fit in view.
+func _values_line(o: Dictionary) -> Control:
+	var col := _vbox(2)
+	for t in TEAMS:
+		var tg: Dictionary = o["tags"][t]
+		var bits := PackedStringArray()
+		for x in tg["honours"]:
+			bits.append("honours #%d %s" % [rank_of(t, x), vn(x)])
+		for x in tg["costs"]:
+			bits.append("COSTS #%d %s" % [rank_of(t, x), vn(x)])
+		var l := _lbl("%s values: %s" % [short(t), ", ".join(bits) if bits.size() else "touches none"], 14, team_col(t))
+		col.add_child(l)
+	return col
+
+
 func _cost_text(o: Dictionary) -> Array:
 	var c := PackedStringArray()
 	for g in o["cost"]:
@@ -1130,14 +1146,14 @@ func dilemma_view() -> Control:
 		var op := _panel(SUNK, team_col(o["owner"]) if votes[fc] == i else LINE, 2 if votes[fc] == i else 1)
 		var ov := _vbox(6)
 		ov.add_child(_lbl("%d. %s" % [i + 1, o["label"]], 19, FG))
-		ov.add_child(_lbl("Paid by %s: %s" % [short(o["owner"]), ct[0]], 14, FG))
-		ov.add_child(_lbl(ct[1], 14, MUTED))
-		ov.add_child(_lbl(_standing_text(o), 14, STORM))
+		ov.add_child(_lbl("%s pays %s. Does: %s." % [short(o["owner"]), ct[0], ct[1]], 14, FG))
+		var note := _standing_text(o)
 		if o["owner"] != fc:
-			ov.add_child(_lbl("%s pays for this, so it runs only if %s votes for it too." % [short(o["owner"]), short(o["owner"])], 14, STORM))
+			note += " %s pays, so it runs only if %s votes for it too." % [short(o["owner"]), short(o["owner"])]
 		if i == d["default"]:
-			ov.add_child(_lbl("The standing plan: this runs if %s doesn't decide." % short(fc), 13, MUTED))
-		ov.add_child(_chips(o))
+			note += " Standing plan: runs if %s doesn't decide." % short(fc)
+		ov.add_child(_lbl(note, 14, STORM))
+		ov.add_child(_values_line(o))
 		var vr := _hbox(8)
 		for t in TEAMS:
 			var on: bool = votes[t] == i

@@ -159,7 +159,7 @@ Rules:
    "cold_store": true (stored cure doses are packed on ice, so none spoil if the plant loses power this turn).
 5. Tag each order, for EACH team, with which of that team's signed values it honours and which it costs. Use only that team's own values. Every order must cost at least one signed value for someone.
 6. Set "final_call" to the team whose resources the moment is mostly about, and "default" to an order owned by that team; it happens if that team does not decide in time. An order owned by the OTHER team runs only if that other team votes for it too, because they pay for it.
-6b. The order that protects people must carry a real human stake (a named person, a number of people) and a real cost; no order may be all gain.
+6b. The order that protects people must carry a real human stake (a named person, a number of people) and a real cost; no order may be all gain. An order that saves N people must give up at least N/10 in goods, doses or meter points together.
 7. Pressure comes only from off-board voices: a named community leader or a named Meridian executive. Never from the other team.
 8. Witness, not judge: no scoring, no right answer, no moral words such as selfish, heroic, greedy or noble.
 9. Plain, concrete English. The whole moment must be readable in 15 seconds: situation under 45 words, order labels under 9 words.
