@@ -4,6 +4,7 @@ extends Node
 ## Needs an Anthropic API key (setup screen, or the ANTHROPIC_API_KEY environment variable).
 
 signal finished(turn: int, result: Dictionary)  # result: {raw, error, ms}
+signal tested(ok: bool, message: String)
 
 const API_URL := "https://api.anthropic.com/v1/messages"
 const DEFAULT_MODEL := "claude-opus-5-5"
@@ -13,6 +14,7 @@ var model := DEFAULT_MODEL
 var _http: HTTPRequest
 var _turn := 0
 var _t0 := 0
+var _test: HTTPRequest
 
 
 func _ready() -> void:
@@ -20,6 +22,10 @@ func _ready() -> void:
 	_http.timeout = 60.0
 	add_child(_http)
 	_http.request_completed.connect(_on_completed)
+	_test = HTTPRequest.new()
+	_test.timeout = 20.0
+	add_child(_test)
+	_test.request_completed.connect(_on_tested)
 
 
 func available() -> bool:
@@ -35,10 +41,12 @@ func cancel() -> void:
 		_http.cancel_request()
 
 
-func request(turn: int, prompt: String) -> void:
+## keep_t0: a retry keeps the clock of the first attempt, so the time shown is the whole wait.
+func request(turn: int, prompt: String, keep_t0 := false) -> void:
 	cancel()
 	_turn = turn
-	_t0 = Time.get_ticks_msec()
+	if not keep_t0:
+		_t0 = Time.get_ticks_msec()
 	if not available():
 		finished.emit(turn, {"error": "no API key", "ms": 0})
 		return
@@ -51,15 +59,53 @@ func request(turn: int, prompt: String) -> void:
 		"fallbacks": "default",
 		"messages": [{"role": "user", "content": prompt}],
 	}
-	var headers := PackedStringArray([
+	var err := _http.request(API_URL, _headers(), HTTPClient.METHOD_POST, JSON.stringify(body))
+	if err != OK:
+		finished.emit(turn, {"error": "could not start the request (%d)" % err, "ms": 0})
+
+
+func _headers() -> PackedStringArray:
+	return PackedStringArray([
 		"content-type: application/json",
 		"x-api-key: " + api_key.strip_edges(),
 		"anthropic-version: 2023-06-01",
 		"anthropic-beta: server-side-fallback-2026-07-01",
 	])
-	var err := _http.request(API_URL, headers, HTTPClient.METHOD_POST, JSON.stringify(body))
+
+
+## A tiny call on the setup screen, so a bad key shows up before the storm, not in turn 1.
+func test_key() -> void:
+	if not available():
+		tested.emit(false, "No key given. Prepared moments will be used.")
+		return
+	_test.cancel_request()
+	var body := {"model": model, "max_tokens": 16, "messages": [{"role": "user", "content": "Reply with the word ready."}]}
+	var err := _test.request(API_URL, _headers(), HTTPClient.METHOD_POST, JSON.stringify(body))
 	if err != OK:
-		finished.emit(turn, {"error": "could not start the request (%d)" % err, "ms": 0})
+		tested.emit(false, "Could not start the test (%d)." % err)
+
+
+func _on_tested(result: int, code: int, _h: PackedStringArray, body: PackedByteArray) -> void:
+	if result != HTTPRequest.RESULT_SUCCESS:
+		tested.emit(false, "No answer (network error %d). Check the internet connection." % result)
+		return
+	if code == 200:
+		tested.emit(true, "The key works. Claude will write the moments.")
+		return
+	var data = JSON.parse_string(body.get_string_from_utf8())
+	tested.emit(false, "The key did not work: " + _error_text(code, data))
+
+
+static func _error_text(code: int, data) -> String:
+	var msg := "HTTP %d" % code
+	if typeof(data) == TYPE_DICTIONARY and typeof(data.get("error")) == TYPE_DICTIONARY:
+		msg += ": " + str(data["error"].get("message", ""))
+	return msg
+
+
+## Added to the prompt when Claude's first moment failed the checks.
+static func retry_note(notes: Array) -> String:
+	return "\n\nYOUR LAST MOMENT WAS REJECTED by the checks for these reasons: " + "; ".join(PackedStringArray(notes)) + ". Write a new one that follows every rule. Reply with only the JSON."
 
 
 func _on_completed(result: int, code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
@@ -69,10 +115,7 @@ func _on_completed(result: int, code: int, _headers: PackedStringArray, body: Pa
 		return
 	var data = JSON.parse_string(body.get_string_from_utf8())
 	if code != 200 or typeof(data) != TYPE_DICTIONARY:
-		var msg := "HTTP %d" % code
-		if typeof(data) == TYPE_DICTIONARY and data.has("error"):
-			msg += ": " + str(data["error"].get("message", ""))
-		finished.emit(_turn, {"error": msg, "ms": ms})
+		finished.emit(_turn, {"error": _error_text(code, data), "ms": ms})
 		return
 	if data.get("stop_reason") == "refusal":
 		finished.emit(_turn, {"error": "Claude declined this situation", "ms": ms})
@@ -108,9 +151,11 @@ Rules:
    "trust": -10..10 (community trust), "confidence": -10..10 (Meridian board confidence),
    "doses": -10..10 (cure doses gained or lost now), "save": {"site": one of low_ward|tech_housing|st_brendans|plant, "n": 0..60} (vulnerable people taken to safety),
    "expose": 0..100 (plant workers kept in harm's way this turn), "power": site (backup power there this turn),
-   "sandbag": site (flood defence there this turn), "open_tower": true (Meridian opens Tech Tower as a shelter).
+   "sandbag": site (flood defence there this turn), "open_tower": true (Meridian opens Tech Tower as a shelter),
+   "cold_store": true (stored cure doses are packed on ice, so none spoil if the plant loses power this turn).
 5. Tag each order, for EACH team, with which of that team's signed values it honours and which it costs. Use only that team's own values. Every order must cost at least one signed value for someone.
-6. Set "final_call" to the team whose resources the moment is mostly about, and "default" to the order that happens if that team does not decide in time.
+6. Set "final_call" to the team whose resources the moment is mostly about, and "default" to an order owned by that team; it happens if that team does not decide in time. An order owned by the OTHER team runs only if that other team votes for it too, because they pay for it.
+6b. The order that protects people must carry a real human stake (a named person, a number of people) and a real cost; no order may be all gain.
 7. Pressure comes only from off-board voices: a named community leader or a named Meridian executive. Never from the other team.
 8. Witness, not judge: no scoring, no right answer, no moral words such as selfish, heroic, greedy or noble.
 9. Plain, concrete English. The whole moment must be readable in 15 seconds: situation under 45 words, order labels under 9 words.
@@ -125,6 +170,9 @@ static func build_prompt(C: Dictionary, s: Dictionary, stances: Dictionary) -> S
 	for t in ["community", "meridian"]:
 		var r: Array = stances[t]["ranks"]
 		st.append('%s TEAM signed, ranked for when they collide: 1. %s 2. %s 3. %s. Statement: "%s"' % [t.to_upper(), r[0], r[1], r[2], stances[t]["statement"]])
+		for v in r:
+			if C["values"].has(v) and C["values"][v].size() > 2 and C["values"][v][2] != "":
+				st.append("  %s means: %s" % [v, C["values"][v][2]])
 	return RULES + "\n\n" + "\n".join(st) + "\n\nBOARD:\n" + board_text(C, s)
 
 

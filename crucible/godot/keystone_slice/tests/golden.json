@@ -78,14 +78,14 @@
         "c_fuel": 8
        },
        "meridian": {
-        "doses": 31,
+        "doses": 33,
         "funds": 32,
         "m_fuel": 9
        }
       },
       "meters": {
-       "trust": 66,
-       "confidence": 54
+       "trust": 69,
+       "confidence": 59
       },
       "lost": {
        "vuln": 1,
@@ -131,7 +131,7 @@
        },
        "plant": {
         "flooded": false,
-        "dark": false,
+        "dark": true,
         "closed": false,
         "home": {
          "able": 0,
@@ -177,7 +177,146 @@
       },
       "promises": [
        "open"
-      ]
+      ],
+      "history": [
+       {
+        "turn": 1,
+        "dilemma": {
+         "turn": 1,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 2,
+         "site": "low_ward",
+         "title": "The last bus run",
+         "situation": "The night shift is due at the plant at 22:00. Meridian promised its operators a ride in every storm, and twelve of them are waiting at the Tech Housing stop. Low Ward still has 120 vulnerable residents waiting for a ride before the surge.",
+         "resident": "Inés Reyes, 81, on home oxygen in Low Ward",
+         "voice": {
+          "who": "Pastor Ruth Okafor, St. Brendan's",
+          "line": "One more run from Low Ward and I can get everyone on oxygen up the hill."
+         },
+         "orders": [
+          {
+           "label": "Send the shuttle to Low Ward",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 1
+           },
+           "effects": {
+            "trust": 5,
+            "confidence": -2,
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 30
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian shuttle pulls 30 residents out of Low Ward; the night shift walks in late."
+          },
+          {
+           "label": "Bring the night shift in",
+           "owner": "meridian",
+           "cost": {},
+           "effects": {
+            "trust": -4,
+            "confidence": 3
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "loyalty"
+             ],
+             "costs": [
+              "safety",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant keeps its promise to the night shift despite the surge warning."
+          },
+          {
+           "label": "Split the runs, half each",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 15
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "fairness"
+             ],
+             "costs": [
+              "safety"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Plant shuttle splits its night between Low Ward and the plant."
+          }
+         ]
+        },
+        "choice": {
+         "index": 0,
+         "stormDecided": false,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": 0
+         }
+        },
+        "lost": {
+         "vuln": 1,
+         "able": 0
+        },
+        "rescued": {
+         "vuln": 120,
+         "able": 15
+        }
+       }
+      ],
+      "hash": "debd97b7"
      }
     },
     {
@@ -216,23 +355,23 @@
      "expect": {
       "stock": {
        "community": {
-        "food": 21,
-        "volunteers": 23,
+        "food": 24,
+        "volunteers": 28,
         "c_fuel": 7
        },
        "meridian": {
-        "doses": 36,
-        "funds": 32,
-        "m_fuel": 5
+        "doses": 38,
+        "funds": 28,
+        "m_fuel": 7
        }
       },
       "meters": {
-       "trust": 53,
-       "confidence": 60
+       "trust": 61,
+       "confidence": 65
       },
       "lost": {
-       "vuln": 7,
-       "able": 37
+       "vuln": 5,
+       "able": 0
       },
       "rescued": {
        "vuln": 160,
@@ -240,7 +379,7 @@
       },
       "shelter": {
        "st_brendans": {
-        "vuln": 83,
+        "vuln": 85,
         "able": 55
        },
        "tech_tower": {
@@ -264,17 +403,17 @@
         }
        },
        "tech_housing": {
-        "flooded": true,
+        "flooded": false,
         "dark": false,
         "closed": false,
         "home": {
-         "able": 644,
+         "able": 660,
          "vuln": 0
         }
        },
        "plant": {
         "flooded": false,
-        "dark": false,
+        "dark": true,
         "closed": false,
         "home": {
          "able": 0,
@@ -291,11 +430,11 @@
         }
        },
        "low_ward": {
-        "flooded": true,
+        "flooded": false,
         "dark": false,
         "closed": false,
         "home": {
-         "able": 864,
+         "able": 885,
          "vuln": 0
         }
        }
@@ -320,7 +459,278 @@
       },
       "promises": [
        "kept"
-      ]
+      ],
+      "history": [
+       {
+        "turn": 1,
+        "dilemma": {
+         "turn": 1,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 2,
+         "site": "low_ward",
+         "title": "The last bus run",
+         "situation": "The night shift is due at the plant at 22:00. Meridian promised its operators a ride in every storm, and twelve of them are waiting at the Tech Housing stop. Low Ward still has 120 vulnerable residents waiting for a ride before the surge.",
+         "resident": "Inés Reyes, 81, on home oxygen in Low Ward",
+         "voice": {
+          "who": "Pastor Ruth Okafor, St. Brendan's",
+          "line": "One more run from Low Ward and I can get everyone on oxygen up the hill."
+         },
+         "orders": [
+          {
+           "label": "Send the shuttle to Low Ward",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 1
+           },
+           "effects": {
+            "trust": 5,
+            "confidence": -2,
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 30
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian shuttle pulls 30 residents out of Low Ward; the night shift walks in late."
+          },
+          {
+           "label": "Bring the night shift in",
+           "owner": "meridian",
+           "cost": {},
+           "effects": {
+            "trust": -4,
+            "confidence": 3
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "loyalty"
+             ],
+             "costs": [
+              "safety",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant keeps its promise to the night shift despite the surge warning."
+          },
+          {
+           "label": "Split the runs, half each",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 15
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "fairness"
+             ],
+             "costs": [
+              "safety"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Plant shuttle splits its night between Low Ward and the plant."
+          }
+         ]
+        },
+        "choice": {
+         "index": 0,
+         "stormDecided": false,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": 0
+         }
+        },
+        "lost": {
+         "vuln": 1,
+         "able": 0
+        },
+        "rescued": {
+         "vuln": 120,
+         "able": 15
+        }
+       },
+       {
+        "turn": 2,
+        "dilemma": {
+         "turn": 2,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 1,
+         "site": "st_brendans",
+         "title": "One generator, two buildings",
+         "situation": "The grid is failing. 104 people are sheltering at St. Brendan's, 89 of them frail, on oxygen or heart monitors. The plant's clean rooms stop the moment power drops, and tonight's batch is lost.",
+         "resident": "Tomás Ibarra, 9, sheltering with his grandmother",
+         "voice": {
+          "who": "Dana Kell, Meridian VP Operations",
+          "line": "If the clean rooms go dark we make nothing tonight, and patients on the mainland miss a treatment cycle."
+         },
+         "orders": [
+          {
+           "label": "Power St. Brendan's",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "trust": 6,
+            "power": "st_brendans",
+            "cold_store": true
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety",
+              "loyalty"
+             ],
+             "costs": []
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian generator keeps the lights on at St. Brendan's; a cure batch is lost."
+          },
+          {
+           "label": "Keep the clean rooms running",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "trust": -5,
+            "confidence": 4,
+            "power": "plant"
+           },
+           "tags": {
+            "community": {
+             "honours": [],
+             "costs": [
+              "safety",
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant protects its batch as St. Brendan's goes dark."
+          },
+          {
+           "label": "Volunteers carry oxygen to St. Brendan's",
+           "owner": "community",
+           "cost": {
+            "volunteers": 6,
+            "c_fuel": 2
+           },
+           "effects": {
+            "trust": 2,
+            "power": "st_brendans"
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence"
+             ],
+             "costs": [
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Volunteers haul oxygen tanks to St. Brendan's by hand."
+          }
+         ]
+        },
+        "choice": {
+         "index": 1,
+         "stormDecided": false,
+         "by": "meridian",
+         "votes": {
+          "community": 2,
+          "meridian": 1
+         }
+        },
+        "lost": {
+         "vuln": 4,
+         "able": 0
+        },
+        "rescued": {
+         "vuln": 40,
+         "able": 40
+        }
+       }
+      ],
+      "hash": "f5a8ebe2"
      }
     },
     {
@@ -357,36 +767,36 @@
      "expect": {
       "stock": {
        "community": {
-        "food": 25,
-        "volunteers": 39,
+        "food": 34,
+        "volunteers": 47,
         "c_fuel": 7
        },
        "meridian": {
-        "doses": 46,
-        "funds": 34,
-        "m_fuel": 5
+        "doses": 39,
+        "funds": 30,
+        "m_fuel": 7
        }
       },
       "meters": {
-       "trust": 44,
-       "confidence": 54
+       "trust": 61,
+       "confidence": 58
       },
       "lost": {
-       "vuln": 14,
-       "able": 64
+       "vuln": 10,
+       "able": 15
       },
       "rescued": {
        "vuln": 160,
-       "able": 80
+       "able": 140
       },
       "shelter": {
        "st_brendans": {
-        "vuln": 76,
+        "vuln": 80,
         "able": 80
        },
        "tech_tower": {
         "vuln": 0,
-        "able": 0
+        "able": 60
        },
        "heartland": {
         "vuln": 70,
@@ -405,17 +815,17 @@
         }
        },
        "tech_housing": {
-        "flooded": true,
+        "flooded": false,
         "dark": false,
         "closed": false,
         "home": {
-         "able": 632,
+         "able": 600,
          "vuln": 0
         }
        },
        "plant": {
         "flooded": false,
-        "dark": false,
+        "dark": true,
         "closed": false,
         "home": {
          "able": 0,
@@ -436,7 +846,7 @@
         "dark": false,
         "closed": false,
         "home": {
-         "able": 824,
+         "able": 845,
          "vuln": 0
         }
        }
@@ -461,20 +871,420 @@
       },
       "promises": [
        "kept"
-      ]
+      ],
+      "history": [
+       {
+        "turn": 1,
+        "dilemma": {
+         "turn": 1,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 2,
+         "site": "low_ward",
+         "title": "The last bus run",
+         "situation": "The night shift is due at the plant at 22:00. Meridian promised its operators a ride in every storm, and twelve of them are waiting at the Tech Housing stop. Low Ward still has 120 vulnerable residents waiting for a ride before the surge.",
+         "resident": "Inés Reyes, 81, on home oxygen in Low Ward",
+         "voice": {
+          "who": "Pastor Ruth Okafor, St. Brendan's",
+          "line": "One more run from Low Ward and I can get everyone on oxygen up the hill."
+         },
+         "orders": [
+          {
+           "label": "Send the shuttle to Low Ward",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 1
+           },
+           "effects": {
+            "trust": 5,
+            "confidence": -2,
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 30
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian shuttle pulls 30 residents out of Low Ward; the night shift walks in late."
+          },
+          {
+           "label": "Bring the night shift in",
+           "owner": "meridian",
+           "cost": {},
+           "effects": {
+            "trust": -4,
+            "confidence": 3
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "loyalty"
+             ],
+             "costs": [
+              "safety",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant keeps its promise to the night shift despite the surge warning."
+          },
+          {
+           "label": "Split the runs, half each",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 15
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "fairness"
+             ],
+             "costs": [
+              "safety"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Plant shuttle splits its night between Low Ward and the plant."
+          }
+         ]
+        },
+        "choice": {
+         "index": 0,
+         "stormDecided": false,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": 0
+         }
+        },
+        "lost": {
+         "vuln": 1,
+         "able": 0
+        },
+        "rescued": {
+         "vuln": 120,
+         "able": 15
+        }
+       },
+       {
+        "turn": 2,
+        "dilemma": {
+         "turn": 2,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 1,
+         "site": "st_brendans",
+         "title": "One generator, two buildings",
+         "situation": "The grid is failing. 104 people are sheltering at St. Brendan's, 89 of them frail, on oxygen or heart monitors. The plant's clean rooms stop the moment power drops, and tonight's batch is lost.",
+         "resident": "Tomás Ibarra, 9, sheltering with his grandmother",
+         "voice": {
+          "who": "Dana Kell, Meridian VP Operations",
+          "line": "If the clean rooms go dark we make nothing tonight, and patients on the mainland miss a treatment cycle."
+         },
+         "orders": [
+          {
+           "label": "Power St. Brendan's",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "trust": 6,
+            "power": "st_brendans",
+            "cold_store": true
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety",
+              "loyalty"
+             ],
+             "costs": []
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian generator keeps the lights on at St. Brendan's; a cure batch is lost."
+          },
+          {
+           "label": "Keep the clean rooms running",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "trust": -5,
+            "confidence": 4,
+            "power": "plant"
+           },
+           "tags": {
+            "community": {
+             "honours": [],
+             "costs": [
+              "safety",
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant protects its batch as St. Brendan's goes dark."
+          },
+          {
+           "label": "Volunteers carry oxygen to St. Brendan's",
+           "owner": "community",
+           "cost": {
+            "volunteers": 6,
+            "c_fuel": 2
+           },
+           "effects": {
+            "trust": 2,
+            "power": "st_brendans"
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence"
+             ],
+             "costs": [
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Volunteers haul oxygen tanks to St. Brendan's by hand."
+          }
+         ]
+        },
+        "choice": {
+         "index": 1,
+         "stormDecided": false,
+         "by": "meridian",
+         "votes": {
+          "community": 2,
+          "meridian": 1
+         }
+        },
+        "lost": {
+         "vuln": 4,
+         "able": 0
+        },
+        "rescued": {
+         "vuln": 40,
+         "able": 40
+        }
+       },
+       {
+        "turn": 3,
+        "dilemma": {
+         "turn": 3,
+         "final_call": "community",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 1,
+         "site": "plant",
+         "title": "The seawall or the doors",
+         "situation": "The plant seawall is about to overtop and Meridian has no hands left. The volunteer crew could sandbag it, or go door to door in dark Tech Housing, where 0 vulnerable people are still at home.",
+         "resident": "Frank Reeves, plant manager, still inside with his crew",
+         "voice": {
+          "who": "Dana Kell, Meridian VP Operations",
+          "line": "If the plant floods, Keystone loses its jobs for a year, and Frank's crew is still in there. Help us hold the wall."
+         },
+         "orders": [
+          {
+           "label": "Sandbag the plant seawall",
+           "owner": "community",
+           "cost": {
+            "volunteers": 6
+           },
+           "effects": {
+            "trust": 2,
+            "confidence": 6,
+            "sandbag": "plant"
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "loyalty"
+             ],
+             "costs": [
+              "safety"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Volunteers race to hold the plant seawall."
+          },
+          {
+           "label": "Keep volunteers on the rescue",
+           "owner": "community",
+           "cost": {
+            "volunteers": 3
+           },
+           "effects": {
+            "confidence": -4,
+            "save": {
+             "site": "tech_housing",
+             "n": 20
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "loyalty"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Volunteers keep pulling families out of Tech Housing in the dark."
+          },
+          {
+           "label": "Ask Meridian to pay a contractor crew",
+           "owner": "meridian",
+           "cost": {
+            "funds": 12
+           },
+           "effects": {
+            "trust": 2,
+            "sandbag": "plant"
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "fairness"
+             ],
+             "costs": []
+            },
+            "meridian": {
+             "honours": [
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Meridian pays a contractor crew to hold the seawall."
+          }
+         ]
+        },
+        "choice": {
+         "index": 0,
+         "stormDecided": false,
+         "by": "community",
+         "votes": {
+          "community": 0,
+          "meridian": null
+         }
+        },
+        "lost": {
+         "vuln": 5,
+         "able": 15
+        },
+        "rescued": {
+         "vuln": 0,
+         "able": 85
+        }
+       }
+      ],
+      "hash": "f79bdcb2"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": 103,
+     "points": 129,
      "start": 84,
-     "index": 123
+     "index": 154
     },
     "meridian": {
-     "points": 182,
+     "points": 161,
      "start": 144,
-     "index": 126
+     "index": 112
     }
    },
    "rng_first": [
@@ -518,21 +1328,21 @@
         "c_fuel": 8
        },
        "meridian": {
-        "doses": 32,
+        "doses": 30,
         "funds": 31,
-        "m_fuel": 12
+        "m_fuel": 10
        }
       },
       "meters": {
-       "trust": 34,
-       "confidence": 59
+       "trust": 48,
+       "confidence": 60
       },
       "lost": {
-       "vuln": 19,
+       "vuln": 17,
        "able": 11
       },
       "rescued": {
-       "vuln": 0,
+       "vuln": 15,
        "able": 0
       },
       "shelter": {
@@ -545,7 +1355,7 @@
         "able": 0
        },
        "heartland": {
-        "vuln": 0,
+        "vuln": 15,
         "able": 0
        }
       },
@@ -593,14 +1403,14 @@
         "closed": false,
         "home": {
          "able": 889,
-         "vuln": 101
+         "vuln": 88
         }
        }
       },
       "residents": {
        "ines": {
-        "where": "low_ward",
-        "status": "home"
+        "where": "heartland",
+        "status": "moved"
        },
        "tomas": {
         "where": "low_ward",
@@ -615,7 +1425,146 @@
         "status": "at work"
        }
       },
-      "promises": []
+      "promises": [],
+      "history": [
+       {
+        "turn": 1,
+        "dilemma": {
+         "turn": 1,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 2,
+         "site": "low_ward",
+         "title": "The last bus run",
+         "situation": "The night shift is due at the plant at 22:00. Meridian promised its operators a ride in every storm, and twelve of them are waiting at the Tech Housing stop. Low Ward still has 120 vulnerable residents waiting for a ride before the surge.",
+         "resident": "Inés Reyes, 81, on home oxygen in Low Ward",
+         "voice": {
+          "who": "Pastor Ruth Okafor, St. Brendan's",
+          "line": "One more run from Low Ward and I can get everyone on oxygen up the hill."
+         },
+         "orders": [
+          {
+           "label": "Send the shuttle to Low Ward",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 1
+           },
+           "effects": {
+            "trust": 5,
+            "confidence": -2,
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 30
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian shuttle pulls 30 residents out of Low Ward; the night shift walks in late."
+          },
+          {
+           "label": "Bring the night shift in",
+           "owner": "meridian",
+           "cost": {},
+           "effects": {
+            "trust": -4,
+            "confidence": 3
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "loyalty"
+             ],
+             "costs": [
+              "safety",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant keeps its promise to the night shift despite the surge warning."
+          },
+          {
+           "label": "Split the runs, half each",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 15
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "fairness"
+             ],
+             "costs": [
+              "safety"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Plant shuttle splits its night between Low Ward and the plant."
+          }
+         ]
+        },
+        "choice": {
+         "index": 2,
+         "stormDecided": true,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": null
+         }
+        },
+        "lost": {
+         "vuln": 17,
+         "able": 11
+        },
+        "rescued": {
+         "vuln": 15,
+         "able": 0
+        }
+       }
+      ],
+      "hash": "1acdbf60"
      }
     },
     {
@@ -635,25 +1584,25 @@
       "stock": {
        "community": {
         "food": 18,
-        "volunteers": 23,
+        "volunteers": 24,
         "c_fuel": 8
        },
        "meridian": {
-        "doses": 34,
+        "doses": 32,
         "funds": 32,
-        "m_fuel": 10
+        "m_fuel": 8
        }
       },
       "meters": {
-       "trust": 4,
-       "confidence": 59
+       "trust": 27,
+       "confidence": 63
       },
       "lost": {
-       "vuln": 51,
+       "vuln": 45,
        "able": 32
       },
       "rescued": {
-       "vuln": 0,
+       "vuln": 15,
        "able": 0
       },
       "shelter": {
@@ -666,7 +1615,7 @@
         "able": 0
        },
        "heartland": {
-        "vuln": 0,
+        "vuln": 15,
         "able": 0
        }
       },
@@ -714,14 +1663,14 @@
         "closed": false,
         "home": {
          "able": 868,
-         "vuln": 69
+         "vuln": 60
         }
        }
       },
       "residents": {
        "ines": {
-        "where": "low_ward",
-        "status": "lost"
+        "where": "heartland",
+        "status": "moved"
        },
        "tomas": {
         "where": "low_ward",
@@ -736,7 +1685,278 @@
         "status": "at work"
        }
       },
-      "promises": []
+      "promises": [],
+      "history": [
+       {
+        "turn": 1,
+        "dilemma": {
+         "turn": 1,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 2,
+         "site": "low_ward",
+         "title": "The last bus run",
+         "situation": "The night shift is due at the plant at 22:00. Meridian promised its operators a ride in every storm, and twelve of them are waiting at the Tech Housing stop. Low Ward still has 120 vulnerable residents waiting for a ride before the surge.",
+         "resident": "Inés Reyes, 81, on home oxygen in Low Ward",
+         "voice": {
+          "who": "Pastor Ruth Okafor, St. Brendan's",
+          "line": "One more run from Low Ward and I can get everyone on oxygen up the hill."
+         },
+         "orders": [
+          {
+           "label": "Send the shuttle to Low Ward",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 1
+           },
+           "effects": {
+            "trust": 5,
+            "confidence": -2,
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 30
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian shuttle pulls 30 residents out of Low Ward; the night shift walks in late."
+          },
+          {
+           "label": "Bring the night shift in",
+           "owner": "meridian",
+           "cost": {},
+           "effects": {
+            "trust": -4,
+            "confidence": 3
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "loyalty"
+             ],
+             "costs": [
+              "safety",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant keeps its promise to the night shift despite the surge warning."
+          },
+          {
+           "label": "Split the runs, half each",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 15
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "fairness"
+             ],
+             "costs": [
+              "safety"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Plant shuttle splits its night between Low Ward and the plant."
+          }
+         ]
+        },
+        "choice": {
+         "index": 2,
+         "stormDecided": true,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": null
+         }
+        },
+        "lost": {
+         "vuln": 17,
+         "able": 11
+        },
+        "rescued": {
+         "vuln": 15,
+         "able": 0
+        }
+       },
+       {
+        "turn": 2,
+        "dilemma": {
+         "turn": 2,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 1,
+         "site": "tech_housing",
+         "title": "One generator, two buildings",
+         "situation": "The grid is failing. Tech Housing has 40 vulnerable residents at home, some on oxygen concentrators. The plant's clean rooms stop the moment power drops, and tonight's batch is lost.",
+         "resident": "Ana Ortega, 79, alone with an oxygen concentrator in Tech Housing",
+         "voice": {
+          "who": "Dana Kell, Meridian VP Operations",
+          "line": "If the clean rooms go dark we make nothing tonight, and patients on the mainland miss a treatment cycle."
+         },
+         "orders": [
+          {
+           "label": "Power Tech Housing",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "trust": 6,
+            "power": "tech_housing",
+            "cold_store": true
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety",
+              "loyalty"
+             ],
+             "costs": []
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian generator keeps the lights on at Tech Housing; a cure batch is lost."
+          },
+          {
+           "label": "Keep the clean rooms running",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "trust": -5,
+            "confidence": 4,
+            "power": "plant"
+           },
+           "tags": {
+            "community": {
+             "honours": [],
+             "costs": [
+              "safety",
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant protects its batch as Tech Housing goes dark."
+          },
+          {
+           "label": "Volunteers carry oxygen to Tech Housing",
+           "owner": "community",
+           "cost": {
+            "volunteers": 6,
+            "c_fuel": 2
+           },
+           "effects": {
+            "trust": 2,
+            "power": "tech_housing"
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence"
+             ],
+             "costs": [
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Volunteers haul oxygen tanks to Tech Housing by hand."
+          }
+         ]
+        },
+        "choice": {
+         "index": 1,
+         "stormDecided": true,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": null
+         }
+        },
+        "lost": {
+         "vuln": 28,
+         "able": 21
+        },
+        "rescued": {
+         "vuln": 0,
+         "able": 0
+        }
+       }
+      ],
+      "hash": "8a532620"
      }
     },
     {
@@ -754,30 +1974,30 @@
       "stock": {
        "community": {
         "food": 2,
-        "volunteers": 31,
+        "volunteers": 26,
         "c_fuel": 8
        },
        "meridian": {
-        "doses": 32,
+        "doses": 25,
         "funds": 33,
-        "m_fuel": 10
+        "m_fuel": 8
        }
       },
       "meters": {
-       "trust": 0,
-       "confidence": 43
+       "trust": 16,
+       "confidence": 46
       },
       "lost": {
-       "vuln": 66,
+       "vuln": 59,
        "able": 48
       },
       "rescued": {
-       "vuln": 20,
+       "vuln": 35,
        "able": 0
       },
       "shelter": {
        "st_brendans": {
-        "vuln": 0,
+        "vuln": 19,
         "able": 0
        },
        "tech_tower": {
@@ -785,7 +2005,7 @@
         "able": 0
        },
        "heartland": {
-        "vuln": 20,
+        "vuln": 15,
         "able": 0
        }
       },
@@ -833,14 +2053,14 @@
         "closed": false,
         "home": {
          "able": 852,
-         "vuln": 37
+         "vuln": 30
         }
        }
       },
       "residents": {
        "ines": {
-        "where": "low_ward",
-        "status": "lost"
+        "where": "heartland",
+        "status": "moved"
        },
        "tomas": {
         "where": "low_ward",
@@ -855,20 +2075,420 @@
         "status": "injured"
        }
       },
-      "promises": []
+      "promises": [],
+      "history": [
+       {
+        "turn": 1,
+        "dilemma": {
+         "turn": 1,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 2,
+         "site": "low_ward",
+         "title": "The last bus run",
+         "situation": "The night shift is due at the plant at 22:00. Meridian promised its operators a ride in every storm, and twelve of them are waiting at the Tech Housing stop. Low Ward still has 120 vulnerable residents waiting for a ride before the surge.",
+         "resident": "Inés Reyes, 81, on home oxygen in Low Ward",
+         "voice": {
+          "who": "Pastor Ruth Okafor, St. Brendan's",
+          "line": "One more run from Low Ward and I can get everyone on oxygen up the hill."
+         },
+         "orders": [
+          {
+           "label": "Send the shuttle to Low Ward",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 1
+           },
+           "effects": {
+            "trust": 5,
+            "confidence": -2,
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 30
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian shuttle pulls 30 residents out of Low Ward; the night shift walks in late."
+          },
+          {
+           "label": "Bring the night shift in",
+           "owner": "meridian",
+           "cost": {},
+           "effects": {
+            "trust": -4,
+            "confidence": 3
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "loyalty"
+             ],
+             "costs": [
+              "safety",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant keeps its promise to the night shift despite the surge warning."
+          },
+          {
+           "label": "Split the runs, half each",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 15
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "fairness"
+             ],
+             "costs": [
+              "safety"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Plant shuttle splits its night between Low Ward and the plant."
+          }
+         ]
+        },
+        "choice": {
+         "index": 2,
+         "stormDecided": true,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": null
+         }
+        },
+        "lost": {
+         "vuln": 17,
+         "able": 11
+        },
+        "rescued": {
+         "vuln": 15,
+         "able": 0
+        }
+       },
+       {
+        "turn": 2,
+        "dilemma": {
+         "turn": 2,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 1,
+         "site": "tech_housing",
+         "title": "One generator, two buildings",
+         "situation": "The grid is failing. Tech Housing has 40 vulnerable residents at home, some on oxygen concentrators. The plant's clean rooms stop the moment power drops, and tonight's batch is lost.",
+         "resident": "Ana Ortega, 79, alone with an oxygen concentrator in Tech Housing",
+         "voice": {
+          "who": "Dana Kell, Meridian VP Operations",
+          "line": "If the clean rooms go dark we make nothing tonight, and patients on the mainland miss a treatment cycle."
+         },
+         "orders": [
+          {
+           "label": "Power Tech Housing",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "trust": 6,
+            "power": "tech_housing",
+            "cold_store": true
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety",
+              "loyalty"
+             ],
+             "costs": []
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian generator keeps the lights on at Tech Housing; a cure batch is lost."
+          },
+          {
+           "label": "Keep the clean rooms running",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "trust": -5,
+            "confidence": 4,
+            "power": "plant"
+           },
+           "tags": {
+            "community": {
+             "honours": [],
+             "costs": [
+              "safety",
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant protects its batch as Tech Housing goes dark."
+          },
+          {
+           "label": "Volunteers carry oxygen to Tech Housing",
+           "owner": "community",
+           "cost": {
+            "volunteers": 6,
+            "c_fuel": 2
+           },
+           "effects": {
+            "trust": 2,
+            "power": "tech_housing"
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence"
+             ],
+             "costs": [
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Volunteers haul oxygen tanks to Tech Housing by hand."
+          }
+         ]
+        },
+        "choice": {
+         "index": 1,
+         "stormDecided": true,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": null
+         }
+        },
+        "lost": {
+         "vuln": 28,
+         "able": 21
+        },
+        "rescued": {
+         "vuln": 0,
+         "able": 0
+        }
+       },
+       {
+        "turn": 3,
+        "dilemma": {
+         "turn": 3,
+         "final_call": "community",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 1,
+         "site": "plant",
+         "title": "The seawall or the boats",
+         "situation": "The plant seawall is about to overtop and Meridian has no hands left. The volunteer crew could sandbag it, or keep pulling the 60 vulnerable people still in Low Ward out by boat.",
+         "resident": "Frank Reeves, plant manager, still inside with his crew",
+         "voice": {
+          "who": "Dana Kell, Meridian VP Operations",
+          "line": "If the plant floods, Keystone loses its jobs for a year, and Frank's crew is still in there. Help us hold the wall."
+         },
+         "orders": [
+          {
+           "label": "Sandbag the plant seawall",
+           "owner": "community",
+           "cost": {
+            "volunteers": 6
+           },
+           "effects": {
+            "trust": 2,
+            "confidence": 6,
+            "sandbag": "plant"
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "loyalty"
+             ],
+             "costs": [
+              "safety"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Volunteers race to hold the plant seawall."
+          },
+          {
+           "label": "Keep volunteers on the rescue",
+           "owner": "community",
+           "cost": {
+            "volunteers": 3
+           },
+           "effects": {
+            "confidence": -4,
+            "save": {
+             "site": "low_ward",
+             "n": 20
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "loyalty"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Volunteers keep pulling families out of Low Ward by boat."
+          },
+          {
+           "label": "Ask Meridian to pay a contractor crew",
+           "owner": "meridian",
+           "cost": {
+            "funds": 12
+           },
+           "effects": {
+            "trust": 2,
+            "sandbag": "plant"
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "fairness"
+             ],
+             "costs": []
+            },
+            "meridian": {
+             "honours": [
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Meridian pays a contractor crew to hold the seawall."
+          }
+         ]
+        },
+        "choice": {
+         "index": 1,
+         "stormDecided": false,
+         "by": "community",
+         "votes": {
+          "community": 1,
+          "meridian": null
+         }
+        },
+        "lost": {
+         "vuln": 14,
+         "able": 16
+        },
+        "rescued": {
+         "vuln": 20,
+         "able": 0
+        }
+       }
+      ],
+      "hash": "6cff2977"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": 51,
+     "points": 46,
      "start": 84,
-     "index": 61
+     "index": 55
     },
     "meridian": {
-     "points": 149,
+     "points": 124,
      "start": 144,
-     "index": 103
+     "index": 86
     }
    },
    "rng_first": [
@@ -929,14 +2549,14 @@
         "c_fuel": 7
        },
        "meridian": {
-        "doses": 24,
+        "doses": 18,
         "funds": 30,
         "m_fuel": 9
        }
       },
       "meters": {
        "trust": 62,
-       "confidence": 57
+       "confidence": 53
       },
       "lost": {
        "vuln": 0,
@@ -1026,7 +2646,146 @@
         "status": "at work"
        }
       },
-      "promises": []
+      "promises": [],
+      "history": [
+       {
+        "turn": 1,
+        "dilemma": {
+         "turn": 1,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 2,
+         "site": "low_ward",
+         "title": "The last bus run",
+         "situation": "The night shift is due at the plant at 22:00. Meridian promised its operators a ride in every storm, and twelve of them are waiting at the Tech Housing stop. Low Ward still has 120 vulnerable residents waiting for a ride before the surge.",
+         "resident": "Inés Reyes, 81, on home oxygen in Low Ward",
+         "voice": {
+          "who": "Pastor Ruth Okafor, St. Brendan's",
+          "line": "One more run from Low Ward and I can get everyone on oxygen up the hill."
+         },
+         "orders": [
+          {
+           "label": "Send the shuttle to Low Ward",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 1
+           },
+           "effects": {
+            "trust": 5,
+            "confidence": -2,
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 30
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian shuttle pulls 30 residents out of Low Ward; the night shift walks in late."
+          },
+          {
+           "label": "Bring the night shift in",
+           "owner": "meridian",
+           "cost": {},
+           "effects": {
+            "trust": -4,
+            "confidence": 3
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "loyalty"
+             ],
+             "costs": [
+              "safety",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant keeps its promise to the night shift despite the surge warning."
+          },
+          {
+           "label": "Split the runs, half each",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 15
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "fairness"
+             ],
+             "costs": [
+              "safety"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Plant shuttle splits its night between Low Ward and the plant."
+          }
+         ]
+        },
+        "choice": {
+         "index": 2,
+         "stormDecided": false,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": 2
+         }
+        },
+        "lost": {
+         "vuln": 0,
+         "able": 0
+        },
+        "rescued": {
+         "vuln": 95,
+         "able": 0
+        }
+       }
+      ],
+      "hash": "9dead0e2"
      }
     },
     {
@@ -1062,14 +2821,14 @@
         "c_fuel": 7
        },
        "meridian": {
-        "doses": 23,
-        "funds": 32,
-        "m_fuel": 5
+        "doses": 18,
+        "funds": 30,
+        "m_fuel": 7
        }
       },
       "meters": {
-       "trust": 56,
-       "confidence": 47
+       "trust": 62,
+       "confidence": 40
       },
       "lost": {
        "vuln": 0,
@@ -1159,7 +2918,278 @@
         "status": "at work"
        }
       },
-      "promises": []
+      "promises": [],
+      "history": [
+       {
+        "turn": 1,
+        "dilemma": {
+         "turn": 1,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 2,
+         "site": "low_ward",
+         "title": "The last bus run",
+         "situation": "The night shift is due at the plant at 22:00. Meridian promised its operators a ride in every storm, and twelve of them are waiting at the Tech Housing stop. Low Ward still has 120 vulnerable residents waiting for a ride before the surge.",
+         "resident": "Inés Reyes, 81, on home oxygen in Low Ward",
+         "voice": {
+          "who": "Pastor Ruth Okafor, St. Brendan's",
+          "line": "One more run from Low Ward and I can get everyone on oxygen up the hill."
+         },
+         "orders": [
+          {
+           "label": "Send the shuttle to Low Ward",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 1
+           },
+           "effects": {
+            "trust": 5,
+            "confidence": -2,
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 30
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian shuttle pulls 30 residents out of Low Ward; the night shift walks in late."
+          },
+          {
+           "label": "Bring the night shift in",
+           "owner": "meridian",
+           "cost": {},
+           "effects": {
+            "trust": -4,
+            "confidence": 3
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "loyalty"
+             ],
+             "costs": [
+              "safety",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant keeps its promise to the night shift despite the surge warning."
+          },
+          {
+           "label": "Split the runs, half each",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 15
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "fairness"
+             ],
+             "costs": [
+              "safety"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Plant shuttle splits its night between Low Ward and the plant."
+          }
+         ]
+        },
+        "choice": {
+         "index": 2,
+         "stormDecided": false,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": 2
+         }
+        },
+        "lost": {
+         "vuln": 0,
+         "able": 0
+        },
+        "rescued": {
+         "vuln": 95,
+         "able": 0
+        }
+       },
+       {
+        "turn": 2,
+        "dilemma": {
+         "turn": 2,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 1,
+         "site": "tech_housing",
+         "title": "One generator, two buildings",
+         "situation": "The grid is failing. Tech Housing has 40 vulnerable residents at home, some on oxygen concentrators. The plant's clean rooms stop the moment power drops, and tonight's batch is lost.",
+         "resident": "Ana Ortega, 79, alone with an oxygen concentrator in Tech Housing",
+         "voice": {
+          "who": "Dana Kell, Meridian VP Operations",
+          "line": "If the clean rooms go dark we make nothing tonight, and patients on the mainland miss a treatment cycle."
+         },
+         "orders": [
+          {
+           "label": "Power Tech Housing",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "trust": 6,
+            "power": "tech_housing",
+            "cold_store": true
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety",
+              "loyalty"
+             ],
+             "costs": []
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian generator keeps the lights on at Tech Housing; a cure batch is lost."
+          },
+          {
+           "label": "Keep the clean rooms running",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "trust": -5,
+            "confidence": 4,
+            "power": "plant"
+           },
+           "tags": {
+            "community": {
+             "honours": [],
+             "costs": [
+              "safety",
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant protects its batch as Tech Housing goes dark."
+          },
+          {
+           "label": "Volunteers carry oxygen to Tech Housing",
+           "owner": "community",
+           "cost": {
+            "volunteers": 6,
+            "c_fuel": 2
+           },
+           "effects": {
+            "trust": 2,
+            "power": "tech_housing"
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence"
+             ],
+             "costs": [
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Volunteers haul oxygen tanks to Tech Housing by hand."
+          }
+         ]
+        },
+        "choice": {
+         "index": 0,
+         "stormDecided": false,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": 0
+         }
+        },
+        "lost": {
+         "vuln": 0,
+         "able": 22
+        },
+        "rescued": {
+         "vuln": 25,
+         "able": 0
+        }
+       }
+      ],
+      "hash": "090c5299"
      }
     },
     {
@@ -1185,30 +3215,30 @@
       "stock": {
        "community": {
         "food": 28,
-        "volunteers": 44,
+        "volunteers": 36,
         "c_fuel": 7
        },
        "meridian": {
-        "doses": 26,
-        "funds": 27,
-        "m_fuel": 3
+        "doses": 15,
+        "funds": 28,
+        "m_fuel": 5
        }
       },
       "meters": {
-       "trust": 40,
-       "confidence": 35
+       "trust": 54,
+       "confidence": 23
       },
       "lost": {
        "vuln": 0,
        "able": 38
       },
       "rescued": {
-       "vuln": 120,
+       "vuln": 140,
        "able": 0
       },
       "shelter": {
        "st_brendans": {
-        "vuln": 25,
+        "vuln": 45,
         "able": 0
        },
        "tech_tower": {
@@ -1237,7 +3267,7 @@
         "closed": false,
         "home": {
          "able": 700,
-         "vuln": 40
+         "vuln": 20
         }
        },
        "plant": {
@@ -1286,20 +3316,421 @@
         "status": "at work"
        }
       },
-      "promises": []
+      "promises": [],
+      "history": [
+       {
+        "turn": 1,
+        "dilemma": {
+         "turn": 1,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 2,
+         "site": "low_ward",
+         "title": "The last bus run",
+         "situation": "The night shift is due at the plant at 22:00. Meridian promised its operators a ride in every storm, and twelve of them are waiting at the Tech Housing stop. Low Ward still has 120 vulnerable residents waiting for a ride before the surge.",
+         "resident": "Inés Reyes, 81, on home oxygen in Low Ward",
+         "voice": {
+          "who": "Pastor Ruth Okafor, St. Brendan's",
+          "line": "One more run from Low Ward and I can get everyone on oxygen up the hill."
+         },
+         "orders": [
+          {
+           "label": "Send the shuttle to Low Ward",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 1
+           },
+           "effects": {
+            "trust": 5,
+            "confidence": -2,
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 30
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian shuttle pulls 30 residents out of Low Ward; the night shift walks in late."
+          },
+          {
+           "label": "Bring the night shift in",
+           "owner": "meridian",
+           "cost": {},
+           "effects": {
+            "trust": -4,
+            "confidence": 3
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "loyalty"
+             ],
+             "costs": [
+              "safety",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant keeps its promise to the night shift despite the surge warning."
+          },
+          {
+           "label": "Split the runs, half each",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "doses": -2,
+            "save": {
+             "site": "low_ward",
+             "n": 15
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "fairness"
+             ],
+             "costs": [
+              "safety"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Plant shuttle splits its night between Low Ward and the plant."
+          }
+         ]
+        },
+        "choice": {
+         "index": 2,
+         "stormDecided": false,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": 2
+         }
+        },
+        "lost": {
+         "vuln": 0,
+         "able": 0
+        },
+        "rescued": {
+         "vuln": 95,
+         "able": 0
+        }
+       },
+       {
+        "turn": 2,
+        "dilemma": {
+         "turn": 2,
+         "final_call": "meridian",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 1,
+         "site": "tech_housing",
+         "title": "One generator, two buildings",
+         "situation": "The grid is failing. Tech Housing has 40 vulnerable residents at home, some on oxygen concentrators. The plant's clean rooms stop the moment power drops, and tonight's batch is lost.",
+         "resident": "Ana Ortega, 79, alone with an oxygen concentrator in Tech Housing",
+         "voice": {
+          "who": "Dana Kell, Meridian VP Operations",
+          "line": "If the clean rooms go dark we make nothing tonight, and patients on the mainland miss a treatment cycle."
+         },
+         "orders": [
+          {
+           "label": "Power Tech Housing",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "trust": 6,
+            "power": "tech_housing",
+            "cold_store": true
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety",
+              "loyalty"
+             ],
+             "costs": []
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Meridian generator keeps the lights on at Tech Housing; a cure batch is lost."
+          },
+          {
+           "label": "Keep the clean rooms running",
+           "owner": "meridian",
+           "cost": {
+            "m_fuel": 2
+           },
+           "effects": {
+            "trust": -5,
+            "confidence": 4,
+            "power": "plant"
+           },
+           "tags": {
+            "community": {
+             "honours": [],
+             "costs": [
+              "safety",
+              "loyalty",
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Keystone plant protects its batch as Tech Housing goes dark."
+          },
+          {
+           "label": "Volunteers carry oxygen to Tech Housing",
+           "owner": "community",
+           "cost": {
+            "volunteers": 6,
+            "c_fuel": 2
+           },
+           "effects": {
+            "trust": 2,
+            "power": "tech_housing"
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "fairness"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence"
+             ],
+             "costs": [
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Volunteers haul oxygen tanks to Tech Housing by hand."
+          }
+         ]
+        },
+        "choice": {
+         "index": 0,
+         "stormDecided": false,
+         "by": "meridian",
+         "votes": {
+          "community": null,
+          "meridian": 0
+         }
+        },
+        "lost": {
+         "vuln": 0,
+         "able": 22
+        },
+        "rescued": {
+         "vuln": 25,
+         "able": 0
+        }
+       },
+       {
+        "turn": 3,
+        "dilemma": {
+         "turn": 3,
+         "final_call": "community",
+         "collision": [
+          "safety",
+          "excellence"
+         ],
+         "default": 1,
+         "site": "plant",
+         "title": "The seawall or the doors",
+         "situation": "The plant seawall is about to overtop and Meridian has no hands left. The volunteer crew could sandbag it, or go door to door in dark Tech Housing, where 40 vulnerable people are still at home.",
+         "resident": "Frank Reeves, plant manager, still inside with his crew",
+         "voice": {
+          "who": "Dana Kell, Meridian VP Operations",
+          "line": "If the plant floods, Keystone loses its jobs for a year, and Frank's crew is still in there. Help us hold the wall."
+         },
+         "orders": [
+          {
+           "label": "Sandbag the plant seawall",
+           "owner": "community",
+           "cost": {
+            "volunteers": 6
+           },
+           "effects": {
+            "trust": 2,
+            "confidence": 6,
+            "sandbag": "plant"
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "loyalty"
+             ],
+             "costs": [
+              "safety"
+             ]
+            },
+            "meridian": {
+             "honours": [
+              "excellence",
+              "duty",
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Volunteers race to hold the plant seawall."
+          },
+          {
+           "label": "Keep volunteers on the rescue",
+           "owner": "community",
+           "cost": {
+            "volunteers": 3
+           },
+           "effects": {
+            "confidence": -4,
+            "save": {
+             "site": "tech_housing",
+             "n": 20
+            }
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "safety"
+             ],
+             "costs": [
+              "loyalty"
+             ]
+            },
+            "meridian": {
+             "honours": [],
+             "costs": [
+              "excellence",
+              "duty",
+              "accountability"
+             ]
+            }
+           },
+           "news": "Volunteers keep pulling families out of Tech Housing in the dark."
+          },
+          {
+           "label": "Ask Meridian to pay a contractor crew",
+           "owner": "meridian",
+           "cost": {
+            "funds": 12
+           },
+           "effects": {
+            "trust": 2,
+            "sandbag": "plant"
+           },
+           "tags": {
+            "community": {
+             "honours": [
+              "fairness"
+             ],
+             "costs": []
+            },
+            "meridian": {
+             "honours": [
+              "accountability"
+             ],
+             "costs": []
+            }
+           },
+           "news": "Meridian pays a contractor crew to hold the seawall."
+          }
+         ]
+        },
+        "choice": {
+         "index": 1,
+         "stormDecided": false,
+         "by": "community",
+         "votes": {
+          "community": 2,
+          "meridian": null
+         },
+         "refused": 2
+        },
+        "lost": {
+         "vuln": 0,
+         "able": 16
+        },
+        "rescued": {
+         "vuln": 20,
+         "able": 0
+        }
+       }
+      ],
+      "hash": "ddde7d8a"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": 114,
+     "points": 106,
      "start": 84,
-     "index": 136
+     "index": 126
     },
     "meridian": {
-     "points": 111,
+     "points": 83,
      "start": 144,
-     "index": 77
+     "index": 58
     }
    },
    "rng_first": [

@@ -27,7 +27,8 @@ func _init() -> void:
 			input["dilemma"] = Eng.fallback_dilemma(C, s, g["stances"])["dilemma"]
 			s = Eng.resolve_turn(C, s, input)["state"]
 			var snap := {"stock": s["stock"], "meters": s["meters"], "lost": s["lost"], "rescued": s["rescued"], "shelter": s["shelter"],
-				"towerOpen": s["towerOpen"], "sites": s["sites"], "residents": s["residents"], "promises": s["promises"].map(func(p): return p["status"])}
+				"towerOpen": s["towerOpen"], "sites": s["sites"], "residents": s["residents"], "promises": s["promises"].map(func(p): return p["status"]),
+				"history": s["history"], "hash": Eng.state_hash(s)}
 			checks += 1
 			var a := Eng.stable(snap)
 			var b := Eng.stable(turn["expect"])

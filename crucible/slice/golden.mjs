@@ -33,7 +33,8 @@ const plans = [
 ];
 
 const snap = (s) => ({ stock: s.stock, meters: s.meters, lost: s.lost, rescued: s.rescued, shelter: s.shelter, towerOpen: s.towerOpen,
-  sites: Object.fromEntries(Object.entries(s.sites).map(([k, v]) => [k, v])), residents: s.residents, promises: s.promises.map((p) => p.status) });
+  sites: Object.fromEntries(Object.entries(s.sites).map(([k, v]) => [k, v])), residents: s.residents, promises: s.promises.map((p) => p.status),
+  history: s.history, hash: E.hash(s) });
 
 const games = plans.map((p) => {
   let s = E.newGame(C, { seed: p.seed });

@@ -6,8 +6,8 @@ signal site_pressed(id: String)
 
 const W := 600.0
 const H := 380.0
-const SITE_W := 150.0
-const SITE_H := 66.0
+const SITE_W := 170.0
+const SITE_H := 104.0
 
 const LAND := Color("#18222c")
 const SEA := Color("#102536")
@@ -80,7 +80,7 @@ func _draw() -> void:
 	_k = minf(size.x / W, size.y / H)
 	_off = (size - Vector2(W, H) * _k) / 2.0
 	var font := get_theme_default_font()
-	var fs := func(n: float) -> int: return maxi(8, int(round(n * _k)))
+	var fs := func(n: float) -> int: return maxi(13, int(round(n * _k)))
 
 	draw_rect(Rect2(_p(0, 0), Vector2(W, H) * _k), LAND)
 	var sea := PackedVector2Array([_p(600, 0), _p(600, 380), _p(330, 380), _p(390, 350), _p(395, 300), _p(520, 300), _p(560, 200), _p(560, 160), _p(555, 90), _p(545, 0)])
@@ -111,7 +111,7 @@ func _draw() -> void:
 	if flash_site != "":
 		var n: Dictionary = C["sites"][flash_site]
 		var pulse := 0.45 + 0.45 * sin(_t * 5.0)
-		draw_rect(Rect2(_p(n["x"] - 82, n["y"] - 40), Vector2(164, 80) * _k), Color(STORM, pulse), false, 3 * _k)
+		draw_rect(Rect2(_p(n["x"] - SITE_W / 2 - 6, n["y"] - SITE_H / 2 - 6), Vector2(SITE_W + 12, SITE_H + 12) * _k), Color(STORM, pulse), false, 3 * _k)
 
 	for id in C["sites"]:
 		_draw_site(id, font, fs)
@@ -144,28 +144,36 @@ func _draw_site(id: String, font: Font, fs: Callable) -> void:
 	var st := " · ".join(flags) if flags.size() else "DRY"
 	var st_col := WATER if x["flooded"] else (COST if x["dark"] or x["closed"] else HONOUR)
 
-	var ppl := ""
-	if n.has("people"):
-		ppl = "%d vuln · %d able" % [x["home"]["vuln"], x["home"]["able"]]
+	# five short lines: name / status / people / more / action or owner
+	var l3 := ""
+	var l4 := ""
 	var sh: Dictionary = s["shelter"]
+	if n.has("people"):
+		l3 = "%d vulnerable at home" % x["home"]["vuln"]
+		l4 = "%d others at home" % x["home"]["able"]
 	if id == "st_brendans":
-		ppl = "sheltering %d of %d" % [sh["st_brendans"]["vuln"] + sh["st_brendans"]["able"], n["capacity"]]
+		l3 = "Sheltering %d of %d" % [sh["st_brendans"]["vuln"] + sh["st_brendans"]["able"], n["capacity"]]
+		var over: int = sh["st_brendans"]["vuln"] + sh["st_brendans"]["able"] - n["capacity"]
+		l4 = "%d over capacity" % over if over > 0 else ""
 	elif id == "crater_road":
-		ppl = "Heartland %d" % (sh["heartland"]["vuln"] + sh["heartland"]["able"])
+		l3 = "Road to Heartland"
+		l4 = "%d evacuated there" % (sh["heartland"]["vuln"] + sh["heartland"]["able"])
 	elif id == "plant":
-		ppl = "crew · Frank injured" if s["residents"]["frank"]["status"] == "injured" else "crew on site"
+		l3 = "Frank injured" if s["residents"]["frank"]["status"] == "injured" else "Plant crew on site"
 	if id == "tech_housing" and s["towerOpen"]:
-		ppl += " · tower open"
+		l4 = "Tower open: %d sheltered" % (sh["tech_tower"]["vuln"] + sh["tech_tower"]["able"])
 
 	var pad := 10 * _k
 	var w := r.size.x - pad * 2
-	draw_string(font, r.position + Vector2(pad, 20 * _k), String(n["name"]).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, w * 0.6, fs.call(12), FG)
-	draw_string(font, r.position + Vector2(pad, 20 * _k), st, HORIZONTAL_ALIGNMENT_RIGHT, w, fs.call(10), st_col)
-	draw_string(font, r.position + Vector2(pad, 40 * _k), ppl, HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), MUTED)
+	var lh := 19.0 * _k
+	draw_string(font, r.position + Vector2(pad, lh), String(n["name"]).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(13), FG)
+	draw_string(font, r.position + Vector2(pad, lh * 2), st, HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), st_col)
+	draw_string(font, r.position + Vector2(pad, lh * 3), l3, HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), FG)
+	draw_string(font, r.position + Vector2(pad, lh * 4), l4, HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), MUTED)
 	if targets.has(id):
-		draw_string(font, r.position + Vector2(pad, 58 * _k), "> " + String(targets[id]), HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), STORM)
+		draw_string(font, r.position + Vector2(pad, lh * 5 - 2 * _k), "TAP TO " + String(targets[id]), HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(12), STORM)
 	else:
-		draw_string(font, r.position + Vector2(pad, 58 * _k), String(n["owner"]).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(10), MUTED)
+		draw_string(font, r.position + Vector2(pad, lh * 5 - 2 * _k), String(n["owner"]).to_upper() + " SITE", HORIZONTAL_ALIGNMENT_LEFT, w, fs.call(11), MUTED)
 
 	# unit tokens under the site
 	var i := 0

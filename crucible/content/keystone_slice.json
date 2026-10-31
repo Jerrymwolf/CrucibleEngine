@@ -1,661 +1,1448 @@
 {
-  "_about": "Keystone slice (phase 2 go/no-go): one parish, two teams, 3 storm turns. Rules in crucible/slice/engine.js read only this file. Numbers are first cut; crucible/slice/sim.mjs checks that doing nothing never wins.",
-  "parish": {
-    "id": "keystone",
-    "name": "Keystone"
+ "_about": "Keystone slice (phase 2 go/no-go): one parish, two teams, 3 storm turns. Rules in crucible/slice/engine.js read only this file. Numbers are first cut; crucible/slice/sim.mjs checks that doing nothing never wins.",
+ "parish": {
+  "id": "keystone",
+  "name": "Keystone"
+ },
+ "teams": {
+  "community": {
+   "name": "Community team",
+   "short": "Community",
+   "meter": "trust"
   },
-  "teams": {
-    "community": {
-      "name": "Community team",
-      "short": "Community",
-      "meter": "trust"
-    },
-    "meridian": {
-      "name": "Meridian team",
-      "short": "Meridian",
-      "meter": "confidence"
-    }
+  "meridian": {
+   "name": "Meridian team",
+   "short": "Meridian",
+   "meter": "confidence"
+  }
+ },
+ "goods": {
+  "food": {
+   "name": "Food",
+   "owner": "community",
+   "points": 2
   },
-  "goods": {
-    "food": {
-      "name": "Food",
-      "owner": "community",
-      "points": 2
-    },
-    "volunteers": {
-      "name": "Volunteers",
-      "owner": "community",
-      "points": 1
-    },
-    "c_fuel": {
-      "name": "Fuel",
-      "owner": "community",
-      "points": 2
-    },
-    "doses": {
-      "name": "Cure doses",
-      "owner": "meridian",
-      "points": 3
-    },
-    "funds": {
-      "name": "Funds",
-      "owner": "meridian",
-      "points": 1
-    },
-    "m_fuel": {
-      "name": "Fuel",
-      "owner": "meridian",
-      "points": 2
-    }
+  "volunteers": {
+   "name": "Volunteers",
+   "owner": "community",
+   "points": 1
   },
-  "start": {
-    "stock": {
-      "community": {
-        "food": 24,
-        "volunteers": 20,
-        "c_fuel": 8
-      },
-      "meridian": {
-        "doses": 30,
-        "funds": 30,
-        "m_fuel": 12
-      }
-    },
-    "meters": {
-      "trust": 60,
-      "confidence": 60
-    }
+  "c_fuel": {
+   "name": "Fuel",
+   "owner": "community",
+   "points": 2
   },
-  "sites": {
-    "crater_road": {
-      "name": "Crater Road",
-      "kind": "exit",
-      "owner": "shared",
-      "x": 70,
-      "y": 70,
-      "note": "Road out to the Heartland shelter. Buses only, while open."
-    },
-    "tech_housing": {
-      "name": "Tech Housing",
-      "kind": "homes",
-      "owner": "meridian",
-      "x": 230,
-      "y": 105,
-      "people": {
-        "able": 700,
-        "vuln": 40
-      },
-      "note": "Company housing for plant staff. Tech Tower inside can shelter 60 if Meridian opens it."
-    },
-    "plant": {
-      "name": "Biotech Plant",
-      "kind": "plant",
-      "owner": "meridian",
-      "x": 470,
-      "y": 110,
-      "note": "Makes the cure. Needs its crew, power and dry floors."
-    },
-    "st_brendans": {
-      "name": "St. Brendan's",
-      "kind": "shelter",
-      "owner": "community",
-      "x": 235,
-      "y": 275,
-      "capacity": 90,
-      "note": "Church on high ground. Shelters 90; more than that and people sleep in the aisles."
-    },
-    "low_ward": {
-      "name": "Low Ward",
-      "kind": "homes",
-      "owner": "community",
-      "x": 470,
-      "y": 300,
-      "people": {
-        "able": 900,
-        "vuln": 120
-      },
-      "note": "Oldest streets, at sea level. Many elderly residents."
-    }
+  "doses": {
+   "name": "Cure doses",
+   "owner": "meridian",
+   "points": 3
   },
-  "roads": [
-    [
-      "crater_road",
-      "tech_housing"
-    ],
-    [
-      "crater_road",
-      "st_brendans"
-    ],
-    [
-      "tech_housing",
-      "plant"
-    ],
-    [
-      "tech_housing",
-      "st_brendans"
-    ],
-    [
-      "st_brendans",
-      "low_ward"
-    ],
-    [
-      "low_ward",
-      "plant"
-    ]
-  ],
-  "destinations": {
-    "st_brendans": {
-      "name": "St. Brendan's",
-      "capacity": 90
-    },
-    "tech_tower": {
-      "name": "Tech Tower",
-      "capacity": 60,
-      "needs": "tower_open"
-    },
-    "heartland": {
-      "name": "Heartland shelter",
-      "needs": "road_open",
-      "fuel": 1
-    }
+  "funds": {
+   "name": "Funds",
+   "owner": "meridian",
+   "points": 1
   },
-  "units": {
-    "bus1": {
-      "name": "Bus 1",
-      "team": "community",
-      "kind": "bus",
-      "carry": 40,
-      "road": true
-    },
-    "bus2": {
-      "name": "Bus 2",
-      "team": "community",
-      "kind": "bus",
-      "carry": 40,
-      "road": true
-    },
-    "boat": {
-      "name": "Fishing boat",
-      "team": "community",
-      "kind": "boat",
-      "carry": 25,
-      "road": false,
-      "reach": [
-        "low_ward",
-        "plant"
-      ]
-    },
-    "vcrew": {
-      "name": "Volunteer crew",
-      "team": "community",
-      "kind": "crew",
-      "sandbag_cost": {
-        "volunteers": 3
-      }
-    },
-    "shuttle": {
-      "name": "Plant shuttle",
-      "team": "meridian",
-      "kind": "bus",
-      "carry": 40,
-      "road": true
-    },
-    "gen": {
-      "name": "Generator",
-      "team": "meridian",
-      "kind": "generator",
-      "power_cost_fuel": 2
-    },
-    "pcrew": {
-      "name": "Plant crew",
-      "team": "meridian",
-      "kind": "plantcrew",
-      "sandbag_cost": {
-        "funds": 2
-      }
-    }
-  },
-  "tower_open_cost": {
-    "funds": 2
-  },
-  "turns": [
-    {
-      "n": 1,
-      "label": "Approach",
-      "hours": "18:00 to 22:00",
-      "intensity": 2,
-      "band": {
-        "x": 560,
-        "y": 360,
-        "r": 120
-      },
-      "hazards": [
-        {
-          "site": "low_ward",
-          "effect": "flooded",
-          "p": 0.9,
-          "sandbag_p": 0.25,
-          "text": "Storm surge floods Low Ward"
-        },
-        {
-          "site": "plant",
-          "effect": "dark",
-          "p": 0.25,
-          "text": "Grid fails at the Biotech Plant"
-        }
-      ]
-    },
-    {
-      "n": 2,
-      "label": "Landfall",
-      "hours": "22:00 to 01:00",
-      "intensity": 4,
-      "band": {
-        "x": 420,
-        "y": 230,
-        "r": 190
-      },
-      "hazards": [
-        {
-          "site": "low_ward",
-          "effect": "flooded",
-          "p": 1.0,
-          "sandbag_p": 0.6,
-          "text": "Surge overtops Low Ward"
-        },
-        {
-          "site": "crater_road",
-          "effect": "closed",
-          "p": 0.85,
-          "text": "Rockfall closes Crater Road"
-        },
-        {
-          "site": "plant",
-          "effect": "dark",
-          "p": 0.7,
-          "text": "Grid fails at the Biotech Plant"
-        },
-        {
-          "site": "st_brendans",
-          "effect": "dark",
-          "p": 0.5,
-          "text": "St. Brendan's loses power"
-        },
-        {
-          "site": "tech_housing",
-          "effect": "flooded",
-          "p": 0.35,
-          "sandbag_p": 0.1,
-          "text": "Flash flooding in Tech Housing"
-        }
-      ]
-    },
-    {
-      "n": 3,
-      "label": "Back wall",
-      "hours": "01:00 to 04:00",
-      "intensity": 3,
-      "band": {
-        "x": 260,
-        "y": 150,
-        "r": 170
-      },
-      "flash": {
-        "site": "plant",
-        "text": "Plant seawall overtops within 3 hours"
-      },
-      "hazards": [
-        {
-          "site": "plant",
-          "effect": "flooded",
-          "p": 0.55,
-          "sandbag_p": 0.15,
-          "text": "Seawall fails, the plant floods"
-        },
-        {
-          "site": "tech_housing",
-          "effect": "dark",
-          "p": 0.6,
-          "text": "Tech Housing goes dark"
-        },
-        {
-          "site": "low_ward",
-          "effect": "flooded",
-          "p": 1.0,
-          "sandbag_p": 0.8,
-          "text": "Low Ward stays under water"
-        }
-      ]
-    }
-  ],
-  "loss": {
-    "flooded": {
-      "vuln": 0.08,
-      "able": 0.006
-    },
-    "dark": {
-      "vuln": 0.025
-    },
-    "shelter_dark": 0.012,
-    "overflow": 0.03,
-    "exposed": 0.03
-  },
-  "yields": {
-    "low_ward": {
-      "food": 3,
-      "able_per_volunteer": 225
-    },
-    "tech_housing": {
-      "volunteers": 2
-    },
-    "plant": {
-      "doses": 5,
-      "funds": 2,
-      "spoil_unpowered": 4
-    },
-    "sheltered_able_per_volunteer": 30
-  },
-  "needs": {
-    "people_per_food": 800
+  "m_fuel": {
+   "name": "Fuel",
+   "owner": "meridian",
+   "points": 2
+  }
+ },
+ "start": {
+  "stock": {
+   "community": {
+    "food": 24,
+    "volunteers": 20,
+    "c_fuel": 8
+   },
+   "meridian": {
+    "doses": 30,
+    "funds": 30,
+    "m_fuel": 12
+   }
   },
   "meters": {
-    "low": 40,
-    "high": 60,
-    "vuln_lost_per_trust": 5,
-    "able_lost_per_trust": 40,
-    "rescued_per_trust": 20,
-    "rescued_trust_cap": 6,
-    "plant_ran": 2,
-    "plant_idle": -6,
-    "hunger": -6,
-    "overflow": -4,
-    "promise_kept": 8,
-    "promise_broken": -10,
-    "hq_clawback_funds": 3,
-    "idle_while_lost": -6
+   "trust": 60,
+   "confidence": 60
+  }
+ },
+ "sites": {
+  "crater_road": {
+   "name": "Crater Road",
+   "kind": "exit",
+   "owner": "shared",
+   "x": 92,
+   "y": 70,
+   "note": "Road out to the Heartland shelter. Buses only, while open."
   },
-  "recovery": {
-    "turns": 2,
-    "high_mult": 1.25,
-    "low_mult": 0.5,
-    "plant_flooded_doses": 3,
-    "able_per_volunteer": 150,
-    "trust_per_aid": 20,
-    "vuln_lost_per_food": 4,
-    "_about": "Two turns after the storm. Community: able survivors volunteer, aid follows trust, each 10 vulnerable people lost costs a food (funerals, care). Meridian: the plant restarts, scaled by board confidence and community trust together."
+  "tech_housing": {
+   "name": "Tech Housing",
+   "kind": "homes",
+   "owner": "meridian",
+   "x": 275,
+   "y": 105,
+   "people": {
+    "able": 700,
+    "vuln": 40
+   },
+   "note": "Company housing for plant staff. Tech Tower inside can shelter 60 if Meridian opens it."
   },
-  "residents": [
-    {
-      "id": "ines",
-      "name": "Inés Reyes",
-      "age": 81,
-      "site": "low_ward",
-      "group": "vuln",
-      "line": "Lives alone on home oxygen. Her concentrator needs power."
-    },
-    {
-      "id": "tomas",
-      "name": "Tomás Ibarra",
-      "age": 9,
-      "site": "low_ward",
-      "group": "vuln",
-      "line": "Lives with his grandmother, who cannot walk far."
-    },
-    {
-      "id": "maria",
-      "name": "Maria Santos",
-      "age": 44,
-      "site": "tech_housing",
-      "group": "able",
-      "line": "Line lead at the plant. Her mother is in Low Ward."
-    },
-    {
-      "id": "frank",
-      "name": "Frank Reeves",
-      "age": 58,
-      "site": "plant",
-      "group": "crew",
-      "line": "Plant manager. Has never lost a batch in 23 years."
-    }
+  "plant": {
+   "name": "Biotech Plant",
+   "kind": "plant",
+   "owner": "meridian",
+   "x": 470,
+   "y": 110,
+   "note": "Makes the cure. Needs its crew, power and dry floors."
+  },
+  "st_brendans": {
+   "name": "St. Brendan's",
+   "kind": "shelter",
+   "owner": "community",
+   "x": 235,
+   "y": 275,
+   "capacity": 90,
+   "note": "Church on high ground. Shelters 90; more than that and people sleep in the aisles."
+  },
+  "low_ward": {
+   "name": "Low Ward",
+   "kind": "homes",
+   "owner": "community",
+   "x": 470,
+   "y": 300,
+   "people": {
+    "able": 900,
+    "vuln": 120
+   },
+   "note": "Oldest streets, at sea level. Many elderly residents."
+  }
+ },
+ "roads": [
+  [
+   "crater_road",
+   "tech_housing"
   ],
-  "voices": {
-    "community": {
-      "who": "Pastor Ruth Okafor, St. Brendan's",
-      "low": "People are asking me why the buses aren't coming. I don't have an answer for them."
-    },
-    "meridian": {
-      "who": "Dana Kell, Meridian VP Operations",
-      "low": "The board is watching Keystone. Every hour the clean rooms sit dark costs us a batch. I need the plant running."
-    }
-  },
-  "fallbacks": [
-    {
-      "turn": 1,
-      "final_call": "meridian",
-      "site": "low_ward",
-      "title": "The last bus run",
-      "situation": "The night shift is due at the plant at 22:00 and the plant shuttle is the only way in. Low Ward still has elderly residents waiting for a ride before the surge.",
-      "resident": "Inés Reyes, 81, on home oxygen in Low Ward",
-      "voice": {
-        "who": "Pastor Ruth Okafor, St. Brendan's",
-        "line": "One more run from Low Ward and I can get everyone on oxygen up the hill."
-      },
-      "orders": [
-        {
-          "label": "Send the shuttle to Low Ward",
-          "owner": "meridian",
-          "cost": {
-            "m_fuel": 1
-          },
-          "effects": {
-            "save": {
-              "site": "low_ward",
-              "n": 30
-            },
-            "doses": -4,
-            "confidence": -4,
-            "trust": 5
-          },
-          "honour": [
-            "conservation",
-            "self-transcendence"
-          ],
-          "cost_fam": [
-            "self-enhancement"
-          ],
-          "news": "Meridian shuttle pulls 30 residents out of Low Ward."
-        },
-        {
-          "label": "Bring the night shift in",
-          "owner": "meridian",
-          "cost": {},
-          "effects": {
-            "confidence": 3,
-            "trust": -4
-          },
-          "honour": [
-            "self-enhancement"
-          ],
-          "cost_fam": [
-            "self-transcendence",
-            "conservation"
-          ],
-          "news": "Keystone plant keeps its night shift despite surge warning."
-        },
-        {
-          "label": "Split the runs, half each",
-          "owner": "meridian",
-          "cost": {
-            "m_fuel": 2
-          },
-          "effects": {
-            "save": {
-              "site": "low_ward",
-              "n": 15
-            },
-            "doses": -2
-          },
-          "honour": [
-            "openness-to-change"
-          ],
-          "cost_fam": [
-            "self-enhancement",
-            "conservation"
-          ],
-          "news": "Plant shuttle splits its night between Low Ward and the plant."
-        }
-      ],
-      "default": 1
-    },
-    {
-      "turn": 2,
-      "final_call": "meridian",
-      "site": "st_brendans",
-      "title": "One generator, two buildings",
-      "situation": "The grid is failing. St. Brendan's is full of people on oxygen and heart monitors. The clean rooms lose a whole batch if power drops for more than an hour.",
-      "resident": "Tomás Ibarra, 9, sheltering with his grandmother",
-      "voice": {
-        "who": "Dana Kell, Meridian VP Operations",
-        "line": "That batch is 40,000 doses for the mainland. The church has candles."
-      },
-      "orders": [
-        {
-          "label": "Power St. Brendan's",
-          "owner": "meridian",
-          "cost": {
-            "m_fuel": 2
-          },
-          "effects": {
-            "power": "st_brendans",
-            "doses": -6,
-            "confidence": -6,
-            "trust": 6
-          },
-          "honour": [
-            "self-transcendence",
-            "conservation"
-          ],
-          "cost_fam": [
-            "self-enhancement"
-          ],
-          "news": "Meridian generator keeps the lights on at St. Brendan's."
-        },
-        {
-          "label": "Keep the clean rooms running",
-          "owner": "meridian",
-          "cost": {
-            "m_fuel": 2
-          },
-          "effects": {
-            "power": "plant",
-            "confidence": 4,
-            "trust": -5
-          },
-          "honour": [
-            "self-enhancement"
-          ],
-          "cost_fam": [
-            "self-transcendence"
-          ],
-          "news": "Keystone plant protects its batch as the church goes dark."
-        },
-        {
-          "label": "Volunteers carry oxygen to the church",
-          "owner": "community",
-          "cost": {
-            "volunteers": 6,
-            "c_fuel": 2
-          },
-          "effects": {
-            "trust": 2
-          },
-          "honour": [
-            "self-transcendence",
-            "openness-to-change"
-          ],
-          "cost_fam": [
-            "conservation"
-          ],
-          "news": "Volunteers haul oxygen tanks up the hill by hand."
-        }
-      ],
-      "default": 1
-    },
-    {
-      "turn": 3,
-      "final_call": "community",
-      "site": "plant",
-      "title": "The seawall or the boats",
-      "situation": "The plant seawall is about to overtop and Meridian has no hands left. The volunteer crew could sandbag it, or stay in Low Ward pulling people out by boat.",
-      "resident": "Frank Reeves, plant manager, still inside with his crew",
-      "voice": {
-        "who": "Dana Kell, Meridian VP Operations",
-        "line": "If the plant floods, Keystone loses its jobs for a year. Help us hold the wall."
-      },
-      "orders": [
-        {
-          "label": "Sandbag the plant seawall",
-          "owner": "community",
-          "cost": {
-            "volunteers": 6
-          },
-          "effects": {
-            "sandbag": "plant",
-            "confidence": 6,
-            "trust": -3
-          },
-          "honour": [
-            "conservation",
-            "self-enhancement"
-          ],
-          "cost_fam": [
-            "self-transcendence"
-          ],
-          "news": "Low Ward volunteers race to hold the plant seawall."
-        },
-        {
-          "label": "Stay in Low Ward with the boats",
-          "owner": "community",
-          "cost": {
-            "volunteers": 3
-          },
-          "effects": {
-            "save": {
-              "site": "low_ward",
-              "n": 20
-            },
-            "confidence": -4
-          },
-          "honour": [
-            "self-transcendence"
-          ],
-          "cost_fam": [
-            "self-enhancement",
-            "conservation"
-          ],
-          "news": "Volunteers keep pulling families from Low Ward by boat."
-        },
-        {
-          "label": "Ask Meridian to pay for a contractor crew",
-          "owner": "meridian",
-          "cost": {
-            "funds": 8
-          },
-          "effects": {
-            "sandbag": "plant",
-            "trust": 2
-          },
-          "honour": [
-            "openness-to-change",
-            "self-transcendence"
-          ],
-          "cost_fam": [
-            "self-enhancement"
-          ],
-          "news": "Meridian pays a contractor crew to hold the seawall."
-        }
-      ],
-      "default": 1
-    }
+  [
+   "crater_road",
+   "st_brendans"
+  ],
+  [
+   "tech_housing",
+   "plant"
+  ],
+  [
+   "tech_housing",
+   "st_brendans"
+  ],
+  [
+   "st_brendans",
+   "low_ward"
+  ],
+  [
+   "low_ward",
+   "plant"
   ]
+ ],
+ "destinations": {
+  "st_brendans": {
+   "name": "St. Brendan's",
+   "capacity": 90
+  },
+  "tech_tower": {
+   "name": "Tech Tower",
+   "capacity": 60,
+   "needs": "tower_open"
+  },
+  "heartland": {
+   "name": "Heartland shelter",
+   "needs": "road_open",
+   "fuel": 1
+  }
+ },
+ "units": {
+  "bus1": {
+   "name": "Bus 1",
+   "team": "community",
+   "kind": "bus",
+   "carry": 40,
+   "road": true
+  },
+  "bus2": {
+   "name": "Bus 2",
+   "team": "community",
+   "kind": "bus",
+   "carry": 40,
+   "road": true
+  },
+  "boat": {
+   "name": "Fishing boat",
+   "team": "community",
+   "kind": "boat",
+   "carry": 25,
+   "road": false,
+   "reach": [
+    "low_ward",
+    "plant"
+   ]
+  },
+  "vcrew": {
+   "name": "Volunteer crew",
+   "team": "community",
+   "kind": "crew",
+   "sandbag_cost": {
+    "volunteers": 3
+   }
+  },
+  "shuttle": {
+   "name": "Plant shuttle",
+   "team": "meridian",
+   "kind": "bus",
+   "carry": 40,
+   "road": true
+  },
+  "gen": {
+   "name": "Generator",
+   "team": "meridian",
+   "kind": "generator",
+   "power_cost_fuel": 2
+  },
+  "pcrew": {
+   "name": "Plant crew",
+   "team": "meridian",
+   "kind": "plantcrew",
+   "sandbag_cost": {
+    "funds": 2
+   }
+  }
+ },
+ "tower_open_cost": {
+  "funds": 6
+ },
+ "turns": [
+  {
+   "n": 1,
+   "label": "Approach",
+   "hours": "18:00 to 22:00",
+   "intensity": 2,
+   "band": {
+    "x": 560,
+    "y": 360,
+    "r": 120
+   },
+   "hazards": [
+    {
+     "site": "low_ward",
+     "effect": "flooded",
+     "p": 0.9,
+     "sandbag_p": 0.25,
+     "text": "Storm surge floods Low Ward"
+    },
+    {
+     "site": "plant",
+     "effect": "dark",
+     "p": 0.4,
+     "text": "Grid fails at the Biotech Plant"
+    }
+   ]
+  },
+  {
+   "n": 2,
+   "label": "Landfall",
+   "hours": "22:00 to 01:00",
+   "intensity": 4,
+   "band": {
+    "x": 420,
+    "y": 230,
+    "r": 190
+   },
+   "hazards": [
+    {
+     "site": "low_ward",
+     "effect": "flooded",
+     "p": 0.85,
+     "sandbag_p": 0.6,
+     "text": "Surge overtops Low Ward"
+    },
+    {
+     "site": "crater_road",
+     "effect": "closed",
+     "p": 0.85,
+     "text": "Rockfall closes Crater Road"
+    },
+    {
+     "site": "plant",
+     "effect": "dark",
+     "p": 0.9,
+     "text": "Grid fails at the Biotech Plant"
+    },
+    {
+     "site": "st_brendans",
+     "effect": "dark",
+     "p": 0.5,
+     "text": "St. Brendan's loses power"
+    },
+    {
+     "site": "tech_housing",
+     "effect": "flooded",
+     "p": 0.35,
+     "sandbag_p": 0.1,
+     "text": "Flash flooding in Tech Housing"
+    }
+   ]
+  },
+  {
+   "n": 3,
+   "label": "Back wall",
+   "hours": "01:00 to 04:00",
+   "intensity": 3,
+   "band": {
+    "x": 260,
+    "y": 150,
+    "r": 170
+   },
+   "flash": {
+    "site": "plant",
+    "text": "Plant seawall overtops within 3 hours"
+   },
+   "hazards": [
+    {
+     "site": "plant",
+     "effect": "flooded",
+     "p": 0.55,
+     "sandbag_p": 0.15,
+     "text": "Seawall fails, the plant floods"
+    },
+    {
+     "site": "tech_housing",
+     "effect": "dark",
+     "p": 0.6,
+     "text": "Tech Housing goes dark"
+    },
+    {
+     "site": "low_ward",
+     "effect": "flooded",
+     "p": 1.0,
+     "sandbag_p": 0.8,
+     "text": "Low Ward stays under water"
+    }
+   ]
+  }
+ ],
+ "loss": {
+  "flooded": {
+   "vuln": 0.08,
+   "able": 0.006
+  },
+  "dark": {
+   "vuln": 0.025
+  },
+  "shelter_dark": 0.012,
+  "overflow": 0.02,
+  "exposed": 0.03
+ },
+ "yields": {
+  "low_ward": {
+   "food": 3,
+   "able_per_volunteer": 225
+  },
+  "tech_housing": {
+   "volunteers": 2
+  },
+  "plant": {
+   "doses": 5,
+   "funds": 2,
+   "spoil_unpowered": 10
+  },
+  "sheltered_able_per_volunteer": 30
+ },
+ "needs": {
+  "people_per_food": 800
+ },
+ "meters": {
+  "low": 40,
+  "high": 60,
+  "vuln_lost_per_trust": 5,
+  "able_lost_per_trust": 40,
+  "rescued_per_trust": 20,
+  "rescued_trust_cap": 6,
+  "plant_ran": 2,
+  "plant_idle": -10,
+  "hunger": -6,
+  "overflow": -1,
+  "promise_kept": 3,
+  "promise_broken": -10,
+  "hq_clawback_funds": 5,
+  "idle_while_lost": -3
+ },
+ "recovery": {
+  "turns": 2,
+  "high_mult": 1.25,
+  "low_mult": 0.3,
+  "plant_flooded_doses": 6,
+  "able_per_volunteer": 200,
+  "trust_per_aid": 20,
+  "vuln_lost_per_food": 4,
+  "_about": "Two turns after the storm. Community: able survivors volunteer, aid follows trust, each 10 vulnerable people lost costs a food (funerals, care). Meridian: the plant restarts, scaled by board confidence and community trust together."
+ },
+ "residents": [
+  {
+   "id": "ines",
+   "name": "Inés Reyes",
+   "age": 81,
+   "site": "low_ward",
+   "group": "vuln",
+   "line": "Lives alone on home oxygen. Her concentrator needs power."
+  },
+  {
+   "id": "tomas",
+   "name": "Tomás Ibarra",
+   "age": 9,
+   "site": "low_ward",
+   "group": "vuln",
+   "line": "Lives with his grandmother, who cannot walk far."
+  },
+  {
+   "id": "maria",
+   "name": "Maria Santos",
+   "age": 44,
+   "site": "tech_housing",
+   "group": "able",
+   "line": "Line lead at the plant. Her mother is in Low Ward."
+  },
+  {
+   "id": "frank",
+   "name": "Frank Reeves",
+   "age": 58,
+   "site": "plant",
+   "group": "crew",
+   "line": "Plant manager. Has never lost a batch in 23 years."
+  }
+ ],
+ "voices": {
+  "community": {
+   "who": "Pastor Ruth Okafor, St. Brendan's",
+   "low": "People are asking me why the buses aren't coming. I don't have an answer for them."
+  },
+  "meridian": {
+   "who": "Dana Kell, Meridian VP Operations",
+   "low": "The board is watching Keystone. Every hour the clean rooms sit dark costs us a batch. I need the plant running."
+  }
+ },
+ "fallbacks": [
+  {
+   "turn": 1,
+   "final_call": "meridian",
+   "site": "low_ward",
+   "title": "The last bus run",
+   "situation": "The night shift is due at the plant at 22:00. Meridian promised its operators a ride in every storm, and twelve of them are waiting at the Tech Housing stop. Low Ward still has {low_ward_vuln} vulnerable residents waiting for a ride before the surge.",
+   "resident": "Inés Reyes, 81, on home oxygen in Low Ward",
+   "voice": {
+    "who": "Pastor Ruth Okafor, St. Brendan's",
+    "line": "One more run from Low Ward and I can get everyone on oxygen up the hill."
+   },
+   "orders": [
+    {
+     "label": "Send the shuttle to Low Ward",
+     "owner": "meridian",
+     "cost": {
+      "m_fuel": 1
+     },
+     "effects": {
+      "save": {
+       "site": "low_ward",
+       "n": 30
+      },
+      "doses": -2,
+      "confidence": -2,
+      "trust": 5
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "courage",
+        "preparedness",
+        "honor",
+        "impact",
+        "integrity",
+        "accountability",
+        "boldness"
+       ],
+       "costs": [
+        "stability",
+        "order",
+        "loyalty",
+        "fairness"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "courage",
+        "authenticity",
+        "boldness",
+        "independence",
+        "candor"
+       ],
+       "costs": [
+        "honesty",
+        "integrity",
+        "accountability",
+        "loyalty",
+        "duty",
+        "excellence",
+        "competence",
+        "discipline",
+        "success",
+        "ambition",
+        "obedience",
+        "order",
+        "stability",
+        "recognition",
+        "impact"
+       ]
+      }
+     },
+     "news": "Meridian shuttle pulls 30 residents out of Low Ward; the night shift walks in late."
+    },
+    {
+     "label": "Bring the night shift in",
+     "owner": "meridian",
+     "cost": {},
+     "effects": {
+      "confidence": 3,
+      "trust": -4
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "stability",
+        "order",
+        "loyalty"
+       ],
+       "costs": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "courage",
+        "honor",
+        "respect",
+        "integrity",
+        "fairness",
+        "accountability",
+        "boldness"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "duty",
+        "excellence",
+        "competence",
+        "discipline",
+        "honesty",
+        "integrity",
+        "accountability",
+        "loyalty",
+        "success",
+        "ambition",
+        "obedience",
+        "order",
+        "stability",
+        "recognition",
+        "stewardship",
+        "impact"
+       ],
+       "costs": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "courage",
+        "respect",
+        "authenticity",
+        "boldness",
+        "independence"
+       ]
+      }
+     },
+     "news": "Keystone plant keeps its promise to the night shift despite the surge warning."
+    },
+    {
+     "label": "Split the runs, half each",
+     "owner": "meridian",
+     "cost": {
+      "m_fuel": 2
+     },
+     "effects": {
+      "save": {
+       "site": "low_ward",
+       "n": 15
+      },
+      "doses": -2
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "fairness",
+        "creativity",
+        "respect",
+        "honesty"
+       ],
+       "costs": [
+        "safety",
+        "compassion",
+        "boldness",
+        "courage",
+        "candor",
+        "integrity"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "creativity",
+        "independence",
+        "leadership",
+        "fairness",
+        "respect",
+        "honesty",
+        "candor"
+       ],
+       "costs": [
+        "excellence",
+        "competence",
+        "boldness",
+        "courage",
+        "safety",
+        "integrity",
+        "accountability"
+       ]
+      }
+     },
+     "news": "Plant shuttle splits its night between Low Ward and the plant."
+    }
+   ],
+   "default": 2
+  },
+  {
+   "turn": 2,
+   "when": {
+    "min": {
+     "sheltered": 20
+    }
+   },
+   "final_call": "meridian",
+   "site": "st_brendans",
+   "title": "One generator, two buildings",
+   "situation": "The grid is failing. {sheltered} people are sheltering at St. Brendan's, {sheltered_vuln} of them frail, on oxygen or heart monitors. The plant's clean rooms stop the moment power drops, and tonight's batch is lost.",
+   "resident": "Tomás Ibarra, 9, sheltering with his grandmother",
+   "voice": {
+    "who": "Dana Kell, Meridian VP Operations",
+    "line": "If the clean rooms go dark we make nothing tonight, and patients on the mainland miss a treatment cycle."
+   },
+   "orders": [
+    {
+     "label": "Power St. Brendan's",
+     "owner": "meridian",
+     "cost": {
+      "m_fuel": 2
+     },
+     "effects": {
+      "power": "st_brendans",
+      "doses": 0,
+      "confidence": 0,
+      "trust": 6,
+      "cold_store": true
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "loyalty",
+        "respect",
+        "honor",
+        "integrity",
+        "accountability",
+        "boldness"
+       ],
+       "costs": [
+        "impact",
+        "stability",
+        "ambition",
+        "success",
+        "excellence"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "respect",
+        "courage",
+        "authenticity",
+        "integrity",
+        "boldness",
+        "independence"
+       ],
+       "costs": [
+        "excellence",
+        "competence",
+        "duty",
+        "accountability",
+        "loyalty",
+        "discipline",
+        "success",
+        "ambition",
+        "recognition",
+        "impact",
+        "stewardship",
+        "order",
+        "stability",
+        "obedience"
+       ]
+      }
+     },
+     "news": "Meridian generator keeps the lights on at St. Brendan's; a cure batch is lost."
+    },
+    {
+     "label": "Keep the clean rooms running",
+     "owner": "meridian",
+     "cost": {
+      "m_fuel": 2
+     },
+     "effects": {
+      "power": "plant",
+      "confidence": 4,
+      "trust": -5
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "stability",
+        "impact",
+        "ambition"
+       ],
+       "costs": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "loyalty",
+        "respect",
+        "honor",
+        "integrity",
+        "courage",
+        "fairness",
+        "accountability",
+        "boldness"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "excellence",
+        "competence",
+        "duty",
+        "accountability",
+        "loyalty",
+        "discipline",
+        "success",
+        "ambition",
+        "recognition",
+        "impact",
+        "stewardship",
+        "order",
+        "stability",
+        "obedience",
+        "preparedness",
+        "honesty"
+       ],
+       "costs": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "respect",
+        "integrity",
+        "authenticity",
+        "boldness",
+        "creativity"
+       ]
+      }
+     },
+     "news": "Keystone plant protects its batch as St. Brendan's goes dark."
+    },
+    {
+     "label": "Volunteers carry oxygen to St. Brendan's",
+     "owner": "community",
+     "cost": {
+      "volunteers": 6,
+      "c_fuel": 2
+     },
+     "effects": {
+      "power": "st_brendans",
+      "trust": 2
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "service",
+        "compassion",
+        "courage",
+        "resilience",
+        "creativity",
+        "independence",
+        "safety",
+        "kindness",
+        "integrity",
+        "accountability"
+       ],
+       "costs": [
+        "stewardship",
+        "preparedness",
+        "discipline",
+        "order",
+        "fairness",
+        "stability"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "excellence",
+        "competence",
+        "success",
+        "ambition",
+        "stewardship",
+        "impact",
+        "creativity",
+        "curiosity"
+       ],
+       "costs": [
+        "accountability",
+        "integrity",
+        "duty",
+        "leadership",
+        "respect",
+        "honor"
+       ]
+      }
+     },
+     "news": "Volunteers haul oxygen tanks to St. Brendan's by hand."
+    }
+   ],
+   "default": 1
+  },
+  {
+   "turn": 2,
+   "when": {},
+   "final_call": "meridian",
+   "site": "tech_housing",
+   "title": "One generator, two buildings",
+   "situation": "The grid is failing. Tech Housing has {tech_housing_vuln} vulnerable residents at home, some on oxygen concentrators. The plant's clean rooms stop the moment power drops, and tonight's batch is lost.",
+   "resident": "Ana Ortega, 79, alone with an oxygen concentrator in Tech Housing",
+   "voice": {
+    "who": "Dana Kell, Meridian VP Operations",
+    "line": "If the clean rooms go dark we make nothing tonight, and patients on the mainland miss a treatment cycle."
+   },
+   "orders": [
+    {
+     "label": "Power Tech Housing",
+     "owner": "meridian",
+     "cost": {
+      "m_fuel": 2
+     },
+     "effects": {
+      "power": "tech_housing",
+      "doses": 0,
+      "confidence": 0,
+      "trust": 6,
+      "cold_store": true
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "loyalty",
+        "respect",
+        "honor",
+        "integrity",
+        "accountability",
+        "boldness"
+       ],
+       "costs": [
+        "impact",
+        "stability",
+        "ambition",
+        "success",
+        "excellence"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "respect",
+        "courage",
+        "authenticity",
+        "integrity",
+        "boldness",
+        "independence"
+       ],
+       "costs": [
+        "excellence",
+        "competence",
+        "duty",
+        "accountability",
+        "loyalty",
+        "discipline",
+        "success",
+        "ambition",
+        "recognition",
+        "impact",
+        "stewardship",
+        "order",
+        "stability",
+        "obedience"
+       ]
+      }
+     },
+     "news": "Meridian generator keeps the lights on at Tech Housing; a cure batch is lost."
+    },
+    {
+     "label": "Keep the clean rooms running",
+     "owner": "meridian",
+     "cost": {
+      "m_fuel": 2
+     },
+     "effects": {
+      "power": "plant",
+      "confidence": 4,
+      "trust": -5
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "stability",
+        "impact",
+        "ambition"
+       ],
+       "costs": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "loyalty",
+        "respect",
+        "honor",
+        "integrity",
+        "courage",
+        "fairness",
+        "accountability",
+        "boldness"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "excellence",
+        "competence",
+        "duty",
+        "accountability",
+        "loyalty",
+        "discipline",
+        "success",
+        "ambition",
+        "recognition",
+        "impact",
+        "stewardship",
+        "order",
+        "stability",
+        "obedience",
+        "preparedness",
+        "honesty"
+       ],
+       "costs": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "respect",
+        "integrity",
+        "authenticity",
+        "boldness",
+        "creativity"
+       ]
+      }
+     },
+     "news": "Keystone plant protects its batch as Tech Housing goes dark."
+    },
+    {
+     "label": "Volunteers carry oxygen to Tech Housing",
+     "owner": "community",
+     "cost": {
+      "volunteers": 6,
+      "c_fuel": 2
+     },
+     "effects": {
+      "power": "tech_housing",
+      "trust": 2
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "service",
+        "compassion",
+        "courage",
+        "resilience",
+        "creativity",
+        "independence",
+        "safety",
+        "kindness",
+        "integrity",
+        "accountability"
+       ],
+       "costs": [
+        "stewardship",
+        "preparedness",
+        "discipline",
+        "order",
+        "fairness",
+        "stability"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "excellence",
+        "competence",
+        "success",
+        "ambition",
+        "stewardship",
+        "impact",
+        "creativity",
+        "curiosity"
+       ],
+       "costs": [
+        "accountability",
+        "integrity",
+        "duty",
+        "leadership",
+        "respect",
+        "honor"
+       ]
+      }
+     },
+     "news": "Volunteers haul oxygen tanks to Tech Housing by hand."
+    }
+   ],
+   "default": 1
+  },
+  {
+   "turn": 3,
+   "when": {
+    "min": {
+     "low_ward_vuln": 10
+    }
+   },
+   "final_call": "community",
+   "site": "plant",
+   "title": "The seawall or the boats",
+   "situation": "The plant seawall is about to overtop and Meridian has no hands left. The volunteer crew could sandbag it, or keep pulling the {low_ward_vuln} vulnerable people still in Low Ward out by boat.",
+   "resident": "Frank Reeves, plant manager, still inside with his crew",
+   "voice": {
+    "who": "Dana Kell, Meridian VP Operations",
+    "line": "If the plant floods, Keystone loses its jobs for a year, and Frank's crew is still in there. Help us hold the wall."
+   },
+   "orders": [
+    {
+     "label": "Sandbag the plant seawall",
+     "owner": "community",
+     "cost": {
+      "volunteers": 6
+     },
+     "effects": {
+      "sandbag": "plant",
+      "confidence": 6,
+      "trust": 2
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "loyalty",
+        "stability",
+        "stewardship",
+        "preparedness",
+        "courage",
+        "respect",
+        "integrity",
+        "resilience"
+       ],
+       "costs": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "accountability"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "excellence",
+        "duty",
+        "loyalty",
+        "stewardship",
+        "stability",
+        "success",
+        "competence",
+        "preparedness",
+        "accountability"
+       ],
+       "costs": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality"
+       ]
+      }
+     },
+     "news": "Volunteers race to hold the plant seawall."
+    },
+    {
+     "label": "Keep volunteers on the rescue",
+     "owner": "community",
+     "cost": {
+      "volunteers": 3
+     },
+     "effects": {
+      "save": {
+       "site": "low_ward",
+       "n": 20
+      },
+      "confidence": -4
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "courage",
+        "honor",
+        "integrity",
+        "accountability",
+        "boldness",
+        "independence",
+        "autonomy"
+       ],
+       "costs": [
+        "loyalty",
+        "stability",
+        "stewardship",
+        "preparedness"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "compassion",
+        "kindness",
+        "safety",
+        "justice"
+       ],
+       "costs": [
+        "excellence",
+        "duty",
+        "loyalty",
+        "stewardship",
+        "stability",
+        "success",
+        "competence",
+        "ambition",
+        "recognition",
+        "impact",
+        "accountability",
+        "resilience"
+       ]
+      }
+     },
+     "news": "Volunteers keep pulling families out of Low Ward by boat."
+    },
+    {
+     "label": "Ask Meridian to pay a contractor crew",
+     "owner": "meridian",
+     "cost": {
+      "funds": 12
+     },
+     "effects": {
+      "sandbag": "plant",
+      "trust": 2
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "fairness",
+        "justice",
+        "accountability",
+        "creativity"
+       ],
+       "costs": [
+        "independence",
+        "autonomy",
+        "authority",
+        "integrity",
+        "honor"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "accountability",
+        "integrity",
+        "honesty",
+        "stewardship",
+        "leadership",
+        "preparedness",
+        "creativity"
+       ],
+       "costs": [
+        "success",
+        "ambition",
+        "discipline",
+        "order",
+        "loyalty",
+        "boldness"
+       ]
+      }
+     },
+     "news": "Meridian pays a contractor crew to hold the seawall."
+    }
+   ],
+   "default": 1
+  },
+  {
+   "turn": 3,
+   "when": {},
+   "final_call": "community",
+   "site": "plant",
+   "title": "The seawall or the doors",
+   "situation": "The plant seawall is about to overtop and Meridian has no hands left. The volunteer crew could sandbag it, or go door to door in dark Tech Housing, where {tech_housing_vuln} vulnerable people are still at home.",
+   "resident": "Frank Reeves, plant manager, still inside with his crew",
+   "voice": {
+    "who": "Dana Kell, Meridian VP Operations",
+    "line": "If the plant floods, Keystone loses its jobs for a year, and Frank's crew is still in there. Help us hold the wall."
+   },
+   "orders": [
+    {
+     "label": "Sandbag the plant seawall",
+     "owner": "community",
+     "cost": {
+      "volunteers": 6
+     },
+     "effects": {
+      "sandbag": "plant",
+      "confidence": 6,
+      "trust": 2
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "loyalty",
+        "stability",
+        "stewardship",
+        "preparedness",
+        "courage",
+        "respect",
+        "integrity",
+        "resilience"
+       ],
+       "costs": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "accountability"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "excellence",
+        "duty",
+        "loyalty",
+        "stewardship",
+        "stability",
+        "success",
+        "competence",
+        "preparedness",
+        "accountability"
+       ],
+       "costs": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality"
+       ]
+      }
+     },
+     "news": "Volunteers race to hold the plant seawall."
+    },
+    {
+     "label": "Keep volunteers on the rescue",
+     "owner": "community",
+     "cost": {
+      "volunteers": 3
+     },
+     "effects": {
+      "save": {
+       "site": "tech_housing",
+       "n": 20
+      },
+      "confidence": -4
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "safety",
+        "compassion",
+        "service",
+        "kindness",
+        "justice",
+        "equality",
+        "courage",
+        "honor",
+        "integrity",
+        "accountability",
+        "boldness",
+        "independence",
+        "autonomy"
+       ],
+       "costs": [
+        "loyalty",
+        "stability",
+        "stewardship",
+        "preparedness"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "compassion",
+        "kindness",
+        "safety",
+        "justice"
+       ],
+       "costs": [
+        "excellence",
+        "duty",
+        "loyalty",
+        "stewardship",
+        "stability",
+        "success",
+        "competence",
+        "ambition",
+        "recognition",
+        "impact",
+        "accountability",
+        "resilience"
+       ]
+      }
+     },
+     "news": "Volunteers keep pulling families out of Tech Housing in the dark."
+    },
+    {
+     "label": "Ask Meridian to pay a contractor crew",
+     "owner": "meridian",
+     "cost": {
+      "funds": 12
+     },
+     "effects": {
+      "sandbag": "plant",
+      "trust": 2
+     },
+     "values": {
+      "community": {
+       "honours": [
+        "fairness",
+        "justice",
+        "accountability",
+        "creativity"
+       ],
+       "costs": [
+        "independence",
+        "autonomy",
+        "authority",
+        "integrity",
+        "honor"
+       ]
+      },
+      "meridian": {
+       "honours": [
+        "accountability",
+        "integrity",
+        "honesty",
+        "stewardship",
+        "leadership",
+        "preparedness",
+        "creativity"
+       ],
+       "costs": [
+        "success",
+        "ambition",
+        "discipline",
+        "order",
+        "loyalty",
+        "boldness"
+       ]
+      }
+     },
+     "news": "Meridian pays a contractor crew to hold the seawall."
+    }
+   ],
+   "default": 1
+  }
+ ]
 }

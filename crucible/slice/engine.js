@@ -6,7 +6,12 @@
   const TEAMS = ["community", "meridian"];
   const clone = (o) => JSON.parse(JSON.stringify(o));
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-  const int = (v, d = 0) => (Number.isFinite(+v) ? Math.round(+v) : d);
+  const int = (v, d = 0) => (typeof v === "boolean" || v === null || v === "" || !Number.isFinite(+v) ? d : Math.floor(clamp(+v, -1e9, 1e9) + 0.5));
+  // Plain text only: no control characters, so both engines store and hash identical strings.
+  const str = (v, n) => String(v ?? "").replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, n);
+  // Words that judge. The engine is a witness: a moment that uses them is rejected.
+  const JUDGING = ["selfish", "greedy", "greed", "heroic", "hero", "noble", "coward", "villain", "evil", "shameful", "right answer", "wrong answer", "right thing", "obvious choice"];
+  const judges = (t) => { const x = " " + t.toLowerCase() + " "; return JUDGING.find((w) => new RegExp("[^a-z]" + w + "[^a-z]").test(x)) || null; };
 
   function mulberry32(a) {
     return function () {
@@ -25,8 +30,8 @@
     return JSON.stringify(v);
   }
   function hash(v) {
-    const s = stable(v); let h = 0x811c9dc5;
-    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    const b = new TextEncoder().encode(stable(v)); let h = 0x811c9dc5; // UTF-8 bytes, the same bytes Godot hashes
+    for (let i = 0; i < b.length; i++) { h ^= b[i]; h = Math.imul(h, 0x01000193) >>> 0; }
     return h.toString(16).padStart(8, "0");
   }
 
@@ -66,18 +71,20 @@
   function teamGoods(C, team) { return Object.keys(C.goods).filter((g) => C.goods[g].owner === team); }
 
   // Turn any dilemma (AI or fallback) into the one checked shape the engine resolves.
-  function validateDilemma(C, state, raw, stances) {
+  // strict (AI moments): reject judging words, drop orders that cost no signed value or dominate.
+  function validateDilemma(C, state, raw, stances, strict = true) {
     const notes = [];
     if (!raw || typeof raw !== "object") return { ok: false, notes: ["no JSON object"] };
     const final_call = TEAMS.includes(raw.final_call) ? raw.final_call : null;
     if (!final_call) return { ok: false, notes: ["final_call must be community or meridian"] };
     const signed = { community: stances.community.ranks, meridian: stances.meridian.ranks };
     const orders = [];
-    for (const o of (Array.isArray(raw.orders) ? raw.orders : []).slice(0, 3)) {
-      if (!o || !TEAMS.includes(o.owner)) { notes.push("order dropped: bad owner"); continue; }
+    for (const o of Array.isArray(raw.orders) ? raw.orders : []) {
+      if (orders.length === 3) break;
+      if (!o || typeof o !== "object" || !TEAMS.includes(o.owner)) { notes.push("order dropped: bad owner"); continue; }
       const goods = teamGoods(C, o.owner), cost = {};
       let afford = true;
-      for (const [g, n] of Object.entries(o.cost || {})) {
+      for (const [g, n] of Object.entries(o.cost && typeof o.cost === "object" ? o.cost : {})) {
         const k = g === "fuel" ? (o.owner === "community" ? "c_fuel" : "m_fuel") : g;
         if (!goods.includes(k)) { notes.push(`order "${o.label}": ${g} is not ${o.owner}'s to spend`); afford = false; break; }
         const v = clamp(int(n), 0, 20);
@@ -85,72 +92,119 @@
         if (v) cost[k] = v;
       }
       if (!afford) continue;
-      const e = o.effects || {}, effects = {};
-      if (e.trust) effects.trust = clamp(int(e.trust), -10, 10);
-      if (e.confidence) effects.confidence = clamp(int(e.confidence), -10, 10);
-      if (e.doses) effects.doses = clamp(int(e.doses), -10, 10);
-      if (e.save && EFFECT_SITES.includes(e.save.site)) effects.save = { site: e.save.site, n: clamp(int(e.save.n), 0, 60) };
-      if (e.expose) effects.expose = clamp(int(e.expose), 0, 100);
+      const e = o.effects && typeof o.effects === "object" ? o.effects : {}, effects = {};
+      if (int(e.trust)) effects.trust = clamp(int(e.trust), -10, 10);
+      if (int(e.confidence)) effects.confidence = clamp(int(e.confidence), -10, 10);
+      if (int(e.doses)) effects.doses = clamp(int(e.doses), -10, 10);
+      if (e.save && typeof e.save === "object" && EFFECT_SITES.includes(e.save.site) && int(e.save.n) > 0) effects.save = { site: e.save.site, n: clamp(int(e.save.n), 0, 60) };
+      if (int(e.expose) > 0) effects.expose = clamp(int(e.expose), 0, 100);
       if (EFFECT_SITES.includes(e.power)) effects.power = e.power;
       if (EFFECT_SITES.includes(e.sandbag)) effects.sandbag = e.sandbag;
-      if (e.open_tower) effects.open_tower = true;
+      if (e.open_tower === true) effects.open_tower = true;
+      if (e.cold_store === true) effects.cold_store = true;
       const tags = {};
       for (const t of TEAMS) {
         const keep = (a) => (Array.isArray(a) ? a.map((v) => String(v).toLowerCase()).filter((v) => signed[t].includes(v)) : []);
         tags[t] = { honours: keep(o.tags?.[t]?.honours), costs: keep(o.tags?.[t]?.costs) };
       }
-      orders.push({ label: String(o.label || "Order").slice(0, 70), owner: o.owner, cost, effects, tags, news: String(o.news || "").slice(0, 140) });
+      const order = { label: str(o.label, 70) || "Order", owner: o.owner, cost, effects, tags, news: str(o.news, 140) };
+      if (strict && !TEAMS.some((t) => tags[t].costs.length)) { notes.push(`order "${order.label}" dropped: it costs no signed value`); continue; }
+      const gains = effects.save || effects.power || effects.sandbag || effects.open_tower || effects.cold_store || effects.trust > 0 || effects.confidence > 0 || effects.doses > 0;
+      const loses = effects.expose || effects.trust < 0 || effects.confidence < 0 || effects.doses < 0;
+      if (strict && !Object.keys(cost).length && gains && !loses) { notes.push(`order "${order.label}" dropped: it costs nothing and only helps`); continue; }
+      orders.push(order);
     }
     if (orders.length < 2) return { ok: false, notes: notes.concat("fewer than 2 valid orders") };
     if (!orders.some((o) => TEAMS.some((t) => o.tags[t].costs.length))) notes.push("no order costs a signed value");
-    const collision = (Array.isArray(raw.collision) ? raw.collision : []).map((v) => String(v).toLowerCase()).filter((v) => signed.community.includes(v) || signed.meridian.includes(v)).slice(0, 2);
-    let def = int(raw.default, orders.length - 1);
-    if (def < 0 || def >= orders.length) def = orders.length - 1;
-    return {
-      ok: true, notes,
-      dilemma: {
-        turn: state.turn, final_call, collision, default: def,
-        site: EFFECT_SITES.includes(raw.site) ? raw.site : null,
-        title: String(raw.title || "").slice(0, 80), situation: String(raw.situation || "").slice(0, 420),
-        resident: String(raw.resident || "").slice(0, 120),
-        voice: raw.voice && raw.voice.who ? { who: String(raw.voice.who).slice(0, 80), line: String(raw.voice.line || "").slice(0, 220) } : null,
-        orders,
-      },
+    const collision = [];
+    for (const v of Array.isArray(raw.collision) ? raw.collision : []) {
+      const id = String(v).toLowerCase();
+      if ((signed.community.includes(id) || signed.meridian.includes(id)) && !collision.includes(id) && collision.length < 2) collision.push(id);
+    }
+    // The standing plan (what happens with no decision) must be the deciding team's own order.
+    let def = int(raw.default, 0);
+    if (def < 0 || def >= orders.length || orders[def].owner !== final_call) def = orders.findIndex((o) => o.owner === final_call);
+    if (def < 0) return { ok: false, notes: notes.concat(`no order belongs to the ${final_call} team, which makes the call`) };
+    let voice = raw.voice && typeof raw.voice === "object" && raw.voice.who ? { who: str(raw.voice.who, 80), line: str(raw.voice.line, 220) } : null;
+    if (voice && /(community|meridian) team/i.test(voice.who)) { notes.push("voice dropped: pressure comes from off-board voices, never a team"); voice = null; }
+    const d = {
+      turn: state.turn, final_call, collision, default: def,
+      site: EFFECT_SITES.includes(raw.site) ? raw.site : null,
+      title: str(raw.title, 80), situation: str(raw.situation, 420), resident: str(raw.resident, 120), voice, orders,
     };
+    if (strict) {
+      const text = [d.title, d.situation, d.resident, voice ? voice.who + " " + voice.line : ""].concat(orders.map((o) => o.label + " " + o.news)).join(" ");
+      const w = judges(text);
+      if (w) return { ok: false, notes: notes.concat(`judging word "${w}": the engine is a witness`) };
+    }
+    return { ok: true, notes, dilemma: d };
   }
 
-  // Written fallback: fixed story, value tags mapped from each team's own values by family.
+  // Board facts a written moment may quote, so its text never contradicts the map.
+  function boardFacts(C, s) {
+    const sb = s.shelter.st_brendans;
+    return { sheltered: sb.vuln + sb.able, sheltered_vuln: sb.vuln, low_ward_vuln: s.sites.low_ward.home.vuln, tech_housing_vuln: s.sites.tech_housing.home.vuln };
+  }
+  function fallbackApplies(C, s, f) {
+    const w = f.when || {}, b = boardFacts(C, s);
+    for (const [k, n] of Object.entries(w.min || {})) if (!(b[k] >= n)) return false;
+    for (const [k, n] of Object.entries(w.max || {})) if (!(b[k] <= n)) return false;
+    return true;
+  }
+  // Written moment: the first variant for this turn whose board conditions hold. Each order's value tags are
+  // authored per value and per team (what honouring or paying "loyalty" means differs for each side).
   function fallbackDilemma(C, state, stances) {
-    const f = C.fallbacks.find((x) => x.turn === state.turn) || C.fallbacks[C.fallbacks.length - 1];
-    const fam = (v) => (C.values[v] ? C.values[v][1] : "");
+    const forTurn = C.fallbacks.filter((x) => x.turn === state.turn);
+    const f = forTurn.find((x) => fallbackApplies(C, state, x)) || forTurn[forTurn.length - 1] || C.fallbacks[C.fallbacks.length - 1];
+    const b = boardFacts(C, state);
+    const fill = (t) => String(t || "").replace(/\{(\w+)\}/g, (m, k) => (k in b ? String(b[k]) : m));
     const raw = clone(f);
+    for (const k of ["title", "situation", "resident"]) raw[k] = fill(raw[k]);
+    if (raw.voice) raw.voice.line = fill(raw.voice.line);
     raw.orders = f.orders.map((o) => {
       const tags = {};
       for (const t of TEAMS) {
+        const vt = (o.values && o.values[t]) || {};
         const r = stances[t].ranks;
-        tags[t] = { honours: r.filter((v) => o.honour.includes(fam(v))), costs: r.filter((v) => o.cost_fam.includes(fam(v)) && !o.honour.includes(fam(v))) };
+        tags[t] = { honours: r.filter((v) => (vt.honours || []).includes(v)), costs: r.filter((v) => (vt.costs || []).includes(v) && !(vt.honours || []).includes(v)) };
       }
-      return { ...o, tags };
+      return { ...o, label: fill(o.label), news: fill(o.news), tags };
     });
     raw.collision = [stances.community.ranks[0], stances.meridian.ranks[0]];
-    return validateDilemma(C, state, raw, stances);
+    const v = validateDilemma(C, state, raw, stances, false);
+    if (v.ok) return v;
+    return validateDilemma(C, state, holdMoment(C, state), stances, false); // never leave a turn without a moment
+  }
+  // Last resort if a written moment cannot be paid for: hold or act, both free.
+  function holdMoment(C, state) {
+    return { final_call: "meridian", site: null, title: "Hold the line", situation: "Keystone's crews are stretched thin. Meridian can keep its standing plan or release the plant crew early to help their families.",
+      resident: "", voice: null, default: 0,
+      orders: [{ label: "Keep the standing plan", owner: "meridian", cost: {}, effects: { confidence: 2, trust: -2 } },
+        { label: "Release the crew to their families", owner: "meridian", cost: {}, effects: { confidence: -3, trust: 3 } }] };
   }
 
   // ---------- turn resolution ----------
   // input: { orders: {unit: {task, site, dest}}, lends: {unit: true}, towerOpen: bool,
   //          dilemma, votes: {community, meridian}, promises: [...], confirms: [index] }
-  function resolveTurn(C, state0, input) {
+  // A rescue unit "could have helped" if a site it can reach still has people at home.
+function couldHelp(C, s, U) {
+  return Object.keys(C.sites).some((id) => C.sites[id].people && s.sites[id].home.vuln + s.sites[id].home.able > 0
+    && (U.road ? !s.sites[id].flooded : (U.reach || []).includes(id)));
+}
+
+function resolveTurn(C, state0, input) {
     if (state0.over) throw new Error("game over");
     const s = clone(state0), T = C.turns[s.turn - 1], I = T.intensity, rng = rngFor(s.seed, s.turn);
     const ev = [], ticker = [];
     const say = (text, kind = "info") => ev.push({ text, kind });
     const turnLost = { vuln: 0, able: 0 }, turnRescued = { vuln: 0, able: 0 }, credit = { community: 0, meridian: 0 };
-    const powered = new Set(), sandbagged = new Set();
+    const powered = new Set(), sandbagged = new Set(), active = new Set();
+    let genTaken = false, coldStore = false;
     const orders = input.orders || {}, lends = input.lends || {};
 
     // 1. promises made or confirmed this turn
     for (const p of input.promises || []) s.promises.push({ ...p, made: s.turn, due: s.turn + 1, confirmed: false, status: "open" });
-    for (const i of input.confirms || []) if (s.promises[i]) s.promises[i].confirmed = true;
+    for (const i of input.confirms || []) if (Number.isInteger(i) && i >= 0 && s.promises[i]) s.promises[i].confirmed = true;
 
     // 2. Tech Tower
     if (input.towerOpen && !s.towerOpen) {
@@ -162,19 +216,37 @@
     const D = input.dilemma;
     if (D) {
       const v = input.votes || {};
-      const idx = Number.isInteger(v[D.final_call]) ? v[D.final_call] : null;
-      const o = D.orders[idx ?? D.default];
-      choice = { index: idx ?? D.default, stormDecided: idx === null, by: D.final_call, votes: { community: v.community ?? null, meridian: v.meridian ?? null } };
+      const vote = (t) => (Number.isInteger(v[t]) && v[t] >= 0 && v[t] < D.orders.length ? v[t] : null);
+      const idx = vote(D.final_call);
+      let index = idx ?? D.default;
+      choice = { index, stormDecided: idx === null, by: D.final_call, votes: { community: vote("community"), meridian: vote("meridian") } };
+      // An order the other team pays for runs only if that team voted for it too.
+      const asked = D.orders[index];
+      if (asked.owner !== D.final_call && vote(asked.owner) !== index) {
+        choice.refused = index; index = D.default; choice.index = index;
+        say(`${C.teams[asked.owner].short} did not agree to "${asked.label}", so the standing plan ran.`, "bad");
+      }
+      const o = D.orders[index];
       if (pay(s, o.owner, o.cost)) {
         const e = o.effects;
         if (e.open_tower) s.towerOpen = true;
-        if (e.power) powered.add(e.power);
+        if (e.cold_store) coldStore = true;
+        if (e.power) { powered.add(e.power); if (o.owner === "meridian") genTaken = true; } // the moment's power is the generator
         if (e.sandbag) sandbagged.add(e.sandbag);
         if (e.trust) s.meters.trust += e.trust;
         if (e.confidence) s.meters.confidence += e.confidence;
         if (e.doses) s.stock.meridian.doses = Math.max(0, s.stock.meridian.doses + e.doses);
-        if (e.save) { credit[o.owner] += move(s, e.save.site, "heartland", e.save.n, turnRescued, true); board(C, s, e.save.site, "heartland", say); }
-        choice.expose = e.expose || 0;
+        if (e.save) {
+          // to Heartland while Crater Road is open, otherwise up the hill to St. Brendan's
+          const dest = s.sites.crater_road.closed ? "st_brendans" : "heartland";
+          if (!(dest === "st_brendans" && e.save.site === "st_brendans")) {
+            const n = move(s, e.save.site, dest, e.save.n, turnRescued, true);
+            credit[o.owner] += n;
+            board(C, s, e.save.site, dest, say);
+            say(n ? `${n} vulnerable people were taken from ${C.sites[e.save.site].name} to ${C.destinations[dest].name}.` : `Nobody was left at ${C.sites[e.save.site].name} to take to safety.`, n ? "good" : "info");
+          }
+        }
+        if (e.expose) choice.expose = e.expose;
         if (o.news) ticker.push(o.news);
       } else {
         choice.unpaid = true; say(`"${o.label}" could not be paid for, so nothing happened.`, "bad");
@@ -186,7 +258,8 @@
     for (const uid of Object.keys(C.units)) {
       const U = C.units[uid], o = orders[uid];
       if (!o || o.task === "idle") continue;
-      const op = lends[uid] ? other(U.team) : U.team; // operator pays running costs
+      const op = lends[uid] ? other(U.team) : U.team; // operator, who gets the credit for a rescue
+      const fuel = U.team === "community" ? "c_fuel" : "m_fuel"; // running costs stay with the owner
       const site = s.sites[o.site];
       if (o.task === "evac") {
         if (!site) continue;
@@ -196,7 +269,7 @@
         if (dest === "heartland") {
           if (s.sites.crater_road.closed) { say(`${U.name} turned back: Crater Road is closed.`, "bad"); continue; }
           if (!U.road) continue;
-          if (!pay(s, op, { [op === "community" ? "c_fuel" : "m_fuel"]: C.destinations.heartland.fuel })) { say(`${U.name} had no fuel for the Heartland run.`, "bad"); continue; }
+          if (!pay(s, U.team, { [fuel]: C.destinations.heartland.fuel })) { say(`${U.name} had no fuel for the Heartland run.`, "bad"); continue; }
         }
         if (dest === "tech_tower" && !s.towerOpen) { say(`${U.name} found Tech Tower locked.`, "bad"); continue; }
         let room = U.carry;
@@ -205,6 +278,7 @@
         const n = move(s, o.site, dest, room, turnRescued, false);
         credit[op] += turnRescued.vuln - before;
         board(C, s, o.site, dest, say);
+        if (n) active.add(uid);
         if (n) say(`${U.name} moved ${n} people from ${C.sites[o.site].name} to ${C.destinations[dest].name}.`, "good");
         else say(`${U.name} went to ${C.sites[o.site].name} but nobody was left to move.`);
       } else if (o.task === "sandbag") {
@@ -212,7 +286,8 @@
         if (pay(s, U.team, U.sandbag_cost)) { sandbagged.add(o.site); say(`${U.name} sandbagged ${C.sites[o.site].name}.`); }
       } else if (o.task === "power") {
         if (!site) continue;
-        if (pay(s, op, { [op === "community" ? "c_fuel" : "m_fuel"]: U.power_cost_fuel })) { powered.add(o.site); say(`${U.name} is powering ${C.sites[o.site].name}.`); }
+        if (genTaken) { say(`${U.name} went where the moment sent it, not to ${C.sites[o.site].name}.`); continue; }
+        if (pay(s, U.team, { [fuel]: U.power_cost_fuel })) { powered.add(o.site); say(`${U.name} is powering ${C.sites[o.site].name}.`); }
         else say(`${U.name} had no fuel.`, "bad");
       }
     }
@@ -277,7 +352,8 @@
       if (familiesAtRisk) { my.doses = Math.floor(my.doses / 2); my.funds = Math.floor(my.funds / 2); say("Half the shift left the line to find family still stuck in the flood.", "bad"); } s.meters.confidence += M.plant_ran; say(`The plant ran: +${my.doses} cure doses.`, "good"); }
     else { s.meters.confidence += M.plant_idle; say(`The plant made nothing this turn${plant.flooded ? " (flooded)" : !plantPowered ? " (no power)" : ""}.`, "bad"); }
     if (plant.flooded && pc.task === "run" && s.residents.frank.status === "at work") { s.residents.frank.status = "injured"; s.injured += 1; say("Frank Reeves was hurt when the plant flooded.", "loss"); }
-    if (!plantPowered && s.stock.meridian.doses > 0) {
+    if (!plantPowered && coldStore && s.stock.meridian.doses > 0) say("The stored doses were packed on ice in time: none spoiled.", "good");
+    if (!plantPowered && !coldStore && s.stock.meridian.doses > 0) {
       const sp = Math.min(s.stock.meridian.doses, Y.plant.spoil_unpowered);
       s.stock.meridian.doses -= sp; say(`The plant's cold store warmed up: ${sp} stored doses spoiled.`, "bad");
     }
@@ -298,8 +374,9 @@
     // the press notices rescue units that sat still while people were lost
     if (turnLost.vuln + turnLost.able > 0) {
       for (const [uid, U] of Object.entries(C.units)) {
-        if (!U.carry || (orders[uid] && orders[uid].task !== "idle")) continue;
-        const t = lends[uid] ? other(U.team) : U.team;
+        if (!U.carry || active.has(uid)) continue; // only a trip that moved someone counts
+        if (!couldHelp(C, s, U)) continue; // nobody it could still reach was waiting
+        const t = U.team;
         s.meters[C.teams[t].meter] += M.idle_while_lost;
         ticker.push(`${U.name} sat idle while Keystone lost ${turnLost.vuln + turnLost.able} people.`);
       }
@@ -325,7 +402,7 @@
       const meter = C.teams[t].meter;
       if (s.meters[meter] < M.low) ticker.push(`${C.voices[t].who}: "${C.voices[t].low}"`);
     }
-    if (!ticker.length) ticker.push(`Keystone, ${T.hours}: Midas ${T.label.toLowerCase()}, category pressure rising.`);
+    if (!ticker.length) ticker.push(`Keystone, ${T.hours}: Midas ${T.label.toLowerCase()}, pressure rising.`);
 
     const report = { turn: s.turn, label: T.label, events: ev, ticker, lost: turnLost, rescued: turnRescued, yields: { community: cy, meridian: my }, choice };
     s.history.push({ turn: s.turn, dilemma: D || null, choice, lost: turnLost, rescued: turnRescued });
@@ -340,7 +417,7 @@
     const mult = (m) => (m >= M.high ? R.high_mult : m < M.low ? R.low_mult : 1);
     const ableAlive = C.sites.low_ward.people.able + C.sites.tech_housing.people.able - s.lost.able;
     const vulnLost = s.lost.vuln;
-    const cm = mult(s.meters.trust), mm = (mult(s.meters.confidence) + mult(s.meters.trust)) / 2; // the plant also needs its licence to operate
+    const cm = mult(s.meters.trust), mm = (mult(s.meters.confidence) + 2 * mult(s.meters.trust)) / 3; // the plant needs its licence to operate: trust counts double
     const cv = Math.floor((ableAlive / R.able_per_volunteer) * R.turns * cm);
     const cf = Math.floor((Y.low_ward.food + Math.floor(s.meters.trust / R.trust_per_aid)) * R.turns * cm) - Math.floor(vulnLost / R.vuln_lost_per_food);
     const pd = s.sites.plant.flooded ? R.plant_flooded_doses : Y.plant.doses * R.turns;
@@ -396,7 +473,7 @@
     return { state: s, hash: hash(s) };
   }
 
-  const api = { TEAMS, newGame, resolveTurn, validateDilemma, fallbackDilemma, standings, points, replay, hash, rngFor, peopleInParish };
+  const api = { TEAMS, boardFacts, newGame, resolveTurn, validateDilemma, fallbackDilemma, standings, points, replay, hash, rngFor, peopleInParish };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Engine = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);

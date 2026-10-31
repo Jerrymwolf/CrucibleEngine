@@ -183,7 +183,7 @@ pre.log{max-height:280px;overflow:auto;background:var(--sunk);border:1px solid v
 <div id="app"></div>
 
 <script>
-const C = {"_about":"Keystone slice (phase 2 go/no-go): one parish, two teams, 3 storm turns. Rules in crucible/slice/engine.js read only this file. Numbers are first cut; crucible/slice/sim.mjs checks that doing nothing never wins.","parish":{"id":"keystone","name":"Keystone"},"teams":{"community":{"name":"Community team","short":"Community","meter":"trust"},"meridian":{"name":"Meridian team","short":"Meridian","meter":"confidence"}},"goods":{"food":{"name":"Food","owner":"community","points":2},"volunteers":{"name":"Volunteers","owner":"community","points":1},"c_fuel":{"name":"Fuel","owner":"community","points":2},"doses":{"name":"Cure doses","owner":"meridian","points":3},"funds":{"name":"Funds","owner":"meridian","points":1},"m_fuel":{"name":"Fuel","owner":"meridian","points":2}},"start":{"stock":{"community":{"food":24,"volunteers":20,"c_fuel":8},"meridian":{"doses":30,"funds":30,"m_fuel":12}},"meters":{"trust":60,"confidence":60}},"sites":{"crater_road":{"name":"Crater Road","kind":"exit","owner":"shared","x":70,"y":70,"note":"Road out to the Heartland shelter. Buses only, while open."},"tech_housing":{"name":"Tech Housing","kind":"homes","owner":"meridian","x":230,"y":105,"people":{"able":700,"vuln":40},"note":"Company housing for plant staff. Tech Tower inside can shelter 60 if Meridian opens it."},"plant":{"name":"Biotech Plant","kind":"plant","owner":"meridian","x":470,"y":110,"note":"Makes the cure. Needs its crew, power and dry floors."},"st_brendans":{"name":"St. Brendan's","kind":"shelter","owner":"community","x":235,"y":275,"capacity":90,"note":"Church on high ground. Shelters 90; more than that and people sleep in the aisles."},"low_ward":{"name":"Low Ward","kind":"homes","owner":"community","x":470,"y":300,"people":{"able":900,"vuln":120},"note":"Oldest streets, at sea level. Many elderly residents."}},"roads":[["crater_road","tech_housing"],["crater_road","st_brendans"],["tech_housing","plant"],["tech_housing","st_brendans"],["st_brendans","low_ward"],["low_ward","plant"]],"destinations":{"st_brendans":{"name":"St. Brendan's","capacity":90},"tech_tower":{"name":"Tech Tower","capacity":60,"needs":"tower_open"},"heartland":{"name":"Heartland shelter","needs":"road_open","fuel":1}},"units":{"bus1":{"name":"Bus 1","team":"community","kind":"bus","carry":40,"road":true},"bus2":{"name":"Bus 2","team":"community","kind":"bus","carry":40,"road":true},"boat":{"name":"Fishing boat","team":"community","kind":"boat","carry":25,"road":false,"reach":["low_ward","plant"]},"vcrew":{"name":"Volunteer crew","team":"community","kind":"crew","sandbag_cost":{"volunteers":3}},"shuttle":{"name":"Plant shuttle","team":"meridian","kind":"bus","carry":40,"road":true},"gen":{"name":"Generator","team":"meridian","kind":"generator","power_cost_fuel":2},"pcrew":{"name":"Plant crew","team":"meridian","kind":"plantcrew","sandbag_cost":{"funds":2}}},"tower_open_cost":{"funds":2},"turns":[{"n":1,"label":"Approach","hours":"18:00 to 22:00","intensity":2,"band":{"x":560,"y":360,"r":120},"hazards":[{"site":"low_ward","effect":"flooded","p":0.9,"sandbag_p":0.25,"text":"Storm surge floods Low Ward"},{"site":"plant","effect":"dark","p":0.25,"text":"Grid fails at the Biotech Plant"}]},{"n":2,"label":"Landfall","hours":"22:00 to 01:00","intensity":4,"band":{"x":420,"y":230,"r":190},"hazards":[{"site":"low_ward","effect":"flooded","p":1,"sandbag_p":0.6,"text":"Surge overtops Low Ward"},{"site":"crater_road","effect":"closed","p":0.85,"text":"Rockfall closes Crater Road"},{"site":"plant","effect":"dark","p":0.7,"text":"Grid fails at the Biotech Plant"},{"site":"st_brendans","effect":"dark","p":0.5,"text":"St. Brendan's loses power"},{"site":"tech_housing","effect":"flooded","p":0.35,"sandbag_p":0.1,"text":"Flash flooding in Tech Housing"}]},{"n":3,"label":"Back wall","hours":"01:00 to 04:00","intensity":3,"band":{"x":260,"y":150,"r":170},"flash":{"site":"plant","text":"Plant seawall overtops within 3 hours"},"hazards":[{"site":"plant","effect":"flooded","p":0.55,"sandbag_p":0.15,"text":"Seawall fails, the plant floods"},{"site":"tech_housing","effect":"dark","p":0.6,"text":"Tech Housing goes dark"},{"site":"low_ward","effect":"flooded","p":1,"sandbag_p":0.8,"text":"Low Ward stays under water"}]}],"loss":{"flooded":{"vuln":0.08,"able":0.006},"dark":{"vuln":0.025},"shelter_dark":0.012,"overflow":0.03,"exposed":0.03},"yields":{"low_ward":{"food":3,"able_per_volunteer":225},"tech_housing":{"volunteers":2},"plant":{"doses":5,"funds":2,"spoil_unpowered":4},"sheltered_able_per_volunteer":30},"needs":{"people_per_food":800},"meters":{"low":40,"high":60,"vuln_lost_per_trust":5,"able_lost_per_trust":40,"rescued_per_trust":20,"rescued_trust_cap":6,"plant_ran":2,"plant_idle":-6,"hunger":-6,"overflow":-4,"promise_kept":8,"promise_broken":-10,"hq_clawback_funds":3,"idle_while_lost":-6},"recovery":{"turns":2,"high_mult":1.25,"low_mult":0.5,"plant_flooded_doses":3,"able_per_volunteer":150,"trust_per_aid":20,"vuln_lost_per_food":4,"_about":"Two turns after the storm. Community: able survivors volunteer, aid follows trust, each 10 vulnerable people lost costs a food (funerals, care). Meridian: the plant restarts, scaled by board confidence and community trust together."},"residents":[{"id":"ines","name":"Inés Reyes","age":81,"site":"low_ward","group":"vuln","line":"Lives alone on home oxygen. Her concentrator needs power."},{"id":"tomas","name":"Tomás Ibarra","age":9,"site":"low_ward","group":"vuln","line":"Lives with his grandmother, who cannot walk far."},{"id":"maria","name":"Maria Santos","age":44,"site":"tech_housing","group":"able","line":"Line lead at the plant. Her mother is in Low Ward."},{"id":"frank","name":"Frank Reeves","age":58,"site":"plant","group":"crew","line":"Plant manager. Has never lost a batch in 23 years."}],"voices":{"community":{"who":"Pastor Ruth Okafor, St. Brendan's","low":"People are asking me why the buses aren't coming. I don't have an answer for them."},"meridian":{"who":"Dana Kell, Meridian VP Operations","low":"The board is watching Keystone. Every hour the clean rooms sit dark costs us a batch. I need the plant running."}},"fallbacks":[{"turn":1,"final_call":"meridian","site":"low_ward","title":"The last bus run","situation":"The night shift is due at the plant at 22:00 and the plant shuttle is the only way in. Low Ward still has elderly residents waiting for a ride before the surge.","resident":"Inés Reyes, 81, on home oxygen in Low Ward","voice":{"who":"Pastor Ruth Okafor, St. Brendan's","line":"One more run from Low Ward and I can get everyone on oxygen up the hill."},"orders":[{"label":"Send the shuttle to Low Ward","owner":"meridian","cost":{"m_fuel":1},"effects":{"save":{"site":"low_ward","n":30},"doses":-4,"confidence":-4,"trust":5},"honour":["conservation","self-transcendence"],"cost_fam":["self-enhancement"],"news":"Meridian shuttle pulls 30 residents out of Low Ward."},{"label":"Bring the night shift in","owner":"meridian","cost":{},"effects":{"confidence":3,"trust":-4},"honour":["self-enhancement"],"cost_fam":["self-transcendence","conservation"],"news":"Keystone plant keeps its night shift despite surge warning."},{"label":"Split the runs, half each","owner":"meridian","cost":{"m_fuel":2},"effects":{"save":{"site":"low_ward","n":15},"doses":-2},"honour":["openness-to-change"],"cost_fam":["self-enhancement","conservation"],"news":"Plant shuttle splits its night between Low Ward and the plant."}],"default":1},{"turn":2,"final_call":"meridian","site":"st_brendans","title":"One generator, two buildings","situation":"The grid is failing. St. Brendan's is full of people on oxygen and heart monitors. The clean rooms lose a whole batch if power drops for more than an hour.","resident":"Tomás Ibarra, 9, sheltering with his grandmother","voice":{"who":"Dana Kell, Meridian VP Operations","line":"That batch is 40,000 doses for the mainland. The church has candles."},"orders":[{"label":"Power St. Brendan's","owner":"meridian","cost":{"m_fuel":2},"effects":{"power":"st_brendans","doses":-6,"confidence":-6,"trust":6},"honour":["self-transcendence","conservation"],"cost_fam":["self-enhancement"],"news":"Meridian generator keeps the lights on at St. Brendan's."},{"label":"Keep the clean rooms running","owner":"meridian","cost":{"m_fuel":2},"effects":{"power":"plant","confidence":4,"trust":-5},"honour":["self-enhancement"],"cost_fam":["self-transcendence"],"news":"Keystone plant protects its batch as the church goes dark."},{"label":"Volunteers carry oxygen to the church","owner":"community","cost":{"volunteers":6,"c_fuel":2},"effects":{"trust":2},"honour":["self-transcendence","openness-to-change"],"cost_fam":["conservation"],"news":"Volunteers haul oxygen tanks up the hill by hand."}],"default":1},{"turn":3,"final_call":"community","site":"plant","title":"The seawall or the boats","situation":"The plant seawall is about to overtop and Meridian has no hands left. The volunteer crew could sandbag it, or stay in Low Ward pulling people out by boat.","resident":"Frank Reeves, plant manager, still inside with his crew","voice":{"who":"Dana Kell, Meridian VP Operations","line":"If the plant floods, Keystone loses its jobs for a year. Help us hold the wall."},"orders":[{"label":"Sandbag the plant seawall","owner":"community","cost":{"volunteers":6},"effects":{"sandbag":"plant","confidence":6,"trust":-3},"honour":["conservation","self-enhancement"],"cost_fam":["self-transcendence"],"news":"Low Ward volunteers race to hold the plant seawall."},{"label":"Stay in Low Ward with the boats","owner":"community","cost":{"volunteers":3},"effects":{"save":{"site":"low_ward","n":20},"confidence":-4},"honour":["self-transcendence"],"cost_fam":["self-enhancement","conservation"],"news":"Volunteers keep pulling families from Low Ward by boat."},{"label":"Ask Meridian to pay for a contractor crew","owner":"meridian","cost":{"funds":8},"effects":{"sandbag":"plant","trust":2},"honour":["openness-to-change","self-transcendence"],"cost_fam":["self-enhancement"],"news":"Meridian pays a contractor crew to hold the seawall."}],"default":1}]};
+const C = {"_about":"Keystone slice (phase 2 go/no-go): one parish, two teams, 3 storm turns. Rules in crucible/slice/engine.js read only this file. Numbers are first cut; crucible/slice/sim.mjs checks that doing nothing never wins.","parish":{"id":"keystone","name":"Keystone"},"teams":{"community":{"name":"Community team","short":"Community","meter":"trust"},"meridian":{"name":"Meridian team","short":"Meridian","meter":"confidence"}},"goods":{"food":{"name":"Food","owner":"community","points":2},"volunteers":{"name":"Volunteers","owner":"community","points":1},"c_fuel":{"name":"Fuel","owner":"community","points":2},"doses":{"name":"Cure doses","owner":"meridian","points":3},"funds":{"name":"Funds","owner":"meridian","points":1},"m_fuel":{"name":"Fuel","owner":"meridian","points":2}},"start":{"stock":{"community":{"food":24,"volunteers":20,"c_fuel":8},"meridian":{"doses":30,"funds":30,"m_fuel":12}},"meters":{"trust":60,"confidence":60}},"sites":{"crater_road":{"name":"Crater Road","kind":"exit","owner":"shared","x":92,"y":70,"note":"Road out to the Heartland shelter. Buses only, while open."},"tech_housing":{"name":"Tech Housing","kind":"homes","owner":"meridian","x":275,"y":105,"people":{"able":700,"vuln":40},"note":"Company housing for plant staff. Tech Tower inside can shelter 60 if Meridian opens it."},"plant":{"name":"Biotech Plant","kind":"plant","owner":"meridian","x":470,"y":110,"note":"Makes the cure. Needs its crew, power and dry floors."},"st_brendans":{"name":"St. Brendan's","kind":"shelter","owner":"community","x":235,"y":275,"capacity":90,"note":"Church on high ground. Shelters 90; more than that and people sleep in the aisles."},"low_ward":{"name":"Low Ward","kind":"homes","owner":"community","x":470,"y":300,"people":{"able":900,"vuln":120},"note":"Oldest streets, at sea level. Many elderly residents."}},"roads":[["crater_road","tech_housing"],["crater_road","st_brendans"],["tech_housing","plant"],["tech_housing","st_brendans"],["st_brendans","low_ward"],["low_ward","plant"]],"destinations":{"st_brendans":{"name":"St. Brendan's","capacity":90},"tech_tower":{"name":"Tech Tower","capacity":60,"needs":"tower_open"},"heartland":{"name":"Heartland shelter","needs":"road_open","fuel":1}},"units":{"bus1":{"name":"Bus 1","team":"community","kind":"bus","carry":40,"road":true},"bus2":{"name":"Bus 2","team":"community","kind":"bus","carry":40,"road":true},"boat":{"name":"Fishing boat","team":"community","kind":"boat","carry":25,"road":false,"reach":["low_ward","plant"]},"vcrew":{"name":"Volunteer crew","team":"community","kind":"crew","sandbag_cost":{"volunteers":3}},"shuttle":{"name":"Plant shuttle","team":"meridian","kind":"bus","carry":40,"road":true},"gen":{"name":"Generator","team":"meridian","kind":"generator","power_cost_fuel":2},"pcrew":{"name":"Plant crew","team":"meridian","kind":"plantcrew","sandbag_cost":{"funds":2}}},"tower_open_cost":{"funds":6},"turns":[{"n":1,"label":"Approach","hours":"18:00 to 22:00","intensity":2,"band":{"x":560,"y":360,"r":120},"hazards":[{"site":"low_ward","effect":"flooded","p":0.9,"sandbag_p":0.25,"text":"Storm surge floods Low Ward"},{"site":"plant","effect":"dark","p":0.4,"text":"Grid fails at the Biotech Plant"}]},{"n":2,"label":"Landfall","hours":"22:00 to 01:00","intensity":4,"band":{"x":420,"y":230,"r":190},"hazards":[{"site":"low_ward","effect":"flooded","p":0.85,"sandbag_p":0.6,"text":"Surge overtops Low Ward"},{"site":"crater_road","effect":"closed","p":0.85,"text":"Rockfall closes Crater Road"},{"site":"plant","effect":"dark","p":0.9,"text":"Grid fails at the Biotech Plant"},{"site":"st_brendans","effect":"dark","p":0.5,"text":"St. Brendan's loses power"},{"site":"tech_housing","effect":"flooded","p":0.35,"sandbag_p":0.1,"text":"Flash flooding in Tech Housing"}]},{"n":3,"label":"Back wall","hours":"01:00 to 04:00","intensity":3,"band":{"x":260,"y":150,"r":170},"flash":{"site":"plant","text":"Plant seawall overtops within 3 hours"},"hazards":[{"site":"plant","effect":"flooded","p":0.55,"sandbag_p":0.15,"text":"Seawall fails, the plant floods"},{"site":"tech_housing","effect":"dark","p":0.6,"text":"Tech Housing goes dark"},{"site":"low_ward","effect":"flooded","p":1,"sandbag_p":0.8,"text":"Low Ward stays under water"}]}],"loss":{"flooded":{"vuln":0.08,"able":0.006},"dark":{"vuln":0.025},"shelter_dark":0.012,"overflow":0.02,"exposed":0.03},"yields":{"low_ward":{"food":3,"able_per_volunteer":225},"tech_housing":{"volunteers":2},"plant":{"doses":5,"funds":2,"spoil_unpowered":10},"sheltered_able_per_volunteer":30},"needs":{"people_per_food":800},"meters":{"low":40,"high":60,"vuln_lost_per_trust":5,"able_lost_per_trust":40,"rescued_per_trust":20,"rescued_trust_cap":6,"plant_ran":2,"plant_idle":-10,"hunger":-6,"overflow":-1,"promise_kept":3,"promise_broken":-10,"hq_clawback_funds":5,"idle_while_lost":-3},"recovery":{"turns":2,"high_mult":1.25,"low_mult":0.3,"plant_flooded_doses":6,"able_per_volunteer":200,"trust_per_aid":20,"vuln_lost_per_food":4,"_about":"Two turns after the storm. Community: able survivors volunteer, aid follows trust, each 10 vulnerable people lost costs a food (funerals, care). Meridian: the plant restarts, scaled by board confidence and community trust together."},"residents":[{"id":"ines","name":"Inés Reyes","age":81,"site":"low_ward","group":"vuln","line":"Lives alone on home oxygen. Her concentrator needs power."},{"id":"tomas","name":"Tomás Ibarra","age":9,"site":"low_ward","group":"vuln","line":"Lives with his grandmother, who cannot walk far."},{"id":"maria","name":"Maria Santos","age":44,"site":"tech_housing","group":"able","line":"Line lead at the plant. Her mother is in Low Ward."},{"id":"frank","name":"Frank Reeves","age":58,"site":"plant","group":"crew","line":"Plant manager. Has never lost a batch in 23 years."}],"voices":{"community":{"who":"Pastor Ruth Okafor, St. Brendan's","low":"People are asking me why the buses aren't coming. I don't have an answer for them."},"meridian":{"who":"Dana Kell, Meridian VP Operations","low":"The board is watching Keystone. Every hour the clean rooms sit dark costs us a batch. I need the plant running."}},"fallbacks":[{"turn":1,"final_call":"meridian","site":"low_ward","title":"The last bus run","situation":"The night shift is due at the plant at 22:00. Meridian promised its operators a ride in every storm, and twelve of them are waiting at the Tech Housing stop. Low Ward still has {low_ward_vuln} vulnerable residents waiting for a ride before the surge.","resident":"Inés Reyes, 81, on home oxygen in Low Ward","voice":{"who":"Pastor Ruth Okafor, St. Brendan's","line":"One more run from Low Ward and I can get everyone on oxygen up the hill."},"orders":[{"label":"Send the shuttle to Low Ward","owner":"meridian","cost":{"m_fuel":1},"effects":{"save":{"site":"low_ward","n":30},"doses":-2,"confidence":-2,"trust":5},"values":{"community":{"honours":["safety","compassion","service","kindness","justice","equality","courage","preparedness","honor","impact","integrity","accountability","boldness"],"costs":["stability","order","loyalty","fairness"]},"meridian":{"honours":["safety","compassion","service","kindness","justice","equality","courage","authenticity","boldness","independence","candor"],"costs":["honesty","integrity","accountability","loyalty","duty","excellence","competence","discipline","success","ambition","obedience","order","stability","recognition","impact"]}},"news":"Meridian shuttle pulls 30 residents out of Low Ward; the night shift walks in late."},{"label":"Bring the night shift in","owner":"meridian","cost":{},"effects":{"confidence":3,"trust":-4},"values":{"community":{"honours":["stability","order","loyalty"],"costs":["safety","compassion","service","kindness","justice","equality","courage","honor","respect","integrity","fairness","accountability","boldness"]},"meridian":{"honours":["duty","excellence","competence","discipline","honesty","integrity","accountability","loyalty","success","ambition","obedience","order","stability","recognition","stewardship","impact"],"costs":["safety","compassion","service","kindness","justice","equality","courage","respect","authenticity","boldness","independence"]}},"news":"Keystone plant keeps its promise to the night shift despite the surge warning."},{"label":"Split the runs, half each","owner":"meridian","cost":{"m_fuel":2},"effects":{"save":{"site":"low_ward","n":15},"doses":-2},"values":{"community":{"honours":["fairness","creativity","respect","honesty"],"costs":["safety","compassion","boldness","courage","candor","integrity"]},"meridian":{"honours":["creativity","independence","leadership","fairness","respect","honesty","candor"],"costs":["excellence","competence","boldness","courage","safety","integrity","accountability"]}},"news":"Plant shuttle splits its night between Low Ward and the plant."}],"default":2},{"turn":2,"when":{"min":{"sheltered":20}},"final_call":"meridian","site":"st_brendans","title":"One generator, two buildings","situation":"The grid is failing. {sheltered} people are sheltering at St. Brendan's, {sheltered_vuln} of them frail, on oxygen or heart monitors. The plant's clean rooms stop the moment power drops, and tonight's batch is lost.","resident":"Tomás Ibarra, 9, sheltering with his grandmother","voice":{"who":"Dana Kell, Meridian VP Operations","line":"If the clean rooms go dark we make nothing tonight, and patients on the mainland miss a treatment cycle."},"orders":[{"label":"Power St. Brendan's","owner":"meridian","cost":{"m_fuel":2},"effects":{"power":"st_brendans","doses":0,"confidence":0,"trust":6,"cold_store":true},"values":{"community":{"honours":["safety","compassion","service","kindness","justice","equality","loyalty","respect","honor","integrity","accountability","boldness"],"costs":["impact","stability","ambition","success","excellence"]},"meridian":{"honours":["safety","compassion","service","kindness","justice","equality","respect","courage","authenticity","integrity","boldness","independence"],"costs":["excellence","competence","duty","accountability","loyalty","discipline","success","ambition","recognition","impact","stewardship","order","stability","obedience"]}},"news":"Meridian generator keeps the lights on at St. Brendan's; a cure batch is lost."},{"label":"Keep the clean rooms running","owner":"meridian","cost":{"m_fuel":2},"effects":{"power":"plant","confidence":4,"trust":-5},"values":{"community":{"honours":["stability","impact","ambition"],"costs":["safety","compassion","service","kindness","justice","equality","loyalty","respect","honor","integrity","courage","fairness","accountability","boldness"]},"meridian":{"honours":["excellence","competence","duty","accountability","loyalty","discipline","success","ambition","recognition","impact","stewardship","order","stability","obedience","preparedness","honesty"],"costs":["safety","compassion","service","kindness","justice","equality","respect","integrity","authenticity","boldness","creativity"]}},"news":"Keystone plant protects its batch as St. Brendan's goes dark."},{"label":"Volunteers carry oxygen to St. Brendan's","owner":"community","cost":{"volunteers":6,"c_fuel":2},"effects":{"power":"st_brendans","trust":2},"values":{"community":{"honours":["service","compassion","courage","resilience","creativity","independence","safety","kindness","integrity","accountability"],"costs":["stewardship","preparedness","discipline","order","fairness","stability"]},"meridian":{"honours":["excellence","competence","success","ambition","stewardship","impact","creativity","curiosity"],"costs":["accountability","integrity","duty","leadership","respect","honor"]}},"news":"Volunteers haul oxygen tanks to St. Brendan's by hand."}],"default":1},{"turn":2,"when":{},"final_call":"meridian","site":"tech_housing","title":"One generator, two buildings","situation":"The grid is failing. Tech Housing has {tech_housing_vuln} vulnerable residents at home, some on oxygen concentrators. The plant's clean rooms stop the moment power drops, and tonight's batch is lost.","resident":"Ana Ortega, 79, alone with an oxygen concentrator in Tech Housing","voice":{"who":"Dana Kell, Meridian VP Operations","line":"If the clean rooms go dark we make nothing tonight, and patients on the mainland miss a treatment cycle."},"orders":[{"label":"Power Tech Housing","owner":"meridian","cost":{"m_fuel":2},"effects":{"power":"tech_housing","doses":0,"confidence":0,"trust":6,"cold_store":true},"values":{"community":{"honours":["safety","compassion","service","kindness","justice","equality","loyalty","respect","honor","integrity","accountability","boldness"],"costs":["impact","stability","ambition","success","excellence"]},"meridian":{"honours":["safety","compassion","service","kindness","justice","equality","respect","courage","authenticity","integrity","boldness","independence"],"costs":["excellence","competence","duty","accountability","loyalty","discipline","success","ambition","recognition","impact","stewardship","order","stability","obedience"]}},"news":"Meridian generator keeps the lights on at Tech Housing; a cure batch is lost."},{"label":"Keep the clean rooms running","owner":"meridian","cost":{"m_fuel":2},"effects":{"power":"plant","confidence":4,"trust":-5},"values":{"community":{"honours":["stability","impact","ambition"],"costs":["safety","compassion","service","kindness","justice","equality","loyalty","respect","honor","integrity","courage","fairness","accountability","boldness"]},"meridian":{"honours":["excellence","competence","duty","accountability","loyalty","discipline","success","ambition","recognition","impact","stewardship","order","stability","obedience","preparedness","honesty"],"costs":["safety","compassion","service","kindness","justice","equality","respect","integrity","authenticity","boldness","creativity"]}},"news":"Keystone plant protects its batch as Tech Housing goes dark."},{"label":"Volunteers carry oxygen to Tech Housing","owner":"community","cost":{"volunteers":6,"c_fuel":2},"effects":{"power":"tech_housing","trust":2},"values":{"community":{"honours":["service","compassion","courage","resilience","creativity","independence","safety","kindness","integrity","accountability"],"costs":["stewardship","preparedness","discipline","order","fairness","stability"]},"meridian":{"honours":["excellence","competence","success","ambition","stewardship","impact","creativity","curiosity"],"costs":["accountability","integrity","duty","leadership","respect","honor"]}},"news":"Volunteers haul oxygen tanks to Tech Housing by hand."}],"default":1},{"turn":3,"when":{"min":{"low_ward_vuln":10}},"final_call":"community","site":"plant","title":"The seawall or the boats","situation":"The plant seawall is about to overtop and Meridian has no hands left. The volunteer crew could sandbag it, or keep pulling the {low_ward_vuln} vulnerable people still in Low Ward out by boat.","resident":"Frank Reeves, plant manager, still inside with his crew","voice":{"who":"Dana Kell, Meridian VP Operations","line":"If the plant floods, Keystone loses its jobs for a year, and Frank's crew is still in there. Help us hold the wall."},"orders":[{"label":"Sandbag the plant seawall","owner":"community","cost":{"volunteers":6},"effects":{"sandbag":"plant","confidence":6,"trust":2},"values":{"community":{"honours":["loyalty","stability","stewardship","preparedness","courage","respect","integrity","resilience"],"costs":["safety","compassion","service","kindness","justice","equality","accountability"]},"meridian":{"honours":["excellence","duty","loyalty","stewardship","stability","success","competence","preparedness","accountability"],"costs":["safety","compassion","service","kindness","justice","equality"]}},"news":"Volunteers race to hold the plant seawall."},{"label":"Keep volunteers on the rescue","owner":"community","cost":{"volunteers":3},"effects":{"save":{"site":"low_ward","n":20},"confidence":-4},"values":{"community":{"honours":["safety","compassion","service","kindness","justice","equality","courage","honor","integrity","accountability","boldness","independence","autonomy"],"costs":["loyalty","stability","stewardship","preparedness"]},"meridian":{"honours":["compassion","kindness","safety","justice"],"costs":["excellence","duty","loyalty","stewardship","stability","success","competence","ambition","recognition","impact","accountability","resilience"]}},"news":"Volunteers keep pulling families out of Low Ward by boat."},{"label":"Ask Meridian to pay a contractor crew","owner":"meridian","cost":{"funds":12},"effects":{"sandbag":"plant","trust":2},"values":{"community":{"honours":["fairness","justice","accountability","creativity"],"costs":["independence","autonomy","authority","integrity","honor"]},"meridian":{"honours":["accountability","integrity","honesty","stewardship","leadership","preparedness","creativity"],"costs":["success","ambition","discipline","order","loyalty","boldness"]}},"news":"Meridian pays a contractor crew to hold the seawall."}],"default":1},{"turn":3,"when":{},"final_call":"community","site":"plant","title":"The seawall or the doors","situation":"The plant seawall is about to overtop and Meridian has no hands left. The volunteer crew could sandbag it, or go door to door in dark Tech Housing, where {tech_housing_vuln} vulnerable people are still at home.","resident":"Frank Reeves, plant manager, still inside with his crew","voice":{"who":"Dana Kell, Meridian VP Operations","line":"If the plant floods, Keystone loses its jobs for a year, and Frank's crew is still in there. Help us hold the wall."},"orders":[{"label":"Sandbag the plant seawall","owner":"community","cost":{"volunteers":6},"effects":{"sandbag":"plant","confidence":6,"trust":2},"values":{"community":{"honours":["loyalty","stability","stewardship","preparedness","courage","respect","integrity","resilience"],"costs":["safety","compassion","service","kindness","justice","equality","accountability"]},"meridian":{"honours":["excellence","duty","loyalty","stewardship","stability","success","competence","preparedness","accountability"],"costs":["safety","compassion","service","kindness","justice","equality"]}},"news":"Volunteers race to hold the plant seawall."},{"label":"Keep volunteers on the rescue","owner":"community","cost":{"volunteers":3},"effects":{"save":{"site":"tech_housing","n":20},"confidence":-4},"values":{"community":{"honours":["safety","compassion","service","kindness","justice","equality","courage","honor","integrity","accountability","boldness","independence","autonomy"],"costs":["loyalty","stability","stewardship","preparedness"]},"meridian":{"honours":["compassion","kindness","safety","justice"],"costs":["excellence","duty","loyalty","stewardship","stability","success","competence","ambition","recognition","impact","accountability","resilience"]}},"news":"Volunteers keep pulling families out of Tech Housing in the dark."},{"label":"Ask Meridian to pay a contractor crew","owner":"meridian","cost":{"funds":12},"effects":{"sandbag":"plant","trust":2},"values":{"community":{"honours":["fairness","justice","accountability","creativity"],"costs":["independence","autonomy","authority","integrity","honor"]},"meridian":{"honours":["accountability","integrity","honesty","stewardship","leadership","preparedness","creativity"],"costs":["success","ambition","discipline","order","loyalty","boldness"]}},"news":"Meridian pays a contractor crew to hold the seawall."}],"default":1}]};
 C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativity","openness-to-change"],"curiosity":["Curiosity","openness-to-change"],"independence":["Independence","openness-to-change"],"excellence":["Excellence","self-enhancement"],"competence":["Competence","self-enhancement"],"ambition":["Ambition","self-enhancement"],"success":["Success","self-enhancement"],"leadership":["Leadership","self-enhancement"],"authority":["Authority","self-enhancement"],"impact":["Impact","self-enhancement"],"recognition":["Recognition","self-enhancement"],"safety":["Safety","conservation"],"stability":["Stability","conservation"],"preparedness":["Preparedness","conservation"],"order":["Order","conservation"],"obedience":["Obedience","conservation"],"discipline":["Discipline","conservation"],"respect":["Respect","conservation"],"duty":["Duty","conservation"],"honor":["Honor","conservation"],"loyalty":["Loyalty","conservation"],"tradition":["Tradition","conservation"],"heritage":["Heritage","conservation"],"compassion":["Compassion","self-transcendence"],"service":["Service","self-transcendence"],"kindness":["Kindness","self-transcendence"],"forgiveness":["Forgiveness","self-transcendence"],"fairness":["Fairness","self-transcendence"],"justice":["Justice","self-transcendence"],"equality":["Equality","self-transcendence"],"stewardship":["Stewardship","self-transcendence"],"integrity":["Integrity","self-transcendence"],"honesty":["Honesty","self-transcendence"],"accountability":["Accountability","self-transcendence"],"authenticity":["Authenticity","openness-to-change"],"courage":["Courage","openness-to-change"],"resilience":["Resilience","conservation"],"boldness":["Boldness","openness-to-change"],"candor":["Candor","openness-to-change"]};
 </script>
 <script>
@@ -195,7 +195,12 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
   const TEAMS = ["community", "meridian"];
   const clone = (o) => JSON.parse(JSON.stringify(o));
   const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-  const int = (v, d = 0) => (Number.isFinite(+v) ? Math.round(+v) : d);
+  const int = (v, d = 0) => (typeof v === "boolean" || v === null || v === "" || !Number.isFinite(+v) ? d : Math.floor(clamp(+v, -1e9, 1e9) + 0.5));
+  // Plain text only: no control characters, so both engines store and hash identical strings.
+  const str = (v, n) => String(v ?? "").replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, n);
+  // Words that judge. The engine is a witness: a moment that uses them is rejected.
+  const JUDGING = ["selfish", "greedy", "greed", "heroic", "hero", "noble", "coward", "villain", "evil", "shameful", "right answer", "wrong answer", "right thing", "obvious choice"];
+  const judges = (t) => { const x = " " + t.toLowerCase() + " "; return JUDGING.find((w) => new RegExp("[^a-z]" + w + "[^a-z]").test(x)) || null; };
 
   function mulberry32(a) {
     return function () {
@@ -214,8 +219,8 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
     return JSON.stringify(v);
   }
   function hash(v) {
-    const s = stable(v); let h = 0x811c9dc5;
-    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+    const b = new TextEncoder().encode(stable(v)); let h = 0x811c9dc5; // UTF-8 bytes, the same bytes Godot hashes
+    for (let i = 0; i < b.length; i++) { h ^= b[i]; h = Math.imul(h, 0x01000193) >>> 0; }
     return h.toString(16).padStart(8, "0");
   }
 
@@ -255,18 +260,20 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
   function teamGoods(C, team) { return Object.keys(C.goods).filter((g) => C.goods[g].owner === team); }
 
   // Turn any dilemma (AI or fallback) into the one checked shape the engine resolves.
-  function validateDilemma(C, state, raw, stances) {
+  // strict (AI moments): reject judging words, drop orders that cost no signed value or dominate.
+  function validateDilemma(C, state, raw, stances, strict = true) {
     const notes = [];
     if (!raw || typeof raw !== "object") return { ok: false, notes: ["no JSON object"] };
     const final_call = TEAMS.includes(raw.final_call) ? raw.final_call : null;
     if (!final_call) return { ok: false, notes: ["final_call must be community or meridian"] };
     const signed = { community: stances.community.ranks, meridian: stances.meridian.ranks };
     const orders = [];
-    for (const o of (Array.isArray(raw.orders) ? raw.orders : []).slice(0, 3)) {
-      if (!o || !TEAMS.includes(o.owner)) { notes.push("order dropped: bad owner"); continue; }
+    for (const o of Array.isArray(raw.orders) ? raw.orders : []) {
+      if (orders.length === 3) break;
+      if (!o || typeof o !== "object" || !TEAMS.includes(o.owner)) { notes.push("order dropped: bad owner"); continue; }
       const goods = teamGoods(C, o.owner), cost = {};
       let afford = true;
-      for (const [g, n] of Object.entries(o.cost || {})) {
+      for (const [g, n] of Object.entries(o.cost && typeof o.cost === "object" ? o.cost : {})) {
         const k = g === "fuel" ? (o.owner === "community" ? "c_fuel" : "m_fuel") : g;
         if (!goods.includes(k)) { notes.push(`order "${o.label}": ${g} is not ${o.owner}'s to spend`); afford = false; break; }
         const v = clamp(int(n), 0, 20);
@@ -274,72 +281,119 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
         if (v) cost[k] = v;
       }
       if (!afford) continue;
-      const e = o.effects || {}, effects = {};
-      if (e.trust) effects.trust = clamp(int(e.trust), -10, 10);
-      if (e.confidence) effects.confidence = clamp(int(e.confidence), -10, 10);
-      if (e.doses) effects.doses = clamp(int(e.doses), -10, 10);
-      if (e.save && EFFECT_SITES.includes(e.save.site)) effects.save = { site: e.save.site, n: clamp(int(e.save.n), 0, 60) };
-      if (e.expose) effects.expose = clamp(int(e.expose), 0, 100);
+      const e = o.effects && typeof o.effects === "object" ? o.effects : {}, effects = {};
+      if (int(e.trust)) effects.trust = clamp(int(e.trust), -10, 10);
+      if (int(e.confidence)) effects.confidence = clamp(int(e.confidence), -10, 10);
+      if (int(e.doses)) effects.doses = clamp(int(e.doses), -10, 10);
+      if (e.save && typeof e.save === "object" && EFFECT_SITES.includes(e.save.site) && int(e.save.n) > 0) effects.save = { site: e.save.site, n: clamp(int(e.save.n), 0, 60) };
+      if (int(e.expose) > 0) effects.expose = clamp(int(e.expose), 0, 100);
       if (EFFECT_SITES.includes(e.power)) effects.power = e.power;
       if (EFFECT_SITES.includes(e.sandbag)) effects.sandbag = e.sandbag;
-      if (e.open_tower) effects.open_tower = true;
+      if (e.open_tower === true) effects.open_tower = true;
+      if (e.cold_store === true) effects.cold_store = true;
       const tags = {};
       for (const t of TEAMS) {
         const keep = (a) => (Array.isArray(a) ? a.map((v) => String(v).toLowerCase()).filter((v) => signed[t].includes(v)) : []);
         tags[t] = { honours: keep(o.tags?.[t]?.honours), costs: keep(o.tags?.[t]?.costs) };
       }
-      orders.push({ label: String(o.label || "Order").slice(0, 70), owner: o.owner, cost, effects, tags, news: String(o.news || "").slice(0, 140) });
+      const order = { label: str(o.label, 70) || "Order", owner: o.owner, cost, effects, tags, news: str(o.news, 140) };
+      if (strict && !TEAMS.some((t) => tags[t].costs.length)) { notes.push(`order "${order.label}" dropped: it costs no signed value`); continue; }
+      const gains = effects.save || effects.power || effects.sandbag || effects.open_tower || effects.cold_store || effects.trust > 0 || effects.confidence > 0 || effects.doses > 0;
+      const loses = effects.expose || effects.trust < 0 || effects.confidence < 0 || effects.doses < 0;
+      if (strict && !Object.keys(cost).length && gains && !loses) { notes.push(`order "${order.label}" dropped: it costs nothing and only helps`); continue; }
+      orders.push(order);
     }
     if (orders.length < 2) return { ok: false, notes: notes.concat("fewer than 2 valid orders") };
     if (!orders.some((o) => TEAMS.some((t) => o.tags[t].costs.length))) notes.push("no order costs a signed value");
-    const collision = (Array.isArray(raw.collision) ? raw.collision : []).map((v) => String(v).toLowerCase()).filter((v) => signed.community.includes(v) || signed.meridian.includes(v)).slice(0, 2);
-    let def = int(raw.default, orders.length - 1);
-    if (def < 0 || def >= orders.length) def = orders.length - 1;
-    return {
-      ok: true, notes,
-      dilemma: {
-        turn: state.turn, final_call, collision, default: def,
-        site: EFFECT_SITES.includes(raw.site) ? raw.site : null,
-        title: String(raw.title || "").slice(0, 80), situation: String(raw.situation || "").slice(0, 420),
-        resident: String(raw.resident || "").slice(0, 120),
-        voice: raw.voice && raw.voice.who ? { who: String(raw.voice.who).slice(0, 80), line: String(raw.voice.line || "").slice(0, 220) } : null,
-        orders,
-      },
+    const collision = [];
+    for (const v of Array.isArray(raw.collision) ? raw.collision : []) {
+      const id = String(v).toLowerCase();
+      if ((signed.community.includes(id) || signed.meridian.includes(id)) && !collision.includes(id) && collision.length < 2) collision.push(id);
+    }
+    // The standing plan (what happens with no decision) must be the deciding team's own order.
+    let def = int(raw.default, 0);
+    if (def < 0 || def >= orders.length || orders[def].owner !== final_call) def = orders.findIndex((o) => o.owner === final_call);
+    if (def < 0) return { ok: false, notes: notes.concat(`no order belongs to the ${final_call} team, which makes the call`) };
+    let voice = raw.voice && typeof raw.voice === "object" && raw.voice.who ? { who: str(raw.voice.who, 80), line: str(raw.voice.line, 220) } : null;
+    if (voice && /(community|meridian) team/i.test(voice.who)) { notes.push("voice dropped: pressure comes from off-board voices, never a team"); voice = null; }
+    const d = {
+      turn: state.turn, final_call, collision, default: def,
+      site: EFFECT_SITES.includes(raw.site) ? raw.site : null,
+      title: str(raw.title, 80), situation: str(raw.situation, 420), resident: str(raw.resident, 120), voice, orders,
     };
+    if (strict) {
+      const text = [d.title, d.situation, d.resident, voice ? voice.who + " " + voice.line : ""].concat(orders.map((o) => o.label + " " + o.news)).join(" ");
+      const w = judges(text);
+      if (w) return { ok: false, notes: notes.concat(`judging word "${w}": the engine is a witness`) };
+    }
+    return { ok: true, notes, dilemma: d };
   }
 
-  // Written fallback: fixed story, value tags mapped from each team's own values by family.
+  // Board facts a written moment may quote, so its text never contradicts the map.
+  function boardFacts(C, s) {
+    const sb = s.shelter.st_brendans;
+    return { sheltered: sb.vuln + sb.able, sheltered_vuln: sb.vuln, low_ward_vuln: s.sites.low_ward.home.vuln, tech_housing_vuln: s.sites.tech_housing.home.vuln };
+  }
+  function fallbackApplies(C, s, f) {
+    const w = f.when || {}, b = boardFacts(C, s);
+    for (const [k, n] of Object.entries(w.min || {})) if (!(b[k] >= n)) return false;
+    for (const [k, n] of Object.entries(w.max || {})) if (!(b[k] <= n)) return false;
+    return true;
+  }
+  // Written moment: the first variant for this turn whose board conditions hold. Each order's value tags are
+  // authored per value and per team (what honouring or paying "loyalty" means differs for each side).
   function fallbackDilemma(C, state, stances) {
-    const f = C.fallbacks.find((x) => x.turn === state.turn) || C.fallbacks[C.fallbacks.length - 1];
-    const fam = (v) => (C.values[v] ? C.values[v][1] : "");
+    const forTurn = C.fallbacks.filter((x) => x.turn === state.turn);
+    const f = forTurn.find((x) => fallbackApplies(C, state, x)) || forTurn[forTurn.length - 1] || C.fallbacks[C.fallbacks.length - 1];
+    const b = boardFacts(C, state);
+    const fill = (t) => String(t || "").replace(/\{(\w+)\}/g, (m, k) => (k in b ? String(b[k]) : m));
     const raw = clone(f);
+    for (const k of ["title", "situation", "resident"]) raw[k] = fill(raw[k]);
+    if (raw.voice) raw.voice.line = fill(raw.voice.line);
     raw.orders = f.orders.map((o) => {
       const tags = {};
       for (const t of TEAMS) {
+        const vt = (o.values && o.values[t]) || {};
         const r = stances[t].ranks;
-        tags[t] = { honours: r.filter((v) => o.honour.includes(fam(v))), costs: r.filter((v) => o.cost_fam.includes(fam(v)) && !o.honour.includes(fam(v))) };
+        tags[t] = { honours: r.filter((v) => (vt.honours || []).includes(v)), costs: r.filter((v) => (vt.costs || []).includes(v) && !(vt.honours || []).includes(v)) };
       }
-      return { ...o, tags };
+      return { ...o, label: fill(o.label), news: fill(o.news), tags };
     });
     raw.collision = [stances.community.ranks[0], stances.meridian.ranks[0]];
-    return validateDilemma(C, state, raw, stances);
+    const v = validateDilemma(C, state, raw, stances, false);
+    if (v.ok) return v;
+    return validateDilemma(C, state, holdMoment(C, state), stances, false); // never leave a turn without a moment
+  }
+  // Last resort if a written moment cannot be paid for: hold or act, both free.
+  function holdMoment(C, state) {
+    return { final_call: "meridian", site: null, title: "Hold the line", situation: "Keystone's crews are stretched thin. Meridian can keep its standing plan or release the plant crew early to help their families.",
+      resident: "", voice: null, default: 0,
+      orders: [{ label: "Keep the standing plan", owner: "meridian", cost: {}, effects: { confidence: 2, trust: -2 } },
+        { label: "Release the crew to their families", owner: "meridian", cost: {}, effects: { confidence: -3, trust: 3 } }] };
   }
 
   // ---------- turn resolution ----------
   // input: { orders: {unit: {task, site, dest}}, lends: {unit: true}, towerOpen: bool,
   //          dilemma, votes: {community, meridian}, promises: [...], confirms: [index] }
-  function resolveTurn(C, state0, input) {
+  // A rescue unit "could have helped" if a site it can reach still has people at home.
+function couldHelp(C, s, U) {
+  return Object.keys(C.sites).some((id) => C.sites[id].people && s.sites[id].home.vuln + s.sites[id].home.able > 0
+    && (U.road ? !s.sites[id].flooded : (U.reach || []).includes(id)));
+}
+
+function resolveTurn(C, state0, input) {
     if (state0.over) throw new Error("game over");
     const s = clone(state0), T = C.turns[s.turn - 1], I = T.intensity, rng = rngFor(s.seed, s.turn);
     const ev = [], ticker = [];
     const say = (text, kind = "info") => ev.push({ text, kind });
     const turnLost = { vuln: 0, able: 0 }, turnRescued = { vuln: 0, able: 0 }, credit = { community: 0, meridian: 0 };
-    const powered = new Set(), sandbagged = new Set();
+    const powered = new Set(), sandbagged = new Set(), active = new Set();
+    let genTaken = false, coldStore = false;
     const orders = input.orders || {}, lends = input.lends || {};
 
     // 1. promises made or confirmed this turn
     for (const p of input.promises || []) s.promises.push({ ...p, made: s.turn, due: s.turn + 1, confirmed: false, status: "open" });
-    for (const i of input.confirms || []) if (s.promises[i]) s.promises[i].confirmed = true;
+    for (const i of input.confirms || []) if (Number.isInteger(i) && i >= 0 && s.promises[i]) s.promises[i].confirmed = true;
 
     // 2. Tech Tower
     if (input.towerOpen && !s.towerOpen) {
@@ -351,19 +405,37 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
     const D = input.dilemma;
     if (D) {
       const v = input.votes || {};
-      const idx = Number.isInteger(v[D.final_call]) ? v[D.final_call] : null;
-      const o = D.orders[idx ?? D.default];
-      choice = { index: idx ?? D.default, stormDecided: idx === null, by: D.final_call, votes: { community: v.community ?? null, meridian: v.meridian ?? null } };
+      const vote = (t) => (Number.isInteger(v[t]) && v[t] >= 0 && v[t] < D.orders.length ? v[t] : null);
+      const idx = vote(D.final_call);
+      let index = idx ?? D.default;
+      choice = { index, stormDecided: idx === null, by: D.final_call, votes: { community: vote("community"), meridian: vote("meridian") } };
+      // An order the other team pays for runs only if that team voted for it too.
+      const asked = D.orders[index];
+      if (asked.owner !== D.final_call && vote(asked.owner) !== index) {
+        choice.refused = index; index = D.default; choice.index = index;
+        say(`${C.teams[asked.owner].short} did not agree to "${asked.label}", so the standing plan ran.`, "bad");
+      }
+      const o = D.orders[index];
       if (pay(s, o.owner, o.cost)) {
         const e = o.effects;
         if (e.open_tower) s.towerOpen = true;
-        if (e.power) powered.add(e.power);
+        if (e.cold_store) coldStore = true;
+        if (e.power) { powered.add(e.power); if (o.owner === "meridian") genTaken = true; } // the moment's power is the generator
         if (e.sandbag) sandbagged.add(e.sandbag);
         if (e.trust) s.meters.trust += e.trust;
         if (e.confidence) s.meters.confidence += e.confidence;
         if (e.doses) s.stock.meridian.doses = Math.max(0, s.stock.meridian.doses + e.doses);
-        if (e.save) { credit[o.owner] += move(s, e.save.site, "heartland", e.save.n, turnRescued, true); board(C, s, e.save.site, "heartland", say); }
-        choice.expose = e.expose || 0;
+        if (e.save) {
+          // to Heartland while Crater Road is open, otherwise up the hill to St. Brendan's
+          const dest = s.sites.crater_road.closed ? "st_brendans" : "heartland";
+          if (!(dest === "st_brendans" && e.save.site === "st_brendans")) {
+            const n = move(s, e.save.site, dest, e.save.n, turnRescued, true);
+            credit[o.owner] += n;
+            board(C, s, e.save.site, dest, say);
+            say(n ? `${n} vulnerable people were taken from ${C.sites[e.save.site].name} to ${C.destinations[dest].name}.` : `Nobody was left at ${C.sites[e.save.site].name} to take to safety.`, n ? "good" : "info");
+          }
+        }
+        if (e.expose) choice.expose = e.expose;
         if (o.news) ticker.push(o.news);
       } else {
         choice.unpaid = true; say(`"${o.label}" could not be paid for, so nothing happened.`, "bad");
@@ -375,7 +447,8 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
     for (const uid of Object.keys(C.units)) {
       const U = C.units[uid], o = orders[uid];
       if (!o || o.task === "idle") continue;
-      const op = lends[uid] ? other(U.team) : U.team; // operator pays running costs
+      const op = lends[uid] ? other(U.team) : U.team; // operator, who gets the credit for a rescue
+      const fuel = U.team === "community" ? "c_fuel" : "m_fuel"; // running costs stay with the owner
       const site = s.sites[o.site];
       if (o.task === "evac") {
         if (!site) continue;
@@ -385,7 +458,7 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
         if (dest === "heartland") {
           if (s.sites.crater_road.closed) { say(`${U.name} turned back: Crater Road is closed.`, "bad"); continue; }
           if (!U.road) continue;
-          if (!pay(s, op, { [op === "community" ? "c_fuel" : "m_fuel"]: C.destinations.heartland.fuel })) { say(`${U.name} had no fuel for the Heartland run.`, "bad"); continue; }
+          if (!pay(s, U.team, { [fuel]: C.destinations.heartland.fuel })) { say(`${U.name} had no fuel for the Heartland run.`, "bad"); continue; }
         }
         if (dest === "tech_tower" && !s.towerOpen) { say(`${U.name} found Tech Tower locked.`, "bad"); continue; }
         let room = U.carry;
@@ -394,6 +467,7 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
         const n = move(s, o.site, dest, room, turnRescued, false);
         credit[op] += turnRescued.vuln - before;
         board(C, s, o.site, dest, say);
+        if (n) active.add(uid);
         if (n) say(`${U.name} moved ${n} people from ${C.sites[o.site].name} to ${C.destinations[dest].name}.`, "good");
         else say(`${U.name} went to ${C.sites[o.site].name} but nobody was left to move.`);
       } else if (o.task === "sandbag") {
@@ -401,7 +475,8 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
         if (pay(s, U.team, U.sandbag_cost)) { sandbagged.add(o.site); say(`${U.name} sandbagged ${C.sites[o.site].name}.`); }
       } else if (o.task === "power") {
         if (!site) continue;
-        if (pay(s, op, { [op === "community" ? "c_fuel" : "m_fuel"]: U.power_cost_fuel })) { powered.add(o.site); say(`${U.name} is powering ${C.sites[o.site].name}.`); }
+        if (genTaken) { say(`${U.name} went where the moment sent it, not to ${C.sites[o.site].name}.`); continue; }
+        if (pay(s, U.team, { [fuel]: U.power_cost_fuel })) { powered.add(o.site); say(`${U.name} is powering ${C.sites[o.site].name}.`); }
         else say(`${U.name} had no fuel.`, "bad");
       }
     }
@@ -466,7 +541,8 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
       if (familiesAtRisk) { my.doses = Math.floor(my.doses / 2); my.funds = Math.floor(my.funds / 2); say("Half the shift left the line to find family still stuck in the flood.", "bad"); } s.meters.confidence += M.plant_ran; say(`The plant ran: +${my.doses} cure doses.`, "good"); }
     else { s.meters.confidence += M.plant_idle; say(`The plant made nothing this turn${plant.flooded ? " (flooded)" : !plantPowered ? " (no power)" : ""}.`, "bad"); }
     if (plant.flooded && pc.task === "run" && s.residents.frank.status === "at work") { s.residents.frank.status = "injured"; s.injured += 1; say("Frank Reeves was hurt when the plant flooded.", "loss"); }
-    if (!plantPowered && s.stock.meridian.doses > 0) {
+    if (!plantPowered && coldStore && s.stock.meridian.doses > 0) say("The stored doses were packed on ice in time: none spoiled.", "good");
+    if (!plantPowered && !coldStore && s.stock.meridian.doses > 0) {
       const sp = Math.min(s.stock.meridian.doses, Y.plant.spoil_unpowered);
       s.stock.meridian.doses -= sp; say(`The plant's cold store warmed up: ${sp} stored doses spoiled.`, "bad");
     }
@@ -487,8 +563,9 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
     // the press notices rescue units that sat still while people were lost
     if (turnLost.vuln + turnLost.able > 0) {
       for (const [uid, U] of Object.entries(C.units)) {
-        if (!U.carry || (orders[uid] && orders[uid].task !== "idle")) continue;
-        const t = lends[uid] ? other(U.team) : U.team;
+        if (!U.carry || active.has(uid)) continue; // only a trip that moved someone counts
+        if (!couldHelp(C, s, U)) continue; // nobody it could still reach was waiting
+        const t = U.team;
         s.meters[C.teams[t].meter] += M.idle_while_lost;
         ticker.push(`${U.name} sat idle while Keystone lost ${turnLost.vuln + turnLost.able} people.`);
       }
@@ -514,7 +591,7 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
       const meter = C.teams[t].meter;
       if (s.meters[meter] < M.low) ticker.push(`${C.voices[t].who}: "${C.voices[t].low}"`);
     }
-    if (!ticker.length) ticker.push(`Keystone, ${T.hours}: Midas ${T.label.toLowerCase()}, category pressure rising.`);
+    if (!ticker.length) ticker.push(`Keystone, ${T.hours}: Midas ${T.label.toLowerCase()}, pressure rising.`);
 
     const report = { turn: s.turn, label: T.label, events: ev, ticker, lost: turnLost, rescued: turnRescued, yields: { community: cy, meridian: my }, choice };
     s.history.push({ turn: s.turn, dilemma: D || null, choice, lost: turnLost, rescued: turnRescued });
@@ -529,7 +606,7 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
     const mult = (m) => (m >= M.high ? R.high_mult : m < M.low ? R.low_mult : 1);
     const ableAlive = C.sites.low_ward.people.able + C.sites.tech_housing.people.able - s.lost.able;
     const vulnLost = s.lost.vuln;
-    const cm = mult(s.meters.trust), mm = (mult(s.meters.confidence) + mult(s.meters.trust)) / 2; // the plant also needs its licence to operate
+    const cm = mult(s.meters.trust), mm = (mult(s.meters.confidence) + 2 * mult(s.meters.trust)) / 3; // the plant needs its licence to operate: trust counts double
     const cv = Math.floor((ableAlive / R.able_per_volunteer) * R.turns * cm);
     const cf = Math.floor((Y.low_ward.food + Math.floor(s.meters.trust / R.trust_per_aid)) * R.turns * cm) - Math.floor(vulnLost / R.vuln_lost_per_food);
     const pd = s.sites.plant.flooded ? R.plant_flooded_doses : Y.plant.doses * R.turns;
@@ -585,7 +662,7 @@ C.values = {"autonomy":["Autonomy","openness-to-change"],"creativity":["Creativi
     return { state: s, hash: hash(s) };
   }
 
-  const api = { TEAMS, newGame, resolveTurn, validateDilemma, fallbackDilemma, standings, points, replay, hash, rngFor, peopleInParish };
+  const api = { TEAMS, boardFacts, newGame, resolveTurn, validateDilemma, fallbackDilemma, standings, points, replay, hash, rngFor, peopleInParish };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Engine = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);
@@ -633,7 +710,8 @@ Rules:
    "trust": -10..10 (community trust), "confidence": -10..10 (Meridian board confidence),
    "doses": -10..10 (cure doses gained or lost now), "save": {"site": one of low_ward|tech_housing|st_brendans|plant, "n": 0..60} (vulnerable people taken to safety),
    "expose": 0..100 (plant workers kept in harm's way this turn), "power": site (backup power there this turn),
-   "sandbag": site (flood defence there this turn), "open_tower": true (Meridian opens Tech Tower as a shelter).
+   "sandbag": site (flood defence there this turn), "open_tower": true (Meridian opens Tech Tower as a shelter),
+   "cold_store": true (stored cure doses are packed on ice, so none spoil if the plant loses power this turn).
 5. Tag each order, for EACH team, with which of that team's signed values it honours and which it costs. Use only that team's own values. Every order must cost at least one signed value for someone.
 6. Set "final_call" to the team whose resources the moment is mostly about, and "default" to the order that happens if that team does not decide in time.
 7. Pressure comes only from off-board voices: a named community leader or a named Meridian executive. Never from the other team.
