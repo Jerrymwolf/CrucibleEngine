@@ -1,7 +1,7 @@
 ---
 type: research
 date: 2026-11-01
-status: in-progress
+status: done
 tags: [values-crucible, rea, reverse-engineering, civ4, diplomacy, keystone-slice]
 related: ["[[decision-2026-10-26-rts-to-reverse-engineer]]", "[[teardown-2026-10-26-frostpunk2-diplomacy]]", "[[2026-10-31-keystone-persona-test-build-log]]"]
 ---
@@ -42,4 +42,8 @@ Not yet read are Frostpunk 2, Anno 1800, Dune: Spice Wars and Northgard. They ar
 
 ## Status
 
-The game designer persona is testing these three mechanics in its balance harness, with and without the "beat your own start" win condition. The results will be added here.
+Built into both engines (commits 1a5bc6d, 7bf4e92 and the round 7 tune). The game designer persona went from 68 to 90.
+
+- Anger means the selfish line costs Meridian later.
+- The joint seawall means the deal pays both teams (66/73 making target, against 60/60 for careful play alone).
+- The Godot side is syntax-checked only; Jerry's parity test is still the first run.

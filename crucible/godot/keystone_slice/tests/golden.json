@@ -1250,7 +1250,7 @@
            "label": "Ask Meridian to pay a contractor crew",
            "owner": "meridian",
            "cost": {
-            "funds": 8
+            "funds": 5
            },
            "effects": {
             "trust": 2,
@@ -1313,7 +1313,7 @@
         "meridian": "made"
        }
       },
-      "hash": "f2929842"
+      "hash": "19fa9893"
      }
     }
    ],
@@ -2492,7 +2492,7 @@
            "label": "Ask Meridian to pay a contractor crew",
            "owner": "meridian",
            "cost": {
-            "funds": 8
+            "funds": 5
            },
            "effects": {
             "trust": 2,
@@ -2550,7 +2550,7 @@
        },
        "choices": {}
       },
-      "hash": "7b622043"
+      "hash": "d1cc237c"
      }
     }
    ],
@@ -3769,7 +3769,7 @@
            "label": "Ask Meridian to pay a contractor crew",
            "owner": "meridian",
            "cost": {
-            "funds": 8
+            "funds": 5
            },
            "effects": {
             "trust": 2,
@@ -3832,7 +3832,7 @@
         "meridian": "made"
        }
       },
-      "hash": "03cc4b35"
+      "hash": "a0a74f28"
      }
     }
    ],

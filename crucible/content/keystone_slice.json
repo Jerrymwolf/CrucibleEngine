@@ -1268,7 +1268,7 @@
      "label": "Ask Meridian to pay a contractor crew",
      "owner": "meridian",
      "cost": {
-      "funds": 8
+      "funds": 5
      },
      "effects": {
       "sandbag": "plant",
@@ -1462,7 +1462,7 @@
      "label": "Ask Meridian to pay a contractor crew",
      "owner": "meridian",
      "cost": {
-      "funds": 8
+      "funds": 5
      },
      "effects": {
       "sandbag": "plant",

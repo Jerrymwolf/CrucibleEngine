@@ -20,7 +20,7 @@ Five tester personas read the code, ran the JS engine and scored the slice again
 | Red team | hostile AI JSON, inputs, replay, keys | 85 | 94 | | 94 |
 | Exec player (CNO) | first-time clarity, stakes | 54 | 79 | 83 | 87 |
 | Facilitator | values learning, witness, debrief | 55 | 80 | 84 | 87 |
-| Game designer | decisions, exploits, tension | 45 | 67 | 68 | 68 (ceiling set by the win condition) |
+| Game designer | decisions, exploits, tension | 45 | 67 | 68 | 90 (round 7, after REA mechanics and play-to-target) |
 
 ## What changed
 
@@ -69,7 +69,19 @@ Five tester personas read the code, ran the JS engine and scored the slice again
 
 - When Meridian always votes the company option, it gains about 22 win points (it wins about 65% of games).
 
+## 2026-11-01: designer push (REA on real code)
+
+Jerry: "We need to get the game designer score up" and "I don't think we've actually used REA on actual code and games." See [[rea-2026-11-01-civ4-diplomacy-code]].
+
+- **New rules (both engines):** worker anger timers and a smooth workforce (from the Civ IV SDK), a T3 seawall that holds only with sandbags from both teams, sandbags that last two turns (from the Diplomacy engine's support rules), and one recovery choice per team on the last storm turn.
+- **Win setting:** setup has "How a team wins". The default is **play to your target** (community 113%, Meridian 118% of start); "race" is still there.
+- **Tuning:** darkness in shelters and homes is deadlier, the flooded plant restarts with 10 doses, a kept promise is worth 1 trust, Heartland costs 3 fuel per trip, and the T3 contractor costs Meridian 5 funds.
+- **Designer, round 7 (1000 seeds, % making target, C/M):** careful/careful 60/60, careful/nothing 48/6, nothing/careful 3/3, nothing/nothing 1/1, careful/selfish 38/50, deal/deal 66/73. Both Meridian extremes (always selfish, always generous) cost it. Score 89, then 90 with the contractor at 5 funds.
+- **Next for about 92:** give community rescues a real cost (Heartland fuel 4 with community target about 110). Not verified.
+
 ## Open: the win condition (Jerry's call)
+
+Play to your target is the current default, pending Jerry's card.
 
 The game designer's remaining points come from one structural fact. In a race between two teams in one parish, any humane act counts twice: the giver loses resources and the rival gains them. This cannot be tuned away while "most resources left relative to the other team" is the win condition.
 
