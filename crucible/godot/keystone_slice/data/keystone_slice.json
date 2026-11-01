@@ -156,7 +156,7 @@
   "heartland": {
    "name": "Heartland shelter",
    "needs": "road_open",
-   "fuel": 1
+   "fuel": 3
   }
  },
  "units": {
@@ -339,9 +339,9 @@
    "able": 0.006
   },
   "dark": {
-   "vuln": 0.025
+   "vuln": 0.05
   },
-  "shelter_dark": 0.012,
+  "shelter_dark": 0.06,
   "overflow": 0.02,
   "exposed": 0.03
  },
@@ -374,7 +374,7 @@
   "plant_idle": -10,
   "hunger": -6,
   "overflow": -1,
-  "promise_kept": 3,
+  "promise_kept": 1,
   "promise_broken": -10,
   "hq_clawback_funds": 5,
   "idle_while_lost": -3
@@ -383,7 +383,7 @@
   "turns": 2,
   "high_mult": 1.25,
   "low_mult": 0.3,
-  "plant_flooded_doses": 0,
+  "plant_flooded_doses": 10,
   "able_per_volunteer": 200,
   "trust_per_aid": 20,
   "vuln_lost_per_food": 4,
@@ -1516,8 +1516,8 @@
  "win": {
   "mode": "par",
   "par": {
-   "community": 130,
-   "meridian": 125
+   "community": 113,
+   "meridian": 118
   },
   "_about": "par: each team succeeds if it ends at or above its par index; both, one or neither can. race: highest index wins."
  },

@@ -363,7 +363,7 @@
        "community": {
         "food": 24,
         "volunteers": 28,
-        "c_fuel": 7
+        "c_fuel": 5
        },
        "meridian": {
         "doses": 36,
@@ -372,7 +372,7 @@
        }
       },
       "meters": {
-       "trust": 61,
+       "trust": 59,
        "confidence": 55
       },
       "lost": {
@@ -746,7 +746,7 @@
        }
       ],
       "recovery": null,
-      "hash": "68702214"
+      "hash": "3337f33d"
      }
     },
     {
@@ -787,18 +787,18 @@
      "expect": {
       "stock": {
        "community": {
-        "food": 39,
-        "volunteers": 41,
-        "c_fuel": 7
+        "food": 34,
+        "volunteers": 37,
+        "c_fuel": 5
        },
        "meridian": {
-        "doses": 40,
-        "funds": 24,
+        "doses": 39,
+        "funds": 23,
         "m_fuel": 7
        }
       },
       "meters": {
-       "trust": 61,
+       "trust": 59,
        "confidence": 48
       },
       "lost": {
@@ -1301,33 +1301,33 @@
       "anger": [],
       "recovery": {
        "community": {
-        "volunteers": 19,
-        "food": 13
+        "volunteers": 15,
+        "food": 8
        },
        "meridian": {
-        "doses": 10,
-        "funds": 4
+        "doses": 9,
+        "funds": 3
        },
        "choices": {
         "community": "made",
         "meridian": "made"
        }
       },
-      "hash": "42d571cf"
+      "hash": "f2929842"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": 133,
+     "points": 115,
      "start": 84,
-     "index": 158,
+     "index": 137,
      "par": true
     },
     "meridian": {
-     "points": 158,
+     "points": 154,
      "start": 144,
-     "index": 110,
+     "index": 107,
      "par": false
     }
    },
@@ -2031,7 +2031,7 @@
      "expect": {
       "stock": {
        "community": {
-        "food": 2,
+        "food": 0,
         "volunteers": 26,
         "c_fuel": 8
        },
@@ -2042,11 +2042,11 @@
        }
       },
       "meters": {
-       "trust": 16,
+       "trust": 15,
        "confidence": 36
       },
       "lost": {
-       "vuln": 59,
+       "vuln": 65,
        "able": 48
       },
       "rescued": {
@@ -2055,7 +2055,7 @@
       },
       "shelter": {
        "st_brendans": {
-        "vuln": 19,
+        "vuln": 16,
         "able": 0
        },
        "tech_tower": {
@@ -2084,7 +2084,7 @@
         "closed": false,
         "home": {
          "able": 700,
-         "vuln": 37
+         "vuln": 34
         }
        },
        "plant": {
@@ -2528,7 +2528,7 @@
          }
         },
         "lost": {
-         "vuln": 14,
+         "vuln": 20,
          "able": 16
         },
         "rescued": {
@@ -2542,7 +2542,7 @@
       "recovery": {
        "community": {
         "volunteers": 4,
-        "food": -13
+        "food": -15
        },
        "meridian": {
         "doses": 0,
@@ -2550,15 +2550,15 @@
        },
        "choices": {}
       },
-      "hash": "518e89ac"
+      "hash": "7b622043"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": 46,
+     "points": 42,
      "start": 84,
-     "index": 55,
+     "index": 50,
      "par": false
     },
     "meridian": {
@@ -2623,12 +2623,12 @@
        "community": {
         "food": 24,
         "volunteers": 23,
-        "c_fuel": 7
+        "c_fuel": 5
        },
        "meridian": {
         "doses": 18,
         "funds": 30,
-        "m_fuel": 9
+        "m_fuel": 7
        }
       },
       "meters": {
@@ -2868,7 +2868,7 @@
       ],
       "anger": [],
       "recovery": null,
-      "hash": "3e338d42"
+      "hash": "b71e537e"
      }
     },
     {
@@ -2901,12 +2901,12 @@
        "community": {
         "food": 21,
         "volunteers": 22,
-        "c_fuel": 7
+        "c_fuel": 5
        },
        "meridian": {
         "doses": 18,
         "funds": 30,
-        "m_fuel": 7
+        "m_fuel": 5
        }
       },
       "meters": {
@@ -3279,7 +3279,7 @@
       ],
       "anger": [],
       "recovery": null,
-      "hash": "c4b32655"
+      "hash": "3cd167d5"
      }
     },
     {
@@ -3310,12 +3310,12 @@
        "community": {
         "food": 33,
         "volunteers": 36,
-        "c_fuel": 7
+        "c_fuel": 5
        },
        "meridian": {
         "doses": 10,
         "funds": 19,
-        "m_fuel": 5
+        "m_fuel": 3
        }
       },
       "meters": {
@@ -3832,21 +3832,21 @@
         "meridian": "made"
        }
       },
-      "hash": "6dd84075"
+      "hash": "03cc4b35"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": 116,
+     "points": 112,
      "start": 84,
-     "index": 138,
+     "index": 133,
      "par": true
     },
     "meridian": {
-     "points": 59,
+     "points": 55,
      "start": 144,
-     "index": 41,
+     "index": 38,
      "par": false
     }
    },
