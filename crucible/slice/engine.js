@@ -48,7 +48,7 @@
       stock: clone(C.start.stock), meters: clone(C.start.meters),
       sites, shelter: { st_brendans: { vuln: 0, able: 0 }, tech_tower: { vuln: 0, able: 0 }, heartland: { vuln: 0, able: 0 } },
       lost: { vuln: 0, able: 0 }, rescued: { vuln: 0, able: 0 }, injured: 0,
-      towerOpen: false, residents, promises: [], history: [],
+      towerOpen: false, residents, promises: [], history: [], sandbags: [], sandbagTeams: [], anger: [],
     };
   }
 
@@ -62,7 +62,8 @@
     const out = {};
     for (const t of TEAMS) {
       const now = points(C, t, state.stock), start = points(C, t, C.start.stock);
-      out[t] = { points: now, start, index: Math.round((now / start) * 100) };
+      const index = Math.round((now / start) * 100);
+      out[t] = { points: now, start, index, par: C.win && C.win.mode === "par" ? index >= C.win.par[t] : null };
     }
     return out;
   }
@@ -103,6 +104,7 @@
       if (EFFECT_SITES.includes(e.sandbag)) effects.sandbag = e.sandbag;
       if (e.open_tower === true) effects.open_tower = true;
       if (e.cold_store === true) effects.cold_store = true;
+      const ag = clamp(int(e.anger), 0, 3); if (ag) effects.anger = ag; // turns of anger at the plant gates
       const tags = {};
       for (const t of TEAMS) {
         const keep = (a) => (Array.isArray(a) ? a.map((v) => String(v).toLowerCase()).filter((v) => signed[t].includes(v)) : []);
@@ -209,7 +211,9 @@ function resolveTurn(C, state0, input) {
     const ev = [], ticker = [];
     const say = (text, kind = "info") => ev.push({ text, kind });
     const turnLost = { vuln: 0, able: 0 }, turnRescued = { vuln: 0, able: 0 }, credit = { community: 0, meridian: 0 };
-    const powered = new Set(), sandbagged = new Set(), active = new Set();
+    const powered = new Set(), sandbagged = new Set(s.sandbags || []), fresh = new Set(), active = new Set();
+    const support = {}, freshSup = []; const back = (site, team, carried) => { (support[site] = support[site] || []).push(team); if (!carried) freshSup.push({ site, team }); };
+    for (const x of s.sandbagTeams || []) back(x.site, x.team, true); // sandbags hold this turn and the next
     let genTaken = false, coldStore = false;
     const orders = input.orders || {}, lends = input.lends || {};
 
@@ -243,7 +247,8 @@ function resolveTurn(C, state0, input) {
         if (e.open_tower) s.towerOpen = true;
         if (e.cold_store) coldStore = true;
         if (e.power) { powered.add(e.power); if (o.owner === "meridian") genTaken = true; } // the moment's power is the generator
-        if (e.sandbag) sandbagged.add(e.sandbag);
+        if (e.sandbag) { sandbagged.add(e.sandbag); fresh.add(e.sandbag); back(e.sandbag, o.owner); }
+        if (e.anger) { s.anger = (s.anger || []).concat([{ left: e.anger, len: e.anger }]); say(`Low Ward will remember this: anger at the plant gates for ${e.anger} turns.`, "bad"); }
         if (e.trust) s.meters.trust += e.trust;
         if (e.confidence) s.meters.confidence += e.confidence;
         if (e.doses) s.stock.meridian.doses = Math.max(0, s.stock.meridian.doses + e.doses);
@@ -294,7 +299,7 @@ function resolveTurn(C, state0, input) {
         else say(`${U.name} went to ${C.sites[o.site].name} but nobody was left to move.`);
       } else if (o.task === "sandbag") {
         if (!site || site.flooded) continue;
-        if (pay(s, U.team, U.sandbag_cost)) { sandbagged.add(o.site); say(`${U.name} sandbagged ${C.sites[o.site].name}.`); }
+        if (pay(s, U.team, U.sandbag_cost)) { sandbagged.add(o.site); fresh.add(o.site); back(o.site, U.team); say(`${U.name} sandbagged ${C.sites[o.site].name}.`); }
       } else if (o.task === "power") {
         if (!site) continue;
         if (genTaken) { say(`${U.name} went where the moment sent it, not to ${C.sites[o.site].name}.`); continue; }
@@ -309,7 +314,11 @@ function resolveTurn(C, state0, input) {
       if (h.effect === "dark" && site.dark) continue;
       if (h.effect === "closed" && site.closed) continue;
       let p = h.p;
-      if (h.effect === "flooded" && sandbagged.has(h.site) && h.sandbag_p !== undefined) p = h.sandbag_p;
+      if (h.effect === "flooded" && sandbagged.has(h.site) && h.sandbag_p !== undefined) {
+        const sup = support[h.site] || [], strength = sup.length, teams = new Set(sup).size;
+        // a held line needs strength >= hold from both teams; one-sided sandbags only half-help
+        p = !h.hold || (strength >= h.hold && teams >= 2) ? h.sandbag_p : (h.p + h.sandbag_p) / 2;
+      }
       if (rng() < p) { site[h.effect] = true; say(h.text + ".", "storm"); ticker.push(h.text + "."); }
       else if (h.effect === "flooded" && sandbagged.has(h.site)) say(`Sandbags held at ${C.sites[h.site].name}.`, "good");
     }
@@ -359,7 +368,9 @@ function resolveTurn(C, state0, input) {
     const ran = (pc.task === "run" || !orders.pcrew) && !lends.pcrew && !plant.flooded && plantPowered;
     const my = { doses: 0, funds: 0 };
     const familiesAtRisk = EFFECT_SITES.some((id) => s.sites[id].flooded && s.sites[id].home.vuln > 0);
-    if (ran) { my.doses = Y.plant.doses; my.funds = Y.plant.funds;
+    const wf = workforce(C, s);
+    if (ran) { my.doses = Math.floor(Y.plant.doses * wf + 0.5); my.funds = Math.floor(Y.plant.funds * wf + 0.5);
+      if (wf < 1) say(`Only ${Math.floor(wf * 100 + 0.5)}% of the plant's shift turned up.`, "bad");
       if (familiesAtRisk) { my.doses = Math.floor(my.doses / 2); my.funds = Math.floor(my.funds / 2); say("Half the shift left the line to find family still stuck in the flood.", "bad"); } s.meters.confidence += M.plant_ran; say(`The plant ran: +${my.doses} cure doses.`, "good"); }
     else { s.meters.confidence += M.plant_idle; say(`The plant made nothing this turn${plant.flooded ? " (flooded)" : !plantPowered ? " (no power)" : ""}.`, "bad"); }
     if (plant.flooded && pc.task === "run" && s.residents.frank.status === "at work") { s.residents.frank.status = "injured"; s.injured += 1; say("Frank Reeves was hurt when the plant flooded.", "loss"); }
@@ -418,17 +429,27 @@ function resolveTurn(C, state0, input) {
     const report = { turn: s.turn, label: T.label, events: ev, ticker, lost: turnLost, rescued: turnRescued, yields: { community: cy, meridian: my }, choice };
     s.history.push({ turn: s.turn, dilemma: D || null, choice, lost: turnLost, rescued: turnRescued });
     s.turn += 1;
-    if (s.turn > C.turns.length) finish(C, s, report);
+    s.sandbags = [...fresh].filter((id) => !s.sites[id].flooded).sort();
+    s.sandbagTeams = freshSup.filter((x) => !s.sites[x.site].flooded).sort((a, b) => (a.site + "/" + a.team < b.site + "/" + b.team ? -1 : a.site + "/" + a.team > b.site + "/" + b.team ? 1 : 0));
+    s.anger = (s.anger || []).map((a) => ({ ...a, left: a.left - 1 })).filter((a) => a.left > 0);
+    if (s.turn > C.turns.length) finish(C, s, report, input.recovery || {});
     return { state: s, report };
   }
 
   // Recovery after the last storm turn: saved people go back to work, meters scale the yield.
-  function finish(C, s, report) {
+  // Share of the plant's shift that turns up: falls smoothly with low community trust and with live anger timers.
+  function workforce(C, s) {
+    const W = C.workforce; if (!W) return 1;
+    const t = clamp(s.meters.trust / W.trust_full, W.floor, 1);
+    const anger = (s.anger || []).reduce((a, x) => a + ((x.left - 1) / x.len + 1) * W.anger_per_timer, 0);
+    return clamp(t * (1 - clamp(anger, 0, W.anger_cap)), W.floor, 1);
+  }
+  function finish(C, s, report, rc) {
     const R = C.recovery, M = C.meters, Y = C.yields;
     const mult = (m) => (m >= M.high ? R.high_mult : m < M.low ? R.low_mult : 1);
     const ableAlive = C.sites.low_ward.people.able + C.sites.tech_housing.people.able - s.lost.able;
     const vulnLost = s.lost.vuln;
-    const cm = mult(s.meters.trust), mm = (mult(s.meters.confidence) + 2 * mult(s.meters.trust)) / 3; // the plant needs its licence to operate: trust counts double
+    const cm = mult(s.meters.trust), mm = C.workforce ? mult(s.meters.confidence) * workforce(C, s) : (mult(s.meters.confidence) + 2 * mult(s.meters.trust)) / 3;
     const cv = Math.floor((ableAlive / R.able_per_volunteer) * R.turns * cm);
     const cf = Math.floor((Y.low_ward.food + Math.floor(s.meters.trust / R.trust_per_aid)) * R.turns * cm) - Math.floor(vulnLost / R.vuln_lost_per_food);
     const pd = s.sites.plant.flooded ? R.plant_flooded_doses : Y.plant.doses * R.turns;
@@ -436,7 +457,14 @@ function resolveTurn(C, state0, input) {
     const mf = Math.floor(Y.plant.funds * (s.sites.plant.flooded ? 1 : R.turns) * mm);
     s.stock.community.volunteers += cv; s.stock.community.food = Math.max(0, s.stock.community.food + cf);
     s.stock.meridian.doses += md; s.stock.meridian.funds += mf;
-    s.recovery = { community: { volunteers: cv, food: cf }, meridian: { doses: md, funds: mf } };
+    s.recovery = { community: { volunteers: cv, food: cf }, meridian: { doses: md, funds: mf }, choices: {} };
+    for (const t of TEAMS) { // one after-storm choice per team: help the other side rebuild, at a cost to your own stock
+      const ch = R.choices && R.choices[t];
+      if (!ch || !rc[t]) continue;
+      if (!pay(s, t, ch.cost)) { s.recovery.choices[t] = "unpaid"; continue; }
+      for (const [g, n] of Object.entries(ch.gives || {})) s.stock[C.goods[g].owner][g] += n;
+      s.recovery.choices[t] = "made";
+    }
     s.over = true;
     report.recovery = s.recovery;
   }

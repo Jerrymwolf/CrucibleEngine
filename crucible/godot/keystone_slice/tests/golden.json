@@ -240,7 +240,8 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6
+            "confidence": -6,
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -316,7 +317,12 @@
         }
        }
       ],
-      "hash": "1b19adf7"
+      "sandbags": [
+       "low_ward"
+      ],
+      "anger": [],
+      "recovery": null,
+      "hash": "4e3a6257"
      }
     },
     {
@@ -360,8 +366,8 @@
         "c_fuel": 7
        },
        "meridian": {
-        "doses": 38,
-        "funds": 28,
+        "doses": 36,
+        "funds": 27,
         "m_fuel": 7
        }
       },
@@ -522,7 +528,8 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6
+            "confidence": -6,
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -655,7 +662,8 @@
            "effects": {
             "trust": -5,
             "confidence": -6,
-            "power": "plant"
+            "power": "plant",
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -730,7 +738,15 @@
         }
        }
       ],
-      "hash": "1a7237c0"
+      "sandbags": [],
+      "anger": [
+       {
+        "left": 1,
+        "len": 2
+       }
+      ],
+      "recovery": null,
+      "hash": "68702214"
      }
     },
     {
@@ -762,18 +778,22 @@
        "community": 0
       },
       "promises": [],
-      "confirms": []
+      "confirms": [],
+      "recovery": {
+       "community": true,
+       "meridian": true
+      }
      },
      "expect": {
       "stock": {
        "community": {
-        "food": 34,
-        "volunteers": 47,
+        "food": 39,
+        "volunteers": 41,
         "c_fuel": 7
        },
        "meridian": {
-        "doses": 39,
-        "funds": 30,
+        "doses": 40,
+        "funds": 24,
         "m_fuel": 7
        }
       },
@@ -934,7 +954,8 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6
+            "confidence": -6,
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -1067,7 +1088,8 @@
            "effects": {
             "trust": -5,
             "confidence": -6,
-            "power": "plant"
+            "power": "plant",
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -1228,7 +1250,7 @@
            "label": "Ask Meridian to pay a contractor crew",
            "owner": "meridian",
            "cost": {
-            "funds": 12
+            "funds": 8
            },
            "effects": {
             "trust": 2,
@@ -1273,20 +1295,40 @@
         }
        }
       ],
-      "hash": "fa5cc9f0"
+      "sandbags": [
+       "plant"
+      ],
+      "anger": [],
+      "recovery": {
+       "community": {
+        "volunteers": 19,
+        "food": 13
+       },
+       "meridian": {
+        "doses": 10,
+        "funds": 4
+       },
+       "choices": {
+        "community": "made",
+        "meridian": "made"
+       }
+      },
+      "hash": "42d571cf"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": 129,
+     "points": 133,
      "start": 84,
-     "index": 154
+     "index": 158,
+     "par": true
     },
     "meridian": {
-     "points": 161,
+     "points": 158,
      "start": 144,
-     "index": 112
+     "index": 110,
+     "par": false
     }
    },
    "rng_first": [
@@ -1490,7 +1532,8 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6
+            "confidence": -6,
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -1566,7 +1609,10 @@
         }
        }
       ],
-      "hash": "90fda7a0"
+      "sandbags": [],
+      "anger": [],
+      "recovery": null,
+      "hash": "8c8d8587"
      }
     },
     {
@@ -1590,8 +1636,8 @@
         "c_fuel": 8
        },
        "meridian": {
-        "doses": 32,
-        "funds": 32,
+        "doses": 31,
+        "funds": 31,
         "m_fuel": 8
        }
       },
@@ -1750,7 +1796,8 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6
+            "confidence": -6,
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -1883,7 +1930,8 @@
            "effects": {
             "trust": -5,
             "confidence": -6,
-            "power": "plant"
+            "power": "plant",
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -1958,7 +2006,15 @@
         }
        }
       ],
-      "hash": "9a32039c"
+      "sandbags": [],
+      "anger": [
+       {
+        "left": 1,
+        "len": 2
+       }
+      ],
+      "recovery": null,
+      "hash": "efc5c4f5"
      }
     },
     {
@@ -1980,8 +2036,8 @@
         "c_fuel": 8
        },
        "meridian": {
-        "doses": 23,
-        "funds": 27,
+        "doses": 21,
+        "funds": 26,
         "m_fuel": 8
        }
       },
@@ -2140,7 +2196,8 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6
+            "confidence": -6,
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -2273,7 +2330,8 @@
            "effects": {
             "trust": -5,
             "confidence": -6,
-            "power": "plant"
+            "power": "plant",
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -2434,7 +2492,7 @@
            "label": "Ask Meridian to pay a contractor crew",
            "owner": "meridian",
            "cost": {
-            "funds": 12
+            "funds": 8
            },
            "effects": {
             "trust": 2,
@@ -2479,7 +2537,20 @@
         }
        }
       ],
-      "hash": "5658fa09"
+      "sandbags": [],
+      "anger": [],
+      "recovery": {
+       "community": {
+        "volunteers": 4,
+        "food": -13
+       },
+       "meridian": {
+        "doses": 0,
+        "funds": 0
+       },
+       "choices": {}
+      },
+      "hash": "518e89ac"
      }
     }
    ],
@@ -2487,12 +2558,14 @@
     "community": {
      "points": 46,
      "start": 84,
-     "index": 55
+     "index": 55,
+     "par": false
     },
     "meridian": {
-     "points": 112,
+     "points": 105,
      "start": 144,
-     "index": 78
+     "index": 73,
+     "par": false
     }
    },
    "rng_first": [
@@ -2713,7 +2786,8 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6
+            "confidence": -6,
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -2789,7 +2863,12 @@
         }
        }
       ],
-      "hash": "bd60397a"
+      "sandbags": [
+       "low_ward"
+      ],
+      "anger": [],
+      "recovery": null,
+      "hash": "3e338d42"
      }
     },
     {
@@ -2985,7 +3064,8 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6
+            "confidence": -6,
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -3118,7 +3198,8 @@
            "effects": {
             "trust": -5,
             "confidence": -6,
-            "power": "plant"
+            "power": "plant",
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -3193,7 +3274,12 @@
         }
        }
       ],
-      "hash": "4e6b9c54"
+      "sandbags": [
+       "plant"
+      ],
+      "anger": [],
+      "recovery": null,
+      "hash": "c4b32655"
      }
     },
     {
@@ -3204,7 +3290,8 @@
         "site": "tech_housing"
        },
        "pcrew": {
-        "task": "run"
+        "task": "sandbag",
+        "site": "plant"
        }
       },
       "lends": {},
@@ -3213,18 +3300,21 @@
        "community": 2
       },
       "promises": [],
-      "confirms": []
+      "confirms": [],
+      "recovery": {
+       "meridian": true
+      }
      },
      "expect": {
       "stock": {
        "community": {
-        "food": 28,
+        "food": 33,
         "volunteers": 36,
         "c_fuel": 7
        },
        "meridian": {
-        "doses": 15,
-        "funds": 28,
+        "doses": 10,
+        "funds": 19,
         "m_fuel": 5
        }
       },
@@ -3383,7 +3473,8 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6
+            "confidence": -6,
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -3516,7 +3607,8 @@
            "effects": {
             "trust": -5,
             "confidence": -6,
-            "power": "plant"
+            "power": "plant",
+            "anger": 2
            },
            "tags": {
             "community": {
@@ -3677,7 +3769,7 @@
            "label": "Ask Meridian to pay a contractor crew",
            "owner": "meridian",
            "cost": {
-            "funds": 12
+            "funds": 8
            },
            "effects": {
             "trust": 2,
@@ -3723,20 +3815,39 @@
         }
        }
       ],
-      "hash": "6cea89d9"
+      "sandbags": [
+       "plant"
+      ],
+      "anger": [],
+      "recovery": {
+       "community": {
+        "volunteers": 15,
+        "food": 10
+       },
+       "meridian": {
+        "doses": 2,
+        "funds": 1
+       },
+       "choices": {
+        "meridian": "made"
+       }
+      },
+      "hash": "6dd84075"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": 106,
+     "points": 116,
      "start": 84,
-     "index": 126
+     "index": 138,
+     "par": true
     },
     "meridian": {
-     "points": 83,
+     "points": 59,
      "start": 144,
-     "index": 58
+     "index": 41,
+     "par": false
     }
    },
    "rng_first": [

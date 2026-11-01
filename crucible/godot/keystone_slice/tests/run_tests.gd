@@ -28,7 +28,7 @@ func _init() -> void:
 			s = Eng.resolve_turn(C, s, input)["state"]
 			var snap := {"stock": s["stock"], "meters": s["meters"], "lost": s["lost"], "rescued": s["rescued"], "shelter": s["shelter"],
 				"towerOpen": s["towerOpen"], "sites": s["sites"], "residents": s["residents"], "promises": s["promises"].map(func(p): return p["status"]),
-				"history": s["history"], "hash": Eng.state_hash(s)}
+				"history": s["history"], "sandbags": s["sandbags"], "anger": s["anger"], "recovery": s.get("recovery"), "hash": Eng.state_hash(s)}
 			checks += 1
 			var a := Eng.stable(snap)
 			var b := Eng.stable(turn["expect"])

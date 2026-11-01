@@ -7,7 +7,7 @@ const Director = preload("res://scripts/director.gd")
 const MapView = preload("res://scripts/map_view.gd")
 const TEAMS := ["community", "meridian"]
 const SETTINGS := "user://settings.cfg"
-const SETTINGS_VERSION := 2  # bump when a default changes, so an old saved choice doesn't override it
+const SETTINGS_VERSION := 3  # bump when a default changes, so an old saved choice doesn't override it
 const PLAYOUT_S := 3.2
 const AI_WAIT_S := 20        # planning seconds the game waits for Claude's moment
 const AI_RETRY_WAIT_S := 35  # ...or this long when Claude's first answer failed the checks and a retry is running
@@ -37,7 +37,7 @@ const COST_SOFT := Color("#3a1916")
 var C: Dictionary
 var setup := {
 	# Solo go/no-go default: you play the community, a bot plays Meridian from its signed values.
-	"seed": 4217, "seconds": 120, "play": "community", "api_key": "", "model": Director.DEFAULT_MODEL,
+	"seed": 4217, "seconds": 120, "play": "community", "win": "par", "api_key": "", "model": Director.DEFAULT_MODEL,
 	"stances": {
 		"community": {"ranks": ["safety", "loyalty", "fairness"], "statement": "We get our people out first. We stand by our neighbours. Nobody gets special treatment."},
 		"meridian": {"ranks": ["excellence", "duty", "accountability"], "statement": "We finish what we start. We owe the world this cure. We own every call we make."},
@@ -104,7 +104,7 @@ func _load_settings() -> void:
 	if cf.load(SETTINGS) == OK:
 		var keys := ["api_key", "model", "stances"]
 		if cf.get_value("setup", "version", 0) == SETTINGS_VERSION:
-			keys += ["seed", "seconds", "play"]
+			keys += ["seed", "seconds", "play", "win"]
 		for k in keys:
 			if cf.has_section_key("setup", k):
 				setup[k] = cf.get_value("setup", k)
@@ -272,9 +272,10 @@ func start_game() -> void:
 	_save_settings()
 	director.api_key = setup["api_key"]
 	director.model = setup["model"] if String(setup["model"]).strip_edges() != "" else Director.DEFAULT_MODEL
+	C["win"]["mode"] = setup.get("win", "par")  # the rules read the win mode from content; the run log records it
 	state = Eng.new_game(C, int(setup["seed"]))
 	run_log = {"format": "keystone-slice/1", "engine": "godot",
-		"setup": {"seed": int(setup["seed"]), "stances": setup["stances"].duplicate(true), "play": setup["play"], "seconds": setup["seconds"]},
+		"setup": {"seed": int(setup["seed"]), "stances": setup["stances"].duplicate(true), "play": setup["play"], "seconds": setup["seconds"], "win": C["win"]["mode"]},
 		"turns": [], "ai": [], "commitment": ""}
 	ticker_lines = ["Hurricane Midas: Keystone ordered to prepare. Landfall expected before midnight."]
 	ai_stats = []
@@ -284,7 +285,7 @@ func start_game() -> void:
 
 
 func begin_turn() -> void:
-	draft = {"orders": {}, "lends": {}, "towerOpen": false, "votes": {"community": null, "meridian": null}, "promises": [], "confirms": [], "confirmed_local": {}}
+	draft = {"orders": {}, "lends": {}, "towerOpen": false, "votes": {"community": null, "meridian": null}, "promises": [], "confirms": [], "confirmed_local": {}, "recovery": {}}
 	for t in TEAMS:
 		if not plays(t):
 			draft["orders"].merge(bot_orders(t, state), true)
@@ -335,6 +336,8 @@ func lock_and_resolve() -> void:
 		"orders": draft["orders"].duplicate(true), "lends": draft["lends"].duplicate(), "towerOpen": draft["towerOpen"],
 		"dilemma": dil["d"], "votes": draft["votes"].duplicate(), "promises": draft["promises"].duplicate(true), "confirms": draft["confirms"].duplicate(),
 	}
+	if state["turn"] == C["turns"].size():
+		input["recovery"] = draft["recovery"].duplicate()
 	run_log["turns"].append(input.duplicate(true))
 	var raw = pending.get("result", {}).get("raw") if pending.get("turn") == state["turn"] else null
 	run_log["ai"].append({"turn": state["turn"], "source": dil["source"], "ms": dil.get("ms"), "notes": dil["notes"], "raw": raw})
@@ -459,6 +462,22 @@ func _on_lend(on: bool, uid: String) -> void:
 		draft["lends"].erase(uid)
 	selected = ""
 	render()
+
+
+func _on_recovery(on: bool, t: String) -> void:
+	draft["recovery"][t] = on
+	render()
+
+
+func par_mode() -> bool:
+	return C.has("win") and C["win"].get("mode") == "par"
+
+
+func _goods_text(g: Dictionary) -> String:
+	var bits := PackedStringArray()
+	for k in g:
+		bits.append("%d %s" % [g[k], String(C["goods"][k]["name"]).to_lower()])
+	return ", ".join(bits)
 
 
 func _on_tower(on: bool) -> void:
@@ -652,6 +671,14 @@ func setup_view() -> Control:
 	seed_in.text = str(setup["seed"])
 	seed_in.custom_minimum_size = Vector2(120, 0)
 	opts.add_child(_field("Storm number (advanced)", seed_in))
+	var win := OptionButton.new()
+	for pair in [["par", "Meet your own target (both teams can)"], ["race", "Beat the other team"]]:
+		win.add_item(pair[1])
+		win.set_item_metadata(win.item_count - 1, pair[0])
+		if setup.get("win", "par") == pair[0]:
+			win.select(win.item_count - 1)
+	opts.add_child(_field("How a team wins", win))
+	setup_inputs["win"] = win
 	col.add_child(opts)
 
 	var ai := _panel(SUNK, LINE)
@@ -695,6 +722,7 @@ func setup_view() -> Control:
 		setup["play"] = play.get_item_metadata(play.selected)
 		setup["seconds"] = secs.get_item_metadata(secs.selected)
 		setup["seed"] = absi(int(seed_in.text)) if seed_in.text.is_valid_int() else 4217
+		setup["win"] = win.get_item_metadata(win.selected)
 		if key.text.strip_edges() != setup["api_key"]:
 			key_from_env = false
 		setup["api_key"] = key.text.strip_edges()
@@ -803,7 +831,7 @@ func forecast_view(n: int) -> Control:
 					w = "certain" if hp >= 0.85 else ("likely" if hp >= 0.5 else "possible")
 				elif dist == 1:
 					w = "likely" if hp >= 0.85 else "possible"
-				hz.append("%s: %s%s" % [w.capitalize(), h["text"], " (sandbags help)" if h.has("sandbag_p") else ""])
+				hz.append("%s: %s%s" % [w.capitalize(), h["text"], (" (holds only with sandbags from both teams)" if h.has("hold") else " (sandbags help)") if h.has("sandbag_p") else ""])
 			# one wrapped line per turn keeps the moment in view
 			v.add_child(_lbl("; ".join(hz) + ".", 14, FG if dist == 0 else MUTED))
 		p.add_child(v)
@@ -886,8 +914,18 @@ func team_view(t: String) -> Control:
 	h.add_child(sp)
 	h.add_child(_chip("YOU" if mine else "BOT", team_soft(t), team_col(t), 12))
 	v.add_child(h)
-	v.add_child(_lbl("Standing: %d%% of its starting resources" % standing(t, s["stock"]), 16, FG))
-	v.add_child(_lbl("Most left at the end wins.", 13, MUTED))
+	if par_mode():
+		var tgt: int = C["win"]["par"][t]
+		var now := standing(t, s["stock"])
+		v.add_child(_lbl("Standing: %d%% of start. Target: %d%%" % [now, tgt], 16, HONOUR if now >= tgt else FG))
+		v.add_child(_lbl("Meet your target at the end. Both teams can.", 13, MUTED))
+	else:
+		v.add_child(_lbl("Standing: %d%% of its starting resources" % standing(t, s["stock"]), 16, FG))
+		v.add_child(_lbl("Most left at the end wins.", 13, MUTED))
+	if t == "meridian" and C.has("workforce"):
+		var wf := roundi(Eng._workforce(C, s) * 100.0)
+		var ang: int = s.get("anger", []).size()
+		v.add_child(_lbl("Plant shift turning up: %d%%%s" % [wf, " (anger at the gates: %d)" % ang if ang else ""], 14, COST if wf < 100 else MUTED))
 	# Lock sits at the top, so it is always in reach
 	if plan and mine:
 		var lb := _button("Orders locked. Tap to change them" if locked[t] else "Lock %s orders" % short(t), _on_lock.bind(t), not locked[t])
@@ -918,6 +956,15 @@ func team_view(t: String) -> Control:
 	bar.add_theme_stylebox_override("background", _box(SUNK, LINE, 1, 3, 0))
 	v.add_child(bar)
 
+	if plan and mine and s["turn"] == C["turns"].size() and C["recovery"].has("choices"):
+		var ch: Dictionary = C["recovery"]["choices"][t]
+		var rrow := _hbox(6)
+		var rcb := CheckBox.new()
+		rcb.button_pressed = draft["recovery"].get(t, false)
+		rcb.toggled.connect(_on_recovery.bind(t))
+		rrow.add_child(rcb)
+		rrow.add_child(_lbl("AFTER THE STORM: %s (you pay %s; %s gets %s)" % [ch["label"], _goods_text(ch["cost"]), short("meridian" if t == "community" else "community"), _goods_text(ch["gives"])], 14, STORM))
+		v.add_child(rrow)
 	v.add_child(_lbl("YOUR UNITS THIS TURN" if mine else "UNITS THIS TURN", 13, MUTED))
 	for id in units_for(t):
 		var u: Dictionary = C["units"][id]
@@ -1067,6 +1114,7 @@ func _cost_text(o: Dictionary) -> Array:
 	if e.has("sandbag"): bits.append("sandbags at %s" % C["sites"][e["sandbag"]]["name"])
 	if e.get("open_tower", false): bits.append("Tech Tower opens")
 	if e.get("cold_store", false): bits.append("stored doses packed on ice, so none spoil")
+	if e.get("anger", 0): bits.append("Low Ward anger at the plant gates for %d turns (fewer workers turn up)" % e["anger"])
 	if e.get("doses", 0): bits.append("%+d cure doses" % e["doses"])
 	if e.get("trust", 0): bits.append("community trust %+d" % e["trust"])
 	if e.get("confidence", 0): bits.append("board confidence %+d" % e["confidence"])
@@ -1281,7 +1329,12 @@ func debrief_view() -> Control:
 	var v1 := _vbox(8)
 	p1.add_child(v1)
 	var headline := "A dead heat on the standings"
-	if winner != "":
+	if par_mode():
+		var bits := PackedStringArray()
+		for t in TEAMS:
+			bits.append("%s %s its target (%d%% against %d%%)" % [C["teams"][t]["name"], "met" if sd[t]["par"] else "fell short of", sd[t]["index"], C["win"]["par"][t]])
+		headline = ". ".join(bits)
+	elif winner != "":
 		headline = "%s finished ahead with %d%% of its starting resources" % [C["teams"][winner]["name"], sd[winner]["index"]]
 	v1.add_child(_lbl("%s. %d people of Keystone died." % [headline, died], 28, FG))
 	v1.add_child(_lbl("The standings are the win condition you were given. The rest of this page is not a score.", 15, MUTED))
@@ -1307,6 +1360,12 @@ func debrief_view() -> Control:
 	var food: int = R["community"]["food"]
 	v1.add_child(_lbl("Recovery: survivors went back to work and aid followed trust, so the community gained %d volunteers and %s food%s. The plant restarted, scaled by board confidence and community trust, so Meridian gained %d doses and %d funds." % [
 		R["community"]["volunteers"], ("%+d" % food), " (care and funerals for the dead cost food)" if food < 0 else "", R["meridian"]["doses"], R["meridian"]["funds"]], 15, MUTED))
+	for t in TEAMS:
+		var made = R.get("choices", {}).get(t)
+		if made == "made":
+			v1.add_child(_lbl("After the storm, %s chose: %s." % [short(t), C["recovery"]["choices"][t]["label"]], 15, team_col(t)))
+		elif made == "unpaid":
+			v1.add_child(_lbl("%s offered to help rebuild but could not pay for it." % short(t), 15, team_col(t)))
 	col.add_child(p1)
 
 	var p2 := _panel(PANEL, LINE)

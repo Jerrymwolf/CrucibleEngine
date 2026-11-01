@@ -57,9 +57,11 @@ for (const cp of ["nothing", "careful"]) for (const mp of ["nothing", "careful"]
     const s = play(seed, cp, mp, randomPick);
     const st = E.standings(C, s);
     ci += st.community.index; mi += st.meridian.index; lost += s.lost.vuln + s.lost.able; tr += s.meters.trust; cf += s.meters.confidence;
-    if (st.community.index > st.meridian.index) cw++; else if (st.meridian.index > st.community.index) mw++;
+    // par mode: a team "wins" by meeting its own target; race mode: by beating the other team
+    if (st.community.par !== null) { if (st.community.par) cw++; if (st.meridian.par) mw++; }
+    else if (st.community.index > st.meridian.index) cw++; else if (st.meridian.index > st.community.index) mw++;
   }
-  rows.push({ community: cp, meridian: mp, "community wins %": (100 * cw / N).toFixed(1), "meridian wins %": (100 * mw / N).toFixed(1),
+  rows.push({ community: cp, meridian: mp, [C.win && C.win.mode === "par" ? "community makes par %" : "community wins %"]: (100 * cw / N).toFixed(1), [C.win && C.win.mode === "par" ? "meridian makes par %" : "meridian wins %"]: (100 * mw / N).toFixed(1),
     "community index": (ci / N).toFixed(1), "meridian index": (mi / N).toFixed(1), "people lost": (lost / N).toFixed(0), trust: (tr / N).toFixed(0), conf: (cf / N).toFixed(0) });
 }
 console.table(rows);

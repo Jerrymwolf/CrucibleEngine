@@ -314,7 +314,8 @@
      "effect": "flooded",
      "p": 0.55,
      "sandbag_p": 0.15,
-     "text": "Seawall fails, the plant floods"
+     "text": "Seawall fails, the plant floods",
+     "hold": 2
     },
     {
      "site": "tech_housing",
@@ -382,11 +383,31 @@
   "turns": 2,
   "high_mult": 1.25,
   "low_mult": 0.3,
-  "plant_flooded_doses": 6,
+  "plant_flooded_doses": 0,
   "able_per_volunteer": 200,
   "trust_per_aid": 20,
   "vuln_lost_per_food": 4,
-  "_about": "Two turns after the storm. Community: able survivors volunteer, aid follows trust, each 10 vulnerable people lost costs a food (funerals, care). Meridian: the plant restarts, scaled by board confidence and community trust together."
+  "_about": "Two turns after the storm. Community: able survivors volunteer, aid follows trust, each 10 vulnerable people lost costs a food (funerals, care). Meridian: the plant restarts, scaled by board confidence and community trust together.",
+  "choices": {
+   "community": {
+    "label": "Volunteers help clear the plant",
+    "cost": {
+     "volunteers": 6
+    },
+    "gives": {
+     "doses": 4
+    }
+   },
+   "meridian": {
+    "label": "Meridian funds the Low Ward rebuild",
+    "cost": {
+     "funds": 5
+    },
+    "gives": {
+     "food": 5
+    }
+   }
+  }
  },
  "residents": [
   {
@@ -526,7 +547,8 @@
      "cost": {},
      "effects": {
       "confidence": -6,
-      "trust": -4
+      "trust": -4,
+      "anger": 2
      },
      "values": {
       "community": {
@@ -747,7 +769,8 @@
      "effects": {
       "power": "plant",
       "confidence": -6,
-      "trust": -5
+      "trust": -5,
+      "anger": 2
      },
      "values": {
       "community": {
@@ -970,7 +993,8 @@
      "effects": {
       "power": "plant",
       "confidence": -6,
-      "trust": -5
+      "trust": -5,
+      "anger": 2
      },
      "values": {
       "community": {
@@ -1244,7 +1268,7 @@
      "label": "Ask Meridian to pay a contractor crew",
      "owner": "meridian",
      "cost": {
-      "funds": 12
+      "funds": 8
      },
      "effects": {
       "sandbag": "plant",
@@ -1438,7 +1462,7 @@
      "label": "Ask Meridian to pay a contractor crew",
      "owner": "meridian",
      "cost": {
-      "funds": 12
+      "funds": 8
      },
      "effects": {
       "sandbag": "plant",
@@ -1488,5 +1512,20 @@
    ],
    "default": 1
   }
- ]
+ ],
+ "win": {
+  "mode": "par",
+  "par": {
+   "community": 130,
+   "meridian": 125
+  },
+  "_about": "par: each team succeeds if it ends at or above its par index; both, one or neither can. race: highest index wins."
+ },
+ "workforce": {
+  "trust_full": 60,
+  "floor": 0.3,
+  "anger_per_timer": 0.25,
+  "anger_cap": 0.6,
+  "_about": "Share of the plant shift that turns up: trust/trust_full, less anger from live timers ((left-1)/len+1)*anger_per_timer. Continuous, no cliffs."
+ }
 }

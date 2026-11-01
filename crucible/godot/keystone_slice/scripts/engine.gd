@@ -107,7 +107,7 @@ static func new_game(C: Dictionary, seed_value: int) -> Dictionary:
 		"sites": sites,
 		"shelter": {"st_brendans": {"vuln": 0, "able": 0}, "tech_tower": {"vuln": 0, "able": 0}, "heartland": {"vuln": 0, "able": 0}},
 		"lost": {"vuln": 0, "able": 0}, "rescued": {"vuln": 0, "able": 0}, "injured": 0,
-		"towerOpen": false, "residents": residents, "promises": [], "history": [],
+		"towerOpen": false, "residents": residents, "promises": [], "history": [], "sandbags": [], "sandbagTeams": [], "anger": [],
 	}
 
 
@@ -124,7 +124,11 @@ static func standings(C: Dictionary, s: Dictionary) -> Dictionary:
 	for t in TEAMS:
 		var now := points(C, t, s["stock"])
 		var start := points(C, t, C["start"]["stock"])
-		out[t] = {"points": now, "start": start, "index": int(round(float(now) / start * 100.0))}
+		var index := int(round(float(now) / start * 100.0))
+		var par = null
+		if C.has("win") and C["win"].get("mode") == "par":
+			par = index >= int(C["win"]["par"][t])
+		out[t] = {"points": now, "start": start, "index": index, "par": par}
 	return out
 
 
@@ -257,6 +261,9 @@ static func validate_dilemma(C: Dictionary, s: Dictionary, raw, stances: Diction
 			effects["open_tower"] = true
 		if typeof(e.get("cold_store")) == TYPE_BOOL and e["cold_store"]:
 			effects["cold_store"] = true
+		var ag := clampi(_int(e.get("anger"), 0), 0, 3)
+		if ag:
+			effects["anger"] = ag  # turns of anger at the plant gates
 		var tags := {}
 		var raw_tags = o.get("tags", {})
 		if typeof(raw_tags) != TYPE_DICTIONARY:
@@ -479,6 +486,13 @@ static func resolve_turn(C: Dictionary, state0: Dictionary, input: Dictionary) -
 	var credit := {"community": 0, "meridian": 0}
 	var powered := {}
 	var sandbagged := {}
+	for id in s.get("sandbags", []):
+		sandbagged[id] = true  # sandbags hold this turn and the next
+	var fresh := {}
+	var support := {}
+	var fresh_sup := []
+	for x in s.get("sandbagTeams", []):
+		_back(support, fresh_sup, x["site"], x["team"], true)
 	var active := {}
 	var gen_taken := false
 	var cold_store := false
@@ -533,6 +547,11 @@ static func resolve_turn(C: Dictionary, state0: Dictionary, input: Dictionary) -
 					gen_taken = true  # the moment's power is the generator
 			if e.has("sandbag"):
 				sandbagged[e["sandbag"]] = true
+				fresh[e["sandbag"]] = true
+				_back(support, fresh_sup, e["sandbag"], o["owner"], false)
+			if e.has("anger"):
+				s["anger"].append({"left": e["anger"], "len": e["anger"]})
+				_say(ev, "Low Ward will remember this: anger at the plant gates for %d turns." % e["anger"], "bad")
 			s["meters"]["trust"] += int(e.get("trust", 0))
 			s["meters"]["confidence"] += int(e.get("confidence", 0))
 			if e.get("doses", 0):
@@ -611,6 +630,8 @@ static func resolve_turn(C: Dictionary, state0: Dictionary, input: Dictionary) -
 				continue
 			if _pay(s, U["team"], U["sandbag_cost"]):
 				sandbagged[site_id] = true
+				fresh[site_id] = true
+				_back(support, fresh_sup, site_id, U["team"], false)
 				_say(ev, "%s sandbagged %s." % [U["name"], C["sites"][site_id]["name"]])
 		elif task == "power":
 			if site == null:
@@ -632,7 +653,15 @@ static func resolve_turn(C: Dictionary, state0: Dictionary, input: Dictionary) -
 			continue
 		var p: float = h["p"]
 		if eff == "flooded" and sandbagged.has(h["site"]) and h.has("sandbag_p"):
-			p = h["sandbag_p"]
+			# a held line needs strength >= hold from both teams; one-sided sandbags only half-help
+			var sup: Array = support.get(h["site"], [])
+			var teams := {}
+			for tm in sup:
+				teams[tm] = true
+			if not h.has("hold") or (sup.size() >= int(h["hold"]) and teams.size() >= 2):
+				p = h["sandbag_p"]
+			else:
+				p = (float(h["p"]) + float(h["sandbag_p"])) / 2.0
 		if rng.next() < p:
 			site[eff] = true
 			_say(ev, h["text"] + ".", "storm")
@@ -711,9 +740,12 @@ static func resolve_turn(C: Dictionary, state0: Dictionary, input: Dictionary) -
 	for id in EFFECT_SITES:
 		if s["sites"][id]["flooded"] and s["sites"][id]["home"]["vuln"] > 0:
 			families_at_risk = true
+	var wf := _workforce(C, s)
 	if ran:
-		my["doses"] = Y["plant"]["doses"]
-		my["funds"] = Y["plant"]["funds"]
+		my["doses"] = floori(Y["plant"]["doses"] * wf + 0.5)
+		my["funds"] = floori(Y["plant"]["funds"] * wf + 0.5)
+		if wf < 1.0:
+			_say(ev, "Only %d%% of the plant's shift turned up." % floori(wf * 100.0 + 0.5), "bad")
 		if families_at_risk:
 			my["doses"] = floori(my["doses"] / 2.0)
 			my["funds"] = floori(my["funds"] / 2.0)
@@ -800,19 +832,56 @@ static func resolve_turn(C: Dictionary, state0: Dictionary, input: Dictionary) -
 		"yields": {"community": cy, "meridian": my}, "choice": choice}
 	s["history"].append({"turn": s["turn"], "dilemma": D, "choice": choice, "lost": turn_lost, "rescued": turn_rescued})
 	s["turn"] += 1
+	var sb := []
+	for id in fresh:
+		if not s["sites"][id]["flooded"]:
+			sb.append(id)
+	sb.sort()
+	s["sandbags"] = sb
+	var st := []
+	for x in fresh_sup:
+		if not s["sites"][x["site"]]["flooded"]:
+			st.append(x)
+	st.sort_custom(func(a, b): return String(a["site"]) + "/" + String(a["team"]) < String(b["site"]) + "/" + String(b["team"]))
+	s["sandbagTeams"] = st
+	var ang := []
+	for a in s["anger"]:
+		if a["left"] - 1 > 0:
+			ang.append({"left": a["left"] - 1, "len": a["len"]})
+	s["anger"] = ang
 	if s["turn"] > C["turns"].size():
-		_finish(C, s, report)
+		_finish(C, s, report, input.get("recovery", {}))
 	return {"state": s, "report": report}
 
 
 ## Recovery after the last storm turn: saved people go back to work, meters scale the yield.
-static func _finish(C: Dictionary, s: Dictionary, report: Dictionary) -> void:
+static func _back(support: Dictionary, fresh_sup: Array, site: String, team: String, carried: bool) -> void:
+	if not support.has(site):
+		support[site] = []
+	support[site].append(team)
+	if not carried:
+		fresh_sup.append({"site": site, "team": team})
+
+
+## Share of the plant's shift that turns up: falls smoothly with low community trust and with live anger timers.
+static func _workforce(C: Dictionary, s: Dictionary) -> float:
+	if not C.has("workforce"):
+		return 1.0
+	var W: Dictionary = C["workforce"]
+	var t := clampf(float(s["meters"]["trust"]) / float(W["trust_full"]), float(W["floor"]), 1.0)
+	var anger := 0.0
+	for x in s.get("anger", []):
+		anger += (float(x["left"] - 1) / float(x["len"]) + 1.0) * float(W["anger_per_timer"])
+	return clampf(t * (1.0 - clampf(anger, 0.0, float(W["anger_cap"]))), float(W["floor"]), 1.0)
+
+
+static func _finish(C: Dictionary, s: Dictionary, report: Dictionary, rc: Dictionary = {}) -> void:
 	var R: Dictionary = C["recovery"]
 	var M: Dictionary = C["meters"]
 	var Y: Dictionary = C["yields"]
 	var able_alive: int = C["sites"]["low_ward"]["people"]["able"] + C["sites"]["tech_housing"]["people"]["able"] - s["lost"]["able"]
 	var cm := _mult(C, s["meters"]["trust"])
-	var mm := (_mult(C, s["meters"]["confidence"]) + 2.0 * _mult(C, s["meters"]["trust"])) / 3.0  # the plant needs its licence to operate: trust counts double
+	var mm: float = _mult(C, s["meters"]["confidence"]) * _workforce(C, s) if C.has("workforce") else (_mult(C, s["meters"]["confidence"]) + 2.0 * _mult(C, s["meters"]["trust"])) / 3.0
 	var cv := floori(float(able_alive) / R["able_per_volunteer"] * R["turns"] * cm)
 	var cf := floori((Y["low_ward"]["food"] + floori(float(s["meters"]["trust"]) / R["trust_per_aid"])) * R["turns"] * cm) - floori(float(s["lost"]["vuln"]) / R["vuln_lost_per_food"])
 	var pd: int = R["plant_flooded_doses"] if s["sites"]["plant"]["flooded"] else Y["plant"]["doses"] * R["turns"]
@@ -822,7 +891,18 @@ static func _finish(C: Dictionary, s: Dictionary, report: Dictionary) -> void:
 	s["stock"]["community"]["food"] = maxi(0, s["stock"]["community"]["food"] + cf)
 	s["stock"]["meridian"]["doses"] += md
 	s["stock"]["meridian"]["funds"] += mf
-	s["recovery"] = {"community": {"volunteers": cv, "food": cf}, "meridian": {"doses": md, "funds": mf}}
+	s["recovery"] = {"community": {"volunteers": cv, "food": cf}, "meridian": {"doses": md, "funds": mf}, "choices": {}}
+	# one after-storm choice per team: help the other side rebuild, at a cost to your own stock
+	for t in TEAMS:
+		var ch = R.get("choices", {}).get(t)
+		if ch == null or not rc.get(t, false):
+			continue
+		if not _pay(s, t, ch["cost"]):
+			s["recovery"]["choices"][t] = "unpaid"
+			continue
+		for g in ch.get("gives", {}):
+			s["stock"][C["goods"][g]["owner"]][g] += int(ch["gives"][g])
+		s["recovery"]["choices"][t] = "made"
 	s["over"] = true
 	report["recovery"] = s["recovery"]
 

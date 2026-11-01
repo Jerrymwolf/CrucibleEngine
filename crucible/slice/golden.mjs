@@ -22,26 +22,26 @@ const plans = [
     { orders: { bus1: { task: "evac", site: "tech_housing", dest: "heartland" }, shuttle: { task: "evac", site: "tech_housing", dest: "st_brendans" }, gen: { task: "power", site: "st_brendans" }, pcrew: { task: "run", site: "plant" } },
       lends: { shuttle: true }, towerOpen: true, votes: { meridian: 1, community: 2 } },
     { orders: { bus1: { task: "evac", site: "tech_housing", dest: "tech_tower" }, bus2: { task: "evac", site: "tech_housing", dest: "tech_tower" }, boat: { task: "evac", site: "low_ward", dest: "st_brendans" }, pcrew: { task: "sandbag", site: "plant" } },
-      votes: { community: 0 } },
+      votes: { community: 0 }, recovery: { community: true, meridian: true } },
   ] },
   { seed: 7, turns: [ { orders: {}, votes: {} }, { orders: { pcrew: { task: "run" } }, votes: {} }, { orders: {}, votes: { community: 1 } } ] },
   { seed: 4217, turns: [
     { orders: { bus1: { task: "evac", site: "low_ward", dest: "heartland" }, shuttle: { task: "evac", site: "low_ward", dest: "heartland" }, vcrew: { task: "sandbag", site: "low_ward" } }, votes: { meridian: 2 } },
     { orders: { boat: { task: "evac", site: "low_ward", dest: "st_brendans" }, gen: { task: "power", site: "plant" }, vcrew: { task: "sandbag", site: "plant" } }, votes: { meridian: 0 } },
-    { orders: { gen: { task: "power", site: "tech_housing" }, pcrew: { task: "run" } }, votes: { community: 2 } },
+    { orders: { gen: { task: "power", site: "tech_housing" }, pcrew: { task: "sandbag", site: "plant" } }, votes: { community: 2 }, recovery: { meridian: true } },
   ] },
 ];
 
 const snap = (s) => ({ stock: s.stock, meters: s.meters, lost: s.lost, rescued: s.rescued, shelter: s.shelter, towerOpen: s.towerOpen,
   sites: Object.fromEntries(Object.entries(s.sites).map(([k, v]) => [k, v])), residents: s.residents, promises: s.promises.map((p) => p.status),
-  history: s.history, hash: E.hash(s) });
+  history: s.history, sandbags: s.sandbags, anger: s.anger, recovery: s.recovery || null, hash: E.hash(s) });
 
 const games = plans.map((p) => {
   let s = E.newGame(C, { seed: p.seed });
   const turns = [];
   for (const t of p.turns) {
     const d = E.fallbackDilemma(C, s, stances).dilemma;
-    const input = { orders: t.orders, lends: t.lends || {}, towerOpen: !!t.towerOpen, votes: t.votes, promises: t.promises || [], confirms: t.confirms || [] };
+    const input = { orders: t.orders, lends: t.lends || {}, towerOpen: !!t.towerOpen, votes: t.votes, promises: t.promises || [], confirms: t.confirms || [], ...(t.recovery ? { recovery: t.recovery } : {}) };
     s = E.resolveTurn(C, s, { ...input, dilemma: d }).state;
     turns.push({ input, expect: snap(s) });
   }
