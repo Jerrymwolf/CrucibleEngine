@@ -170,8 +170,9 @@ static func card_parts(C: Dictionary, team: String, s: Dictionary, extra: Array 
 			else:
 				n = int(m.get("sheltered_expect", 0))
 			v += n * int(m["sheltered_per10"])
-		if not s.has("stock") and m.has("from"):
-			v = int(m["from"])  # a measure granted mid-game counts from its value when it was granted
+		# A measure granted mid-game counts only the change since it was granted; it adds nothing to the starting card.
+		if m.has("from"):
+			v = v - int(m["from"]) if s.has("stock") else 0
 		out.append({"label": m["label"], "value": v})
 	return out
 

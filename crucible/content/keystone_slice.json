@@ -1559,7 +1559,7 @@
      "line": "Don't burn the volunteers or the food. We have a week of this ahead, and Heartland won't feed us."
     },
     "permission": {
-     "change": -2,
+     "change": 2,
      "line": "Spend what you must. We will rebuild the stores; we cannot rebuild a family.",
      "measure": {
       "label": "People in shelter",
@@ -1598,7 +1598,7 @@
      "line": "The board meets Thursday. I need the batch numbers, not excuses."
     },
     "permission": {
-     "change": -4,
+     "change": -10,
      "line": "Take care of Keystone first. The board will back you; we'll explain the numbers.",
      "measure": {
       "label": "Licence to operate (community trust)",
@@ -1667,7 +1667,7 @@
     "team": "community",
     "after_turn": 2,
     "kind": "permission",
-    "change": -4,
+    "change": -2,
     "if": {
      "lost_atleast": 20
     },

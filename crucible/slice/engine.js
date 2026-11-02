@@ -87,7 +87,8 @@
       if (m.lost_vuln_per10) v += lost.vuln * m.lost_vuln_per10;
       if (m.lost_able_per10) v += lost.able * m.lost_able_per10;
       if (m.sheltered_per10) v += (s ? Object.values(s.shelter).reduce((n, x) => n + x.vuln + x.able, 0) : m.sheltered_expect || 0) * m.sheltered_per10;
-      if (!s && m.from !== undefined) v = m.from; // a measure granted mid-game counts from its value when it was granted
+      // A measure granted mid-game counts only the change since it was granted; it adds nothing to the starting card.
+      if (m.from !== undefined) v = s ? v - m.from : 0;
       return { label: m.label, value: v };
     });
   }

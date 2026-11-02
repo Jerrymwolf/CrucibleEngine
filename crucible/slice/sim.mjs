@@ -41,8 +41,10 @@ function play(seed, cp, mp, pick, boss = {}) {
   let s = E.newGame(C, { seed });
   while (!s.over) {
     const d = E.fallbackDilemma(C, s, stances).dilemma;
-    const idx = pick(seed, s.turn, d);
-    const input = { orders: { ...POLICY.community[cp](s), ...POLICY.meridian[mp](s) }, dilemma: d, votes: { [d.final_call]: idx }, ...(s.turn === 1 ? { boss } : {}) };
+    // generous / selfish Meridian: plays careful units, and always takes the first (people) or second (plant) order on its own calls
+    const lean = { generous: 0, selfish: 1 }[mp];
+    const idx = d.final_call === "meridian" && lean !== undefined ? lean : pick(seed, s.turn, d);
+    const input = { orders: { ...POLICY.community[cp](s), ...POLICY.meridian[mp in POLICY.meridian ? mp : "careful"](s) }, dilemma: d, votes: { [d.final_call]: idx }, ...(s.turn === 1 ? { boss } : {}) };
     s = E.resolveTurn(C, s, input).state;
   }
   return s;
@@ -55,6 +57,7 @@ const RUNS = [];
 for (const cp of ["nothing", "careful"]) for (const mp of ["nothing", "careful"]) RUNS.push([cp, mp, {}]);
 // boss mode: the Crucible Master presses a lever on turn 1
 if (C.win && C.win.mode === "boss") for (const b of [{ meridian: "permission" }, { community: "permission" }, { meridian: "pressure" }, { community: "pressure" }]) RUNS.push(["careful", "careful", b]);
+  RUNS.push(["careful", "generous", {}], ["careful", "generous", { meridian: "permission" }], ["careful", "selfish", {}], ["careful", "selfish", { meridian: "permission" }]);
 for (const [cp, mp, boss] of RUNS) {
   let cw = 0, mw = 0, ci = 0, mi = 0, lost = 0, tr = 0, cf = 0;
   for (let seed = 1; seed <= N; seed++) {

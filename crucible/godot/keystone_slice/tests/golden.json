@@ -787,7 +787,7 @@
         "extra": []
        },
        "meridian": {
-        "target": 115,
+        "target": 109,
         "log": [
          {
           "turn": 1,
@@ -801,11 +801,11 @@
          {
           "turn": 2,
           "kind": "permission",
-          "change": -4,
+          "change": -10,
           "who": "Dana Kell and the Meridian board",
           "line": "Take care of Keystone first. The board will back you; we'll explain the numbers.",
           "source": "cm",
-          "target": 115,
+          "target": 109,
           "measure": "Licence to operate (community trust)"
          }
         ],
@@ -822,7 +822,7 @@
         ]
        }
       },
-      "hash": "4e778bc0"
+      "hash": "174fb47b"
      }
     },
     {
@@ -1400,7 +1400,7 @@
         "extra": []
        },
        "meridian": {
-        "target": 115,
+        "target": 109,
         "log": [
          {
           "turn": 1,
@@ -1414,11 +1414,11 @@
          {
           "turn": 2,
           "kind": "permission",
-          "change": -4,
+          "change": -10,
           "who": "Dana Kell and the Meridian board",
           "line": "Take care of Keystone first. The board will back you; we'll explain the numbers.",
           "source": "cm",
-          "target": 115,
+          "target": 109,
           "measure": "Licence to operate (community trust)"
          }
         ],
@@ -1435,7 +1435,7 @@
         ]
        }
       },
-      "hash": "3d45c0b6"
+      "hash": "d6209af9"
      }
     }
    ],
@@ -1448,10 +1448,10 @@
      "par": true
     },
     "meridian": {
-     "points": 2528,
-     "start": 2448,
-     "index": 103,
-     "target": 115,
+     "points": 1820,
+     "start": 1740,
+     "index": 105,
+     "target": 109,
      "par": false
     }
    },
@@ -2175,7 +2175,7 @@
         5
        ],
        "community": {
-        "target": 74,
+        "target": 80,
         "log": [
          {
           "turn": 1,
@@ -2189,20 +2189,20 @@
          {
           "turn": 2,
           "kind": "permission",
-          "change": -4,
+          "change": -2,
           "who": "Pastor Ruth Okafor and the parish council",
           "line": "Do what you can. Nobody will blame you for the ones the storm took.",
           "source": "trigger",
-          "target": 76
+          "target": 78
          },
          {
           "turn": 2,
           "kind": "permission",
-          "change": -2,
+          "change": 2,
           "who": "Pastor Ruth Okafor and the parish council",
           "line": "Spend what you must. We will rebuild the stores; we cannot rebuild a family.",
           "source": "cm",
-          "target": 74,
+          "target": 80,
           "measure": "People in shelter"
          }
         ],
@@ -2225,7 +2225,7 @@
         "extra": []
        }
       },
-      "hash": "9a0bf088"
+      "hash": "516360cb"
      }
     },
     {
@@ -2767,7 +2767,7 @@
         5
        ],
        "community": {
-        "target": 74,
+        "target": 80,
         "log": [
          {
           "turn": 1,
@@ -2781,20 +2781,20 @@
          {
           "turn": 2,
           "kind": "permission",
-          "change": -4,
+          "change": -2,
           "who": "Pastor Ruth Okafor and the parish council",
           "line": "Do what you can. Nobody will blame you for the ones the storm took.",
           "source": "trigger",
-          "target": 76
+          "target": 78
          },
          {
           "turn": 2,
           "kind": "permission",
-          "change": -2,
+          "change": 2,
           "who": "Pastor Ruth Okafor and the parish council",
           "line": "Spend what you must. We will rebuild the stores; we cannot rebuild a family.",
           "source": "cm",
-          "target": 74,
+          "target": 80,
           "measure": "People in shelter"
          }
         ],
@@ -2817,16 +2817,16 @@
         "extra": []
        }
       },
-      "hash": "c0974d37"
+      "hash": "7b242f24"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": -268,
-     "start": 1155,
-     "index": -23,
-     "target": 74,
+     "points": -283,
+     "start": 1140,
+     "index": -25,
+     "target": 80,
      "par": false
     },
     "meridian": {
@@ -3609,7 +3609,7 @@
         5
        ],
        "community": {
-        "target": 77,
+        "target": 79,
         "log": [
          {
           "turn": 1,
@@ -3623,11 +3623,11 @@
          {
           "turn": 2,
           "kind": "permission",
-          "change": -4,
+          "change": -2,
           "who": "Pastor Ruth Okafor and the parish council",
           "line": "Do what you can. Nobody will blame you for the ones the storm took.",
           "source": "trigger",
-          "target": 77
+          "target": 79
          }
         ],
         "cm": [
@@ -3672,7 +3672,7 @@
         "extra": []
        }
       },
-      "hash": "2619282f"
+      "hash": "48c9b37d"
      }
     },
     {
@@ -4236,7 +4236,7 @@
         5
        ],
        "community": {
-        "target": 77,
+        "target": 79,
         "log": [
          {
           "turn": 1,
@@ -4250,11 +4250,11 @@
          {
           "turn": 2,
           "kind": "permission",
-          "change": -4,
+          "change": -2,
           "who": "Pastor Ruth Okafor and the parish council",
           "line": "Do what you can. Nobody will blame you for the ones the storm took.",
           "source": "trigger",
-          "target": 77
+          "target": 79
          }
         ],
         "cm": [
@@ -4299,7 +4299,7 @@
         "extra": []
        }
       },
-      "hash": "cd96aa8e"
+      "hash": "9cefd380"
      }
     }
    ],
@@ -4308,7 +4308,7 @@
      "points": 1276,
      "start": 1140,
      "index": 112,
-     "target": 77,
+     "target": 79,
      "par": true
     },
     "meridian": {

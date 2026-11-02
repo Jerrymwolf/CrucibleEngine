@@ -38,7 +38,8 @@ In real life, nobody keeps score against the team across the table. Each leader 
 **Change.** Permission now adds a measure to that team's card and only nudges the target (-4):
 - **Meridian's board** starts counting "licence to operate (community trust)".
 - **The council** starts counting "people in shelter" (a head count, so a person is never counted twice), and its target moves -2.
-- **Not retroactive:** a granted measure counts only the change after the moment it was granted.
+- **Not retroactive:** a granted measure counts only the change after the moment it was granted. It adds nothing to the starting card, so it never rescales the score.
+- **Lever sizes (final):** Meridian permission moves the target -10 and adds licence to operate. Community permission moves it +2 and adds people in shelter. The look-away trigger moves it -2, kept small so a few more deaths near the 20-death threshold never pay.
 - **Permission to look away:** a community trigger after turn 2, when 20 or more people died, lowers the bar without changing what is counted: "Nobody will blame you for the ones the storm took." The debrief can then ask who gave that permission.
 
 **Result.** With Meridian's permission (as first measured, before the change to counting from the moment it is granted), a selfish Meridian meets its target 30% of the time, a careful one 48% and a generous one 51%. After that change, sim.mjs shows both careful teams at 62/62 with no lever. With Meridian's permission pressed on turn 1, Meridian meets its target 42% of the time. With the community's permission, the community meets its target 75% of the time. Pressure pulls toward the board's numbers, and permission now pulls toward Keystone, without making kindness a sure thing.
@@ -49,6 +50,18 @@ In real life, nobody keeps score against the team across the table. Each leader 
 - Bots weigh their own bosses' score at a quarter of a value per point.
 - The Crucible Master's levers are folded behind a toggle, with each lever's line and a one-line hint showing.
 - The council's pressure lever is now about stores ("Don't burn the volunteers or the food"), so it pulls against care.
+
+## Final lever check (sim.mjs, 1000 seeds, lever pressed on turn 1, % meeting target C/M)
+
+| Play | No lever | Meridian permission | Community permission | Meridian pressure | Community pressure |
+|---|---|---|---|---|---|
+| Both careful | 61/62 | 61/66 | 68/62 | 61/47 | 55/62 |
+| Careful vs Meridian generous | 100/49 | 100/60 | | | |
+| Careful vs Meridian selfish | 45/64 | 45/65 | | | |
+
+Permission helps a generous Meridian most (+11) and a selfish one least (+1). Pressure costs the team it lands on 7 to 15 points. Teams that do nothing stay under 10%.
+
+**Persona scores:** game designer 90 and facilitator 90 on commit 4eaa710. Both projected 91 to 93 with the final lever sizes, which take their suggestions but have not been re-scored.
 
 ## Measured before the revision (1000 seeds, % of games each team meets its target, C/M)
 
