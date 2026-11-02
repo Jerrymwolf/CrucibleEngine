@@ -31,7 +31,24 @@ In real life, nobody keeps score against the team across the table. Each leader 
 - **Determinism:** the score is integer tenths, the index is floor(x + 0.5), and triggers fire once. Godot mirrors all of it.
 - **Content:** the selfish orders now please the board (+2 confidence) and still anger the community. That makes the pressure real.
 
-## Measured (1000 seeds, % of games each team meets its target, C/M)
+## Revision, same day: permission changes what the bosses count
+
+**Problem.** In round 8 the game designer found that a flat permission ("lower the target") only lowered the bar for whatever a team was already doing, and it helped a selfish Meridian most (64% to 100% meeting its target). The words said "take care of Keystone", but the mechanics said "you passed".
+
+**Change.** Permission now adds a measure to that team's card and only nudges the target (-4):
+- **Meridian's board** starts counting "licence to operate (community trust)".
+- **The council** starts counting "people moved to safety" above a baseline of 800.
+
+**Result.** With Meridian's permission, a selfish Meridian meets its target 30% of the time, a careful one 48% and a generous one 51%. Pressure pulls toward the board's numbers, and permission now pulls toward Keystone, without making kindness a sure thing.
+
+**Facilitator fixes in the same pass:**
+- Every boss log entry records whether it came from the Crucible Master or a trigger.
+- Each debrief choice card shows the target and the bosses' last word in force when the team decided.
+- Bots weigh their own bosses' score at a quarter of a value per point.
+- The Crucible Master's levers are folded behind a toggle, with each lever's line and a one-line hint showing.
+- The council's pressure lever is now about stores ("Don't burn the volunteers or the food"), so it pulls against care.
+
+## Measured before the revision (1000 seeds, % of games each team meets its target, C/M)
 
 | Play | Community | Meridian |
 |---|---|---|

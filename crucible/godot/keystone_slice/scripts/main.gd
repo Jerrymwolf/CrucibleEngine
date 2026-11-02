@@ -72,6 +72,7 @@ var setup_inputs := {}
 var _scrolls := {}
 var _scroll_keep := {}
 var _restoring := false
+var cm_open := false  # the Crucible Master's levers stay folded away from the players' eyes until opened
 
 
 func _ready() -> void:
@@ -160,7 +161,8 @@ static func fmt(n: int) -> String:
 func standing(t: String, stock: Dictionary, meters = null) -> int:
 	if boss_mode():  # the team's own bosses' scorecard, matching Eng.standings
 		var s2 := {"stock": stock, "meters": meters if meters != null else state["meters"], "lost": state["lost"]}
-		return int(floor(float(Eng.card_score(C, t, s2)) / Eng.card_score(C, t, {}) * 100.0 + 0.5))
+		var extra: Array = state["boss"][t].get("extra", [])
+		return int(floor(float(Eng.card_score(C, t, s2, extra)) / Eng.card_score(C, t, {}, extra) * 100.0 + 0.5))
 	return int(round(float(Eng.points(C, t, stock)) / Eng.points(C, t, C["start"]["stock"]) * 100.0))
 
 
@@ -270,6 +272,9 @@ func bot_vote() -> void:
 		for i in d["orders"].size():
 			var tg: Dictionary = d["orders"][i]["tags"][t]
 			var sc: float = (3.0 if top in tg["honours"] else 0.0) + tg["honours"].size() - tg["costs"].size() * 1.5 - (3.0 if top in tg["costs"] else 0.0)
+			if boss_mode():  # a bot feels its bosses too: each point its own scorecard moves weighs a quarter of a value
+				var mv: Dictionary = _order_moves(d["orders"][i])
+				sc += 0.25 * (mv[t][1] - mv[t][0])
 			if sc > best_score:
 				best_score = sc
 				best = i
@@ -498,22 +503,44 @@ func _on_boss(t: String, kind: String) -> void:
 
 
 ## The Crucible Master's levers: a team's bosses lean in (pressure) or free it (permission). One of each per team per game.
+## Folded by default so the levers are the facilitator's, not the players'.
 func cm_view() -> Control:
 	var p := _panel(SUNK, LINE)
-	var row := _hbox(8)
-	row.add_child(_lbl("CRUCIBLE MASTER", 13, MUTED, false))
-	for t in TEAMS:
-		for kind in ["pressure", "permission"]:
-			var used: bool = state["boss"][t]["cm"].has(kind)
-			var lever: Dictionary = C["scorecard"][t]["cm"][kind]
-			var on: bool = draft["boss"].get(t) == kind
-			var txt := "%s %s (%+d)" % [short(t), kind, int(lever["change"])]
-			var b := _button(("✓ " if on else "") + txt + (" · used" if used else ""), _on_boss.bind(t, kind), on)
-			b.disabled = used
-			b.tooltip_text = lever["line"]
-			row.add_child(b)
-	p.add_child(row)
+	var v := _vbox(6)
+	var head := _hbox(8)
+	head.add_child(_button("Crucible Master ▾" if cm_open else "Crucible Master ▸", _on_cm_toggle))
+	var pend := PackedStringArray()
+	for t in draft["boss"]:
+		pend.append("%s %s" % [short(t), draft["boss"][t]])
+	if pend.size():
+		head.add_child(_lbl("Set for this turn: " + ", ".join(pend), 14, STORM, false))
+	v.add_child(head)
+	if cm_open:
+		v.add_child(_lbl(C["scorecard"].get("_cm_hint", ""), 13, MUTED))
+		var grid := GridContainer.new()
+		grid.columns = 2
+		grid.add_theme_constant_override("h_separation", 8)
+		grid.add_theme_constant_override("v_separation", 6)
+		for t in TEAMS:
+			for kind in ["pressure", "permission"]:
+				var used: bool = state["boss"][t]["cm"].has(kind)
+				var lever: Dictionary = C["scorecard"][t]["cm"][kind]
+				var on: bool = draft["boss"].get(t) == kind
+				var cell := _vbox(2)
+				cell.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				var b := _button("%s%s %s (%+d)%s" % ["✓ " if on else "", short(t), kind, int(lever["change"]), " · used" if used else ""], _on_boss.bind(t, kind), on)
+				b.disabled = used
+				cell.add_child(b)
+				cell.add_child(_lbl('%s: "%s"' % [C["scorecard"][t]["boss"], lever["line"]], 13, MUTED))
+				grid.add_child(cell)
+		v.add_child(grid)
+	p.add_child(v)
 	return p
+
+
+func _on_cm_toggle() -> void:
+	cm_open = not cm_open
+	render()
 
 
 func _goods_text(g: Dictionary) -> String:
@@ -964,12 +991,17 @@ func team_view(t: String) -> Control:
 		var now_b := standing(t, s["stock"])
 		var card: Dictionary = C["scorecard"][t]
 		var what := PackedStringArray()
-		for m in card["measures"]:
+		for m in card["measures"] + s["boss"][t].get("extra", []):
 			what.append(String(m["label"]).to_lower())
 		v.add_child(_lbl("Your bosses' score: %d%%. Target: %d%%" % [now_b, tgt_b], 16, HONOUR if now_b >= tgt_b else FG))
 		v.add_child(_lbl("%s judge you on %s. Meet the target at the end; both teams can." % [card["boss"], ", ".join(what)], 13, MUTED))
+		var pk = draft.get("boss", {}).get(t) if plan else null
+		if pk != null:
+			var lv: Dictionary = card["cm"][pk]
+			var adds := (" Your bosses will also count %s." % String(lv["measure"]["label"]).to_lower()) if lv.has("measure") else ""
+			v.add_child(_lbl('%s: "%s" Target moves to %d%% when this turn locks.%s' % ["Pressure" if lv["change"] > 0 else "Permission", lv["line"], tgt_b + int(lv["change"]), adds], 13, STORM if lv["change"] > 0 else HONOUR))
 		var lg: Array = s["boss"][t]["log"]
-		if lg.size():
+		if lg.size() and pk == null:
 			var last: Dictionary = lg[lg.size() - 1]
 			v.add_child(_lbl('%s: "%s"' % ["Pressure" if last["change"] > 0 else "Permission", last["line"]], 13, STORM if last["change"] > 0 else HONOUR))
 	elif par_mode():
@@ -1179,6 +1211,23 @@ func _cost_text(o: Dictionary) -> Array:
 	return [", ".join(c) if c.size() else "nothing", " · ".join(bits) if bits.size() else "no direct effect"]
 
 
+## Each team's standing before and after an order's cost, doses and meter effects: {team: [before, after]}.
+func _order_moves(o: Dictionary) -> Dictionary:
+	var stock: Dictionary = state["stock"].duplicate(true)
+	for g in o["cost"]:
+		stock[o["owner"]][g] -= int(o["cost"][g])
+	var dz: int = o["effects"].get("doses", 0)
+	if dz:
+		stock["meridian"]["doses"] = maxi(0, stock["meridian"]["doses"] + dz)
+	var meters: Dictionary = state["meters"].duplicate()
+	for k in ["trust", "confidence"]:
+		meters[k] = clampi(meters[k] + int(o["effects"].get(k, 0)), 0, 100)
+	var out := {}
+	for t in TEAMS:
+		out[t] = [standing(t, state["stock"]), standing(t, stock, meters)]
+	return out
+
+
 ## What this order does to each team's standing right now (its cost and any doses), before the storm decides the rest.
 func _standing_text(o: Dictionary) -> String:
 	var stock: Dictionary = state["stock"].duplicate(true)
@@ -1191,9 +1240,10 @@ func _standing_text(o: Dictionary) -> String:
 	for k in ["trust", "confidence"]:
 		meters[k] = clampi(meters[k] + int(o["effects"].get(k, 0)), 0, 100)
 	var bits := PackedStringArray()
+	var mv := _order_moves(o)
 	for t in TEAMS:
-		var b := standing(t, state["stock"])
-		var a := standing(t, stock, meters)
+		var b: int = mv[t][0]
+		var a: int = mv[t][1]
 		if a != b:
 			bits.append("%s %d%% → %d%%" % [short(t), b, a])
 	return ("Bosses' score now: " if boss_mode() else "Standing now: ") + (", ".join(bits) if bits.size() else "no change") + ". What it saves or loses later depends on the storm."
@@ -1369,6 +1419,18 @@ func _orders_line(t: String, input: Dictionary) -> String:
 	return "; ".join(bits) + "."
 
 
+## The target a team was playing to, and its bosses' last word, while it decided turn n.
+## Triggers from earlier turns count; a Crucible Master lever pressed during turn n was on screen, so it counts too.
+func _in_force(t: String, n: int) -> Array:
+	var target := int(C["scorecard"][t]["target"])
+	var last = null
+	for e in state["boss"][t]["log"]:
+		if e["turn"] < n or (e["turn"] == n and e.get("source") == "cm"):
+			target = int(e["target"])
+			last = e
+	return [target, last]
+
+
 func debrief_view() -> Control:
 	var s := state
 	var sd: Dictionary = Eng.standings(C, s)
@@ -1431,11 +1493,13 @@ func debrief_view() -> Control:
 		v1.add_child(_lbl("WHAT YOUR BOSSES ASKED OF YOU", 13, MUTED))
 		for t in TEAMS:
 			var parts := PackedStringArray()
-			for x in Eng.card_parts(C, t, s):
+			for x in Eng.card_parts(C, t, s, s["boss"][t].get("extra", [])):
 				parts.append("%s %s" % [String(x["label"]).to_lower(), str(snappedf(x["value"] / 10.0, 0.1))])
 			v1.add_child(_lbl("%s were judged by %s on: %s. Target at the start %d%%, at the end %d%%." % [C["teams"][t]["name"], C["scorecard"][t]["boss"], ", ".join(parts), int(C["scorecard"][t]["target"]), sd[t]["target"]], 15, team_col(t)))
 			for e in s["boss"][t]["log"]:
-				v1.add_child(_lbl('After turn %d, %s (%s, target %d%%): "%s"' % [e["turn"], e["who"], e["kind"], e["target"], e["line"]], 14, STORM if e["change"] > 0 else HONOUR))
+				var by := "pressed by the Crucible Master" if e.get("source") == "cm" else "the storm's events"
+				var counted := (" From then on they also counted %s." % String(e["measure"]).to_lower()) if e.has("measure") else ""
+				v1.add_child(_lbl('Turn %d, %s (%s, %s, target %d%%): "%s"%s' % [e["turn"], e["who"], e["kind"], by, e["target"], e["line"], counted], 14, STORM if e["change"] > 0 else HONOUR))
 	col.add_child(p1)
 
 	var p2 := _panel(PANEL, LINE)
@@ -1487,6 +1551,10 @@ func debrief_view() -> Control:
 		elif ch["stormDecided"]:
 			how = "No one decided; the standing plan ran"
 		cv.add_child(_lbl("%s: %s" % [how, o["label"]], 18, FG))
+		if boss_mode():
+			for t in TEAMS:
+				var f := _in_force(t, h["turn"])
+				cv.add_child(_lbl("%s · in force when you decided: target %d%%%s" % [short(t).to_upper(), f[0], ('. Last word from %s: "%s"' % [f[1]["who"], f[1]["line"]]) if f[1] != null else ", no word from your bosses yet"], 14, team_col(t)))
 		for t in TEAMS:
 			var line := ""
 			var hn := PackedStringArray()

@@ -1529,7 +1529,7 @@
   "_about": "Share of the plant shift that turns up: trust/trust_full, less anger from live timers ((left-1)/len+1)*anger_per_timer. Continuous, no cliffs."
  },
  "scorecard": {
-  "_about": "Each team answers to its own bosses, who judge it on what they care about. Score is in tenths of a point; index = score now / score at start. Pressure raises the target, permission lowers it. Triggers fire once, after the named turn resolves; the Crucible Master can add one pressure and one permission per team.",
+  "_about": "Each team answers to its own bosses, who judge it on what they care about. Score is in tenths of a point; index = score now / score at start. Pressure raises the target, permission lowers it. Triggers fire once, after the named turn resolves; the Crucible Master can add one pressure and one permission per team. A lever or trigger with a measure adds it to the bosses' card: permission changes what the bosses count, not only the bar.",
   "community": {
    "boss": "Pastor Ruth Okafor and the parish council",
    "target": 75,
@@ -1556,11 +1556,16 @@
    "cm": {
     "pressure": {
      "change": 6,
-     "line": "Every family in Low Ward is counting on us. Nobody gets left, whatever it costs."
+     "line": "Don't burn the volunteers or the food. We have a week of this ahead, and Heartland won't feed us."
     },
     "permission": {
-     "change": -8,
-     "line": "Do what you can. Nobody will blame you for the ones the storm took."
+     "change": -4,
+     "line": "Spend what you must. We will rebuild the stores; we cannot rebuild a family.",
+     "measure": {
+      "label": "People moved to safety",
+      "rescued_per10": 1,
+      "rescued_over": 800
+     }
     }
    }
   },
@@ -1593,8 +1598,13 @@
      "line": "The board meets Thursday. I need the batch numbers, not excuses."
     },
     "permission": {
-     "change": -12,
-     "line": "Take care of Keystone first. The board will back you; we'll explain the numbers."
+     "change": -4,
+     "line": "Take care of Keystone first. The board will back you; we'll explain the numbers.",
+     "measure": {
+      "label": "Licence to operate (community trust)",
+      "meter": "trust",
+      "per10": 12
+     }
     }
    }
   },
@@ -1653,6 +1663,7 @@
     },
     "line": "You've kept faith with people. Spend what you must; we'll rebuild the stores."
    }
-  ]
+  ],
+  "_cm_hint": "Press pressure when a team is coasting or only one pull is on it; press permission when a team says it can't afford its #1 value. Each lever works once per team."
  }
 }

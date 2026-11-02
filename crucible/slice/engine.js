@@ -63,7 +63,8 @@
     const out = {}, mode = C.win && C.win.mode;
     for (const t of TEAMS) {
       if (mode === "boss" && C.scorecard) { // each team is judged by its own bosses, on what they care about
-        const now = cardScore(C, t, state), start = cardScore(C, t, null);
+        const extra = state.boss[t].extra || [];
+        const now = cardScore(C, t, state, extra), start = cardScore(C, t, null, extra);
         const index = Math.floor((now / start) * 100 + 0.5), target = state.boss[t].target;
         out[t] = { points: now, start, index, target, par: index >= target };
         continue;
@@ -76,30 +77,35 @@
     return out;
   }
   // Boss scorecard, in tenths of a point so it stays an integer. state null = the starting card.
-  function cardParts(C, team, s) {
+  // extra: measures a boss's permission added to the card (they count from the start, like the rest).
+  function cardParts(C, team, s, extra = []) {
     const stock = s ? s.stock : C.start.stock, meters = s ? s.meters : C.start.meters, lost = s ? s.lost : { vuln: 0, able: 0 };
-    return C.scorecard[team].measures.map((m) => {
+    const rescued = s ? s.rescued : { vuln: 0, able: 0 };
+    return C.scorecard[team].measures.concat(extra).map((m) => {
       let v = 0;
       for (const g of m.goods || []) v += stock[C.goods[g].owner][g] * C.goods[g].points * 10;
       if (m.meter) v += meters[m.meter] * m.per10;
       if (m.lost_vuln_per10) v += lost.vuln * m.lost_vuln_per10;
       if (m.lost_able_per10) v += lost.able * m.lost_able_per10;
+      if (m.rescued_per10) v += (rescued.vuln + rescued.able - (m.rescued_over || 0)) * m.rescued_per10; // counted above a baseline the bosses expect
       return { label: m.label, value: v };
     });
   }
-  function cardScore(C, team, s) { return cardParts(C, team, s).reduce((a, x) => a + x.value, 0); }
+  function cardScore(C, team, s, extra = []) { return cardParts(C, team, s, extra).reduce((a, x) => a + x.value, 0); }
   function bossStart(C) {
     if (!C.scorecard) return null;
     const b = { fired: [] };
-    for (const t of TEAMS) b[t] = { target: C.scorecard[t].target, log: [], cm: [] };
+    for (const t of TEAMS) b[t] = { target: C.scorecard[t].target, log: [], cm: [], extra: [] };
     return b;
   }
   // Bosses move the target: pressure raises it, permission lowers it. Content triggers fire once; the CM can add one of each per team.
   function bossTurn(C, s, input, turnLost, ticker, say) {
     if (!s.boss || !C.scorecard) return;
-    const move = (t, kind, change, who, line) => {
+    const move = (t, kind, change, who, line, source, measure) => {
       s.boss[t].target += change;
-      s.boss[t].log.push({ turn: s.turn, kind, change, who, line, target: s.boss[t].target });
+      // Permission can change what the bosses count, not only the bar: a new measure joins the card.
+      if (measure && typeof measure === "object" && measure.label) s.boss[t].extra.push(measure);
+      s.boss[t].log.push({ turn: s.turn, kind, change, who, line, source, target: s.boss[t].target, ...(measure && measure.label ? { measure: measure.label } : {}) });
       ticker.push(`${who}: "${line}"`);
       say(`${C.teams[t].short} target ${change > 0 ? "raised" : "lowered"} to ${s.boss[t].target}% (${kind}).`, change > 0 ? "bad" : "good");
     };
@@ -110,7 +116,7 @@
       if (w.meter && w.atleast !== undefined && !(s.meters[w.meter] >= w.atleast)) return;
       if (w.lost_atleast !== undefined && !(turnLost.vuln + turnLost.able >= w.lost_atleast)) return;
       s.boss.fired.push(i);
-      move(g.team, g.kind, g.change, C.scorecard[g.team].boss, g.line);
+      move(g.team, g.kind, g.change, C.scorecard[g.team].boss, g.line, "trigger", g.measure);
     });
     const cm = input.boss && typeof input.boss === "object" ? input.boss : {};
     for (const t of TEAMS) {
@@ -118,7 +124,7 @@
       const lever = kind && C.scorecard[t].cm ? C.scorecard[t].cm[kind] : null;
       if (!lever || s.boss[t].cm.includes(kind)) continue;
       s.boss[t].cm.push(kind);
-      move(t, kind, lever.change, C.scorecard[t].boss, lever.line);
+      move(t, kind, lever.change, C.scorecard[t].boss, lever.line, "cm", lever.measure);
     }
   }
 

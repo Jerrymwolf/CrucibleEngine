@@ -126,8 +126,9 @@ static func standings(C: Dictionary, s: Dictionary) -> Dictionary:
 	for t in TEAMS:
 		if mode == "boss" and C.has("scorecard"):
 			# each team is judged by its own bosses, on what they care about
-			var now_b := card_score(C, t, s)
-			var start_b := card_score(C, t, {})
+			var extra: Array = s["boss"][t].get("extra", [])
+			var now_b := card_score(C, t, s, extra)
+			var start_b := card_score(C, t, {}, extra)
 			var index_b := int(floor(float(now_b) / start_b * 100.0 + 0.5))
 			var target: int = s["boss"][t]["target"]
 			out[t] = {"points": now_b, "start": start_b, "index": index_b, "target": target, "par": index_b >= target}
@@ -145,12 +146,14 @@ static func standings(C: Dictionary, s: Dictionary) -> Dictionary:
 
 
 ## Boss scorecard, in tenths of a point so it stays an integer. An empty state means the starting card.
-static func card_parts(C: Dictionary, team: String, s: Dictionary) -> Array:
+## extra: measures a boss's permission added to the card (they count from the start, like the rest).
+static func card_parts(C: Dictionary, team: String, s: Dictionary, extra: Array = []) -> Array:
 	var stock: Dictionary = s["stock"] if s.has("stock") else C["start"]["stock"]
 	var meters: Dictionary = s["meters"] if s.has("meters") else C["start"]["meters"]
 	var lost: Dictionary = s["lost"] if s.has("lost") else {"vuln": 0, "able": 0}
+	var rescued: Dictionary = s["rescued"] if s.has("rescued") else {"vuln": 0, "able": 0}
 	var out := []
-	for m in C["scorecard"][team]["measures"]:
+	for m in C["scorecard"][team]["measures"] + extra:
 		var v := 0
 		for g in m.get("goods", []):
 			v += int(stock[C["goods"][g]["owner"]][g]) * int(C["goods"][g]["points"]) * 10
@@ -160,13 +163,15 @@ static func card_parts(C: Dictionary, team: String, s: Dictionary) -> Array:
 			v += int(lost["vuln"]) * int(m["lost_vuln_per10"])
 		if m.has("lost_able_per10"):
 			v += int(lost["able"]) * int(m["lost_able_per10"])
+		if m.has("rescued_per10"):  # counted above a baseline the bosses expect
+			v += (int(rescued["vuln"]) + int(rescued["able"]) - int(m.get("rescued_over", 0))) * int(m["rescued_per10"])
 		out.append({"label": m["label"], "value": v})
 	return out
 
 
-static func card_score(C: Dictionary, team: String, s: Dictionary) -> int:
+static func card_score(C: Dictionary, team: String, s: Dictionary, extra: Array = []) -> int:
 	var total := 0
-	for x in card_parts(C, team, s):
+	for x in card_parts(C, team, s, extra):
 		total += int(x["value"])
 	return total
 
@@ -176,13 +181,20 @@ static func _boss_start(C: Dictionary):
 		return null
 	var b := {"fired": []}
 	for t in TEAMS:
-		b[t] = {"target": int(C["scorecard"][t]["target"]), "log": [], "cm": []}
+		b[t] = {"target": int(C["scorecard"][t]["target"]), "log": [], "cm": [], "extra": []}
 	return b
 
 
-static func _boss_move(C: Dictionary, s: Dictionary, t: String, kind: String, change: int, who: String, line: String, ticker: Array, ev: Array) -> void:
+static func _boss_move(C: Dictionary, s: Dictionary, t: String, kind: String, change: int, who: String, line: String, source: String, measure, ticker: Array, ev: Array) -> void:
 	s["boss"][t]["target"] += change
-	s["boss"][t]["log"].append({"turn": s["turn"], "kind": kind, "change": change, "who": who, "line": line, "target": s["boss"][t]["target"]})
+	# Permission can change what the bosses count, not only the bar: a new measure joins the card.
+	var has_m: bool = typeof(measure) == TYPE_DICTIONARY and measure.has("label") and String(measure["label"]) != ""
+	if has_m:
+		s["boss"][t]["extra"].append(measure.duplicate(true))
+	var entry := {"turn": s["turn"], "kind": kind, "change": change, "who": who, "line": line, "source": source, "target": s["boss"][t]["target"]}
+	if has_m:
+		entry["measure"] = measure["label"]
+	s["boss"][t]["log"].append(entry)
 	ticker.append('%s: "%s"' % [who, line])
 	_say(ev, "%s target %s to %d%% (%s)." % [C["teams"][t]["short"], "raised" if change > 0 else "lowered", s["boss"][t]["target"], kind], "bad" if change > 0 else "good")
 
@@ -204,7 +216,7 @@ static func _boss_turn(C: Dictionary, s: Dictionary, input: Dictionary, turn_los
 		if w.has("lost_atleast") and not (turn_lost["vuln"] + turn_lost["able"] >= w["lost_atleast"]):
 			continue
 		s["boss"]["fired"].append(i)
-		_boss_move(C, s, g["team"], g["kind"], int(g["change"]), C["scorecard"][g["team"]]["boss"], g["line"], ticker, ev)
+		_boss_move(C, s, g["team"], g["kind"], int(g["change"]), C["scorecard"][g["team"]]["boss"], g["line"], "trigger", g.get("measure"), ticker, ev)
 	var cm = input.get("boss", {})
 	if typeof(cm) != TYPE_DICTIONARY:
 		cm = {}
@@ -216,7 +228,7 @@ static func _boss_turn(C: Dictionary, s: Dictionary, input: Dictionary, turn_los
 		if not levers.has(k) or s["boss"][t]["cm"].has(k):
 			continue
 		s["boss"][t]["cm"].append(k)
-		_boss_move(C, s, t, k, int(levers[k]["change"]), C["scorecard"][t]["boss"], levers[k]["line"], ticker, ev)
+		_boss_move(C, s, t, k, int(levers[k]["change"]), C["scorecard"][t]["boss"], levers[k]["line"], "cm", levers[k].get("measure"), ticker, ev)
 
 
 # ---------- dilemmas ----------
