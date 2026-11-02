@@ -816,12 +816,13 @@
          {
           "label": "Licence to operate (community trust)",
           "meter": "trust",
-          "per10": 12
+          "per10": 12,
+          "from": 708
          }
         ]
        }
       },
-      "hash": "6973dba1"
+      "hash": "4e778bc0"
      }
     },
     {
@@ -1428,12 +1429,13 @@
          {
           "label": "Licence to operate (community trust)",
           "meter": "trust",
-          "per10": 12
+          "per10": 12,
+          "from": 708
          }
         ]
        }
       },
-      "hash": "8923a6f3"
+      "hash": "3d45c0b6"
      }
     }
    ],
@@ -1447,7 +1449,7 @@
     },
     "meridian": {
      "points": 2528,
-     "start": 2460,
+     "start": 2448,
      "index": 103,
      "target": 115,
      "par": false
@@ -2169,10 +2171,11 @@
       "recovery": null,
       "boss": {
        "fired": [
-        1
+        1,
+        5
        ],
        "community": {
-        "target": 76,
+        "target": 74,
         "log": [
          {
           "turn": 1,
@@ -2188,10 +2191,19 @@
           "kind": "permission",
           "change": -4,
           "who": "Pastor Ruth Okafor and the parish council",
+          "line": "Do what you can. Nobody will blame you for the ones the storm took.",
+          "source": "trigger",
+          "target": 76
+         },
+         {
+          "turn": 2,
+          "kind": "permission",
+          "change": -2,
+          "who": "Pastor Ruth Okafor and the parish council",
           "line": "Spend what you must. We will rebuild the stores; we cannot rebuild a family.",
           "source": "cm",
-          "target": 76,
-          "measure": "People moved to safety"
+          "target": 74,
+          "measure": "People in shelter"
          }
         ],
         "cm": [
@@ -2199,9 +2211,10 @@
         ],
         "extra": [
          {
-          "label": "People moved to safety",
-          "rescued_per10": 1,
-          "rescued_over": 800
+          "label": "People in shelter",
+          "sheltered_per10": 1,
+          "sheltered_expect": 300,
+          "from": 15
          }
         ]
        },
@@ -2212,7 +2225,7 @@
         "extra": []
        }
       },
-      "hash": "6fccea08"
+      "hash": "9a0bf088"
      }
     },
     {
@@ -2750,10 +2763,11 @@
       },
       "boss": {
        "fired": [
-        1
+        1,
+        5
        ],
        "community": {
-        "target": 76,
+        "target": 74,
         "log": [
          {
           "turn": 1,
@@ -2769,10 +2783,19 @@
           "kind": "permission",
           "change": -4,
           "who": "Pastor Ruth Okafor and the parish council",
+          "line": "Do what you can. Nobody will blame you for the ones the storm took.",
+          "source": "trigger",
+          "target": 76
+         },
+         {
+          "turn": 2,
+          "kind": "permission",
+          "change": -2,
+          "who": "Pastor Ruth Okafor and the parish council",
           "line": "Spend what you must. We will rebuild the stores; we cannot rebuild a family.",
           "source": "cm",
-          "target": 76,
-          "measure": "People moved to safety"
+          "target": 74,
+          "measure": "People in shelter"
          }
         ],
         "cm": [
@@ -2780,9 +2803,10 @@
         ],
         "extra": [
          {
-          "label": "People moved to safety",
-          "rescued_per10": 1,
-          "rescued_over": 800
+          "label": "People in shelter",
+          "sheltered_per10": 1,
+          "sheltered_expect": 300,
+          "from": 15
          }
         ]
        },
@@ -2793,16 +2817,16 @@
         "extra": []
        }
       },
-      "hash": "54b5d075"
+      "hash": "c0974d37"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": -1064,
-     "start": 340,
-     "index": -313,
-     "target": 76,
+     "points": -268,
+     "start": 1155,
+     "index": -23,
+     "target": 74,
      "par": false
     },
     "meridian": {
@@ -3581,10 +3605,11 @@
       "boss": {
        "fired": [
         0,
-        2
+        2,
+        5
        ],
        "community": {
-        "target": 81,
+        "target": 77,
         "log": [
          {
           "turn": 1,
@@ -3594,6 +3619,15 @@
           "line": "Don't burn the volunteers or the food. We have a week of this ahead, and Heartland won't feed us.",
           "source": "cm",
           "target": 81
+         },
+         {
+          "turn": 2,
+          "kind": "permission",
+          "change": -4,
+          "who": "Pastor Ruth Okafor and the parish council",
+          "line": "Do what you can. Nobody will blame you for the ones the storm took.",
+          "source": "trigger",
+          "target": 77
          }
         ],
         "cm": [
@@ -3638,7 +3672,7 @@
         "extra": []
        }
       },
-      "hash": "b9d69c4d"
+      "hash": "2619282f"
      }
     },
     {
@@ -4198,10 +4232,11 @@
       "boss": {
        "fired": [
         0,
-        2
+        2,
+        5
        ],
        "community": {
-        "target": 81,
+        "target": 77,
         "log": [
          {
           "turn": 1,
@@ -4211,6 +4246,15 @@
           "line": "Don't burn the volunteers or the food. We have a week of this ahead, and Heartland won't feed us.",
           "source": "cm",
           "target": 81
+         },
+         {
+          "turn": 2,
+          "kind": "permission",
+          "change": -4,
+          "who": "Pastor Ruth Okafor and the parish council",
+          "line": "Do what you can. Nobody will blame you for the ones the storm took.",
+          "source": "trigger",
+          "target": 77
          }
         ],
         "cm": [
@@ -4255,7 +4299,7 @@
         "extra": []
        }
       },
-      "hash": "e2d75770"
+      "hash": "cd96aa8e"
      }
     }
    ],
@@ -4264,7 +4308,7 @@
      "points": 1276,
      "start": 1140,
      "index": 112,
-     "target": 81,
+     "target": 77,
      "par": true
     },
     "meridian": {

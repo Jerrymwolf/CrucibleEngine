@@ -37,12 +37,12 @@ const POLICY = {
   },
 };
 
-function play(seed, cp, mp, pick) {
+function play(seed, cp, mp, pick, boss = {}) {
   let s = E.newGame(C, { seed });
   while (!s.over) {
     const d = E.fallbackDilemma(C, s, stances).dilemma;
     const idx = pick(seed, s.turn, d);
-    const input = { orders: { ...POLICY.community[cp](s), ...POLICY.meridian[mp](s) }, dilemma: d, votes: { [d.final_call]: idx } };
+    const input = { orders: { ...POLICY.community[cp](s), ...POLICY.meridian[mp](s) }, dilemma: d, votes: { [d.final_call]: idx }, ...(s.turn === 1 ? { boss } : {}) };
     s = E.resolveTurn(C, s, input).state;
   }
   return s;
@@ -51,17 +51,21 @@ const randomPick = (seed, turn, d) => E.rngFor(seed + 99991, turn)() * d.orders.
 
 const N = +(process.argv[2] || 1000);
 const rows = [];
-for (const cp of ["nothing", "careful"]) for (const mp of ["nothing", "careful"]) {
+const RUNS = [];
+for (const cp of ["nothing", "careful"]) for (const mp of ["nothing", "careful"]) RUNS.push([cp, mp, {}]);
+// boss mode: the Crucible Master presses a lever on turn 1
+if (C.win && C.win.mode === "boss") for (const b of [{ meridian: "permission" }, { community: "permission" }, { meridian: "pressure" }, { community: "pressure" }]) RUNS.push(["careful", "careful", b]);
+for (const [cp, mp, boss] of RUNS) {
   let cw = 0, mw = 0, ci = 0, mi = 0, lost = 0, tr = 0, cf = 0;
   for (let seed = 1; seed <= N; seed++) {
-    const s = play(seed, cp, mp, randomPick);
+    const s = play(seed, cp, mp, randomPick, boss);
     const st = E.standings(C, s);
     ci += st.community.index; mi += st.meridian.index; lost += s.lost.vuln + s.lost.able; tr += s.meters.trust; cf += s.meters.confidence;
     // par mode: a team "wins" by meeting its own target; race mode: by beating the other team
     if (st.community.par !== null) { if (st.community.par) cw++; if (st.meridian.par) mw++; }
     else if (st.community.index > st.meridian.index) cw++; else if (st.meridian.index > st.community.index) mw++;
   }
-  rows.push({ community: cp, meridian: mp, [C.win && (C.win.mode === "par" || C.win.mode === "boss") ? "community makes par %" : "community wins %"]: (100 * cw / N).toFixed(1), [C.win && (C.win.mode === "par" || C.win.mode === "boss") ? "meridian makes par %" : "meridian wins %"]: (100 * mw / N).toFixed(1),
+  rows.push({ community: cp, meridian: mp, lever: Object.entries(boss).map(([k, v]) => `${k} ${v}`).join() || "-", [C.win && (C.win.mode === "par" || C.win.mode === "boss") ? "community makes par %" : "community wins %"]: (100 * cw / N).toFixed(1), [C.win && (C.win.mode === "par" || C.win.mode === "boss") ? "meridian makes par %" : "meridian wins %"]: (100 * mw / N).toFixed(1),
     "community index": (ci / N).toFixed(1), "meridian index": (mi / N).toFixed(1), "people lost": (lost / N).toFixed(0), trust: (tr / N).toFixed(0), conf: (cf / N).toFixed(0) });
 }
 console.table(rows);

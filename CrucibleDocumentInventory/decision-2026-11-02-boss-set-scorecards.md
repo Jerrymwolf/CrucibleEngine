@@ -37,9 +37,11 @@ In real life, nobody keeps score against the team across the table. Each leader 
 
 **Change.** Permission now adds a measure to that team's card and only nudges the target (-4):
 - **Meridian's board** starts counting "licence to operate (community trust)".
-- **The council** starts counting "people moved to safety" above a baseline of 800.
+- **The council** starts counting "people in shelter" (a head count, so a person is never counted twice), and its target moves -2.
+- **Not retroactive:** a granted measure counts only the change after the moment it was granted.
+- **Permission to look away:** a community trigger after turn 2, when 20 or more people died, lowers the bar without changing what is counted: "Nobody will blame you for the ones the storm took." The debrief can then ask who gave that permission.
 
-**Result.** With Meridian's permission, a selfish Meridian meets its target 30% of the time, a careful one 48% and a generous one 51%. Pressure pulls toward the board's numbers, and permission now pulls toward Keystone, without making kindness a sure thing.
+**Result.** With Meridian's permission (as first measured, before the change to counting from the moment it is granted), a selfish Meridian meets its target 30% of the time, a careful one 48% and a generous one 51%. After that change, sim.mjs shows both careful teams at 62/62 with no lever. With Meridian's permission pressed on turn 1, Meridian meets its target 42% of the time. With the community's permission, the community meets its target 75% of the time. Pressure pulls toward the board's numbers, and permission now pulls toward Keystone, without making kindness a sure thing.
 
 **Facilitator fixes in the same pass:**
 - Every boss log entry records whether it came from the Crucible Master or a trigger.

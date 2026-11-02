@@ -80,14 +80,14 @@
   // extra: measures a boss's permission added to the card (they count from the start, like the rest).
   function cardParts(C, team, s, extra = []) {
     const stock = s ? s.stock : C.start.stock, meters = s ? s.meters : C.start.meters, lost = s ? s.lost : { vuln: 0, able: 0 };
-    const rescued = s ? s.rescued : { vuln: 0, able: 0 };
     return C.scorecard[team].measures.concat(extra).map((m) => {
       let v = 0;
       for (const g of m.goods || []) v += stock[C.goods[g].owner][g] * C.goods[g].points * 10;
       if (m.meter) v += meters[m.meter] * m.per10;
       if (m.lost_vuln_per10) v += lost.vuln * m.lost_vuln_per10;
       if (m.lost_able_per10) v += lost.able * m.lost_able_per10;
-      if (m.rescued_per10) v += (rescued.vuln + rescued.able - (m.rescued_over || 0)) * m.rescued_per10; // counted above a baseline the bosses expect
+      if (m.sheltered_per10) v += (s ? Object.values(s.shelter).reduce((n, x) => n + x.vuln + x.able, 0) : m.sheltered_expect || 0) * m.sheltered_per10;
+      if (!s && m.from !== undefined) v = m.from; // a measure granted mid-game counts from its value when it was granted
       return { label: m.label, value: v };
     });
   }
@@ -104,7 +104,11 @@
     const move = (t, kind, change, who, line, source, measure) => {
       s.boss[t].target += change;
       // Permission can change what the bosses count, not only the bar: a new measure joins the card.
-      if (measure && typeof measure === "object" && measure.label) s.boss[t].extra.push(measure);
+      if (measure && typeof measure === "object" && measure.label) {
+        const m = { ...measure }; delete m.from;
+        m.from = cardParts(C, t, s, [m]).pop().value; // not retroactive: only change from now on counts
+        s.boss[t].extra.push(m);
+      }
       s.boss[t].log.push({ turn: s.turn, kind, change, who, line, source, target: s.boss[t].target, ...(measure && measure.label ? { measure: measure.label } : {}) });
       ticker.push(`${who}: "${line}"`);
       say(`${C.teams[t].short} target ${change > 0 ? "raised" : "lowered"} to ${s.boss[t].target}% (${kind}).`, change > 0 ? "bad" : "good");

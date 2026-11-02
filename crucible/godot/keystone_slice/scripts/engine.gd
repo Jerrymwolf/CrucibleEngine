@@ -151,7 +151,6 @@ static func card_parts(C: Dictionary, team: String, s: Dictionary, extra: Array 
 	var stock: Dictionary = s["stock"] if s.has("stock") else C["start"]["stock"]
 	var meters: Dictionary = s["meters"] if s.has("meters") else C["start"]["meters"]
 	var lost: Dictionary = s["lost"] if s.has("lost") else {"vuln": 0, "able": 0}
-	var rescued: Dictionary = s["rescued"] if s.has("rescued") else {"vuln": 0, "able": 0}
 	var out := []
 	for m in C["scorecard"][team]["measures"] + extra:
 		var v := 0
@@ -163,8 +162,16 @@ static func card_parts(C: Dictionary, team: String, s: Dictionary, extra: Array 
 			v += int(lost["vuln"]) * int(m["lost_vuln_per10"])
 		if m.has("lost_able_per10"):
 			v += int(lost["able"]) * int(m["lost_able_per10"])
-		if m.has("rescued_per10"):  # counted above a baseline the bosses expect
-			v += (int(rescued["vuln"]) + int(rescued["able"]) - int(m.get("rescued_over", 0))) * int(m["rescued_per10"])
+		if m.has("sheltered_per10"):
+			var n := 0
+			if s.has("shelter"):
+				for k in s["shelter"]:
+					n += int(s["shelter"][k]["vuln"]) + int(s["shelter"][k]["able"])
+			else:
+				n = int(m.get("sheltered_expect", 0))
+			v += n * int(m["sheltered_per10"])
+		if not s.has("stock") and m.has("from"):
+			v = int(m["from"])  # a measure granted mid-game counts from its value when it was granted
 		out.append({"label": m["label"], "value": v})
 	return out
 
@@ -190,7 +197,11 @@ static func _boss_move(C: Dictionary, s: Dictionary, t: String, kind: String, ch
 	# Permission can change what the bosses count, not only the bar: a new measure joins the card.
 	var has_m: bool = typeof(measure) == TYPE_DICTIONARY and measure.has("label") and String(measure["label"]) != ""
 	if has_m:
-		s["boss"][t]["extra"].append(measure.duplicate(true))
+		var mm: Dictionary = measure.duplicate(true)
+		mm.erase("from")
+		var parts := card_parts(C, t, s, [mm])
+		mm["from"] = int(parts[parts.size() - 1]["value"])  # not retroactive: only change from now on counts
+		s["boss"][t]["extra"].append(mm)
 	var entry := {"turn": s["turn"], "kind": kind, "change": change, "who": who, "line": line, "source": source, "target": s["boss"][t]["target"]}
 	if has_m:
 		entry["measure"] = measure["label"]

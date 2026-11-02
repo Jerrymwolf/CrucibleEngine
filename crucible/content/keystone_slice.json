@@ -1529,7 +1529,7 @@
   "_about": "Share of the plant shift that turns up: trust/trust_full, less anger from live timers ((left-1)/len+1)*anger_per_timer. Continuous, no cliffs."
  },
  "scorecard": {
-  "_about": "Each team answers to its own bosses, who judge it on what they care about. Score is in tenths of a point; index = score now / score at start. Pressure raises the target, permission lowers it. Triggers fire once, after the named turn resolves; the Crucible Master can add one pressure and one permission per team. A lever or trigger with a measure adds it to the bosses' card: permission changes what the bosses count, not only the bar.",
+  "_about": "Each team answers to its own bosses, who judge it on what they care about. Score is in tenths of a point; index = score now / score at start. Pressure raises the target, permission lowers it. Triggers fire once, after the named turn resolves; the Crucible Master can add one pressure and one permission per team. A lever or trigger with a measure adds it to the bosses' card from that moment (only change after it is granted counts): permission changes what the bosses count, not only the bar.",
   "community": {
    "boss": "Pastor Ruth Okafor and the parish council",
    "target": 75,
@@ -1559,12 +1559,12 @@
      "line": "Don't burn the volunteers or the food. We have a week of this ahead, and Heartland won't feed us."
     },
     "permission": {
-     "change": -4,
+     "change": -2,
      "line": "Spend what you must. We will rebuild the stores; we cannot rebuild a family.",
      "measure": {
-      "label": "People moved to safety",
-      "rescued_per10": 1,
-      "rescued_over": 800
+      "label": "People in shelter",
+      "sheltered_per10": 1,
+      "sheltered_expect": 300
      }
     }
    }
@@ -1662,6 +1662,17 @@
      "atleast": 70
     },
     "line": "You've kept faith with people. Spend what you must; we'll rebuild the stores."
+   },
+   {
+    "team": "community",
+    "after_turn": 2,
+    "kind": "permission",
+    "change": -4,
+    "if": {
+     "lost_atleast": 20
+    },
+    "line": "Do what you can. Nobody will blame you for the ones the storm took.",
+    "_about": "Permission to look away: lowers the bar without changing what is counted."
    }
   ],
   "_cm_hint": "Press pressure when a team is coasting or only one pull is on it; press permission when a team says it can't afford its #1 value. Each lever works once per team."
