@@ -546,7 +546,7 @@
      "owner": "meridian",
      "cost": {},
      "effects": {
-      "confidence": -6,
+      "confidence": 2,
       "trust": -4,
       "anger": 2
      },
@@ -768,7 +768,7 @@
      },
      "effects": {
       "power": "plant",
-      "confidence": -6,
+      "confidence": 2,
       "trust": -5,
       "anger": 2
      },
@@ -992,7 +992,7 @@
      },
      "effects": {
       "power": "plant",
-      "confidence": -6,
+      "confidence": 2,
       "trust": -5,
       "anger": 2
      },
@@ -1514,12 +1514,12 @@
   }
  ],
  "win": {
-  "mode": "par",
+  "mode": "boss",
   "par": {
    "community": 113,
    "meridian": 118
   },
-  "_about": "par: each team succeeds if it ends at or above its par index; both, one or neither can. race: highest index wins."
+  "_about": "boss: each team is judged by its own bosses on its scorecard (see scorecard) against a target the bosses move; par: all own resources against a fixed target; race: highest index wins."
  },
  "workforce": {
   "trust_full": 60,
@@ -1527,5 +1527,132 @@
   "anger_per_timer": 0.25,
   "anger_cap": 0.6,
   "_about": "Share of the plant shift that turns up: trust/trust_full, less anger from live timers ((left-1)/len+1)*anger_per_timer. Continuous, no cliffs."
+ },
+ "scorecard": {
+  "_about": "Each team answers to its own bosses, who judge it on what they care about. Score is in tenths of a point; index = score now / score at start. Pressure raises the target, permission lowers it. Triggers fire once, after the named turn resolves; the Crucible Master can add one pressure and one permission per team.",
+  "community": {
+   "boss": "Pastor Ruth Okafor and the parish council",
+   "target": 75,
+   "measures": [
+    {
+     "label": "People lost",
+     "lost_vuln_per10": -10,
+     "lost_able_per10": -3
+    },
+    {
+     "label": "Supplies",
+     "goods": [
+      "food",
+      "volunteers",
+      "c_fuel"
+     ]
+    },
+    {
+     "label": "Trust",
+     "meter": "trust",
+     "per10": 5
+    }
+   ],
+   "cm": {
+    "pressure": {
+     "change": 6,
+     "line": "Every family in Low Ward is counting on us. Nobody gets left, whatever it costs."
+    },
+    "permission": {
+     "change": -8,
+     "line": "Do what you can. Nobody will blame you for the ones the storm took."
+    }
+   }
+  },
+  "meridian": {
+   "boss": "Dana Kell and the Meridian board",
+   "target": 114,
+   "measures": [
+    {
+     "label": "Cure doses",
+     "goods": [
+      "doses"
+     ]
+    },
+    {
+     "label": "Funds and fuel",
+     "goods": [
+      "funds",
+      "m_fuel"
+     ]
+    },
+    {
+     "label": "Board confidence",
+     "meter": "confidence",
+     "per10": 5
+    }
+   ],
+   "cm": {
+    "pressure": {
+     "change": 6,
+     "line": "The board meets Thursday. I need the batch numbers, not excuses."
+    },
+    "permission": {
+     "change": -12,
+     "line": "Take care of Keystone first. The board will back you; we'll explain the numbers."
+    }
+   }
+  },
+  "triggers": [
+   {
+    "team": "meridian",
+    "after_turn": 1,
+    "kind": "pressure",
+    "change": 5,
+    "if": {
+     "meter": "confidence",
+     "below": 60
+    },
+    "line": "Chicago is asking why Keystone slipped. Get the plant back on schedule."
+   },
+   {
+    "team": "community",
+    "after_turn": 1,
+    "kind": "pressure",
+    "change": 5,
+    "if": {
+     "lost_atleast": 20
+    },
+    "line": "People are dying in Low Ward. The council wants every bus on the road."
+   },
+   {
+    "team": "meridian",
+    "after_turn": 2,
+    "kind": "pressure",
+    "change": 5,
+    "if": {
+     "meter": "confidence",
+     "below": 55
+    },
+    "line": "Two bad turns. The board wants the doses shipped, whatever it takes."
+   },
+   {
+    "team": "meridian",
+    "after_turn": 2,
+    "kind": "permission",
+    "change": -6,
+    "if": {
+     "meter": "trust",
+     "atleast": 70
+    },
+    "line": "Keystone trusts us. That licence is worth more than this batch; keep it."
+   },
+   {
+    "team": "community",
+    "after_turn": 2,
+    "kind": "permission",
+    "change": -6,
+    "if": {
+     "meter": "trust",
+     "atleast": 70
+    },
+    "line": "You've kept faith with people. Spend what you must; we'll rebuild the stores."
+   }
+  ]
  }
 }

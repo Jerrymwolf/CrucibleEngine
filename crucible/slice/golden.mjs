@@ -20,28 +20,28 @@ const plans = [
     { orders: { bus1: { task: "evac", site: "low_ward", dest: "st_brendans" }, bus2: { task: "evac", site: "low_ward", dest: "st_brendans" }, boat: { task: "evac", site: "low_ward", dest: "st_brendans" }, vcrew: { task: "sandbag", site: "low_ward" }, gen: { task: "power", site: "plant" }, pcrew: { task: "run", site: "plant" } },
       votes: { meridian: 0 }, promises: [{ by: "meridian", to: "community", kind: "lend", unit: "shuttle", site: null, text: "Meridian will lend Plant shuttle to Community next turn." }], confirms: [0] },
     { orders: { bus1: { task: "evac", site: "tech_housing", dest: "heartland" }, shuttle: { task: "evac", site: "tech_housing", dest: "st_brendans" }, gen: { task: "power", site: "st_brendans" }, pcrew: { task: "run", site: "plant" } },
-      lends: { shuttle: true }, towerOpen: true, votes: { meridian: 1, community: 2 } },
+      lends: { shuttle: true }, towerOpen: true, votes: { meridian: 1, community: 2 }, boss: { meridian: "permission" } },
     { orders: { bus1: { task: "evac", site: "tech_housing", dest: "tech_tower" }, bus2: { task: "evac", site: "tech_housing", dest: "tech_tower" }, boat: { task: "evac", site: "low_ward", dest: "st_brendans" }, pcrew: { task: "sandbag", site: "plant" } },
       votes: { community: 0 }, recovery: { community: true, meridian: true } },
   ] },
-  { seed: 7, turns: [ { orders: {}, votes: {} }, { orders: { pcrew: { task: "run" } }, votes: {} }, { orders: {}, votes: { community: 1 } } ] },
+  { seed: 7, turns: [ { orders: {}, votes: {} }, { orders: { pcrew: { task: "run" } }, votes: {}, boss: { community: "permission", meridian: 5 } }, { orders: {}, votes: { community: 1 } } ] },
   { seed: 4217, turns: [
-    { orders: { bus1: { task: "evac", site: "low_ward", dest: "heartland" }, shuttle: { task: "evac", site: "low_ward", dest: "heartland" }, vcrew: { task: "sandbag", site: "low_ward" } }, votes: { meridian: 2 } },
+    { orders: { bus1: { task: "evac", site: "low_ward", dest: "heartland" }, shuttle: { task: "evac", site: "low_ward", dest: "heartland" }, vcrew: { task: "sandbag", site: "low_ward" } }, votes: { meridian: 2 }, boss: { community: "pressure", meridian: "pressure" } },
     { orders: { boat: { task: "evac", site: "low_ward", dest: "st_brendans" }, gen: { task: "power", site: "plant" }, vcrew: { task: "sandbag", site: "plant" } }, votes: { meridian: 0 } },
-    { orders: { gen: { task: "power", site: "tech_housing" }, pcrew: { task: "sandbag", site: "plant" } }, votes: { community: 2 }, recovery: { meridian: true } },
+    { orders: { gen: { task: "power", site: "tech_housing" }, pcrew: { task: "sandbag", site: "plant" } }, votes: { community: 2 }, recovery: { meridian: true }, boss: { meridian: "pressure", community: "bogus" } },
   ] },
 ];
 
 const snap = (s) => ({ stock: s.stock, meters: s.meters, lost: s.lost, rescued: s.rescued, shelter: s.shelter, towerOpen: s.towerOpen,
   sites: Object.fromEntries(Object.entries(s.sites).map(([k, v]) => [k, v])), residents: s.residents, promises: s.promises.map((p) => p.status),
-  history: s.history, sandbags: s.sandbags, anger: s.anger, recovery: s.recovery || null, hash: E.hash(s) });
+  history: s.history, sandbags: s.sandbags, anger: s.anger, recovery: s.recovery || null, boss: s.boss, hash: E.hash(s) });
 
 const games = plans.map((p) => {
   let s = E.newGame(C, { seed: p.seed });
   const turns = [];
   for (const t of p.turns) {
     const d = E.fallbackDilemma(C, s, stances).dilemma;
-    const input = { orders: t.orders, lends: t.lends || {}, towerOpen: !!t.towerOpen, votes: t.votes, promises: t.promises || [], confirms: t.confirms || [], ...(t.recovery ? { recovery: t.recovery } : {}) };
+    const input = { orders: t.orders, lends: t.lends || {}, towerOpen: !!t.towerOpen, votes: t.votes, promises: t.promises || [], confirms: t.confirms || [], ...(t.recovery ? { recovery: t.recovery } : {}), ...(t.boss ? { boss: t.boss } : {}) };
     s = E.resolveTurn(C, s, { ...input, dilemma: d }).state;
     turns.push({ input, expect: snap(s) });
   }

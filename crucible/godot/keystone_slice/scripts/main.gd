@@ -7,13 +7,13 @@ const Director = preload("res://scripts/director.gd")
 const MapView = preload("res://scripts/map_view.gd")
 const TEAMS := ["community", "meridian"]
 const SETTINGS := "user://settings.cfg"
-const SETTINGS_VERSION := 3  # bump when a default changes, so an old saved choice doesn't override it
+const SETTINGS_VERSION := 4  # bump when a default changes, so an old saved choice doesn't override it
 const PLAYOUT_S := 3.2
 const AI_WAIT_S := 20        # planning seconds the game waits for Claude's moment
 const AI_RETRY_WAIT_S := 35  # ...or this long when Claude's first answer failed the checks and a retry is running
 const REFLECT := [
 	"Where did you first trade a value you signed, and who gave you permission to?",
-	"Which voice moved you most tonight: Pastor Ruth, Dana Kell, the clock, or the score?",
+	"Which pull moved you most tonight: Pastor Ruth, Dana Kell, your bosses' target, or the clock?",
 	"If the people of Low Ward described what you valued tonight, what would they say?",
 ]
 
@@ -37,7 +37,7 @@ const COST_SOFT := Color("#3a1916")
 var C: Dictionary
 var setup := {
 	# Solo go/no-go default: you play the community, a bot plays Meridian from its signed values.
-	"seed": 4217, "seconds": 120, "play": "community", "win": "par", "api_key": "", "model": Director.DEFAULT_MODEL,
+	"seed": 4217, "seconds": 120, "play": "community", "win": "boss", "api_key": "", "model": Director.DEFAULT_MODEL,
 	"stances": {
 		"community": {"ranks": ["safety", "loyalty", "fairness"], "statement": "We get our people out first. We stand by our neighbours. Nobody gets special treatment."},
 		"meridian": {"ranks": ["excellence", "duty", "accountability"], "statement": "We finish what we start. We owe the world this cure. We own every call we make."},
@@ -157,8 +157,17 @@ static func fmt(n: int) -> String:
 	return "%d:%02d" % [floori(n / 60.0), maxi(0, n) % 60]
 
 
-func standing(t: String, stock: Dictionary) -> int:
+func standing(t: String, stock: Dictionary, meters = null) -> int:
+	if boss_mode():  # the team's own bosses' scorecard, matching Eng.standings
+		var s2 := {"stock": stock, "meters": meters if meters != null else state["meters"], "lost": state["lost"]}
+		return int(floor(float(Eng.card_score(C, t, s2)) / Eng.card_score(C, t, {}) * 100.0 + 0.5))
 	return int(round(float(Eng.points(C, t, stock)) / Eng.points(C, t, C["start"]["stock"]) * 100.0))
+
+
+func target_for(t: String) -> int:
+	if boss_mode():
+		return int(state["boss"][t]["target"])
+	return int(C["win"]["par"][t])
 
 
 # ---------- AI Dilemma Director ----------
@@ -272,7 +281,7 @@ func start_game() -> void:
 	_save_settings()
 	director.api_key = setup["api_key"]
 	director.model = setup["model"] if String(setup["model"]).strip_edges() != "" else Director.DEFAULT_MODEL
-	C["win"]["mode"] = setup.get("win", "par")  # the rules read the win mode from content; the run log records it
+	C["win"]["mode"] = setup.get("win", "boss")  # the rules read the win mode from content; the run log records it
 	state = Eng.new_game(C, int(setup["seed"]))
 	run_log = {"format": "keystone-slice/1", "engine": "godot",
 		"setup": {"seed": int(setup["seed"]), "stances": setup["stances"].duplicate(true), "play": setup["play"], "seconds": setup["seconds"], "win": C["win"]["mode"]},
@@ -285,7 +294,7 @@ func start_game() -> void:
 
 
 func begin_turn() -> void:
-	draft = {"orders": {}, "lends": {}, "towerOpen": false, "votes": {"community": null, "meridian": null}, "promises": [], "confirms": [], "confirmed_local": {}, "recovery": {}}
+	draft = {"orders": {}, "lends": {}, "towerOpen": false, "votes": {"community": null, "meridian": null}, "promises": [], "confirms": [], "confirmed_local": {}, "recovery": {}, "boss": {}}
 	for t in TEAMS:
 		if not plays(t):
 			draft["orders"].merge(bot_orders(t, state), true)
@@ -338,6 +347,8 @@ func lock_and_resolve() -> void:
 	}
 	if state["turn"] == C["turns"].size():
 		input["recovery"] = draft["recovery"].duplicate()
+	if not draft["boss"].is_empty():
+		input["boss"] = draft["boss"].duplicate()  # the Crucible Master's pressure or permission, logged like any other input
 	run_log["turns"].append(input.duplicate(true))
 	var raw = pending.get("result", {}).get("raw") if pending.get("turn") == state["turn"] else null
 	run_log["ai"].append({"turn": state["turn"], "source": dil["source"], "ms": dil.get("ms"), "notes": dil["notes"], "raw": raw})
@@ -469,8 +480,40 @@ func _on_recovery(on: bool, t: String) -> void:
 	render()
 
 
+## Both "par" and "boss" are play-to-target modes: each team can meet its own target.
 func par_mode() -> bool:
-	return C.has("win") and C["win"].get("mode") == "par"
+	return C.has("win") and C["win"].get("mode") in ["par", "boss"]
+
+
+func boss_mode() -> bool:
+	return C.has("win") and C["win"].get("mode") == "boss" and C.has("scorecard") and state.get("boss") != null
+
+
+func _on_boss(t: String, kind: String) -> void:
+	if draft["boss"].get(t) == kind:
+		draft["boss"].erase(t)
+	else:
+		draft["boss"][t] = kind
+	render()
+
+
+## The Crucible Master's levers: a team's bosses lean in (pressure) or free it (permission). One of each per team per game.
+func cm_view() -> Control:
+	var p := _panel(SUNK, LINE)
+	var row := _hbox(8)
+	row.add_child(_lbl("CRUCIBLE MASTER", 13, MUTED, false))
+	for t in TEAMS:
+		for kind in ["pressure", "permission"]:
+			var used: bool = state["boss"][t]["cm"].has(kind)
+			var lever: Dictionary = C["scorecard"][t]["cm"][kind]
+			var on: bool = draft["boss"].get(t) == kind
+			var txt := "%s %s (%+d)" % [short(t), kind, int(lever["change"])]
+			var b := _button(("✓ " if on else "") + txt + (" · used" if used else ""), _on_boss.bind(t, kind), on)
+			b.disabled = used
+			b.tooltip_text = lever["line"]
+			row.add_child(b)
+	p.add_child(row)
+	return p
 
 
 func _goods_text(g: Dictionary) -> String:
@@ -672,10 +715,10 @@ func setup_view() -> Control:
 	seed_in.custom_minimum_size = Vector2(120, 0)
 	opts.add_child(_field("Storm number (advanced)", seed_in))
 	var win := OptionButton.new()
-	for pair in [["par", "Meet your own target (both teams can)"], ["race", "Beat the other team"]]:
+	for pair in [["boss", "Answer to your own bosses (pressure and permission)"], ["par", "Meet a fixed target (both teams can)"], ["race", "Beat the other team"]]:
 		win.add_item(pair[1])
 		win.set_item_metadata(win.item_count - 1, pair[0])
-		if setup.get("win", "par") == pair[0]:
+		if setup.get("win", "boss") == pair[0]:
 			win.select(win.item_count - 1)
 	opts.add_child(_field("How a team wins", win))
 	setup_inputs["win"] = win
@@ -768,6 +811,8 @@ func console_view() -> Control:
 		var f := _panel(STORM, STORM)
 		f.add_child(_lbl("FLASH WARNING: %s. Plan for it now." % TT["flash"]["text"], 16, BG))
 		col.add_child(f)
+	if screen == "plan" and boss_mode():
+		col.add_child(cm_view())
 	if screen == "plan" and s["turn"] == 1 and _no_player_orders():
 		var cb := _panel(COMM_SOFT if plays("community") else MERI_SOFT, STORM, 2)
 		var first := "Bus 1" if plays("community") else "Plant shuttle"
@@ -914,7 +959,20 @@ func team_view(t: String) -> Control:
 	h.add_child(sp)
 	h.add_child(_chip("YOU" if mine else "BOT", team_soft(t), team_col(t), 12))
 	v.add_child(h)
-	if par_mode():
+	if boss_mode():
+		var tgt_b := target_for(t)
+		var now_b := standing(t, s["stock"])
+		var card: Dictionary = C["scorecard"][t]
+		var what := PackedStringArray()
+		for m in card["measures"]:
+			what.append(String(m["label"]).to_lower())
+		v.add_child(_lbl("Your bosses' score: %d%%. Target: %d%%" % [now_b, tgt_b], 16, HONOUR if now_b >= tgt_b else FG))
+		v.add_child(_lbl("%s judge you on %s. Meet the target at the end; both teams can." % [card["boss"], ", ".join(what)], 13, MUTED))
+		var lg: Array = s["boss"][t]["log"]
+		if lg.size():
+			var last: Dictionary = lg[lg.size() - 1]
+			v.add_child(_lbl('%s: "%s"' % ["Pressure" if last["change"] > 0 else "Permission", last["line"]], 13, STORM if last["change"] > 0 else HONOUR))
+	elif par_mode():
 		var tgt: int = C["win"]["par"][t]
 		var now := standing(t, s["stock"])
 		v.add_child(_lbl("Standing: %d%% of start. Target: %d%%" % [now, tgt], 16, HONOUR if now >= tgt else FG))
@@ -1129,13 +1187,16 @@ func _standing_text(o: Dictionary) -> String:
 	var dz: int = o["effects"].get("doses", 0)
 	if dz:
 		stock["meridian"]["doses"] = maxi(0, stock["meridian"]["doses"] + dz)
+	var meters: Dictionary = state["meters"].duplicate()
+	for k in ["trust", "confidence"]:
+		meters[k] = clampi(meters[k] + int(o["effects"].get(k, 0)), 0, 100)
 	var bits := PackedStringArray()
 	for t in TEAMS:
 		var b := standing(t, state["stock"])
-		var a := standing(t, stock)
+		var a := standing(t, stock, meters)
 		if a != b:
 			bits.append("%s %d%% → %d%%" % [short(t), b, a])
-	return "Standing now: " + (", ".join(bits) if bits.size() else "no change") + ". What it saves or loses later depends on the storm."
+	return ("Bosses' score now: " if boss_mode() else "Standing now: ") + (", ".join(bits) if bits.size() else "no change") + ". What it saves or loses later depends on the storm."
 
 
 func dilemma_view() -> Control:
@@ -1332,7 +1393,7 @@ func debrief_view() -> Control:
 	if par_mode():
 		var bits := PackedStringArray()
 		for t in TEAMS:
-			bits.append("%s %s its target (%d%% against %d%%)" % [C["teams"][t]["name"], "met" if sd[t]["par"] else "fell short of", sd[t]["index"], C["win"]["par"][t]])
+			bits.append("%s %s its target (%d%% against %d%%)" % [C["teams"][t]["name"], "met" if sd[t]["par"] else "fell short of", sd[t]["index"], sd[t]["target"]])
 		headline = ". ".join(bits)
 	elif winner != "":
 		headline = "%s finished ahead with %d%% of its starting resources" % [C["teams"][winner]["name"], sd[winner]["index"]]
@@ -1366,6 +1427,15 @@ func debrief_view() -> Control:
 			v1.add_child(_lbl("After the storm, %s chose: %s." % [short(t), C["recovery"]["choices"][t]["label"]], 15, team_col(t)))
 		elif made == "unpaid":
 			v1.add_child(_lbl("%s offered to help rebuild but could not pay for it." % short(t), 15, team_col(t)))
+	if boss_mode():
+		v1.add_child(_lbl("WHAT YOUR BOSSES ASKED OF YOU", 13, MUTED))
+		for t in TEAMS:
+			var parts := PackedStringArray()
+			for x in Eng.card_parts(C, t, s):
+				parts.append("%s %s" % [String(x["label"]).to_lower(), str(snappedf(x["value"] / 10.0, 0.1))])
+			v1.add_child(_lbl("%s were judged by %s on: %s. Target at the start %d%%, at the end %d%%." % [C["teams"][t]["name"], C["scorecard"][t]["boss"], ", ".join(parts), int(C["scorecard"][t]["target"]), sd[t]["target"]], 15, team_col(t)))
+			for e in s["boss"][t]["log"]:
+				v1.add_child(_lbl('After turn %d, %s (%s, target %d%%): "%s"' % [e["turn"], e["who"], e["kind"], e["target"], e["line"]], 14, STORM if e["change"] > 0 else HONOUR))
 	col.add_child(p1)
 
 	var p2 := _panel(PANEL, LINE)

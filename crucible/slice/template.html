@@ -459,7 +459,7 @@ function setupView() {
   return `<div class="setup">
     <header><span class="label">Values Crucible · Keystone slice · phase 2 go/no-go</span>
       <h1>Hurricane Midas reaches Keystone tonight</h1>
-      <p class="lede">One parish, two teams, three storm turns. Plan your moves on the map, answer the moment the storm puts in front of you, and watch what happens. Most resources at the end wins, and people are the workforce. About 10 minutes.</p></header>
+      <p class="lede">One parish, two teams, three storm turns. Plan your moves on the map, answer the moment the storm puts in front of you, and watch what happens. Each team answers to its own bosses, who raise or lower its target as the storm goes, and people are the workforce. About 10 minutes.</p></header>
     <ul class="how">
       <li><b>Plan together</b>Tap a unit, then tap a site on the map. Buses move people, crews sandbag, the generator keeps a site powered.</li>
       <li><b>Answer the moment</b>Claude writes it from both teams' signed values and the map. Both teams vote; the owner makes the final call.</li>
@@ -756,8 +756,8 @@ function debriefView() {
   return `<div class="wrap" style="max-width:1100px">
     <div class="topbar"><h1>Keystone · after the storm</h1><span class="turn">DEBRIEF · TWO RECOVERY TURNS COUNTED</span></div>
     <section class="panel">
-      <span class="label">Standings: resources now, as a share of what each team started with</span>
-      <h2 style="font-size:30px">${winner ? `${esc(C.teams[winner].name)} finishes ahead` : "A dead heat"}</h2>
+      <span class="label">${sd.community.target !== undefined ? "Each team's score on its own bosses' scorecard, against the target they set" : "Standings: resources now, as a share of what each team started with"}</span>
+      <h2 style="font-size:30px">${sd.community.target !== undefined ? TEAMS.map((t) => `${esc(C.teams[t].name)} ${sd[t].par ? "met" : "fell short of"} its target (${sd[t].index}% against ${sd[t].target}%)`).join(". ") : winner ? `${esc(C.teams[winner].name)} finishes ahead` : "A dead heat"}</h2>
       <div class="stand">${TEAMS.map((t) => `<div class="bar"><span class="label">${esc(short(t))}</span><div class="track"><i style="width:${(sd[t].index / maxI) * 100}%;background:var(--${t === "community" ? "comm" : "meri"})"></i></div><span class="mono">${sd[t].index}</span></div>`).join("")}</div>
       <p class="muted" style="margin:0;font-size:14px">Recovery added ${s.recovery.community.volunteers} volunteers and ${s.recovery.community.food} food to the community team (survivors back at work, aid that follows trust), and ${s.recovery.meridian.doses} doses and ${s.recovery.meridian.funds} funds to Meridian (the plant restarting, scaled by board confidence and community trust).</p>
     </section>

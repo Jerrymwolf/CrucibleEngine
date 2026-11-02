@@ -108,6 +108,7 @@ static func new_game(C: Dictionary, seed_value: int) -> Dictionary:
 		"shelter": {"st_brendans": {"vuln": 0, "able": 0}, "tech_tower": {"vuln": 0, "able": 0}, "heartland": {"vuln": 0, "able": 0}},
 		"lost": {"vuln": 0, "able": 0}, "rescued": {"vuln": 0, "able": 0}, "injured": 0,
 		"towerOpen": false, "residents": residents, "promises": [], "history": [], "sandbags": [], "sandbagTeams": [], "anger": [],
+		"boss": _boss_start(C),
 	}
 
 
@@ -121,15 +122,101 @@ static func points(C: Dictionary, team: String, stock: Dictionary) -> int:
 
 static func standings(C: Dictionary, s: Dictionary) -> Dictionary:
 	var out := {}
+	var mode = C["win"].get("mode") if C.has("win") else null
 	for t in TEAMS:
+		if mode == "boss" and C.has("scorecard"):
+			# each team is judged by its own bosses, on what they care about
+			var now_b := card_score(C, t, s)
+			var start_b := card_score(C, t, {})
+			var index_b := int(floor(float(now_b) / start_b * 100.0 + 0.5))
+			var target: int = s["boss"][t]["target"]
+			out[t] = {"points": now_b, "start": start_b, "index": index_b, "target": target, "par": index_b >= target}
+			continue
 		var now := points(C, t, s["stock"])
 		var start := points(C, t, C["start"]["stock"])
 		var index := int(round(float(now) / start * 100.0))
 		var par = null
-		if C.has("win") and C["win"].get("mode") == "par":
+		if mode == "par":
 			par = index >= int(C["win"]["par"][t])
 		out[t] = {"points": now, "start": start, "index": index, "par": par}
+		if mode == "par":
+			out[t]["target"] = int(C["win"]["par"][t])
 	return out
+
+
+## Boss scorecard, in tenths of a point so it stays an integer. An empty state means the starting card.
+static func card_parts(C: Dictionary, team: String, s: Dictionary) -> Array:
+	var stock: Dictionary = s["stock"] if s.has("stock") else C["start"]["stock"]
+	var meters: Dictionary = s["meters"] if s.has("meters") else C["start"]["meters"]
+	var lost: Dictionary = s["lost"] if s.has("lost") else {"vuln": 0, "able": 0}
+	var out := []
+	for m in C["scorecard"][team]["measures"]:
+		var v := 0
+		for g in m.get("goods", []):
+			v += int(stock[C["goods"][g]["owner"]][g]) * int(C["goods"][g]["points"]) * 10
+		if m.has("meter"):
+			v += int(meters[m["meter"]]) * int(m["per10"])
+		if m.has("lost_vuln_per10"):
+			v += int(lost["vuln"]) * int(m["lost_vuln_per10"])
+		if m.has("lost_able_per10"):
+			v += int(lost["able"]) * int(m["lost_able_per10"])
+		out.append({"label": m["label"], "value": v})
+	return out
+
+
+static func card_score(C: Dictionary, team: String, s: Dictionary) -> int:
+	var total := 0
+	for x in card_parts(C, team, s):
+		total += int(x["value"])
+	return total
+
+
+static func _boss_start(C: Dictionary):
+	if not C.has("scorecard"):
+		return null
+	var b := {"fired": []}
+	for t in TEAMS:
+		b[t] = {"target": int(C["scorecard"][t]["target"]), "log": [], "cm": []}
+	return b
+
+
+static func _boss_move(C: Dictionary, s: Dictionary, t: String, kind: String, change: int, who: String, line: String, ticker: Array, ev: Array) -> void:
+	s["boss"][t]["target"] += change
+	s["boss"][t]["log"].append({"turn": s["turn"], "kind": kind, "change": change, "who": who, "line": line, "target": s["boss"][t]["target"]})
+	ticker.append('%s: "%s"' % [who, line])
+	_say(ev, "%s target %s to %d%% (%s)." % [C["teams"][t]["short"], "raised" if change > 0 else "lowered", s["boss"][t]["target"], kind], "bad" if change > 0 else "good")
+
+
+## Bosses move the target: pressure raises it, permission lowers it. Content triggers fire once; the CM can add one of each per team.
+static func _boss_turn(C: Dictionary, s: Dictionary, input: Dictionary, turn_lost: Dictionary, ticker: Array, ev: Array) -> void:
+	if s.get("boss") == null or not C.has("scorecard"):
+		return
+	var triggers: Array = C["scorecard"].get("triggers", [])
+	for i in triggers.size():
+		var g: Dictionary = triggers[i]
+		if s["boss"]["fired"].has(i) or g.get("after_turn") != s["turn"] or not TEAMS.has(g.get("team")):
+			continue
+		var w: Dictionary = g.get("if", {})
+		if w.has("meter") and w.has("below") and not (s["meters"][w["meter"]] < w["below"]):
+			continue
+		if w.has("meter") and w.has("atleast") and not (s["meters"][w["meter"]] >= w["atleast"]):
+			continue
+		if w.has("lost_atleast") and not (turn_lost["vuln"] + turn_lost["able"] >= w["lost_atleast"]):
+			continue
+		s["boss"]["fired"].append(i)
+		_boss_move(C, s, g["team"], g["kind"], int(g["change"]), C["scorecard"][g["team"]]["boss"], g["line"], ticker, ev)
+	var cm = input.get("boss", {})
+	if typeof(cm) != TYPE_DICTIONARY:
+		cm = {}
+	for t in TEAMS:
+		var k = cm.get(t)
+		if typeof(k) != TYPE_STRING or not (k == "pressure" or k == "permission"):
+			continue
+		var levers: Dictionary = C["scorecard"][t].get("cm", {})
+		if not levers.has(k) or s["boss"][t]["cm"].has(k):
+			continue
+		s["boss"][t]["cm"].append(k)
+		_boss_move(C, s, t, k, int(levers[k]["change"]), C["scorecard"][t]["boss"], levers[k]["line"], ticker, ev)
 
 
 # ---------- dilemmas ----------
@@ -825,6 +912,7 @@ static func resolve_turn(C: Dictionary, state0: Dictionary, input: Dictionary) -
 	for t in TEAMS:
 		if s["meters"][C["teams"][t]["meter"]] < M["low"]:
 			ticker.append('%s: "%s"' % [C["voices"][t]["who"], C["voices"][t]["low"]])
+	_boss_turn(C, s, input, turn_lost, ticker, ev)
 	if ticker.is_empty():
 		ticker.append("Keystone, %s: Midas %s, pressure rising." % [T["hours"], T["label"].to_lower()])
 

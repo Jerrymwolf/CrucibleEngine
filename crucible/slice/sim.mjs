@@ -61,7 +61,7 @@ for (const cp of ["nothing", "careful"]) for (const mp of ["nothing", "careful"]
     if (st.community.par !== null) { if (st.community.par) cw++; if (st.meridian.par) mw++; }
     else if (st.community.index > st.meridian.index) cw++; else if (st.meridian.index > st.community.index) mw++;
   }
-  rows.push({ community: cp, meridian: mp, [C.win && C.win.mode === "par" ? "community makes par %" : "community wins %"]: (100 * cw / N).toFixed(1), [C.win && C.win.mode === "par" ? "meridian makes par %" : "meridian wins %"]: (100 * mw / N).toFixed(1),
+  rows.push({ community: cp, meridian: mp, [C.win && (C.win.mode === "par" || C.win.mode === "boss") ? "community makes par %" : "community wins %"]: (100 * cw / N).toFixed(1), [C.win && (C.win.mode === "par" || C.win.mode === "boss") ? "meridian makes par %" : "meridian wins %"]: (100 * mw / N).toFixed(1),
     "community index": (ci / N).toFixed(1), "meridian index": (mi / N).toFixed(1), "people lost": (lost / N).toFixed(0), trust: (tr / N).toFixed(0), conf: (cf / N).toFixed(0) });
 }
 console.table(rows);

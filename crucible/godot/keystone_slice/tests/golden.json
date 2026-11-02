@@ -240,7 +240,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6,
+            "confidence": 2,
             "anger": 2
            },
            "tags": {
@@ -322,7 +322,31 @@
       ],
       "anger": [],
       "recovery": null,
-      "hash": "4e3a6257"
+      "boss": {
+       "fired": [
+        0
+       ],
+       "community": {
+        "target": 75,
+        "log": [],
+        "cm": []
+       },
+       "meridian": {
+        "target": 119,
+        "log": [
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 5,
+          "who": "Dana Kell and the Meridian board",
+          "line": "Chicago is asking why Keystone slipped. Get the plant back on schedule.",
+          "target": 119
+         }
+        ],
+        "cm": []
+       }
+      },
+      "hash": "3a5aa752"
      }
     },
     {
@@ -356,7 +380,10 @@
        "community": 2
       },
       "promises": [],
-      "confirms": []
+      "confirms": [],
+      "boss": {
+       "meridian": "permission"
+      }
      },
      "expect": {
       "stock": {
@@ -373,7 +400,7 @@
       },
       "meters": {
        "trust": 59,
-       "confidence": 55
+       "confidence": 63
       },
       "lost": {
        "vuln": 5,
@@ -528,7 +555,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6,
+            "confidence": 2,
             "anger": 2
            },
            "tags": {
@@ -661,7 +688,7 @@
            },
            "effects": {
             "trust": -5,
-            "confidence": -6,
+            "confidence": 2,
             "power": "plant",
             "anger": 2
            },
@@ -746,7 +773,41 @@
        }
       ],
       "recovery": null,
-      "hash": "3337f33d"
+      "boss": {
+       "fired": [
+        0
+       ],
+       "community": {
+        "target": 75,
+        "log": [],
+        "cm": []
+       },
+       "meridian": {
+        "target": 107,
+        "log": [
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 5,
+          "who": "Dana Kell and the Meridian board",
+          "line": "Chicago is asking why Keystone slipped. Get the plant back on schedule.",
+          "target": 119
+         },
+         {
+          "turn": 2,
+          "kind": "permission",
+          "change": -12,
+          "who": "Dana Kell and the Meridian board",
+          "line": "Take care of Keystone first. The board will back you; we'll explain the numbers.",
+          "target": 107
+         }
+        ],
+        "cm": [
+         "permission"
+        ]
+       }
+      },
+      "hash": "4d6aa8c2"
      }
     },
     {
@@ -799,7 +860,7 @@
       },
       "meters": {
        "trust": 59,
-       "confidence": 48
+       "confidence": 56
       },
       "lost": {
        "vuln": 10,
@@ -954,7 +1015,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6,
+            "confidence": 2,
             "anger": 2
            },
            "tags": {
@@ -1087,7 +1148,7 @@
            },
            "effects": {
             "trust": -5,
-            "confidence": -6,
+            "confidence": 2,
             "power": "plant",
             "anger": 2
            },
@@ -1313,21 +1374,57 @@
         "meridian": "made"
        }
       },
-      "hash": "19fa9893"
+      "boss": {
+       "fired": [
+        0
+       ],
+       "community": {
+        "target": 75,
+        "log": [],
+        "cm": []
+       },
+       "meridian": {
+        "target": 107,
+        "log": [
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 5,
+          "who": "Dana Kell and the Meridian board",
+          "line": "Chicago is asking why Keystone slipped. Get the plant back on schedule.",
+          "target": 119
+         },
+         {
+          "turn": 2,
+          "kind": "permission",
+          "change": -12,
+          "who": "Dana Kell and the Meridian board",
+          "line": "Take care of Keystone first. The board will back you; we'll explain the numbers.",
+          "target": 107
+         }
+        ],
+        "cm": [
+         "permission"
+        ]
+       }
+      },
+      "hash": "485fb376"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": 115,
-     "start": 84,
-     "index": 137,
+     "points": 1300,
+     "start": 1140,
+     "index": 114,
+     "target": 75,
      "par": true
     },
     "meridian": {
-     "points": 154,
-     "start": 144,
-     "index": 107,
+     "points": 1820,
+     "start": 1740,
+     "index": 105,
+     "target": 107,
      "par": false
     }
    },
@@ -1532,7 +1629,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6,
+            "confidence": 2,
             "anger": 2
            },
            "tags": {
@@ -1612,7 +1709,31 @@
       "sandbags": [],
       "anger": [],
       "recovery": null,
-      "hash": "8c8d8587"
+      "boss": {
+       "fired": [
+        1
+       ],
+       "community": {
+        "target": 80,
+        "log": [
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 5,
+          "who": "Pastor Ruth Okafor and the parish council",
+          "line": "People are dying in Low Ward. The council wants every bus on the road.",
+          "target": 80
+         }
+        ],
+        "cm": []
+       },
+       "meridian": {
+        "target": 114,
+        "log": [],
+        "cm": []
+       }
+      },
+      "hash": "30cda84a"
      }
     },
     {
@@ -1626,7 +1747,11 @@
       "towerOpen": false,
       "votes": {},
       "promises": [],
-      "confirms": []
+      "confirms": [],
+      "boss": {
+       "community": "permission",
+       "meridian": 5
+      }
      },
      "expect": {
       "stock": {
@@ -1643,7 +1768,7 @@
       },
       "meters": {
        "trust": 27,
-       "confidence": 53
+       "confidence": 61
       },
       "lost": {
        "vuln": 45,
@@ -1796,7 +1921,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6,
+            "confidence": 2,
             "anger": 2
            },
            "tags": {
@@ -1929,7 +2054,7 @@
            },
            "effects": {
             "trust": -5,
-            "confidence": -6,
+            "confidence": 2,
             "power": "plant",
             "anger": 2
            },
@@ -2014,7 +2139,41 @@
        }
       ],
       "recovery": null,
-      "hash": "efc5c4f5"
+      "boss": {
+       "fired": [
+        1
+       ],
+       "community": {
+        "target": 72,
+        "log": [
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 5,
+          "who": "Pastor Ruth Okafor and the parish council",
+          "line": "People are dying in Low Ward. The council wants every bus on the road.",
+          "target": 80
+         },
+         {
+          "turn": 2,
+          "kind": "permission",
+          "change": -8,
+          "who": "Pastor Ruth Okafor and the parish council",
+          "line": "Do what you can. Nobody will blame you for the ones the storm took.",
+          "target": 72
+         }
+        ],
+        "cm": [
+         "permission"
+        ]
+       },
+       "meridian": {
+        "target": 114,
+        "log": [],
+        "cm": []
+       }
+      },
+      "hash": "b54f7fd6"
      }
     },
     {
@@ -2036,14 +2195,14 @@
         "c_fuel": 8
        },
        "meridian": {
-        "doses": 21,
-        "funds": 26,
+        "doses": 24,
+        "funds": 31,
         "m_fuel": 8
        }
       },
       "meters": {
        "trust": 15,
-       "confidence": 36
+       "confidence": 44
       },
       "lost": {
        "vuln": 65,
@@ -2196,7 +2355,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6,
+            "confidence": 2,
             "anger": 2
            },
            "tags": {
@@ -2329,7 +2488,7 @@
            },
            "effects": {
             "trust": -5,
-            "confidence": -6,
+            "confidence": 2,
             "power": "plant",
             "anger": 2
            },
@@ -2545,26 +2704,62 @@
         "food": -15
        },
        "meridian": {
-        "doses": 0,
+        "doses": 3,
         "funds": 0
        },
        "choices": {}
       },
-      "hash": "d1cc237c"
+      "boss": {
+       "fired": [
+        1
+       ],
+       "community": {
+        "target": 72,
+        "log": [
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 5,
+          "who": "Pastor Ruth Okafor and the parish council",
+          "line": "People are dying in Low Ward. The council wants every bus on the road.",
+          "target": 80
+         },
+         {
+          "turn": 2,
+          "kind": "permission",
+          "change": -8,
+          "who": "Pastor Ruth Okafor and the parish council",
+          "line": "Do what you can. Nobody will blame you for the ones the storm took.",
+          "target": 72
+         }
+        ],
+        "cm": [
+         "permission"
+        ]
+       },
+       "meridian": {
+        "target": 114,
+        "log": [],
+        "cm": []
+       }
+      },
+      "hash": "9529251f"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": 42,
-     "start": 84,
-     "index": 50,
+     "points": -299,
+     "start": 1140,
+     "index": -26,
+     "target": 72,
      "par": false
     },
     "meridian": {
-     "points": 105,
-     "start": 144,
-     "index": 73,
+     "points": 1410,
+     "start": 1740,
+     "index": 81,
+     "target": 114,
      "par": false
     }
    },
@@ -2616,7 +2811,11 @@
        "meridian": 2
       },
       "promises": [],
-      "confirms": []
+      "confirms": [],
+      "boss": {
+       "community": "pressure",
+       "meridian": "pressure"
+      }
      },
      "expect": {
       "stock": {
@@ -2786,7 +2985,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6,
+            "confidence": 2,
             "anger": 2
            },
            "tags": {
@@ -2868,7 +3067,52 @@
       ],
       "anger": [],
       "recovery": null,
-      "hash": "b71e537e"
+      "boss": {
+       "fired": [
+        0
+       ],
+       "community": {
+        "target": 81,
+        "log": [
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 6,
+          "who": "Pastor Ruth Okafor and the parish council",
+          "line": "Every family in Low Ward is counting on us. Nobody gets left, whatever it costs.",
+          "target": 81
+         }
+        ],
+        "cm": [
+         "pressure"
+        ]
+       },
+       "meridian": {
+        "target": 125,
+        "log": [
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 5,
+          "who": "Dana Kell and the Meridian board",
+          "line": "Chicago is asking why Keystone slipped. Get the plant back on schedule.",
+          "target": 119
+         },
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 6,
+          "who": "Dana Kell and the Meridian board",
+          "line": "The board meets Thursday. I need the batch numbers, not excuses.",
+          "target": 125
+         }
+        ],
+        "cm": [
+         "pressure"
+        ]
+       }
+      },
+      "hash": "7453f091"
      }
     },
     {
@@ -3064,7 +3308,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6,
+            "confidence": 2,
             "anger": 2
            },
            "tags": {
@@ -3197,7 +3441,7 @@
            },
            "effects": {
             "trust": -5,
-            "confidence": -6,
+            "confidence": 2,
             "power": "plant",
             "anger": 2
            },
@@ -3279,7 +3523,61 @@
       ],
       "anger": [],
       "recovery": null,
-      "hash": "3cd167d5"
+      "boss": {
+       "fired": [
+        0,
+        2
+       ],
+       "community": {
+        "target": 81,
+        "log": [
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 6,
+          "who": "Pastor Ruth Okafor and the parish council",
+          "line": "Every family in Low Ward is counting on us. Nobody gets left, whatever it costs.",
+          "target": 81
+         }
+        ],
+        "cm": [
+         "pressure"
+        ]
+       },
+       "meridian": {
+        "target": 130,
+        "log": [
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 5,
+          "who": "Dana Kell and the Meridian board",
+          "line": "Chicago is asking why Keystone slipped. Get the plant back on schedule.",
+          "target": 119
+         },
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 6,
+          "who": "Dana Kell and the Meridian board",
+          "line": "The board meets Thursday. I need the batch numbers, not excuses.",
+          "target": 125
+         },
+         {
+          "turn": 2,
+          "kind": "pressure",
+          "change": 5,
+          "who": "Dana Kell and the Meridian board",
+          "line": "Two bad turns. The board wants the doses shipped, whatever it takes.",
+          "target": 130
+         }
+        ],
+        "cm": [
+         "pressure"
+        ]
+       }
+      },
+      "hash": "e67e65b2"
      }
     },
     {
@@ -3303,6 +3601,10 @@
       "confirms": [],
       "recovery": {
        "meridian": true
+      },
+      "boss": {
+       "meridian": "pressure",
+       "community": "bogus"
       }
      },
      "expect": {
@@ -3473,7 +3775,7 @@
            "cost": {},
            "effects": {
             "trust": -4,
-            "confidence": -6,
+            "confidence": 2,
             "anger": 2
            },
            "tags": {
@@ -3606,7 +3908,7 @@
            },
            "effects": {
             "trust": -5,
-            "confidence": -6,
+            "confidence": 2,
             "power": "plant",
             "anger": 2
            },
@@ -3832,21 +4134,77 @@
         "meridian": "made"
        }
       },
-      "hash": "a0a74f28"
+      "boss": {
+       "fired": [
+        0,
+        2
+       ],
+       "community": {
+        "target": 81,
+        "log": [
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 6,
+          "who": "Pastor Ruth Okafor and the parish council",
+          "line": "Every family in Low Ward is counting on us. Nobody gets left, whatever it costs.",
+          "target": 81
+         }
+        ],
+        "cm": [
+         "pressure"
+        ]
+       },
+       "meridian": {
+        "target": 130,
+        "log": [
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 5,
+          "who": "Dana Kell and the Meridian board",
+          "line": "Chicago is asking why Keystone slipped. Get the plant back on schedule.",
+          "target": 119
+         },
+         {
+          "turn": 1,
+          "kind": "pressure",
+          "change": 6,
+          "who": "Dana Kell and the Meridian board",
+          "line": "The board meets Thursday. I need the batch numbers, not excuses.",
+          "target": 125
+         },
+         {
+          "turn": 2,
+          "kind": "pressure",
+          "change": 5,
+          "who": "Dana Kell and the Meridian board",
+          "line": "Two bad turns. The board wants the doses shipped, whatever it takes.",
+          "target": 130
+         }
+        ],
+        "cm": [
+         "pressure"
+        ]
+       }
+      },
+      "hash": "02fe5107"
      }
     }
    ],
    "standings": {
     "community": {
-     "points": 112,
-     "start": 84,
-     "index": 133,
+     "points": 1276,
+     "start": 1140,
+     "index": 112,
+     "target": 81,
      "par": true
     },
     "meridian": {
-     "points": 55,
-     "start": 144,
+     "points": 665,
+     "start": 1740,
      "index": 38,
+     "target": 130,
      "par": false
     }
    },

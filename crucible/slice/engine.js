@@ -49,6 +49,7 @@
       sites, shelter: { st_brendans: { vuln: 0, able: 0 }, tech_tower: { vuln: 0, able: 0 }, heartland: { vuln: 0, able: 0 } },
       lost: { vuln: 0, able: 0 }, rescued: { vuln: 0, able: 0 }, injured: 0,
       towerOpen: false, residents, promises: [], history: [], sandbags: [], sandbagTeams: [], anger: [],
+      boss: bossStart(C),
     };
   }
 
@@ -59,13 +60,66 @@
     return p;
   }
   function standings(C, state) {
-    const out = {};
+    const out = {}, mode = C.win && C.win.mode;
     for (const t of TEAMS) {
+      if (mode === "boss" && C.scorecard) { // each team is judged by its own bosses, on what they care about
+        const now = cardScore(C, t, state), start = cardScore(C, t, null);
+        const index = Math.floor((now / start) * 100 + 0.5), target = state.boss[t].target;
+        out[t] = { points: now, start, index, target, par: index >= target };
+        continue;
+      }
       const now = points(C, t, state.stock), start = points(C, t, C.start.stock);
       const index = Math.round((now / start) * 100);
-      out[t] = { points: now, start, index, par: C.win && C.win.mode === "par" ? index >= C.win.par[t] : null };
+      out[t] = { points: now, start, index, par: mode === "par" ? index >= C.win.par[t] : null };
+      if (mode === "par") out[t].target = C.win.par[t];
     }
     return out;
+  }
+  // Boss scorecard, in tenths of a point so it stays an integer. state null = the starting card.
+  function cardParts(C, team, s) {
+    const stock = s ? s.stock : C.start.stock, meters = s ? s.meters : C.start.meters, lost = s ? s.lost : { vuln: 0, able: 0 };
+    return C.scorecard[team].measures.map((m) => {
+      let v = 0;
+      for (const g of m.goods || []) v += stock[C.goods[g].owner][g] * C.goods[g].points * 10;
+      if (m.meter) v += meters[m.meter] * m.per10;
+      if (m.lost_vuln_per10) v += lost.vuln * m.lost_vuln_per10;
+      if (m.lost_able_per10) v += lost.able * m.lost_able_per10;
+      return { label: m.label, value: v };
+    });
+  }
+  function cardScore(C, team, s) { return cardParts(C, team, s).reduce((a, x) => a + x.value, 0); }
+  function bossStart(C) {
+    if (!C.scorecard) return null;
+    const b = { fired: [] };
+    for (const t of TEAMS) b[t] = { target: C.scorecard[t].target, log: [], cm: [] };
+    return b;
+  }
+  // Bosses move the target: pressure raises it, permission lowers it. Content triggers fire once; the CM can add one of each per team.
+  function bossTurn(C, s, input, turnLost, ticker, say) {
+    if (!s.boss || !C.scorecard) return;
+    const move = (t, kind, change, who, line) => {
+      s.boss[t].target += change;
+      s.boss[t].log.push({ turn: s.turn, kind, change, who, line, target: s.boss[t].target });
+      ticker.push(`${who}: "${line}"`);
+      say(`${C.teams[t].short} target ${change > 0 ? "raised" : "lowered"} to ${s.boss[t].target}% (${kind}).`, change > 0 ? "bad" : "good");
+    };
+    (C.scorecard.triggers || []).forEach((g, i) => {
+      if (s.boss.fired.includes(i) || g.after_turn !== s.turn || !TEAMS.includes(g.team)) return;
+      const w = g.if || {};
+      if (w.meter && w.below !== undefined && !(s.meters[w.meter] < w.below)) return;
+      if (w.meter && w.atleast !== undefined && !(s.meters[w.meter] >= w.atleast)) return;
+      if (w.lost_atleast !== undefined && !(turnLost.vuln + turnLost.able >= w.lost_atleast)) return;
+      s.boss.fired.push(i);
+      move(g.team, g.kind, g.change, C.scorecard[g.team].boss, g.line);
+    });
+    const cm = input.boss && typeof input.boss === "object" ? input.boss : {};
+    for (const t of TEAMS) {
+      const kind = cm[t] === "pressure" || cm[t] === "permission" ? cm[t] : null;
+      const lever = kind && C.scorecard[t].cm ? C.scorecard[t].cm[kind] : null;
+      if (!lever || s.boss[t].cm.includes(kind)) continue;
+      s.boss[t].cm.push(kind);
+      move(t, kind, lever.change, C.scorecard[t].boss, lever.line);
+    }
   }
 
   // ---------- dilemmas ----------
@@ -424,6 +478,7 @@ function resolveTurn(C, state0, input) {
       const meter = C.teams[t].meter;
       if (s.meters[meter] < M.low) ticker.push(`${C.voices[t].who}: "${C.voices[t].low}"`);
     }
+    bossTurn(C, s, input, turnLost, ticker, say);
     if (!ticker.length) ticker.push(`Keystone, ${T.hours}: Midas ${T.label.toLowerCase()}, pressure rising.`);
 
     const report = { turn: s.turn, label: T.label, events: ev, ticker, lost: turnLost, rescued: turnRescued, yields: { community: cy, meridian: my }, choice };
@@ -512,7 +567,7 @@ function resolveTurn(C, state0, input) {
     return { state: s, hash: hash(s) };
   }
 
-  const api = { TEAMS, boardFacts, newGame, resolveTurn, validateDilemma, fallbackDilemma, standings, points, replay, hash, rngFor, peopleInParish };
+  const api = { TEAMS, boardFacts, newGame, resolveTurn, validateDilemma, fallbackDilemma, standings, points, cardParts, replay, hash, rngFor, peopleInParish };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.Engine = api;
 })(typeof globalThis !== "undefined" ? globalThis : this);

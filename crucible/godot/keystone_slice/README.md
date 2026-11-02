@@ -20,7 +20,9 @@ Press **Test the key** to check it before the storm. Without a key, or when Clau
 - Both teams vote on each moment. The team whose resources it is about makes the final call.
 - An order the *other* team pays for runs only if that team votes for it too; otherwise the standing plan (the deciding team's own default) runs.
 - The team that owns a unit pays its fuel, even when the unit is lent.
-- The team with the most of its starting resources left at the end wins. People are the workforce: saved people pay back in recovery.
+- Each team answers to its own bosses (the default; setup can switch to a fixed target or the old race). Pastor Ruth and the parish council judge the community team on people lost, supplies and trust. Dana Kell and the Meridian board judge the Meridian team on cure doses, funds and fuel, and board confidence; lives are not on their card. Meet your target at the end; both teams can.
+- Bosses move the target. Pressure raises it when things go badly; permission lowers it when trust is high. The Crucible Master has one pressure and one permission button per team on the planning screen, and every use is logged and shown in the debrief.
+- People are the workforce: saved people pay back in recovery.
 
 ## Check that the rules match the reference engine
 
