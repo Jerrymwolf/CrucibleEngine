@@ -26,7 +26,7 @@ All three are GPL. We read them for rules and rebuild clean-room; no code is cop
 - Pay is distance × amount × base rate × a time factor (out of 255).
 - Up to a cargo's first time limit, the factor stays at 255.
 - After that, it falls 1 per period. After the second limit, it falls 2 per period.
-- It never drops below 31, which is about 12% of full pay. Past the 31 floor, it tails off slowly.
+- It falls linearly to 31, about 12% of full pay, then keeps decaying toward 1 along a scaled 1/(x+1) curve (`economy.cpp` at 611118d). Card 5's 15% floor is our adaptation, not the game's.
 
 **OpenTTD: a station's rating is slow to move** (`UpdateStationRating`)
 - A target rating adds up how recently cargo was collected, how much is left waiting, and how fast and new the last vehicle was.

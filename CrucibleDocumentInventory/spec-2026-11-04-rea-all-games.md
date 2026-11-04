@@ -2,286 +2,220 @@
 type: spec
 date: 2026-11-04
 status: proposed
+version: v4
 tags: [values-crucible, rea, reverse-engineering, spec, plan]
 related: ["[[audit-2026-11-03-rea-plan]]", "[[rea-2026-11-04-openttd-0ad-freeciv]]", "[[rea-2026-11-01-civ4-diplomacy-code]]", "[[decision-2026-10-26-rts-to-reverse-engineer]]", "[[decision-2026-10-18-rea-reference-games-rust]]"]
 ---
-# REA spec and plan, all ten games, 2026-11-04
+# REA spec and plan, all games, 2026-11-04 (v4)
 
-Jerry, 2026-11-04 18:48: "I want a full spec and plan for ALL REAs." Live Claude Doc: https://claude.ai/artifact/JRVtFfJ7nMG29Lxdk4dWPH. This file started as the full text of that doc. It has since been hardened through a Claudex Loop audit (Codex) and a fact-check against live web pages on 2026-11-04, so it is now ahead of the live doc.
+Jerry, 2026-11-04 18:48: "I want a full spec and plan for ALL REAs." The canonical spec is the live Claude Doc: https://claude.ai/artifact/JRVtFfJ7nMG29Lxdk4dWPH. This file is a snapshot of doc v4 (rev 100). The Codex-revised v5 of this file (Claudex Loop, scored 96 at 506fecc; four residual fixes at 534edf8, re-scored by Claude at 83.5) stays in git history; its strengths were merged into v4.
 
 ## Summary
 
-We reverse engineer games for one reason: so the Keystone slice and the five-parish game get rules that strategy designers have already tested on millions of players. We then rebuild those rules to serve one purpose: making the gap between stated values and enacted values visible.
+We reverse engineer games for one reason: so the Keystone slice and the five-parish game get rules that strategy designers have already tested on millions of players, then rebuilt to serve one purpose: making the gap between stated values and enacted values visible.
 
-The Values Crucible tracks four levels of values (source: Jerry's concept doc, `~/Desktop/Projects/Values Crucible/The Values Crucible.docx`):
-- **PV-5:** each person's five values, from their behavioural event interview.
-- **TV-5:** the five values each team negotiates.
-- **CV:** the company values that leadership states.
-- **LV:** what executives actually model under pressure.
+This spec covers eleven games: six already read and five still to do. It also gives an in-or-out line for every other reference the records name. The six already read are all open source or have released source: Micropolis (read with REA on 18 October), Civ IV, Diplomacy, OpenTTD, 0 A.D. and Freeciv. The five still to do are closed source: Frostpunk 2, Rebel Inc, Northgard, Dune: Spice Wars and Anno 1800.
 
-Players see only the performance metrics. The values layer stays hidden until the debrief. The metrics are the pressure, not a values level. Every mechanic we take must create a moment where that pressure pulls against a declared value, and leave a logged decision the debrief can point to.
-
-This spec covers all ten reference games. Five have been read so far, all open source or with released source:
-- Civ IV and Diplomacy, read on 2026-11-01 and built ([[rea-2026-11-01-civ4-diplomacy-code]]).
-- OpenTTD, 0 A.D. and Freeciv, read on 2026-11-04 in step A, giving five cards and nothing built ([[rea-2026-11-04-openttd-0ad-freeciv]]).
-
-The other five have not been touched: Frostpunk 2, Anno 1800, Dune: Spice Wars, Northgard and Rebel Inc: Escalation. All five are closed source, so they need Jerry's own copies, and four of the routes need a Windows PC (FrostKit, Anno 1800, Dune: Spice Wars and the Northgard Editor).
-
-Nothing is built before Jerry's playtest gate (step B). After the gate, every finding becomes a card, and nothing gets built without Jerry's approval on that card.
+Public documents read here in the cloud answer as much as they can first. After your playtest gate, three sessions on your computer cover what's left, in order of question rank, not game. Anno 1800 waits for the five-parish game. Decompiling (rung 4) is possible on your computer only where a licence allows it, and nothing in the plan depends on it. Every finding becomes a card, and nothing gets built without your go.
 
 ## Design questions
 
-Every REA session starts from one of these questions, never from a game. Q1 to Q6 come from the audited plan of 3 November ([[audit-2026-11-03-rea-plan]]). Q7 and Q8 are new and close two gaps: delayed effects, and how often dilemmas come up. "Values tension" names the declared value the mechanic puts under pressure, and the debrief trace names the logged decision that shows enactment, compromise or recovery.
+Every reverse engineering (REA) session starts from one of these questions, never from a game. Q1 to Q6 come from the audited plan of 3 November. Q7 and Q8 are new and close two gaps: delayed effects, and how often dilemmas come up.
 
-| # | Question for Keystone and the five-parish game | Values tension and debrief trace | Answered by | An answer looks like | Status |
-|---|---|---|---|---|---|
-| Q1 | How does a two-faction vote create tension and legitimacy, not just a winner? | TV-5 against the visible score. Trace: the team's vote (the slice logs one vote per team) against its signed ranks | Frostpunk 2 council | Vote thresholds, how support shifts, what losing a vote costs | Open |
-| Q2 | How big are pressure and permission, and how fast do they decay? | CV against LV. Trace: whether the leader uses the board's pressure or permission in line with the stated company values | Frostpunk 2 demands and promises | Demand size, deadline, decay; penalty for a broken promise | Open (boss scorecards are our own design, not yet checked against a game) |
-| Q3 | How do supply chains bend under disruption, from kelp to cure to port? | PV-5 and TV-5 (care) against the performance metric. Trace: which shipment goes before people | Anno 1800; OpenTTD | Pay by delivery time, service rating, chain ratios | OpenTTD carded; Anno open |
-| Q4 | How do a moving storm and site states force teams to replan? | TV-5 under uncertainty: the "prepare or wait" test in the concept doc. Trace: when the team commits resources against the warning | Dune: Spice Wars, Northgard (storm timing); 0 A.D. (site state only) | Warning lead time, hazard odds, recovery speed | Partly answered: 0 A.D. gives site allegiance, not storm warning |
-| Q5 | How does unrest turn into people refusing to work? | PV-5 (respect, compassion) against the shift target. Trace: care or control when the shift falls short | Civ IV, Freeciv, Frostpunk 2 tension | Anger timers, disorder thresholds, martial law | Civ IV built; Freeciv carded; Frostpunk 2 open |
-| Q6 | How do deals between teams work: votes, treaties, broken promises? | TV-5 across teams. Trace: a promise made, then kept or broken | Diplomacy; Dune: Spice Wars Landsraad | How a proposal is made, voted and enforced | Diplomacy built; Landsraad open |
-| Q7 | How do the delayed effects of aid show up, so caring now pays later and neglect is felt late? | PV-5 over time: drift and recovery. Trace: the turn the cost of neglect lands, then the team's recovery choice (repair, or carry on) | Rebel Inc; OpenTTD rating | Delay before an effect lands, how it decays, reputation drift | Partly answered: OpenTTD gives inertia, not delay; Rebel Inc open |
-| Q8 | How often, and on what triggers, should a dilemma interrupt play? | All levels: the Crucible Master's pacing. Trace: the number of values moments per turn | Frostpunk 2 events; Rebel Inc events | Event cooldowns, trigger conditions, how many run at once | Open |
+| Rank | # | Question | Needed for | Answered by | An answer looks like | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Q1 | How does a two-faction vote create tension and legitimacy, not just a winner? | Slice | Frostpunk 2 council | Vote thresholds, how support shifts, what losing a vote costs | Open |
+| 2 | Q2 | How big are pressure and permission, and how fast do they decay? | Slice | Frostpunk 2 demands and promises; Against the Storm's Queen's Impatience | Demand size, deadline, decay; penalty for a broken promise | Open (boss scorecards are our own design, not yet checked against a game) |
+| 3 | Q8 | How often, and on what triggers, should a dilemma interrupt play? | Slice | Frostpunk 2 events; Rebel Inc; Paradox event scripts; Left 4 Dead AI Director | Event cooldowns, trigger conditions, how many run at once | Open |
+| 4 | Q7 | How do the delayed effects of aid show up, so caring now pays later and neglect is felt late? | Slice | Rebel Inc; OpenTTD rating; Democracy 4 | Delay before an effect lands, how it decays, reputation drift | Partly answered: OpenTTD gives inertia, not delay (card 2); Rebel Inc open |
+| 5 | Q4 | How do a moving storm and site states force teams to replan? | Slice and five-parish | Northgard, Dune: Spice Wars; 0 A.D.; Micropolis | Warning lead time, hazard odds, recovery speed | Partly answered: 0 A.D. gives site allegiance, not storm warning (card 4); the Shiro games open |
+| 6 | Q6 | How do deals between teams work: votes, treaties, broken promises? | Five-parish | Diplomacy; Dune: Spice Wars Landsraad | How a proposal is made, voted and enforced | Diplomacy in the slice (two teams); Landsraad open |
+| 7 | Q3 | How do supply chains bend under disruption, from kelp to cure to port? | Five-parish | Anno 1800; OpenTTD; Micropolis | Pay by delivery time, service rating, chain ratios | OpenTTD carded; Anno open |
+| Closes at B | Q5 | How does unrest turn into people refusing to work? | Slice | Civ IV, Freeciv | Anger timers, disorder thresholds, martial law | Closes at B if the Civ IV build passes parity; Freeciv carded |
 
-A card's values purpose must name actual declared values: the values deck in `crucible/content/values.json` and each team's signed ranks. It must not assume that care always means PV-5, or that performance always means CV.
+A question closes, for the game it's needed for, when one of its cards is built (see the build gate), and sessions spend no time on a closed question. Q5 closes when the Civ IV anger build passes the parity test at step B and you confirm it there. Frostpunk 2's tension numbers are read only if a Q1 or Q2 card needs them. Q6 stays open: Diplomacy's joint seawall serves two teams in the slice, and the five-parish game needs deals among more teams. Q7 stays open after card 2 is built: OpenTTD's rating moves slowly but never delays an effect, so S2 still reads Rebel Inc's delays. The ranks above are mine, set before your playtest. After it, you re-rank Q1 to Q8 on a decision card, and only sessions with a ranked, open question run.
 
-**What the engine can and can't trace.** The slice engine logs team orders, one vote per team, and the Crucible Master's levers. It can trace TV-5 directly, with one caveat: each team signs three ranked values in the slice, so that is a three-value approximation of TV-5, labelled as such in the debrief.
+## What each game must give us
 
-The Crucible Master's levers are imposed pressure: the context of a decision, not evidence of anyone's values. LV evidence is the executive players' own decisions under that pressure, and comes from two places:
-- The engine log: their team's final calls, orders, and promises kept or broken on the turns after a lever.
-- The facilitator's written notes of who argued for what.
+Each game has a job, a lowest access rung, named targets, and a licence line. The rungs are: 0 = published documents, 1 = open source, 2 = official mod tools or the game's own data files, 3 = observing play, 4 = decompiling one formula. Engines, platforms and tools were checked against live pages on 4 November; the sources are at the end.
 
-PV-5 and CV are per-person and per-company declarations that live in the facilitated session (the participants' PV-5 cards and the values leadership presents). They are not in the engine. The debrief joins PV-5, CV and the LV notes to the engine log by hand. Per-person tracing in the engine is deferred to the five-parish game, and no card may claim it before then.
+| Game | Status | Questions | Lowest rung | Targets | Licence (clause, date checked) | Output |
+| --- | --- | --- | --- | --- | --- | --- |
+| Micropolis | Done, brief (2026-10-18) | Q3, Q4 cascades | 1 (GPL; read with REA) | Cascade rules | GPL: ideas only | crucible/docs/rea-micropolis-brief.md |
+| Civilization IV | Done in both engines (2026-11-01); parity first runs at B | Q5, plus worked tiles and yields (your 26 October pick). Wonders as public goals (subsystems row 12) wait for that row, which is marked Later | 1: released core SDK | CvCity hurry anger; CvCity worked plots and base yields, to check teardown 8b | SDK released for modding: ideas only | Anger timers built; yield check, and a card only if 8b disagrees |
+| Diplomacy | Done in both engines (2026-11-01); parity first runs at B | Q6 | 1: open-source engine | Support strength, cut support | Open source: ideas only | Joint seawall, both engines |
+| OpenTTD | Read, carded (2026-11-04) | Q3, Q7 | 1 | Delivery time factor, station rating inertia | GPL: ideas only | Cards 2 and 5 |
+| 0 A.D. | Read, carded (2026-11-04) | Q4 | 1 | Capture points, territory decay | GPL: ideas only | Card 4 |
+| Freeciv | Read, carded (2026-11-04) | Q5 | 1 | Martial law and luxury, disorder counter | GPL: ideas only | Card 1+3 (one idea) |
+| Frostpunk 2 | Not started | Q1, Q2, Q8 | 0, then 2: FrostKit 1.0, the official mod kit (Unreal Engine 5; Epic Games Store; Windows 10 or 11 only; 100 GB). Its policy data holds each law's Required Yes Percentage and how delegates vote. The game itself also runs on Mac (macOS 14.5, M1) | Law vote thresholds, delegate voting behaviour, promise and demand data (size, deadline, penalty), event triggers and cooldowns | 11 bit's user agreement (checked 4 November) bars use "in other purpose than private, in particular for commercial purposes", and any "attempt to gain access or modify source code". Before S1, you record whether reading FrostKit's policy data for design research is private use (counsel decides if it's unclear), and you check FrostKit's own terms. Treat rung 4 as barred unless counsel reads clause 4 otherwise | 3 to 5 cards; boss scorecard sizes checked against the game |
+| Rebel Inc: Escalation | Not started | Q7, Q8 | 0, then 2: the official Scenario Creator (Unity, IL2CPP build; Windows and Mac). The wiki already documents defaults, which S2 checks in the game: 80 turns of Lack of Stability before reputation falls; insurgency from turn 115 | Initiative delays, reputation drift, corruption's monthly hit to reputation, event cadence | Ndemic's Scenario Creator terms (checked 4 November): "You are not allowed to make commercial use of Scenarios or the Scenario Creator", and no reverse engineering or disassembling. The Scenario Creator is opened only with documented clearance for this research: Ndemic's written permission or counsel's written opinion. Until then, Rebel Inc stays at rungs 0 and 3, and rung 4 is barred | 1 to 2 cards |
+| Northgard | Not started | Q4 | 0, then 2: the official Northgard Editor (NGEditor/Editor.exe in the install folder; Windows only), whose Database view shows the game data that cdb.diff mods change; also the in-game Map Editor, script.hx in Haxe, and Steam Workshop. The game itself runs on Windows, Mac and Linux | Seasonal calendar and winter penalties, event odds, disaster recovery | Shiro terms: you check | 1 to 2 cards |
+| Dune: Spice Wars | Not started | Q4, Q6 | 0: public wikis and patch notes. The 21 October 2026 patch (v2.2.8.33019) added modding hooks, but there is no official mod kit yet; Shiro's Haxe/Heaps engine (HashLink); Windows only | Sandstorm and sandworm timing and warning, Landsraad resolution rules | Rung 0 only in this plan. Rung 2 (its own data files) would need your check of the Funcom and Shiro terms and its own session. Rung 4 is unlikely: REA lists no HashLink support | 1 to 2 cards |
+| Anno 1800 | Not started (five-parish game) | Q3 | 0, then 3: public guides and wikis, then values the game itself shows, such as each building's production time (Windows only). The in-game mod system shows no base values; they sit in assets.xml inside the .rda archives, which open only with community tools | Chain ratios and cycle times, unmet needs, ship capacity and route timing | Ubisoft EULA §1.2 (last updated 01/2023): no reverse engineering, decompiling or derivative works, except content made through game features. So we use public guides and observed play only, and never unpack or decompile its files | 2 to 3 cards for the five-parish chain |
 
-**Translation rule.** Source games run on different clocks (seconds, days, turns) and have different numbers of factions. Every card converts the source unit into Keystone turns, and the conversion goes in its Formula field. By default, one source decision cycle is one Keystone turn. Faction counts map to Keystone's two teams plus the council. A rule that can't be translated is rejected, not stretched.
+**Also named in the records.** Every other reference gets an in or out line, so none is quietly dropped.
 
-## Access records, fact-checked 2026-11-04
-
-Rungs:
-1. Open source.
-2. An official mod tool, or the game's own data read through the route the publisher's mod system supports.
-3. Observing play.
-4. Decompiling one formula.
-
-Every claim below was checked against the cited page on 2026-11-04; the F numbers point to the fact-check table. Where a page couldn't settle a claim, it is marked **unresolved**, with the person who settles it.
-
-| Game | Platforms | Lowest rung | Verified route | Licence and tool terms | Questions | Targets | Output |
-|---|---|---|---|---|---|---|---|
-| Civilization IV | n/a (source) | 1: released core SDK | `CvGameCoreDLL` in github.com/dguenms/beyond-the-sword-sdk | Released SDK | Q5 | Hurry anger, angry population | Built in both engines (2026-11-01) |
-| Diplomacy | n/a (source) | 1 | github.com/diplomacy/diplomacy `engine/game.py` | Open source | Q6 | Support strength, cut support | Built in both engines (2026-11-01) |
-| OpenTTD | n/a (source) | 1 | `src/economy.cpp`, `src/station_cmd.cpp` @ 611118d | GPL: read for ideas, rebuild clean-room | Q3, Q7 | Delivery time factor, station rating inertia | Cards 2 and 5 |
-| 0 A.D. | n/a (source) | 1 | `TerritoryDecay.js`, `Capturable.js` @ 61a3b95 | GPL | Q4 (site state) | Capture points, territory decay | Card 4 |
-| Freeciv | n/a (source) | 1 | `common/city.c`, `server/cityturn.c` @ cfa2c92 | GPL | Q5 | Martial law and luxury, disorder counter | Cards 1 and 3 |
-| Frostpunk 2 | Game: Windows 10/11 and macOS [F4]. FrostKit: **Windows 10/11 64-bit only, about 100 GB, free** [F3] | 2: FrostKit, the official mod tool [F1] | Policy assets expose "Required Yes Percentage", a voting-behaviour override (`PXVotingBehaviourSet`) and Aye/Hesitant standing thresholds; `PXLaw` types exist [F2]. Promise, demand, tension and event tables are **unresolved** until FrostKit is opened | 11 bit studios user agreement: no explicit decompiling clause found [F5]. **Unresolved:** Jerry reads it in step B | Q1, Q2, Q5, Q8 | Vote thresholds and voting behaviour; promises and demands; tension per event; event triggers and cooldowns | 4 to 6 cards; boss scorecard sizes checked against the game |
-| Anno 1800 | **Windows 10 64-bit only**; needs a Ubisoft account [F9] | 2: game data, via the built-in mod loader's route | Data sits in `.rda` archives in `maindata`. Values live in `data/config/export/main/asset/assets.xml`, superseded by later patch archives, so read the highest patch. The mod loader is built into the game [F6]. Units are per field: `CycleTime` in seconds and `Amount` in tonnes in `FactoryBase` [F7]; every other field's unit is recorded from an Anno 1800 example before use. The archives are opened with RDA Explorer, a community tool [F6] | EULA s.1.2 bans reverse engineering, decompiling and disassembling, except through in-product user-content features [F8]. **Rung 4 is barred.** Rung 2 needs Jerry's licence entry to name RDA Explorer explicitly; otherwise Anno stops at rung 3 | Q3 | Chain ratios and cycle times, population needs and unmet-need effects, ship capacity and route timing | 2 to 3 cards for the five-parish chain |
-| Dune: Spice Wars | **Windows 10/11 only** [F11] | 3 by default; 2 only if the licence entry allows it | No official editor. The 21 Oct 2026 patch added official mod hooks: data from a modified `cdb` file, `/enableCheats`, `/reloadPak` and `/help`; Shiro doesn't vet community mods [F10]. Reading the `cdb` needs a community tool | Shiro Games EULA: **unresolved**, Jerry checks in step B | Q4, Q6 | Sandstorm and sandworm timing and warning, Landsraad resolution and vote rules | 1 to 2 cards (shape only if rung 3) |
-| Northgard | Windows, macOS, Linux; the editor is PC-only [F13] | 2: the official Northgard Editor | `NGEditor/Editor.exe` edits the game's CastleDB data and saves changes as `cdb.diff`; scripts are Haxe (`script.hx`) [F12] | Official tool. Shiro Games EULA: **unresolved**, Jerry checks | Q4 | Seasonal calendar and winter penalties, event odds, disaster recovery | 1 to 2 cards |
-| Rebel Inc: Escalation | Windows 10 and macOS 12+ [F15] | 2: the official Scenario Creator | Steam Workshop and an official Scenario Creator, on Steam and mobile; which variables it exposes is **unresolved** [F15]. The build is likely Unity IL2CPP, going by community tooling [F14] | The Scenario Creator terms ban commercial use and reverse engineering [F19]. The Values Crucible is commercial, so the Scenario Creator is **not opened** until documented clearance exists for this research use: written permission from Ndemic, or counsel's written opinion. Until then, Rebel Inc stays at rung 3 | Q7, Q8 | Initiative delay, reputation drift, corruption and unrest spread, event cadence | 1 to 2 cards |
-
-**Platform consequence.** Each game's full minimum has to be met, not just the OS:
-- Frostpunk 2 needs an Apple processor (M1 or better), 8 GB RAM, macOS 14.5 and 30 GB [F4].
-- Rebel Inc needs macOS 12.
-- Northgard needs 10.9.
-
-Jerry's Mac, checked on 2026-11-04, is an Apple M5 Max with 64 GB, macOS 26.5.2 and 836 GB free, so it meets all three. It can run Frostpunk 2 (play only), Northgard (play only) and Rebel Inc. FrostKit, Anno 1800, Dune: Spice Wars and the Northgard Editor need a Windows PC. Without one, Frostpunk 2 and Northgard drop to rung 3, and Anno 1800 and Dune: Spice Wars can only be skipped.
-
-**Skips need Jerry's approval.** A game is skipped only with Jerry's written approval in the session note. The note must also list the questions left open:
-
-| If skipped | Left open or weakened |
-|---|---|
-| Anno 1800 | Q3 rests on OpenTTD alone |
-| Dune: Spice Wars | Q4 storm timing rests on Northgard; the Q6 Landsraad goes unanswered, so Q6 rests on Diplomacy |
-| Rebel Inc | Q7 rests on card 2 (inertia only, a partial answer); Q8 rests on Frostpunk 2 alone |
-
-The closed five are ordered by expected value. Frostpunk 2 answers four questions and is the closest match to the slice. Rebel Inc is the cheapest to drop.
+| Reference (where named) | Question | In or out |
+| --- | --- | --- |
+| Paradox event scripts (18 October record, the dilemma format anchor) | Q8 | In: the official modding wiki's event documentation, read in the cloud (rung 0); the event files themselves only from your own copy, if you own a Paradox game |
+| Left 4 Dead AI Director (subsystems row 10) | Q8 pacing | In: published design talks only |
+| Against the Storm, Queen's Impatience (26 October research) | Q2 | In: public wiki only |
+| Democracy 4 (18 October record) | Q7 | In only if Q7 is still open after S2 and you own it: its plaintext policy data at rung 2, after the licence check, about 15 minutes added to the next session |
+| Hearts of Iron IV (26 October research) | Q4 | Out for the slice; five-parish weather only |
+| Civilization V and VI | Q3, Q5 | Out: Civ IV already covers worked tiles at rung 1, and Civ VI never released its core source, per player reports |
+| This Is the Police, Frostpunk 1, Emergency, Company of Heroes 2, Tropico, Age of Empires II, StarCraft II, Open RTS (MIT; camera and selection already borrowed), Widelands (architecture reference for authoritative state and replay), Into the Breach, Jackbox | Theme, units, UX | Out: design references, no numbers needed |
 
 ## Method and guardrails
 
-Each question gets the lowest rung that can answer it. Climb only when the rung below came up empty, and write down why.
+Each question gets the lowest access rung that can answer it. We climb a rung only when the one below has come up empty, and we write down why.
 
-1. **Open source (rung 1):** read in the cloud. Downloads are untrusted data and never executed. Cite repository, commit, file and function.
-2. **Mod tool and data files (rung 2):** on Jerry's computer through a remote session, with his installed copies. Only an official tool, or a community tool his licence entry names, may be used. Exported tables are read as numbers only, and no assets or text leave his computer.
-3. **Observing play (rung 3):** follow the observation protocol below.
-4. **Decompiling one formula (rung 4):** the last resort, never for Anno 1800 or Rebel Inc. It covers one named formula that rungs 1 to 3 couldn't answer, and only after the licence entry clears it. It uses REA ("Reverse Engineer Anything", morluto/rea, MIT, npm `rea-agents`) with Ghidra on Jerry's copy [F17]. One formula per session, and the output is plain math only. REA decodes IL2CPP metadata statically [F16].
+1. **Published documents (rung 0).** Official modding guides, patch notes and community wikis, which I read here in the cloud before any session. Examples: the Frostpunk 2 policy creation guide on mod.io, Northgard's "How to mod" page, and the Rebel Inc wiki's Scenario Creator page. A session on your computer only checks what these can't settle.
+2. **Open source (rung 1).** I read the code here in the cloud. Downloads are treated as untrusted data and never executed, and every finding cites the file, function and commit.
+3. **Official mod tools and data files (rung 2).** These run on your computer through a remote session, using your own installed copies. Exported tables are read as numbers only, and no assets or text leave your computer.
+4. **Observing play (rung 3).** Before the session I write one fixed scenario per question: difficulty, map, start state and the exact choices. For a fixed rule we log at least 3 values (5 for a delay or decay curve), and a formula is accepted only if it predicts a held-out run to within 10%. For a chance event we use fresh seeded runs over a fixed window, report the rate with a Wilson 95% interval, and keep windows that end early (censored) in the count. The evidence is insufficient if the interval is wider than ±15 points or fewer than 5 events are seen; then the card records the shape, not the numbers.
+5. **Decompiling one formula (rung 4).** This is a last resort and never planned ahead. It needs a passed card that names one formula rungs 0 to 3 couldn't answer, and a licence check that allows it.
 
-**REA setup is conditional and pinned.** It happens only before the first session that actually needs rung 4. The pins:
-- `rea-agents@6.8.0` (npm, published 2026-10-25).
-- Node `^22.23.4 || ^24.22.1 || >=26.12.1`, the package's declared engines. Jerry's Mac has Node 22.20.0, which is below the range, so it upgrades to the latest 22.x first. The session note records the exact Node, REA, Ghidra and JDK versions used.
-- Ghidra 12.1.4 with JDK 21, REA's documented verified pair. Ghidra 12.2 would need JDK 25 or newer [F18]. Source: the release-tag docs at https://github.com/morluto/rea/blob/rea-agents-6.8.0/docs/installation.md
+**The REA tool (morluto/rea) is set up only when rung 4 is actually needed.**
 
-The steps:
-1. Run `npm install --global rea-agents@6.8.0`, then `rea setup`.
-2. Set `GHIDRA_INSTALL_DIR`.
-3. Run `rea doctor --provider ghidra --json` and `rea providers --json`.
-4. Only if the doctor reports the native decompiler missing, build it as the install guide's macOS section shows, and re-run the doctor.
-5. Smoke test: `rea inspect <target> --provider ghidra --json` on the one target binary.
+- **Version.** We pin `rea-agents@6.8.0`, the current npm release (25 October 2026).
+- **What it needs.** Ghidra 12.1.x with a 64-bit full JDK 21 or newer; it is verified with Ghidra 12.1.4 and JDK 21. Node.js 22.23.4 or later on the 22 line, 24.22.1 or later on the 24 line, or 26.12.1 or later. Your Mac has 22.20.0.
+- **Where it runs.** Ghidra runs on Linux, or on a Mac with an Intel or Apple chip; on an Apple chip its native decompiler may need building first. On Windows x64 the route is experimental and read-only, but it takes native programs and DLLs.
+- **Checks before use.** We run `rea doctor --provider ghidra --json` and `rea providers --json`, which are read-only, then one smoke test on the target: `rea inspect <target> --provider ghidra --json`. We stop if any of them fails. A plain `rea doctor` checks every integration, so it can fail on tools we don't use.
 
-Only the scoped check and the smoke test count. A plain `rea doctor` can fail on unrelated integrations. If either step fails, that formula stays at rung 3.
+So rung 4 is possible on your computer where a licence allows it, and nothing in this plan depends on it.
 
-**Observation protocol (rung 3).** The scenario script is written before the session. It sets the difficulty, the starting state, the one variable being changed, and what is held constant.
-- **Deterministic rules** (costs, thresholds, timers): sample at least 3 values of the variable, plus 1 held-out value. The fitted formula must reproduce the held-out value to the game's display precision.
-- **Stochastic hazards** (event odds, storm timing): one trial is one fresh start of the scripted scenario, observed for a fixed exposure window written in the script (for example, the first in-game year, or 20 minutes).
-  - **Independence:** each trial needs its own logged randomisation: a new map seed where the game offers one, otherwise a new map or game, plus its save name. A trial that reuses a seed or save is not counted.
-  - **Odds:** record whether the event occurs in each window, and report the rate with a Wilson 95% interval.
-  - **Timing:** record when it occurs in game seconds or days. Windows where it never occurs are kept as censored observations, not dropped. Report the Kaplan–Meier median when it can be estimated (otherwise "median later than the window"), the range of the observed events labelled separately, and the number of censored windows with their bound ("no event by the end of the window"), all converted to Keystone turns (https://www.itl.nist.gov/div898/handbook/apr/section1/apr131.htm). If more than half the windows are censored, report the timing as "later than the window" only.
-  - **Stop rule:** stop at the time box. The result is insufficient evidence if the Wilson half-width is over 15 points, or fewer than 5 events were seen for a timing claim.
-- **Insufficient evidence** means the card is held with the shape only. No formula is invented.
+**Guardrails, all binding:**
 
-**Guardrails.**
-- **Copy nothing:** no code, assets, text or names. GPL code is read for ideas only.
-- **Clean-room, in practice:** the reader writes the card in plain math, and the builder works only from the card. Source files are never committed, and each claim on a card cites its provenance (game, build, file or table, row).
-- **Licence entry first, at rung 2 and above:** before any rung 2 to 4 session, Jerry records a licence entry in the repo note. It covers the game's EULA **and** the terms of each tool used, separately: URL, the relevant clause, date, permitted scope, the tools named, and his decision. If a clause is unclear, or a route needs circumvention (DRM, encryption, or a tool the entry doesn't name), stop at rung 3.
-- **Jerry's copies only.**
-- **Counsel before any sale.** This is not legal advice. The Rebel Inc commercial-use clause makes this binding for that game.
-- **Determinism holds:** rules live in content JSON and the seeded engine.
+- **Copy nothing.** No code, assets, text or names leave a game. GPL code is read for ideas and rebuilt clean-room.
+- **Licence first.** You check a game's licence and any mod-kit terms before we do anything beyond reading public documents and open-source code. The session note records the game's licence and each tool's terms separately, each with its clause, link and date. If either is unclear, we stop at rung 3.
+  - Official tools (FrostKit, the Northgard Editor, Rebel Inc's Scenario Creator) are used only as their terms allow.
+  - Unpacking game files with a community tool needs a check first. The tool must come from its own repository, at a pinned version.
+  - Decompiling always needs a check.
+  - Watching play needs none.
+- **Known now.** Ubisoft's licence for Anno 1800 bans reverse engineering, so Anno stays at public guides and observed play, and its files are never unpacked or decompiled. REA is MIT-licensed; its disclaimer says it is for "software you own or are authorized to examine", and it grants no licence for Hopper, IDA or JEB.
+- **Your copies only.** Nothing comes from piracy or asset-rip sites.
+- **Counsel before sale.** If the app is ever sold, we get a short intellectual-property review first. This spec is not legal advice.
+- **Determinism holds.** Every rule we build lives in content JSON and the seeded engine, and the same seed always gives a byte-identical replay. A card that changes the rules changes golden.json only through a reviewed regeneration.
 
 ## The REA card and when it passes
 
+Every finding goes on a card. If a card has an empty field, it isn't built.
+
 | Field | What it must hold |
-|---|---|
-| Provenance | Game, edition, build or version, platform, and settings or difficulty; repository and commit for open source |
-| Source and evidence | Per claim: file and function, a data table and row, or a play log with its scenario script |
-| Formula | Plain math with real values and units per field; the time and faction translation; no code copied |
-| Recovered vs adapted | Which constants came from the source, and which are our own tuning, labelled separately |
-| Confidence | High only after an interpretation check: a worked example with real values reproduced, or a behaviour check. Otherwise medium (fitted from play) or low. List any unverified fields |
+| --- | --- |
+| Source and evidence | Open source: file, function and commit. Closed game: game version and build, store, platform and mod-kit version; the asset path or table and row; and a SHA-256 of the file read (only the hash leaves your computer). Play log: scenario script, difficulty, number of runs and the held-out run's error. Published document (rung 0): URL, date read, page revision and the exact line quoted. A number from a community wiki also needs a second source, or a check in the game, before a card uses it |
+| Rung and licence | Rung used, why the rung below didn't answer, and the licence line |
+| Formula | Plain math with real values and units, converted to Keystone turns; a formula that can't be translated is rejected. No code copied. Recovered or adapted: whether the numbers are the game's own or our adaptation, and which. Confidence: high (source or data file), medium (held-out play within 10%), or low (shape only) |
 | What the player feels | One sentence |
-| Keystone mapping | Content JSON keys and engine function touched |
-| Values purpose | The declared value under pressure, the level (PV-5, TV-5, CV, LV), and the logged decision the debrief will show |
-| Cost | How many new ideas it adds (see the complexity rule) |
-| Prediction | A number with a tolerance on the sim, written before the test |
-| Decision | Prototype, adopt, adapt, hold or reject, with a reason |
+| Keystone mapping | Content JSON keys and the engine function it touches |
+| Values purpose | Which gap between stated and enacted values it creates or sharpens |
+| Cost | Passes only if the facilitator can explain it in one sentence an executive can repeat back, it adds at most one number to the planning screen and no new screen, and the slice still fits in 10 minutes. The slice takes at most three card-added ideas, and each must be used correctly in the playtest without prompting. Cards that only work together count as one idea only if together they add one decision and one number |
+| Prediction | A metric, today's value and a pass range, written before the test. Example: generous Meridian makes its target in 49.4% of games against the careful community now, and 52 to 58% after |
+| Decision | Adopt, adapt, hold or reject, with the reason |
 
-**Complexity rule.**
-- One new idea is one new player-visible element: a number, an order, a meter or a screen.
-- Each slice iteration may add at most one.
-- The slice carries at most **3** card-added ideas in total. A fourth must replace one.
-- Comprehension is a task check, not a recital. In Jerry's playtest, the player uses the new element correctly at least once without prompting, and can say what it does. If either fails, the element is removed.
-- Cards 1 (the cordon order) and 3 (the unrest counter) are two ideas, so they ship in separate iterations.
+Each card is tried first in the JavaScript engine on a branch. It passes there when rules 1 to 3 hold; then you approve or reject it (rule 5). Rule 4 is the build check: it runs after an approved card is ported to Godot, and the card counts as built only when it prints PASS.
 
-**Two gates per card.**
-- **Prototype approval:** Jerry approves the card, and Claude builds it behind a content key.
-- **Acceptance:** it stays in the slice only if all four pass criteria below hold.
-
-**Pass criteria.**
-1. **Prediction met:** within the written tolerance (default ±5 percentage points of target rate), on seeds 1 to 1000 of `node crucible/slice/sim.mjs 1000`. Claude runs it and logs it.
-2. **Invariants hold, on the run matrix sim.mjs actually plays.** That matrix is:
-   - Community `nothing` or `careful`, against Meridian `nothing` or `careful`.
-   - Community `careful` against Meridian `generous` and `selfish`.
-   - The four Crucible Master levers.
-
-   Inactivity is defined per team. Community `nothing` gives no orders. Meridian `nothing` only runs the plant, which is its baseline operation. Three checks:
-   - **Idle success:** an idle team meets its target at most 10% of the time. Measured on 2026-11-04 (1000 seeds): both idle 0.6% and 1.0%; idle community against careful Meridian 2.0%; idle Meridian against careful community 7.1%.
-   - **Acting beats idling:** against the same opponent, each team's mean index is higher when it acts than when it idles (today 74.1 vs 6.7 for the community, 115.9 vs 83.6 for Meridian). Indexes are compared within a team only, because the two teams' scales differ.
-   - **Pressure trade-off survives:** today selfish Meridian beats careful on its own target (64.0% against 61.7%). It costs the community's target (45.4% against 61.2%) and lives (72 against 67 mean people lost). A card must not erase that cost, or the pressure has no moral price.
-   - **No dominant line** (enforced once D0 lands): in D0's full matrix, no policy is a team's best response, on its own target rate, to every opposing policy.
-
-   **Step D0**, before any card is built: Claude extends sim.mjs to the full matrix. It logs four things per cell: each team's target rate, the **joint** rate at which both teams meet their targets, mean people lost, and turn-by-turn meter changes. Card-specific predictions are tested on those columns, not on the separate team rates. Each card also adds a policy that actually uses its new mechanic, and logs an activation count: a mechanic that never fires in the matrix fails. Card 2's "fewer last-turn swings" is measured as the mean absolute change in trust and confidence on the final storm turn. It passes if that drops by at least 25% against the current engine, while the joint rate for both careful teams stays within ±5 points:
-   - Community: `nothing`, `careful`, `kind` and `selfish`.
-   - Meridian: `nothing`, `careful`, `generous` and `selfish`.
-   - Levers: none, plus each of the four.
-
-   These claims hold for this matrix and these seeds only.
-3. **Parity**, two separate checks:
-   - **Determinism:** on an unchanged engine, `node crucible/slice/golden.mjs` regenerates `crucible/godot/keystone_slice/tests/golden.json` byte-identical (seeds 42, 7 and 4217; true on 2026-11-04).
-   - **Intended change:** an accepted card commits a new `golden.json`, with its diff reviewed, plus at least one golden scenario that exercises the new mechanic. Then `godot --headless --script res://tests/run_tests.gd` must print PASS on Jerry's machine, comparing matching JS and Godot states.
-
-   The earlier "600-game red-team" has no harness in the repo and is dropped until one is built.
-4. **Jerry accepts it after his playtest.** His notes outrank every persona score.
-
-**Corrections to existing cards** (found in the audit).
-- [[rea-2026-11-04-openttd-0ad-freeciv]] says OpenTTD's delivery factor "never drops below 31". At 611118d, `GetTransportedGoodsIncome` falls linearly to `MIN_TIME_FACTOR` = 31, then decays toward 1 along a scaled 1/(x+1) curve (https://github.com/OpenTTD/OpenTTD/blob/611118d/src/economy.cpp). Card 5's 15% floor is therefore our adaptation, not a recovered constant.
-- Step A2 retrofits the new Provenance, Recovered vs adapted and Confidence fields onto cards 1 to 5 **and** onto the built Civ IV and Diplomacy mechanics, pinning their upstream commits.
-- Card 3's timing doesn't fit the slice. The counter acts at 3, but the slice has only three storm turns, so "next turn's shift at the floor" lands after play ends. Before prototyping, A2 re-times it so the picket lands inside play: warn at 1, act at 2, and the penalty hits the next shift.
-- **Late trigger:** if unrest starts at T2, the counter reaches 2 at T3, and no storm turn is left. The picket then hits the recovery phase: the plant's first recovery shift is at the floor, which counts in the recovery score. It never expires silently.
-- **Goldens:** A2 writes the two scenarios as specs only (triggered by T2, and triggered at T3). They are implemented and their goldens regenerated in step D, after gate B and Jerry's approval of card 3, so the slice stays unchanged for the playtest.
+1. The 1000-seed run lands inside the prediction's pass range, and the run reports how often the new mechanic fires. At least one bot line must use it; a mechanic that never fires fails.
+2. A team that does nothing makes its target in under 10% of seeds, against every line the other team plays. That's the 2 November rule; today's worst case is 7.9%. The card raises no do-nothing rate by more than 2 points, and the second community line must also keep every do-nothing rate under 10%.
+3. No new or wider dominance. A line is dominant when it is best for its team against every active line of the other team. The card makes no line dominant that wasn't dominant before. Where a line already dominates, its lead over its team's next-best line grows by at most 2 points against any line of the other team. If a dominant line is the intended temptation (for example, Meridian's selfish lean), the card says so and you decide. Lines are the named bot policies in `crucible/slice/sim.mjs`, and doing nothing is not a line. Each team needs at least two active lines. The community has only one today, so a second line (for example, "sandbag first") is added, and this baseline grid is measured, before any card is tried.
+4. Godot parity: `tests/run_tests.gd` first regenerates golden.json byte-identically from the current rules, then, with the card in, a reviewed, regenerated golden.json plus at least one new golden game prints PASS on all of them (seeds 42, 7, 4217 and the new seeds). Godot can't run in this cloud environment, so this runs on your computer, or in a CI job with headless Godot if you approve one.
+5. You approve it on a card. After your playtest, your notes outrank every persona score.
 
 ## Plan
 
-Each step has an owner, a time box and a hard stop. Every time box ends with each question marked answered, held or rejected; nothing carries on automatically.
+Your gate plus three sessions on your computer comes to about 4 hours: 45 + 90 + 45 + 60 minutes. A rung 3 fallback is extra: one session of about 90 minutes per question, booked only when a lower rung comes up empty. Anno 1800 waits for the five-parish game. The sessions follow the question rank, not the game, and the session lengths are my estimates.
 
-| Step | Owner | Where | Scope | Time box | Done when |
-|---|---|---|---|---|---|
-| A. Open-source read | Claude | Cloud | OpenTTD, 0 A.D., Freeciv: 5 cards, nothing built | Done 2026-11-04 | [[rea-2026-11-04-openttd-0ad-freeciv]] |
-| A2. Card retrofit | Claude | Here | New card fields on cards 1 to 5 and the Civ IV and Diplomacy mechanics; fix the OpenTTD floor; pin commits | 90 min | Cards updated, nothing built |
-| B. Jerry's gate | Jerry | His computer | Godot parity PASS; a 10-minute play of the **unchanged** slice; which games he owns, on which store and OS; whether he has a Windows PC; licence entries (game and tool) for every closed game; approval for any skip | Jerry's pace | His notes set the build order and reorder Q1 to Q8 |
-| C1. Frostpunk 2 | Claude, with Jerry at the PC | Windows PC (FrostKit) | Policy and voting tables, then promise, demand, tension and event tables; Q1, Q2, Q5, Q8 | 90 min, hard stop | Cards, plus `rea-YYYY-MM-DD-frostpunk2.md` |
-| C2. Anno 1800 | Claude, with Jerry | Windows PC | `assets.xml` from the highest patch, if RDA Explorer is named in the licence entry; Q3 | 60 min, hard stop | Cards, plus repo note |
-| C3a. Northgard | Claude, with Jerry | Windows PC (editor) | CastleDB seasons, events and disasters; Q4 | 45 min, hard stop | Cards, plus repo note |
-| C3b. Dune: Spice Wars | Claude, with Jerry | Windows PC | Rung 3 storm and Landsraad observation (rung 2 only if the licence entry allows); Q4, Q6 | 60 min, hard stop | Shape cards, plus repo note; odds likely insufficient evidence in one session |
-| C4. Rebel Inc | Claude, with Jerry | Mac or PC | Observation; the Scenario Creator only with documented clearance; Q7, Q8 | 60 min, plus about 20 min of play | Cards, plus repo note, or the skip approval and open questions |
-| C5. Rung 4, only if needed | Claude, with Jerry | His computer | Pinned REA setup, then one named formula | 30 min setup plus 60 min per formula | One formula in plain math, or held |
-| D0. Sim matrix | Claude | Here | Add community `selfish` and `kind` lines to sim.mjs | 60 min | Full best-response table logged |
-| D. Build | Claude builds; Jerry approves and accepts | Here | Approved cards only, in the order gate B sets; one new idea per iteration; at most 3 in the slice | Per card: at most 2 build-and-retest cycles (about 3 hours); then hold or reject | Pass criteria 1 to 4 met, or held or rejected with a reason |
+Plan diagram (in the doc): A Read in the cloud (done) → B Your gate → S1 Frostpunk 2 → S2 Rebel Inc → S3 Northgard → D Build, rolling → S4 Anno 1800 (five-parish). Rung 4 (REA) is a standalone, as-needed step.
 
-The total for C1 to C4 is about 6 hours on Jerry's computer. These are estimates; if a session runs short, the next game waits. Prerequisites:
-- **B:** the parity run, playtest notes and licence entries.
-- **C:** the computer is on, remote control is approved, he has admin rights, and the game is installed.
-- **C1:** FrostKit (about 100 GB) is downloaded first.
+**B, your gate (about 45 minutes):** I run the Godot parity test on your computer, and it must print PASS. Then you play the slice for 10 minutes and answer the open questions below, except the licence question, which is answered before each session. If parity fails, we fix that first. If the playtest is a no-go, the sessions wait and we re-rank Q1 to Q8 from your notes. Each session ends with cards and a repo note named `rea-YYYY-MM-DD-<game>.md`. If a session runs short, the next game waits. While you do B, I add the second community line, measure the baseline grid and re-time card 3, then try card 1+3 in the JavaScript engine. If you approve it, its Godot port goes through the parity test at the start of S1.
+
+**If your computer is a Mac:** FrostKit and the Northgard Editor are Windows only, so S1 and S3 become rung 0 plus observed play under the rung 3 protocol, one question per session of about 90 minutes. On an Intel Mac, Frostpunk 2 doesn't run, so S1 stays at rung 0. S2 is unchanged: the Scenario Creator runs on Mac, once it's cleared. S4 uses public guides only. That makes up to about 7.5 hours on an Apple-silicon Mac and about 3 on an Intel Mac.
+
+What each session needs from you:
+
+- **Before any session:** Claude signed in on that computer, connected for Remote Control, with admin rights. Before B, also Godot 4.3 or newer (the standard build, not .NET) and a copy of this repo; I run the parity test over Remote Control, `godot --headless --script res://tests/run_tests.gd` from crucible/godot/keystone_slice. Before each session, you read that game's licence (FrostKit's terms before S1), and I record the clause, link and date in the games table.
+- **Before S1:** FrostKit installed from the Epic Games Store. It's free, but it's Windows 10 or 11 only and 100 GB, so start the download a day ahead. Update Frostpunk 2 first.
+- **S2 and S3:** the game installed and opened once.
+- **S2:** the Scenario Creator is opened only with the clearance recorded in the games table. If it isn't cleared, or doesn't show a value we need, you play a second session of about 90 minutes, booked only then. It follows the rung 3 protocol: five runs of one short fixed scenario.
 
 ## Card backlog
 
+There are five cards so far, all from source code. Cards 1 and 3 merge into one idea, since the slice takes one new idea at a time. The closed games should add roughly 8 to 14 more cards. The "When" column is my recommendation; you decide each card on a decision card. Card 3 can't fire as written: trust starts at 60 and, with a careful community, never falls below 55 after the first turn, so its "below 40 for 3 turns" trigger fired in 0 of 5000 simulated games. Before card 1+3 is tried, card 3 is re-timed to act on a fall in trust (for example, 10 points across two turns) or its penalty lands in recovery, and its prediction is rewritten first.
+
 | Card | Source | Question | Decision so far | When |
-|---|---|---|---|---|
-| 1. Care or control (security cordon) | Freeciv | Q5 | Prototype recommended | After gate B, in the order it sets |
-| 3. Unrest ladder with a warning | Freeciv | Q5 | Prototype recommended | A separate iteration from card 1 |
-| 2. Trust moves slowly | OpenTTD | Q7 | Prototype after playtest | After step B |
+| --- | --- | --- | --- | --- |
+| 1+3. Care or control, with its unrest warning (one idea: one decision, one number) | Freeciv | Q5 | Adopt as one idea once card 3 is re-timed (recommended) | Slice, awaiting your card |
+| 2. Trust moves slowly | OpenTTD | Q7 | Adopt after playtest | After step B |
 | 4. Allegiance per site | 0 A.D. | Q4 | Hold | Five-parish game |
-| 5. Late doses lose value | OpenTTD | Q3 | Hold; the floor is an adaptation | Five-parish game |
-| Council vote and legitimacy | Frostpunk 2 | Q1 | Not yet read | After C1 |
-| Demand size and broken-promise penalty | Frostpunk 2 | Q2 | Not yet read | After C1; may re-tune boss scorecards |
-| Chain ratios and unmet needs | Anno 1800 | Q3 | Not yet read | Five-parish game |
-| Storm warning lead time | Northgard, Dune: Spice Wars | Q4 | Not yet read | Slice or five-parish, per playtest |
+| 5. Late doses lose value | OpenTTD | Q3 | Hold | Five-parish game |
+| Second community bot line ("sandbag first") | Our own; needed by pass rule 3 | All | Required before any card is tested | First, before any card |
+| Council vote and legitimacy | Frostpunk 2 | Q1 | Not yet read | After S1 |
+| Demand size and broken-promise penalty | Frostpunk 2; Against the Storm | Q2 | Not yet read | After S1; may re-tune the boss scorecards |
+| Dilemma cadence and cooldowns | Frostpunk 2, Rebel Inc, Paradox | Q8 | Not yet read | After S1 and S2; feeds the AI Dilemma Director |
+| Delayed aid effects | Rebel Inc; Democracy 4 | Q7 | Not yet read | After S2; compare with card 2 |
+| Storm warning lead time | Northgard, Dune: Spice Wars | Q4 | Not yet read | Slice or five-parish, depending on your playtest |
 | Landsraad-style island resolution | Dune: Spice Wars | Q6 | Not yet read | Five-parish game |
-| Delayed aid effects | Rebel Inc | Q7 | Not yet read | Compare with card 2 |
-| Dilemma cadence and cooldowns | Frostpunk 2, Rebel Inc | Q8 | Not yet read | Feeds the AI Dilemma Director and the Crucible Master's pacing |
+| Chain ratios and unmet needs | Anno 1800 | Q3 | Not yet read | Five-parish game |
+
+Build gate: "built" means the card has passed in the JavaScript engine and you've approved it, it's ported to Godot with a reviewed, regenerated golden.json and new golden seeds, within at most two build-and-retest cycles (about 3 hours), the parity test prints PASS, and the build log has an entry.
 
 ## Risks and open questions
 
 | Risk | Effect | Fallback |
-|---|---|---|
-| A licence or tool's terms ban the route, or are unclear | That game stops at rung 3 | Rung 3 covers the shape, not exact numbers |
-| Jerry has no Windows PC | FrostKit, Anno 1800, Dune and the Northgard Editor are out | Frostpunk 2 and Northgard by observation on the Mac; Anno and Dune skipped, with approval and their open questions recorded |
-| FrostKit doesn't expose promise or tension numbers | Q2 stays open | Observe play and fit the curve. Decompile the promise penalty only if the licence clears it |
-| The REA scoped check or smoke test fails | No rung 4 | Rungs 2 and 3 carry the plan |
-| No documented clearance for the Scenario Creator | Q7 and Q8 rest on observation | Observation protocol, or skip with approval |
-| Hazard odds need more trials than a session allows | Q4 odds stay open | Hold with the shape only; use Northgard's editor data for the odds |
-| Too many cards for a 10-minute slice | Confusing slice | One idea per iteration, 3 in total, task-checked |
-| Tuning before the playtest | Wrong lever | Nothing is built before gate B |
+| --- | --- | --- |
+| A licence bans reverse engineering (already true for Anno 1800) | That game stays at rungs 0, 2 (official tools) and 3 | Rungs 0 and 3 give the shape of an answer, without the exact numbers |
+| FrostKit doesn't expose the promise or demand numbers | Q2 stays partly open | Observe play using the rung 3 protocol, in its own session of about 90 minutes; the vote thresholds are already confirmed in its policy data |
+| Your computer is a Mac | No FrostKit, Northgard Editor, Anno 1800 or Dune: Spice Wars; on an Intel Mac, no Frostpunk 2 either | Follow the Mac branch in the plan |
+| The Scenario Creator doesn't show a delay we need | Q7 keeps its shape but loses the number | Observe play with a set script, in its own session of about 90 minutes. Rung 4 isn't available: Ndemic's terms forbid reverse engineering or disassembling "in relation to, Rebel Inc. Scenarios or the Scenario Creator" |
+| REA's scoped check or its smoke test fails on your computer | No rung 4 | Nothing depends on rung 4 |
+| Too many cards for executives in a 10-minute slice | The slice gets confusing | The cost rule: one decision and one number per idea, at most three ideas in the slice, each used correctly without prompting in the playtest |
+| Tuning before your playtest | Effort spent on the wrong lever | Only card 1+3 is tried during step B, in JavaScript, after the second community line and the baseline grid. It is built only with your go |
 
-Open for Jerry, all in step B:
-- Which closed games he owns, on which store.
-- Whether he has a Windows PC.
-- Licence entries, covering the game and each tool, for Frostpunk 2, Anno 1800 (RDA Explorer), the two Shiro games, and Rebel Inc. For the Scenario Creator, documented clearance (from Ndemic or counsel) is needed before it is opened.
-- The parity test and playtest.
+Only you can answer these:
 
-## Fact-check, 2026-11-04
+- [ ] Is that computer Windows, an Apple-silicon Mac (M1 or newer) or an Intel Mac? Is it the M5 Max MacBook Pro that runs the Codex loop, and do you also have a Windows PC? On an Apple-silicon Mac you can run Frostpunk 2, Northgard and Rebel Inc (with its Scenario Creator), but not FrostKit, the Northgard Editor, Anno 1800 or Dune: Spice Wars. On an Intel Mac, Frostpunk 2 doesn't run either.
+- [ ] Which of Frostpunk 2, Rebel Inc, Northgard, Dune: Spice Wars, Anno 1800, Democracy 4 and any Paradox game (Crusader Kings III, Stellaris, Victoria 3) do you own, and on which store?
+- [ ] Will you read each game's licence before its session and FrostKit's terms before S1, record whether FrostKit research counts as private use under 11 bit's agreement, and seek Ndemic's written permission (or counsel's opinion) for the Scenario Creator? I'll record each clause, link and date in the games table.
+- [ ] Does the Godot parity test print PASS, and what did your 10-minute playtest show?
+- [ ] Do you confirm the in-or-out list, including keeping Rebel Inc? It was the design anchor on 18 October.
 
-Every claim the earlier version marked "check", plus the platforms and the REA tool, checked against live pages.
+## Audit log
 
-| # | Claim | Finding | Verdict | Source |
-|---|---|---|---|---|
-| F1 | Frostpunk 2 has an official mod kit | FrostKit: a free official modding tool, out of beta as 1.0, on Steam Workshop and mod.io | Confirmed | https://store.epicgames.com/p/frostkit ; https://mod.io/g/frostpunk2/r |
-| F2 | FrostKit exposes law vote thresholds | Policy assets carry "Required Yes Percentage", a voting-behaviour override and Aye/Hesitant standing thresholds; `PXLaw` types exist | Confirmed for votes; promise and tension tables not yet confirmed | https://mod.io/g/frostpunk2/r/policy-creation-guide |
-| F3 | FrostKit runs where the game runs | FrostKit is Windows 10/11 64-bit only, about 100 GB | Corrected: rung 2 needs a Windows PC | https://store.epicgames.com/p/frostkit |
-| F4 | Frostpunk 2 platforms | Steam lists Windows 10/11 and macOS. The Mac minimum is an Apple processor (M1), 8 GB RAM, macOS 14.5 and 30 GB | Confirmed; Jerry's M5 Max meets it | https://store.steampowered.com/app/1601580/Frostpunk_2/ |
-| F5 | Frostpunk 2 licence | The 11 bit studios user agreement bans tampering with source code; no explicit decompiling clause or mod-tool exception found in the fetch | Unresolved: Jerry reads it in full | https://store.steampowered.com/eula/1601580_eula_0 |
-| F6 | Anno 1800 data is in archives with `assets.xml` | `.rda` archives in `maindata`; values in `data/config/export/main/asset/assets.xml`; RDA Explorer (a community tool) opens them; the mod loader is built into the game | Confirmed | https://anno1800.fandom.com/wiki/Modding ; https://github.com/lysannschlegel/RDAExplorer ; https://github.com/jakobharder/anno1800-mod-loader |
-| F7 | Anno 1800 units | Units are per field: `CycleTime` in seconds, `FactoryBase` `Amount` in tonnes. The wiki's kilogram claim is dropped, because that page mixes in Anno 2070 material | Corrected: record units per field from Anno 1800 examples | https://github.com/anno-mods/modding-guide/blob/main/hier0nimus-tutorials/03-making-new-production-chain/readme.md |
-| F8 | Anno 1800 licence | EULA s.1.2 bans reverse engineering, decompiling and disassembling, except through in-product user-content features | Corrected: rung 4 barred | https://store.steampowered.com/eula/916440_eula_0 |
-| F9 | Anno 1800 platform | Windows 10 64-bit only; needs a Ubisoft account | Corrected: Windows PC required | https://store.steampowered.com/app/916440/Anno_1800/ |
-| F10 | Dune: Spice Wars mod support | No official editor. Shiro staff earlier said they weren't working on mod support. The 21 Oct 2026 patch added official mod hooks (modified `cdb` file, `/enableCheats`, `/reloadPak`); Shiro doesn't vet community mods | Corrected: rung 3 by default; rung 2 only with a licence entry | https://steamcommunity.com/app/1605220/announcements/ ; https://steamcommunity.com/app/1605220/discussions/0/3271310323764305480/ |
-| F11 | Dune: Spice Wars platform | Windows 10/11 only | Corrected: Windows PC required | https://store.steampowered.com/app/1605220/Dune_Spice_Wars/ |
-| F12 | Northgard official modding and data format | The official Northgard Editor edits CastleDB data, saving it as `cdb.diff`; scripts in Haxe; map editor and Workshop | Confirmed | https://northgard.net/map-editor/how-to-mod/ ; https://northgard.fandom.com/wiki/Northgard_Editor |
-| F13 | Northgard platform | Windows, macOS, Linux; the editor is PC-only | Confirmed, with a caveat | https://store.steampowered.com/app/466560/Northgard/ |
-| F14 | Rebel Inc is Mono or IL2CPP | Community tooling targets BepInEx for IL2CPP, which points to an IL2CPP build | Likely IL2CPP (community source) | https://www.unknowncheats.me/forum/unity/444926-rebels-inc-escalation-trainer.html |
-| F15 | Rebel Inc platforms and mods | Windows 10 and macOS 12+; Steam Workshop and an official Scenario Creator, on Steam and mobile; the FAQ doesn't list the editable variables | Corrected: rung 2 exists; variables unresolved | https://store.steampowered.com/app/1088790/Rebel_Inc_Escalation/ ; https://www.ndemiccreations.com/en/58-rebel-inc-scenario-creator-help-and-faq |
-| F16 | REA can't read names in IL2CPP | REA decodes IL2CPP metadata statically (versions 24, 27, 29, 31, 39) and .NET assemblies | Corrected | https://github.com/morluto/rea ; https://github.com/morluto/rea/blob/main/docs/il2cpp-metadata.md |
-| F17 | REA is morluto/rea with Ghidra | REA ("Reverse Engineer Anything"): MIT licence, npm `rea-agents`; providers include Ghidra, Hopper, IDA, Rizin | Confirmed | https://github.com/morluto/rea |
-| F18 | `rea doctor` checks readiness | `rea doctor --provider ghidra --json` and `rea providers --json`; verified with Ghidra 12.1.4 and JDK 21 (Ghidra 12.2 needs JDK 25+); Node 22.23.4+ or 24.22.1+; global CLI via `npm install --global rea-agents` | Confirmed; pin `rea-agents@6.8.0` and use the scoped check; `inspect` is a documented command | https://github.com/morluto/rea/blob/main/docs/installation.md ; https://github.com/morluto/rea/blob/main/docs/cli.md ; https://www.npmjs.com/package/rea-agents |
-| F19 | Tool terms beyond the game EULA | The Rebel Inc Scenario Creator terms ban commercial use and reverse engineering | New: a licence entry is needed per tool | https://www.ndemiccreations.com/en/59-legal-information-for-rebel-inc-scenario-creator |
+The independent auditor scored v1 at 64, against my own self-score of 90. It found pass rules that today's slice already fails, two wrong access facts, and a licence check at the wrong rung. v2 applied its 28 fixes and scored 85.5; most of what was left came from fixes that clashed once combined. v3 applied its 12 round-2 fixes and 11 smaller corrections. This version, v4, applies the 8 round-3 defects and 10 smaller corrections, and is now the canonical spec; the repo file is a snapshot of it.
 
-## Audit history
+| Version | Scorer | Score | Note |
+| --- | --- | --- | --- |
+| v1 | Claude (self) | 90 | Too generous |
+| v1 | Independent Claude auditor, max effort | 64 | Fact-checked 19 claims: 14 against live pages, 5 against the repo and a re-run of the 1000-seed simulation |
+| v2 | Independent Claude auditor, round 2 | 85.5 | All 28 fixes landed; 12 defects remained (8.5 points), mostly where fixes combined |
+| v3 | Independent Claude auditor, round 3 | 89.5 | Round 3 scored v3 at 89.5 and listed 8 defects; v4 applies them, projected 94 |
+| v1 snapshot | Codex (gpt-6-astra, max) via Claudex Loop on your Mac | 60 in round 1 | Revised its own repo copy over 5 rounds: 60, 75, 86, 93, 96 (commit 506fecc). Claude re-scored the final copy (534edf8) at 83.5; its strengths are merged into v4 |
 
-- Self-audit (v1): 90/100. It was not independent.
-- Claudex Loop: Codex (gpt-6-astra, max reasoning effort) scored each version against the 8-criterion rubric of [[audit-2026-11-03-rea-plan]]. v1: 60/100. v2: 75/100. v3: 86/100. v4: 93/100. v5: 96/100, final, which passed the >95 bar in round 5 of 5. After the final round, Codex's four residual findings were applied without re-scoring: the stale Mac question was removed; the Kaplan–Meier reporting was spelled out; D0 activation counts and card 2's swing statistic were added; and the card 3 goldens moved to step D.
+To get above 95, the auditor needs two answers from you: which computer (Windows, Apple-silicon Mac or Intel Mac), and which games you own on which store. That takes it to 96. Your licence reading, a Godot PASS, your playtest notes and your confirmation of the in-or-out list lift it the rest of the way to 100.
+
+## Sources
+
+All checked 2026-11-04. Added in v4: [Ndemic legal terms](https://www.ndemiccreations.com/en/59-legal-information-for-rebel-inc-scenario-creator), [Frostpunk 2 user agreement](https://store.steampowered.com/eula/1601580_eula_0), [Dune: Spice Wars patch, 21 Oct 2026](https://steamdb.info/patchnotes/26100697/), [rea-agents 6.8.0 on npm](https://www.npmjs.com/package/rea-agents/v/6.8.0). Earlier:
+
+- [FrostKit on the Epic Games Store](https://store.epicgames.com/p/frostkit?lang=en-US)
+- [Frostpunk 2 policy creation guide](https://mod.io/g/frostpunk2/r/policy-creation-guide)
+- [Frostpunk 2 on Steam](https://store.steampowered.com/app/1601580/Frostpunk_2/)
+- [Rebel Inc on SteamDB](https://steamdb.info/app/1088790/info/)
+- [Rebel Inc Scenario Creator wiki](https://rebelinc.wiki.gg/wiki/Scenario_Creator)
+- [Northgard: how to mod](https://northgard.net/map-editor/how-to-mod/)
+- [Dune: Spice Wars on Steam](https://store.steampowered.com/app/1605220/)
+- [Heaps engine](https://heaps.io/about.html)
+- [Ubisoft EULA](https://www.ubisoft.com/legal/documents/eula/en-US)
+- [Anno 1800 RDA Explorer](https://github.com/anno-mods/RDAExplorer) (where the data sits; not used)
+- [REA (morluto/rea)](https://github.com/morluto/rea)
+- [REA on Windows](https://github.com/morluto/rea/blob/main/docs/windows-ghidra-p0.md)
+- [Civ IV SDK](https://github.com/dguenms/beyond-the-sword-sdk)
+- [Ndemic: Rebel Inc PC and Mac FAQ](https://www.ndemiccreations.com/en/55-rebel-inc-escalation-pc-faqs)
+- [Northgard on Steam](https://store.steampowered.com/app/466560/Northgard/)
+- [Anno 1800 on Steam](https://store.steampowered.com/app/916440/Anno_1800/)
+- [Anno 1800 mod tutorial](https://mod.io/g/anno-1800/r/tutorial-1-my-first-mod)
+- [REA installation](https://github.com/morluto/rea/blob/main/docs/installation.md)
+- [Heaps and HashLink](https://heaps.io/documentation/fullstack.html)
+- [FrostKit 1.0 patch notes](https://steamdb.info/patchnotes/18380952/)
+- [Civ V SDK tasks](https://modiki.civfanatics.com/index.php/Basic_DLL_tasks)
+- [Civ VI source discussion](https://steamcommunity.com/app/289070/discussions/0/6171700864785205192/)
