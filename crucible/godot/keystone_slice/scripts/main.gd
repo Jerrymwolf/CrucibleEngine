@@ -888,7 +888,7 @@ func forecast_view(n: int) -> Control:
 		var p := _panel(STORM_SOFT if dist == 0 else SUNK, STORM if dist == 0 else LINE, 1, 8)
 		p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var v := _vbox(2)
-		var when := ["THIS TURN" if screen == "plan" else "NEXT TURN", "NEXT TURN" if screen == "plan" else "AFTER THAT", "LATER"][dist]
+		var when: String = ["THIS TURN" if screen == "plan" else "NEXT TURN", "NEXT TURN" if screen == "plan" else "AFTER THAT", "LATER"][dist]
 		if n + dist > C["turns"].size():
 			v.add_child(_lbl(when, 13, MUTED))
 			v.add_child(_lbl("Recovery. The storm has passed.", 14, MUTED))
