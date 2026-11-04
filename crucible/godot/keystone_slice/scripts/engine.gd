@@ -944,12 +944,12 @@ static func resolve_turn(C: Dictionary, state0: Dictionary, input: Dictionary) -
 		"yields": {"community": cy, "meridian": my}, "choice": choice}
 	s["history"].append({"turn": s["turn"], "dilemma": D, "choice": choice, "lost": turn_lost, "rescued": turn_rescued})
 	s["turn"] += 1
-	var sandbagged := []
+	var held_sandbags := []
 	for id in fresh:
 		if not s["sites"][id]["flooded"]:
-			sandbagged.append(id)
-	sandbagged.sort()
-	s["sandbags"] = sandbagged
+			held_sandbags.append(id)
+	held_sandbags.sort()
+	s["sandbags"] = held_sandbags
 	var st := []
 	for x in fresh_sup:
 		if not s["sites"][x["site"]]["flooded"]:
