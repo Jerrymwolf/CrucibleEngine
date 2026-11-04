@@ -8,7 +8,7 @@ related: ["[[audit-2026-11-03-rea-plan]]", "[[rea-2026-11-04-openttd-0ad-freeciv
 ---
 # REA spec and plan, all games, 2026-11-04 (v5-mac)
 
-Jerry, 2026-11-04 18:48: "I want a full spec and plan for ALL REAs." The canonical spec is the live Claude Doc: https://claude.ai/artifact/JRVtFfJ7nMG29Lxdk4dWPH. This file started as a snapshot of doc v4 (rev 103) and is now **ahead of the Claude Doc as v5-mac**, pending a sync: it applies Astra's 2026-11-04 score-only audit of v4 (76/100) and records today's Godot parity PASS. The Codex-revised v5 of this file (Claudex Loop, scored 96 at 506fecc; four residual fixes at 534edf8, re-scored by Claude at 83.5) stays in git history; its strengths were merged into v4.
+Jerry, 2026-11-04 18:48: "I want a full spec and plan for ALL REAs." The canonical spec is the live Claude Doc: https://claude.ai/artifact/JRVtFfJ7nMG29Lxdk4dWPH. This file started as a snapshot of doc v4 (rev 103) and was revised on Jerry's Mac to v5-mac (Astra 95/100 at fd94988) and synced back into the Claude Doc (rev 150) the same evening. v5-mac it applies Astra's 2026-11-04 score-only audit of v4 (76/100) and records today's Godot parity PASS. The Codex-revised v5 of this file (Claudex Loop, scored 96 at 506fecc; four residual fixes at 534edf8, re-scored by Claude at 83.5) stays in git history; its strengths were merged into v4.
 
 ## Summary
 
@@ -182,7 +182,7 @@ Only you can answer these:
 
 ## Audit log
 
-The independent auditor scored v1 at 64, against my own self-score of 90. It found pass rules that today's slice already fails, two wrong access facts, and a licence check at the wrong rung. v2 applied its 28 fixes and scored 85.5; most of what was left came from fixes that clashed once combined. v3 applied its 12 round-2 fixes and 11 smaller corrections. The v4 snapshot incorporated those corrections. The current working-tree revision is v5-mac and is ahead of the Claude Doc pending synchronization.
+The independent auditor scored v1 at 64, against my own self-score of 90. It found pass rules that today's slice already fails, two wrong access facts, and a licence check at the wrong rung. v2 applied its 28 fixes and scored 85.5; most of what was left came from fixes that clashed once combined. v3 applied its 12 round-2 fixes and 11 smaller corrections. The v4 snapshot incorporated those corrections. v5-mac (Astra 76 → 92 → 95, commit fd94988) is synced to the Claude Doc at rev 150; the remaining 5 points are Jerry-only.
 
 | Version | Scorer | Score | Note |
 | --- | --- | --- | --- |
