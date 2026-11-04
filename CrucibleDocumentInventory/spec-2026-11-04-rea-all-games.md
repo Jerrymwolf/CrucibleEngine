@@ -8,7 +8,7 @@ related: ["[[audit-2026-11-03-rea-plan]]", "[[rea-2026-11-04-openttd-0ad-freeciv
 ---
 # REA spec and plan, all games, 2026-11-04 (v4)
 
-Jerry, 2026-11-04 18:48: "I want a full spec and plan for ALL REAs." The canonical spec is the live Claude Doc: https://claude.ai/artifact/JRVtFfJ7nMG29Lxdk4dWPH. This file is a snapshot of doc v4 (rev 100). The Codex-revised v5 of this file (Claudex Loop, scored 96 at 506fecc; four residual fixes at 534edf8, re-scored by Claude at 83.5) stays in git history; its strengths were merged into v4.
+Jerry, 2026-11-04 18:48: "I want a full spec and plan for ALL REAs." The canonical spec is the live Claude Doc: https://claude.ai/artifact/JRVtFfJ7nMG29Lxdk4dWPH. This file is a snapshot of doc v4 (rev 103). The Codex-revised v5 of this file (Claudex Loop, scored 96 at 506fecc; four residual fixes at 534edf8, re-scored by Claude at 83.5) stays in git history; its strengths were merged into v4.
 
 ## Summary
 
@@ -129,7 +129,7 @@ Plan diagram (in the doc): A Read in the cloud (done) → B Your gate → S1 Fro
 
 **B, your gate (about 45 minutes):** I run the Godot parity test on your computer, and it must print PASS. Then you play the slice for 10 minutes and answer the open questions below, except the licence question, which is answered before each session. If parity fails, we fix that first. If the playtest is a no-go, the sessions wait and we re-rank Q1 to Q8 from your notes. Each session ends with cards and a repo note named `rea-YYYY-MM-DD-<game>.md`. If a session runs short, the next game waits. While you do B, I add the second community line, measure the baseline grid and re-time card 3, then try card 1+3 in the JavaScript engine. If you approve it, its Godot port goes through the parity test at the start of S1.
 
-**If your computer is a Mac:** FrostKit and the Northgard Editor are Windows only, so S1 and S3 become rung 0 plus observed play under the rung 3 protocol, one question per session of about 90 minutes. On an Intel Mac, Frostpunk 2 doesn't run, so S1 stays at rung 0. S2 is unchanged: the Scenario Creator runs on Mac, once it's cleared. S4 uses public guides only. That makes up to about 7.5 hours on an Apple-silicon Mac and about 3 on an Intel Mac.
+**Your computer is an Apple-silicon Mac (chosen 4 November), so this is the plan:** FrostKit and the Northgard Editor are Windows only, so S1 and S3 become rung 0 plus observed play under the rung 3 protocol, one question per session of about 90 minutes. On an Intel Mac, Frostpunk 2 doesn't run, so S1 stays at rung 0. S2 is unchanged: the Scenario Creator runs on Mac, once it's cleared. S4 uses public guides only. You also chose (4 November) to study Mac and iOS versions, for observed play only (rung 3): iOS apps are encrypted and their store terms bar decompiling. Checked 4 November: Northgard is on the App Store (Playdigious port), so S3's observed play can use an iPad; Rebel Inc. began on iOS (December 2018), and its mobile version can be watched alongside Escalation on the Mac; Frostpunk 2 runs natively on the Mac. Dune: Spice Wars and Anno 1800 have no Mac or iOS version (Dune runs only through CrossOver or Parallels, which we don't rely on), so they stay at rung 0. That makes up to about 7.5 hours on an Apple-silicon Mac and about 3 on an Intel Mac.
 
 What each session needs from you:
 
@@ -173,7 +173,7 @@ Build gate: "built" means the card has passed in the JavaScript engine and you'v
 
 Only you can answer these:
 
-- [ ] Is that computer Windows, an Apple-silicon Mac (M1 or newer) or an Intel Mac? Is it the M5 Max MacBook Pro that runs the Codex loop, and do you also have a Windows PC? On an Apple-silicon Mac you can run Frostpunk 2, Northgard and Rebel Inc (with its Scenario Creator), but not FrostKit, the Northgard Editor, Anno 1800 or Dune: Spice Wars. On an Intel Mac, Frostpunk 2 doesn't run either.
+- [ ] Answered 4 November: the M5 Max MacBook Pro only, no Windows PC, so the Mac branch of the plan applies. On an Apple-silicon Mac you can run Frostpunk 2, Northgard and Rebel Inc (with its Scenario Creator), but not FrostKit, the Northgard Editor, Anno 1800 or Dune: Spice Wars. On an Intel Mac, Frostpunk 2 doesn't run either.
 - [ ] Which of Frostpunk 2, Rebel Inc, Northgard, Dune: Spice Wars, Anno 1800, Democracy 4 and any Paradox game (Crusader Kings III, Stellaris, Victoria 3) do you own, and on which store?
 - [ ] Will you read each game's licence before its session and FrostKit's terms before S1, record whether FrostKit research counts as private use under 11 bit's agreement, and seek Ndemic's written permission (or counsel's opinion) for the Scenario Creator? I'll record each clause, link and date in the games table.
 - [ ] Does the Godot parity test print PASS, and what did your 10-minute playtest show?
@@ -219,3 +219,6 @@ All checked 2026-11-04. Added in v4: [Ndemic legal terms](https://www.ndemiccrea
 - [FrostKit 1.0 patch notes](https://steamdb.info/patchnotes/18380952/)
 - [Civ V SDK tasks](https://modiki.civfanatics.com/index.php/Basic_DLL_tasks)
 - [Civ VI source discussion](https://steamcommunity.com/app/289070/discussions/0/6171700864785205192/)
+- [Northgard now on iOS (Playdigious)](https://playdigious.com/news/northgard-is-now-available-on-ios)
+- [Rebel Inc. (Wikipedia: iOS, December 2018)](https://en.wikipedia.org/wiki/Rebel_Inc._(video_game))
+- [Dune: Spice Wars on Apple-silicon Macs](https://www.applegamingwiki.com/wiki/Dune:_Spice_Wars)
