@@ -124,7 +124,7 @@ Only the scoped check and the smoke test count. A plain `rea doctor` can fail on
 - **Stochastic hazards** (event odds, storm timing): one trial is one fresh start of the scripted scenario, observed for a fixed exposure window written in the script (for example, the first in-game year, or 20 minutes).
   - **Independence:** each trial needs its own logged randomisation: a new map seed where the game offers one, otherwise a new map or game, plus its save name. A trial that reuses a seed or save is not counted.
   - **Odds:** record whether the event occurs in each window, and report the rate with a Wilson 95% interval.
-  - **Timing:** record when it occurs in game seconds or days. Windows where it never occurs are kept as censored observations, not dropped. Report the Kaplan–Meier median and range, converted to Keystone turns (https://www.itl.nist.gov/div898/handbook/apr/section1/apr131.htm). If more than half the windows are censored, report the timing as "later than the window" only.
+  - **Timing:** record when it occurs in game seconds or days. Windows where it never occurs are kept as censored observations, not dropped. Report the Kaplan–Meier median when it can be estimated (otherwise "median later than the window"), the range of the observed events labelled separately, and the number of censored windows with their bound ("no event by the end of the window"), all converted to Keystone turns (https://www.itl.nist.gov/div898/handbook/apr/section1/apr131.htm). If more than half the windows are censored, report the timing as "later than the window" only.
   - **Stop rule:** stop at the time box. The result is insufficient evidence if the Wilson half-width is over 15 points, or fewer than 5 events were seen for a timing claim.
 - **Insufficient evidence** means the card is held with the shape only. No formula is invented.
 
@@ -176,7 +176,7 @@ Only the scoped check and the smoke test count. A plain `rea doctor` can fail on
    - **Pressure trade-off survives:** today selfish Meridian beats careful on its own target (64.0% against 61.7%). It costs the community's target (45.4% against 61.2%) and lives (72 against 67 mean people lost). A card must not erase that cost, or the pressure has no moral price.
    - **No dominant line** (enforced once D0 lands): in D0's full matrix, no policy is a team's best response, on its own target rate, to every opposing policy.
 
-   **Step D0**, before any card is built: Claude extends sim.mjs to the full matrix. It logs four things per cell: each team's target rate, the **joint** rate at which both teams meet their targets, mean people lost, and turn-by-turn meter changes. Card-specific predictions (for example, card 2's "both careful teams meet their targets" and "fewer last-turn swings") are tested on those columns, not on the separate team rates:
+   **Step D0**, before any card is built: Claude extends sim.mjs to the full matrix. It logs four things per cell: each team's target rate, the **joint** rate at which both teams meet their targets, mean people lost, and turn-by-turn meter changes. Card-specific predictions are tested on those columns, not on the separate team rates. Each card also adds a policy that actually uses its new mechanic, and logs an activation count: a mechanic that never fires in the matrix fails. Card 2's "fewer last-turn swings" is measured as the mean absolute change in trust and confidence on the final storm turn. It passes if that drops by at least 25% against the current engine, while the joint rate for both careful teams stays within ±5 points:
    - Community: `nothing`, `careful`, `kind` and `selfish`.
    - Meridian: `nothing`, `careful`, `generous` and `selfish`.
    - Levers: none, plus each of the four.
@@ -194,7 +194,7 @@ Only the scoped check and the smoke test count. A plain `rea doctor` can fail on
 - Step A2 retrofits the new Provenance, Recovered vs adapted and Confidence fields onto cards 1 to 5 **and** onto the built Civ IV and Diplomacy mechanics, pinning their upstream commits.
 - Card 3's timing doesn't fit the slice. The counter acts at 3, but the slice has only three storm turns, so "next turn's shift at the floor" lands after play ends. Before prototyping, A2 re-times it so the picket lands inside play: warn at 1, act at 2, and the penalty hits the next shift.
 - **Late trigger:** if unrest starts at T2, the counter reaches 2 at T3, and no storm turn is left. The picket then hits the recovery phase: the plant's first recovery shift is at the floor, which counts in the recovery score. It never expires silently.
-- **Goldens:** A2 adds one golden scenario for each case: triggered by T2, and triggered at T3.
+- **Goldens:** A2 writes the two scenarios as specs only (triggered by T2, and triggered at T3). They are implemented and their goldens regenerated in step D, after gate B and Jerry's approval of card 3, so the slice stays unchanged for the playtest.
 
 ## Plan
 
@@ -253,7 +253,6 @@ Open for Jerry, all in step B:
 - Which closed games he owns, on which store.
 - Whether he has a Windows PC.
 - Licence entries, covering the game and each tool, for Frostpunk 2, Anno 1800 (RDA Explorer), the two Shiro games, and Rebel Inc. For the Scenario Creator, documented clearance (from Ndemic or counsel) is needed before it is opened.
-- Whether his Mac meets each game's minimum macOS.
 - The parity test and playtest.
 
 ## Fact-check, 2026-11-04
@@ -285,4 +284,4 @@ Every claim the earlier version marked "check", plus the platforms and the REA t
 ## Audit history
 
 - Self-audit (v1): 90/100. It was not independent.
-- Claudex Loop: Codex (gpt-6-astra, max reasoning effort) scored each version against the 8-criterion rubric of [[audit-2026-11-03-rea-plan]]. v1: 60/100. v2: 75/100. v3: 86/100. v4: 93/100. v5 (this version): see the commit log.
+- Claudex Loop: Codex (gpt-6-astra, max reasoning effort) scored each version against the 8-criterion rubric of [[audit-2026-11-03-rea-plan]]. v1: 60/100. v2: 75/100. v3: 86/100. v4: 93/100. v5: 96/100, final, which passed the >95 bar in round 5 of 5. After the final round, Codex's four residual findings were applied without re-scoring: the stale Mac question was removed; the Kaplan–Meier reporting was spelled out; D0 activation counts and card 2's swing statistic were added; and the card 3 goldens moved to step D.
