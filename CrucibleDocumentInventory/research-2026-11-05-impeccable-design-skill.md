@@ -49,4 +49,4 @@ Use it read-only first: apply its critique rubric and Operate-mode rules to the 
 
 ## Decision (2026-11-05 10:34, Jerry card)
 
-**Use its rules, no install.** After Jerry's 10-minute playtest of the Keystone slice, score the slice UI with Impeccable's critique rubric (Operate mode) and write the Crucible UI rulebook (PRODUCT.md, DESIGN.md) as a Godot Theme. Nothing is installed on Jerry's Mac.
+**Use its rules, no install.** After Jerry's 10-minute playtest of the Keystone slice, score the slice UI with Impeccable's critique rubric (Experience mode for the map; see correction in [[ui-rulebook-2026-11-05]]) and write the Crucible UI rulebook (PRODUCT.md, DESIGN.md) as a Godot Theme. Nothing is installed on Jerry's Mac.
