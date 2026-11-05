@@ -2,7 +2,7 @@
 title: "Research: Impeccable (impeccable.style) for the Crucible game UI"
 date: 2026-11-05
 type: research-note
-status: open
+status: accepted
 project: Crucible Engine (The Values Crucible)
 tags: [crucible-engine, ui, ux, design, tooling, godot, impeccable]
 related:
@@ -47,6 +47,6 @@ Jerry shared https://impeccable.style on 2026-11-05 with no comment. This note r
 
 Use it read-only first: apply its critique rubric and Operate-mode rules to the Keystone slice UI from the cloud, and draft a Crucible `PRODUCT.md` and `DESIGN.md` (mapped to a Godot Theme). Install on the Mac only if that pass proves useful. Best timing is after Jerry's 10-minute playtest, so the critique targets the UI he has actually used.
 
-## Open
+## Decision (2026-11-05 10:34, Jerry card)
 
-- Jerry's pick on how to use it (decision card in thread "Evaluate Impeccable for game UI").
+**Use its rules, no install.** After Jerry's 10-minute playtest of the Keystone slice, score the slice UI with Impeccable's critique rubric (Operate mode) and write the Crucible UI rulebook (PRODUCT.md, DESIGN.md) as a Godot Theme. Nothing is installed on Jerry's Mac.
