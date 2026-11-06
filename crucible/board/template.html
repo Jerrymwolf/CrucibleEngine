@@ -1,0 +1,578 @@
+<meta charset="utf-8">
+<title>Crucible Live Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+/* Layout: the island board is the room's shared object, square and as tall as the screen; the
+   right rail changes with the session step (values, a decision beat, playback, debrief).
+   Tokens are the replay viewer's, so the two pages read as one instrument. */
+:root{
+  --bg:#eef0f3;--bg-2:#e4e7ec;--panel:#f8f9fb;--panel-2:#ffffff;--line:#c9ced8;--line-2:#dde1e8;
+  --fg:#15191f;--fg-2:#4a5260;--fg-3:#7a8392;
+  --accent:#b8540f;--accent-fg:#ffffff;--accent-soft:#f3dfcf;
+  --st-ok:#2f7a4a;--st-reduced:#8a8a2c;--st-degraded:#c58a12;--st-critical:#c9541f;--st-failed:#9b1c1c;--st-na:#b9bfc9;
+  --pos:#2f7a4a;--neg:#b23a2b;--pos-soft:#d9eadf;--neg-soft:#f4d9d5;
+  --phase-watch:#3a6ea5;--phase-crisis:#b23a2b;--phase-recovery:#2f7a4a;
+  --sea:#d6dee9;--land:#f6f3ea;--land-line:#9aa3ae;--road:#5a6472;--storm:#8a2f22;
+  --focus:#1f5fbf;--shadow:0 1px 0 rgba(0,0,0,.04);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1317;--bg-2:#141a20;--panel:#171d24;--panel-2:#1c232b;--line:#2b343f;--line-2:#222a33;
+    --fg:#e6e9ed;--fg-2:#aab3bf;--fg-3:#737e8b;
+    --accent:#e8893d;--accent-fg:#101418;--accent-soft:#3a2616;
+    --st-ok:#4fb06f;--st-reduced:#b4b44a;--st-degraded:#e0a93a;--st-critical:#ec7a44;--st-failed:#e0524f;--st-na:#3a434e;
+    --pos:#4fb06f;--neg:#ea6b5b;--pos-soft:#1c3324;--neg-soft:#3b1f1c;
+    --phase-watch:#5d93d1;--phase-crisis:#ea6b5b;--phase-recovery:#4fb06f;
+    --sea:#111820;--land:#1f262e;--land-line:#4e5a68;--road:#9aa5b3;--storm:#ee7d6a;
+    --focus:#6ea4f2;--shadow:none;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1317;--bg-2:#141a20;--panel:#171d24;--panel-2:#1c232b;--line:#2b343f;--line-2:#222a33;
+  --fg:#e6e9ed;--fg-2:#aab3bf;--fg-3:#737e8b;
+  --accent:#e8893d;--accent-fg:#101418;--accent-soft:#3a2616;
+  --st-ok:#4fb06f;--st-reduced:#b4b44a;--st-degraded:#e0a93a;--st-critical:#ec7a44;--st-failed:#e0524f;--st-na:#3a434e;
+  --pos:#4fb06f;--neg:#ea6b5b;--pos-soft:#1c3324;--neg-soft:#3b1f1c;
+  --phase-watch:#5d93d1;--phase-crisis:#ea6b5b;--phase-recovery:#4fb06f;
+  --sea:#111820;--land:#1f262e;--land-line:#4e5a68;--road:#9aa5b3;--storm:#ee7d6a;
+  --focus:#6ea4f2;--shadow:none;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--fg);font-family:"Barlow","Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.4;-webkit-text-size-adjust:100%}
+.mono,.num{font-family:"JetBrains Mono","SFMono-Regular",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+.cond{font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.45}
+h1,h2,h3,p{margin:0}
+.lbl{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--fg-3);font-weight:600}
+#app{height:100%;display:flex;flex-direction:column;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px 12px;gap:10px}
+
+.band{border:1px solid var(--line);border-top:3px solid var(--accent);background:var(--panel);display:flex;flex-wrap:wrap;gap:8px 22px;padding:8px 14px;align-items:center}
+.band h1{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:22px;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.band .round{color:var(--fg-2);font-size:14px}
+.band .spacer{flex:1}
+.clock{font-size:34px;font-weight:700;line-height:1;letter-spacing:.02em}
+.chip{display:inline-flex;align-items:center;gap:5px;padding:1px 7px;border:1px solid var(--line);border-radius:2px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;line-height:1.6;white-space:nowrap}
+.chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.phase-watch{color:var(--phase-watch)}.phase-crisis{color:var(--phase-crisis)}.phase-recovery{color:var(--phase-recovery)}
+.meter{display:flex;gap:2px;align-items:flex-end;height:18px}
+.meter i{width:5px;background:var(--line);display:block}
+.meter i.on{background:var(--storm)}
+.tools{display:flex;gap:6px;flex-wrap:wrap}
+.btn{background:var(--panel-2);border:1px solid var(--line);border-radius:2px;padding:6px 12px;font-weight:600;font-size:13px;letter-spacing:.04em}
+.btn:hover:not(:disabled){border-color:var(--fg-3)}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);font-size:15px;padding:9px 18px;text-transform:uppercase;letter-spacing:.08em;font-family:"Barlow Condensed","Arial Narrow",sans-serif}
+.btn.small{padding:3px 9px;font-size:12px}
+
+.stage{flex:1;display:grid;min-height:0;grid-template-columns:minmax(0,auto) minmax(340px,1fr);gap:10px;min-height:0}
+.boardwrap{border:1px solid var(--line);background:var(--sea);display:flex;align-items:center;justify-content:center;min-width:0}
+.board{position:relative;width:min(calc(100vh - 110px),62vw);aspect-ratio:1;max-width:100%}
+.board img{position:absolute;inset:0;width:100%;height:100%;display:block;filter:saturate(.75) brightness(.92)}
+.board svg{position:absolute;inset:0;width:100%;height:100%;overflow:hidden}
+.side{border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;min-width:0;min-height:0;overflow:auto}
+.side>header{padding:12px 16px 10px;border-bottom:1px solid var(--line-2);display:flex;flex-direction:column;gap:4px}
+.side>header h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:24px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;text-wrap:balance}
+.side .brief{color:var(--fg-2);max-width:62ch}
+.side .body{padding:12px 16px;display:flex;flex-direction:column;gap:12px;flex:1;min-height:0}
+.side footer{padding:10px 16px;border-top:1px solid var(--line-2);display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:sticky;bottom:0;background:var(--panel)}
+.side footer .spacer{flex:1}
+.prose{max-width:62ch;display:flex;flex-direction:column;gap:10px;color:var(--fg-2)}
+.prose strong{color:var(--fg)}
+
+/* board overlay */
+.pmark .dot{stroke:var(--panel-2);stroke-width:.5}
+.pmark text{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-weight:700;letter-spacing:.04em;text-transform:uppercase;fill:#fff;paint-order:stroke;stroke:rgba(10,14,18,.85);stroke-width:.7px}
+.pmark .site{font-family:"Barlow",sans-serif;font-weight:500;text-transform:none;letter-spacing:0;font-size:2.2px}
+.pmark .bar-bg{fill:rgba(10,14,18,.7)}
+.pmark .iso{fill:none;stroke:var(--st-failed);stroke-width:.6;stroke-dasharray:1.2 .8}
+.pmark .isot{fill:#fff;font-family:"JetBrains Mono",monospace;font-size:1.9px;letter-spacing:.08em;stroke:var(--st-failed);stroke-width:.6px}
+.pmark .tok rect{fill:var(--accent);stroke:#fff;stroke-width:.25}
+.pmark .tok text{fill:var(--accent-fg);stroke:none;font-family:"JetBrains Mono",monospace;font-size:2.4px;font-weight:700}
+.pmark.waiting .dot{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{stroke:var(--accent);stroke-width:1.2}}
+.storm .ring{fill:var(--storm);fill-opacity:.12;stroke:var(--storm);stroke-opacity:.6;stroke-width:.3}
+.storm .core{fill:var(--storm);fill-opacity:.35}
+.storm path.arm{fill:none;stroke:#fff;stroke-opacity:.85;stroke-width:.55;stroke-linecap:round}
+.storm text{font-family:"JetBrains Mono",monospace;font-size:2.4px;font-weight:700;fill:#fff;paint-order:stroke;stroke:rgba(10,14,18,.85);stroke-width:.6px}
+.trail{fill:none;stroke:var(--storm);stroke-width:.35;stroke-dasharray:.8 .8;stroke-opacity:.8}
+@media (prefers-reduced-motion:reduce){.pmark.waiting .dot{animation:none}.storm .spin{animation:none!important}}
+
+/* values lock */
+.vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.vtable{border:1px solid var(--line);background:var(--panel-2);padding:10px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.vtable h3,.card h3{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:18px;letter-spacing:.05em;text-transform:uppercase;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.vtable h3 small,.card h3 small{font-family:"Barlow",sans-serif;text-transform:none;letter-spacing:0;font-size:13px;color:var(--fg-3);font-weight:500}
+.deck{display:flex;flex-wrap:wrap;gap:4px}
+.vchip{border:1px solid var(--line);background:var(--panel);border-radius:2px;padding:2px 7px;font-size:12.5px;display:inline-flex;gap:5px;align-items:center}
+.vchip b{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--accent-fg);background:var(--accent);padding:0 4px;border-radius:1px}
+.vchip.on{border-color:var(--accent);background:var(--accent-soft)}
+
+/* decision cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.card{border:1px solid var(--line);background:var(--panel-2);padding:10px 12px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.card.locked{border-color:var(--accent)}
+.card .dtitle{font-weight:600;font-size:16px}
+.card .setup{color:var(--fg-2);font-size:13.5px}
+.card .persona{font-size:13px;color:var(--fg-2);border-left:2px solid var(--accent);padding-left:8px;font-style:italic}
+.opts{display:flex;flex-direction:column;gap:4px}
+.opt{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:start;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:2px;padding:5px 8px}
+.opt .k{font-family:"JetBrains Mono",monospace;font-weight:700;font-size:13px;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:2px}
+.opt.on{border-color:var(--accent);background:var(--accent-soft)}
+.opt.on .k{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.opt .d{color:var(--fg-3);font-size:12.5px}
+.status{font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--fg-3)}
+.status.ok{color:var(--accent)}
+
+/* DM drawer */
+.dm{border:1px dashed var(--line);padding:8px 10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--bg-2)}
+.dm .lbl{margin-right:4px}
+body.proj .dm-only{display:none!important}
+
+/* feed */
+.feed{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.feed div{display:grid;grid-template-columns:5.2em minmax(0,1fr);gap:8px;padding:3px 0;border-bottom:1px solid var(--line-2)}
+.feed .t{color:var(--fg-3);font-size:12px}
+.feed .human{font-weight:600}
+.feed .bad{color:var(--neg)}
+.feed .good{color:var(--pos)}
+
+/* debrief */
+.gap{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.grow{display:grid;grid-template-columns:1.4em 7.5em minmax(0,1fr) 4.6em;gap:6px;align-items:center;font-size:13.5px}
+.gbar{position:relative;height:12px;background:var(--bg-2);border:1px solid var(--line-2)}
+.gbar::after{content:"";position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--fg-3)}
+.gbar i{position:absolute;top:0;bottom:0;display:block}
+.verdict{font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:700;text-align:right}
+.v-lived{color:var(--pos)}.v-gap{color:var(--neg)}.v-mixed{color:var(--st-degraded)}.v-untested{color:var(--fg-3)}
+.dlist{font-size:13px;color:var(--fg-2);display:flex;flex-direction:column;gap:2px}
+
+/* table sheets */
+.sheets{position:fixed;inset:0;background:var(--bg);overflow:auto;z-index:20;padding-block:16px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.sheet{max-width:820px;margin:0 auto 24px;border:1px solid var(--line);background:var(--panel-2);padding:18px 22px;display:flex;flex-direction:column;gap:12px;break-after:page}
+.sheet h2{font-family:"Barlow Condensed","Arial Narrow",sans-serif;font-size:26px;text-transform:uppercase;letter-spacing:.05em}
+.sheet .q{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:6px}
+.sheet .q h3{font-size:17px}
+@media print{.sheets{position:static}.noprint{display:none!important}.sheet{border:0}}
+
+@media (max-width:900px){
+  .stage{grid-template-columns:minmax(0,1fr)}
+  .board{width:100%}
+  #app{height:auto;min-height:100%}
+  .clock{font-size:26px}
+}
+</style>
+
+<div id="app">
+  <header class="band">
+    <h1>Values Crucible</h1>
+    <span class="round" id="round-label"></span>
+    <span class="spacer"></span>
+    <span class="chip" id="phase-chip"></span>
+    <div title="Storm intensity"><div class="lbl">Intensity <span class="num" id="int-val"></span></div><div class="meter" id="meter"></div></div>
+    <div><div class="lbl" id="win-label"></div><div class="clock num" id="clock">T-72:00</div></div>
+    <div class="tools dm-only">
+      <button class="btn small" id="btn-proj" type="button">Projector window</button>
+      <button class="btn small" id="btn-layout" type="button">Room layout</button>
+      <button class="btn small" id="btn-sheets" type="button">Table sheets</button>
+      <button class="btn small" id="btn-theme" type="button">Theme</button>
+    </div>
+  </header>
+  <main class="stage">
+    <section class="boardwrap" aria-label="Concordia game board">
+      <div class="board">
+        <img alt="Satellite view of the island of Concordia" src="__ISLAND_JPG__">
+        <svg id="ov" viewBox="0 0 100 100" role="img" aria-label="Parish status and the position of Hurricane Midas"></svg>
+      </div>
+    </section>
+    <aside class="side" id="side" aria-live="polite"></aside>
+  </main>
+</div>
+<div class="sheets" id="sheets" hidden></div>
+
+<script type="application/json" id="board-data">__BOARD_DATA__</script>
+<script type="application/octet-stream" id="wasm-b64">__WASM_B64__</script>
+<script>
+"use strict";
+const DATA = JSON.parse(document.getElementById('board-data').textContent);
+const P = DATA.session;
+const PARISHES = DATA.parishes; // [{id,name,position:{x,y}}]
+const PIDS = PARISHES.map(p => p.id);
+const KEY = 'crucible-board-' + P.id;
+const PROJECTOR = location.hash === '#projector';
+const LETTERS = 'ABCDEFG';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pname = id => (PARISHES.find(p => p.id === id) || {name: id}).name;
+const vname = id => (DATA.values[id] || {name: id}).name;
+const clock = t => { const s = t < 0 ? '-' : '+'; const a = Math.abs(t); return 'T' + s + String(Math.floor(a / 60)).padStart(2, '0') + ':' + String(a % 60).padStart(2, '0'); };
+
+/* ---------- engine (WebAssembly, embedded) ---------- */
+let wasm = null;
+async function initEngine() {
+  const b64 = $('wasm-b64').textContent.trim();
+  const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  wasm = (await WebAssembly.instantiate(bytes, {})).instance.exports;
+}
+function engineRun(req) {
+  const enc = new TextEncoder().encode(JSON.stringify(req));
+  const p = wasm.crucible_alloc(enc.length);
+  new Uint8Array(wasm.memory.buffer, p, enc.length).set(enc);
+  const r = wasm.crucible_run(p, enc.length);
+  wasm.crucible_free(p, enc.length);
+  const rp = Number(r >> 32n), rl = Number(r & 0xffffffffn);
+  const text = new TextDecoder().decode(new Uint8Array(wasm.memory.buffer, rp, rl));
+  wasm.crucible_free(rp, rl);
+  const out = JSON.parse(text);
+  if (out.error) throw new Error(out.error);
+  return out;
+}
+
+/* ---------- session state (the inputs; the log is always recomputed from them) ---------- */
+function fresh() {
+  return { screen: 'title', seed: P.seed, stated: Object.fromEntries(PIDS.map(p => [p, []])), decisions: {}, intensity: [], moves: [], beat: 0, picks: {}, revealed: false };
+}
+let S = fresh();
+let LOG = null, logVer = 0, tickIdx = 0, playFrom = 0, anim = null;
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function loadSaved() { try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); return s && s.stated ? s : null; } catch (e) { return null; } }
+const askSet = () => [...new Set(Object.values(P.ask).flat())];
+const askFor = (p, b) => (P.ask[p] || [])[b];
+function rerun() {
+  const teams = PIDS.map(p => ({ parish_id: p, controller: 'human', stated_values: S.stated[p] }));
+  LOG = engineRun({ seed: S.seed, teams, decisions: S.decisions, intensity: S.intensity.map(x => [x.t, x.intensity]), live: true, ask: askSet() });
+  logVer++;
+}
+const haltT = () => LOG && LOG.pending && LOG.pending.length ? LOG.pending[0].t : null;
+const playingTitle = () => S.beat > 0 ? roundOf(S.beat - 1).title : 'Briefing';
+const roundOf = b => P.rounds.find(r => r.id === (P.beats[b] || {}).round) || P.rounds[P.rounds.length - 1];
+
+/* ---------- board ---------- */
+// Content positions are 0..100 across the island; the island disc fills ~8%..92% of the art.
+const MX = v => 8 + 0.84 * v;
+const LABEL_LEFT = new Set(['heartland']);
+function status(level) { return level >= 80 ? 'ok' : level >= 60 ? 'reduced' : level >= 40 ? 'degraded' : level >= 20 ? 'critical' : 'failed'; }
+function humanDecisions(upto) {
+  const out = {};
+  if (!LOG) return out;
+  for (let i = 0; i <= upto && i < LOG.ticks.length; i++) for (const e of LOG.ticks[i].events) {
+    if (e.kind === 'decision' && e.controller === 'human') (out[e.parish_id] = out[e.parish_id] || []).push(e);
+  }
+  return out;
+}
+function letterOf(dilemmaId, optionId) {
+  const d = DATA.dilemmas[dilemmaId]; if (!d) return '?';
+  const i = d.options.findIndex(o => o.id === optionId); return i < 0 ? '?' : LETTERS[i];
+}
+function drawBoard() {
+  const svg = $('ov');
+  const tick = LOG ? LOG.ticks[Math.min(tickIdx, LOG.ticks.length - 1)] : null;
+  let h = '';
+  if (tick) {
+    const pts = [];
+    for (let i = 0; i <= tickIdx; i += 4) { const w = LOG.ticks[i].weather.hurricane_position; pts.push(MX(w.x).toFixed(2) + ',' + MX(w.y).toFixed(2)); }
+    h += '<polyline class="trail" points="' + pts.join(' ') + '"/>';
+  }
+  const dec = humanDecisions(tickIdx);
+  const waiting = S.screen === 'beat' ? new Set(PIDS.filter(p => !S.picks[p])) : new Set();
+  for (const p of PARISHES) {
+    const x = MX(p.position.x), y = MX(p.position.y);
+    const inf = tick ? tick.infrastructure[p.id] : { power: 100, communications: 100, roads: 100, hospital: 100 };
+    const lv = Math.min(inf.power, inf.communications, inf.roads, inf.hospital);
+    const iso = tick && tick.isolated.includes(p.id);
+    h += '<g class="pmark' + (waiting.has(p.id) ? ' waiting' : '') + '">';
+    if (iso) h += '<circle class="iso" cx="' + x + '" cy="' + y + '" r="4.2"/><text class="isot" x="' + x + '" y="' + (y + 12.4) + '" text-anchor="middle">ISOLATED</text>';
+    h += '<circle class="dot" cx="' + x + '" cy="' + y + '" r="2.6" fill="var(--st-' + status(lv) + ')"/>';
+    // Heartland sits just below Summit on the art, so its label goes to the left.
+    const side = LABEL_LEFT.has(p.id), lx = side ? x - 3.8 : x, ly = side ? y + .2 : y - 5.4, anchor = side ? 'end' : 'middle';
+    h += '<text x="' + lx + '" y="' + ly + '" text-anchor="' + anchor + '" font-size="3.6">' + esc(p.name) + '</text>';
+    h += '<text class="site" x="' + lx + '" y="' + (ly + 2.1) + '" text-anchor="' + anchor + '">' + esc(P.careSites[p.id] || '') + '</text>';
+    const sys = [['power', 'P'], ['communications', 'C'], ['roads', 'R'], ['hospital', 'H']];
+    sys.forEach(([k], i) => {
+      const bx = x - 4.2 + i * 2.2, by = y + 3.4, v = inf[k];
+      h += '<rect class="bar-bg" x="' + bx + '" y="' + by + '" width="1.7" height="3"/><rect x="' + bx + '" y="' + (by + 3 - 3 * v / 100) + '" width="1.7" height="' + (3 * v / 100) + '" fill="var(--st-' + status(v) + ')"/>';
+    });
+    (dec[p.id] || []).forEach((e, i) => {
+      const n = (dec[p.id] || []).length, tx = x - n * 1.5 + i * 3 + .1, ty = y + 7;
+      h += '<g class="tok"><rect x="' + tx + '" y="' + ty + '" width="2.8" height="3.2" rx=".3"/><text x="' + (tx + 1.4) + '" y="' + (ty + 2.5) + '" text-anchor="middle">' + letterOf(e.dilemma_id, e.option_id) + '</text></g>';
+    });
+    h += '</g>';
+  }
+  if (tick) {
+    const w = tick.weather, sx = MX(w.hurricane_position.x), sy = MX(w.hurricane_position.y);
+    const outer = 4 + w.wind_kts / 7, inner = w.wind_kts >= 64 ? 2 + (w.wind_kts - 64) / 7 : 0;
+    h += '<g class="storm"><circle class="ring" cx="' + sx + '" cy="' + sy + '" r="' + outer.toFixed(2) + '"/>';
+    if (inner) h += '<circle class="core" cx="' + sx + '" cy="' + sy + '" r="' + inner.toFixed(2) + '"/>';
+    h += '<g class="spin" style="transform-origin:' + sx + 'px ' + sy + 'px;transform:rotate(' + (-(tickIdx * 9) % 360) + 'deg)">'
+      + '<path class="arm" d="M' + sx + ' ' + sy + ' m0 -1.4 a1.4 1.4 0 0 1 1.4 1.4 q0 2.6 -3 3"/><path class="arm" d="M' + sx + ' ' + sy + ' m0 1.4 a1.4 1.4 0 0 1 -1.4 -1.4 q0 -2.6 3 -3"/></g>';
+    h += '<text x="' + sx + '" y="' + (sy - outer - 1) + '" text-anchor="middle">MIDAS ' + Math.round(w.wind_kts) + 'KT</text></g>';
+  }
+  svg.innerHTML = h;
+}
+function drawBand() {
+  const tick = LOG ? LOG.ticks[Math.min(tickIdx, LOG.ticks.length - 1)] : null;
+  const phase = tick ? tick.phase : 'watch';
+  $('phase-chip').className = 'chip phase-' + phase;
+  $('phase-chip').textContent = phase;
+  $('clock').textContent = tick ? clock(tick.t) : 'T-72:00';
+  const win = tick && LOG.windows.find(w => w.id === tick.window_id);
+  $('win-label').textContent = win ? win.label : 'Watch Issued';
+  const iv = tick ? tick.intensity : 1;
+  $('int-val').textContent = iv;
+  $('meter').innerHTML = Array.from({ length: 10 }, (_, i) => '<i class="' + (i < iv ? 'on' : '') + '" style="height:' + (5 + i * 1.3) + 'px"></i>').join('');
+  const r = S.screen === 'beat' ? roundOf(S.beat).title : S.screen === 'play' ? playingTitle() : S.screen === 'debrief' ? 'Debrief' : S.screen === 'values' ? 'Values lock' : '';
+  $('round-label').textContent = r;
+}
+
+/* ---------- side rail, per screen ---------- */
+function sideTitle() {
+  const saved = !PROJECTOR && loadSaved();
+  return '<header><span class="lbl">' + esc(P.title) + '</span><h2>The gap between what we say and what we do</h2></header>'
+    + '<div class="body"><div class="prose">'
+    + '<p>Six tables. Each one is the nursing leadership of a care site on the island of Concordia. Hurricane Midas is 72 hours out.</p>'
+    + '<p><strong>First</strong>, each table names three values it will lead by. <strong>Then</strong> the storm comes, in three rounds. Each round you face a real choice and raise one card. The island remembers what you chose.</p>'
+    + '<p>At the end we put what you said beside what you did.</p></div></div>'
+    + '<footer class="dm-only"><button class="btn primary" data-act="to-values" type="button">Start: values lock</button>'
+    + (saved && saved.screen !== 'title' ? '<button class="btn" data-act="resume" type="button">Resume saved session</button>' : '')
+    + '<span class="spacer"></span><span class="lbl">Seed ' + S.seed + '</span></footer>';
+}
+function sideValues() {
+  const need = P.valuesToPick;
+  const tables = PIDS.map(p => {
+    const mine = S.stated[p];
+    const chips = P.valuesDeck.map(v => {
+      const i = mine.indexOf(v);
+      return '<button type="button" class="vchip' + (i >= 0 ? ' on' : '') + '" data-act="pick-value" data-p="' + p + '" data-v="' + v + '" title="' + esc((DATA.values[v] || {}).definition || '') + '">' + (i >= 0 ? '<b>' + (i + 1) + '</b>' : '') + esc(vname(v)) + '</button>';
+    }).join('');
+    return '<div class="vtable"><h3>' + esc(pname(p)) + ' <small>' + esc(P.careSites[p]) + '</small></h3><div class="deck">' + chips + '</div>'
+      + '<span class="status' + (mine.length === need ? ' ok' : '') + '">' + (mine.length === need ? 'Locked in rank order' : mine.length + ' of ' + need + ' chosen') + '</span></div>';
+  }).join('');
+  const done = PIDS.every(p => S.stated[p].length === need);
+  return '<header><span class="lbl">Values lock</span><h2>Name the three values you will lead by</h2>'
+    + '<p class="brief">Each table picks ' + need + ' from the deck and ranks them. Click in rank order; click again to remove.</p></header>'
+    + '<div class="body"><div class="vgrid">' + tables + '</div></div>'
+    + '<footer class="dm-only"><button class="btn primary" data-act="lock-values" type="button"' + (done ? '' : ' disabled') + '>Lock values and brief the room</button>'
+    + '<button class="btn" data-act="fill-values" type="button">Rehearse: fill at random</button></footer>';
+}
+function sideBrief() {
+  return '<header><span class="lbl">Briefing</span><h2>Hurricane Midas</h2></header>'
+    + '<div class="body"><div class="prose"><p>A Category 3 storm is tracking toward Concordia. One ring road, one dam, one hospital with surgery and an ER, one airport, one port.</p>'
+    + '<p>Each marker on the island is your site. The four bars are power, communications, roads and hospital. Watch them.</p></div></div>'
+    + '<footer class="dm-only"><button class="btn primary" data-act="to-beat" type="button">Begin ' + esc(roundOf(0).title) + '</button></footer>';
+}
+function sideBeat() {
+  const r = roundOf(S.beat);
+  const cards = PIDS.map(p => {
+    const id = askFor(p, S.beat), d = DATA.dilemmas[id];
+    if (!d) return '';
+    const pick = S.picks[p];
+    const persona = DATA.personas[d.personaId];
+    const opts = d.options.map((o, i) => {
+      const on = pick === o.id && (S.revealed || !document.body.classList.contains('proj'));
+      return '<button type="button" class="opt' + (on ? ' on' : '') + '" data-act="pick-option" data-p="' + p + '" data-o="' + esc(o.id) + '"><span class="k">' + LETTERS[i] + '</span><span><span>' + esc(o.label) + '</span><br><span class="d">' + esc(o.description) + '</span></span></button>';
+    }).join('');
+    return '<div class="card' + (pick ? ' locked' : '') + '"><h3>' + esc(pname(p)) + ' <small>' + esc(P.careSites[p]) + '</small></h3>'
+      + '<div class="dtitle">' + esc(d.title) + '</div><div class="setup">' + esc(d.setup) + '</div>'
+      + (persona ? '<div class="persona dm-only">Read as ' + esc(persona.name) + ': &ldquo;' + esc(persona.signatureLine) + '&rdquo;</div>' : '')
+      + '<div class="opts">' + opts + '</div><span class="status' + (pick ? ' ok' : '') + '">' + (pick ? (S.revealed ? 'Chose ' + letterOf(id, pick) : 'Card locked') : 'Deciding') + '</span></div>';
+  }).join('');
+  const all = PIDS.every(p => !askFor(p, S.beat) || S.picks[p]);
+  const tick = LOG.ticks[LOG.ticks.length - 1];
+  const nextInt = (S.intensity.find(x => x.t === haltT() + LOG.step_minutes) || {}).intensity;
+  const lever = '<div class="dm dm-only"><span class="lbl">DM levers</span>'
+    + '<button class="btn small" data-act="heat" data-d="2" type="button">Heat up</button><button class="btn small" data-act="heat" data-d="-2" type="button">Cool down</button>'
+    + '<span class="lbl">storm now ' + tick.intensity + (nextInt ? ', next ' + nextInt : '') + '</span>'
+    + '<button class="btn small" data-act="rehearse" type="button">Rehearse: pick at random</button></div>';
+  return '<header><span class="lbl">' + esc(r.title) + ' &middot; decision ' + (S.beat + 1) + ' of ' + P.beats.length + '</span><h2>' + esc(clock(haltT() ?? tick.t)) + ': raise one card</h2>'
+    + '<p class="brief">' + esc(r.brief) + '</p></header>'
+    + '<div class="body">' + lever + '<div class="cards">' + cards + '</div></div>'
+    + '<footer class="dm-only">'
+    + (S.revealed ? '<button class="btn primary" data-act="play" type="button">Play the storm forward</button>'
+      : '<button class="btn primary" data-act="reveal" type="button"' + (all ? '' : ' disabled') + '>Reveal all cards</button>')
+    + '<span class="spacer"></span><span class="lbl">' + PIDS.filter(p => S.picks[p]).length + ' of 6 locked</span></footer>';
+}
+function feedLines(from, to) {
+  const out = [];
+  const asked = new Set(askSet());
+  for (let i = from; i <= to && i < LOG.ticks.length; i++) {
+    const tk = LOG.ticks[i], seen = new Set();
+    for (const e of tk.events) {
+      let cls = '', txt = '';
+      if (e.kind === 'window_transition') txt = e.narrative;
+      else if (e.kind === 'decision' && e.controller === 'human') { cls = 'human'; txt = pname(e.parish_id) + ' chose ' + letterOf(e.dilemma_id, e.option_id) + ': ' + e.option_label; }
+      else if (e.kind === 'dilemma_presented' && asked.has(e.dilemma_id)) txt = pname(e.parish_id) + ' faces ' + e.title;
+      else if (e.kind === 'cascade') { cls = 'bad'; txt = e.narrative; }
+      else if (e.kind === 'isolation') { cls = 'bad'; txt = e.narrative; }
+      else if (e.kind === 'connectivity' && (e.status === 'lost' || e.status === 'restored')) { cls = e.status === 'lost' ? 'bad' : 'good'; txt = pname(e.parish_id) + ' ' + e.system + ' ' + e.status; }
+      else continue;
+      if (seen.has(txt)) continue;
+      seen.add(txt);
+      out.push('<div><span class="t num">' + clock(tk.t) + '</span><span class="' + cls + '">' + esc(txt) + '</span></div>');
+    }
+  }
+  return out.reverse().join('');
+}
+function sidePlay() {
+  const done = !anim;
+  const end = !LOG.pending || !LOG.pending.length;
+  return '<header><span class="lbl">' + esc(playingTitle()) + '</span><h2>The storm moves</h2></header>'
+    + '<div class="body"><div class="feed">' + feedLines(playFrom, tickIdx) + '</div></div>'
+    + '<footer class="dm-only">' + (done
+      ? (end ? '<button class="btn primary" data-act="to-debrief" type="button">Open the debrief</button>'
+        : '<button class="btn primary" data-act="to-beat" type="button">Next: ' + esc(roundOf(S.beat).title) + '</button>')
+      : '<button class="btn" data-act="skip" type="button">Skip to the next choice</button>') + '</footer>';
+}
+function verdict(row) {
+  if (!row || !row.n_decisions) return ['untested', 'Not tested'];
+  if (row.enacted_score >= 1) return ['lived', 'Lived it'];
+  if (row.enacted_score <= -1) return ['gap', 'Gap'];
+  return ['mixed', 'Mixed'];
+}
+function sideDebrief() {
+  const s = LOG.summary;
+  const dec = humanDecisions(LOG.ticks.length - 1);
+  const panels = PIDS.map(p => {
+    const rows = S.stated[p].map((v, i) => {
+      const r = s.values_gap.find(g => g.parish_id === p && g.value === v);
+      const sc = r && r.n_decisions ? r.enacted_score : 0;
+      const [cls, lab] = verdict(r);
+      const w = Math.abs(sc) / 3 * 50;
+      const bar = '<i style="left:' + (sc < 0 ? 50 - w : 50) + '%;width:' + w + '%;background:var(--' + (sc < 0 ? 'neg' : 'pos') + ')"></i>';
+      return '<div class="grow"><span class="num lbl">' + (i + 1) + '</span><span>' + esc(vname(v)) + '</span><span class="gbar">' + bar + '</span><span class="verdict v-' + cls + '">' + lab + '</span></div>';
+    }).join('');
+    const list = (dec[p] || []).map(e => '<span>' + esc((DATA.dilemmas[e.dilemma_id] || {}).title) + ': <b>' + letterOf(e.dilemma_id, e.option_id) + '</b> ' + esc(e.option_label) + '</span>').join('');
+    const o = s.per_parish[p];
+    return '<div class="card"><h3>' + esc(pname(p)) + ' <small>morale ' + o.final_morale + ', cut off ' + Math.round(o.minutes_isolated / 60) + 'h</small></h3>' + rows + '<div class="dlist">' + list + '</div></div>';
+  }).join('');
+  const moves = S.moves.length ? '<div class="dm"><span class="lbl">DM moves</span>' + S.moves.map(m => '<span class="num">' + clock(m.t) + ' storm ' + m.from + '&rarr;' + m.to + '</span>').join(' ') + '</div>' : '';
+  return '<header><span class="lbl">Debrief</span><h2>What you said, beside what you did</h2>'
+    + '<p class="brief">Bars run from the value betrayed (left) to the value lived (right), across the choices that tested it.</p></header>'
+    + '<div class="body"><div class="gap">' + panels + '</div>' + moves + '</div>'
+    + '<footer class="dm-only"><button class="btn" data-act="restart" type="button">New session</button><span class="spacer"></span><span class="lbl num">state ' + esc(s.state_hash.slice(0, 12)) + '</span></footer>';
+}
+function render() {
+  drawBand(); drawBoard();
+  const side = { title: sideTitle, values: sideValues, brief: sideBrief, beat: sideBeat, play: sidePlay, debrief: sideDebrief }[S.screen];
+  $('side').innerHTML = side ? side() : '';
+  if (!PROJECTOR) sync();
+}
+
+/* ---------- playback ---------- */
+function playTo(endIdx, then) {
+  const start = tickIdx, n = Math.max(0, endIdx - start);
+  if (anim) cancelAnimationFrame(anim.raf);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const dur = reduce ? 0 : Math.min(14000, n * 45);
+  const t0 = performance.now();
+  anim = { then, endIdx };
+  const step = now => {
+    const f = dur ? Math.min(1, (now - t0) / dur) : 1;
+    tickIdx = Math.round(start + n * f);
+    if (f >= 1) { const cb = anim.then; anim = null; render(); cb && cb(); return; }
+    render(); anim.raf = requestAnimationFrame(step);
+  };
+  anim.raf = requestAnimationFrame(step);
+}
+function skip() { if (!anim) return; cancelAnimationFrame(anim.raf); tickIdx = anim.endIdx; const cb = anim.then; anim = null; render(); cb && cb(); }
+
+/* ---------- actions ---------- */
+const ACT = {
+  'to-values'() { S = fresh(); S.screen = 'values'; save(); render(); },
+  resume() { S = loadSaved(); rerun(); tickIdx = LOG.ticks.length - 1; playFrom = tickIdx; if (S.screen === 'play') S.screen = LOG.pending && LOG.pending.length ? 'beat' : 'debrief'; render(); },
+  'pick-value'(el) {
+    const m = S.stated[el.dataset.p], v = el.dataset.v, i = m.indexOf(v);
+    if (i >= 0) m.splice(i, 1); else if (m.length < P.valuesToPick) m.push(v);
+    save(); render();
+  },
+  'fill-values'() { for (const p of PIDS) S.stated[p] = [...P.valuesDeck].sort(() => Math.random() - .5).slice(0, P.valuesToPick); save(); render(); },
+  'lock-values'() { rerun(); tickIdx = 0; S.screen = 'brief'; save(); render(); },
+  'to-beat'() {
+    if (S.screen === 'brief') { S.screen = 'play'; playFrom = 0; render(); playTo(LOG.ticks.length - 1, () => { S.screen = 'beat'; save(); render(); }); return; }
+    S.screen = 'beat'; save(); render();
+  },
+  'pick-option'(el) { if (S.revealed) return; const p = el.dataset.p; S.picks[p] = S.picks[p] === el.dataset.o ? undefined : el.dataset.o; if (!S.picks[p]) delete S.picks[p]; save(); render(); },
+  rehearse() { for (const p of PIDS) { const d = DATA.dilemmas[askFor(p, S.beat)]; if (d) S.picks[p] = d.options[Math.floor(Math.random() * d.options.length)].id; } save(); render(); },
+  reveal() { S.revealed = true; save(); render(); },
+  heat(el) {
+    const t = haltT(); if (t === null) return;
+    const at = t + LOG.step_minutes, cur = LOG.ticks[LOG.ticks.length - 1].intensity;
+    const prev = (S.intensity.find(x => x.t === at) || {}).intensity ?? cur;
+    const to = Math.max(1, Math.min(10, prev + Number(el.dataset.d)));
+    S.intensity = S.intensity.filter(x => x.t !== at).concat([{ t: at, intensity: to }]).sort((a, b) => a.t - b.t);
+    S.moves = S.moves.filter(m => m.t !== at).concat([{ t: at, beat: S.beat, from: cur, to }]);
+    save(); render();
+  },
+  play() {
+    for (const p of PIDS) { const id = askFor(p, S.beat); if (id && S.picks[p]) S.decisions[id] = { option_id: S.picks[p], rationale: 'Table decision' }; }
+    const from = tickIdx;
+    rerun();
+    S.picks = {}; S.revealed = false; S.beat++; S.screen = 'play'; playFrom = from; save(); render();
+    playTo(LOG.ticks.length - 1, () => { save(); render(); });
+  },
+  skip,
+  'to-debrief'() { S.screen = 'debrief'; save(); render(); },
+  restart() { S = fresh(); LOG = null; tickIdx = 0; save(); render(); },
+};
+document.addEventListener('click', ev => {
+  const el = ev.target.closest('[data-act]'); if (!el || PROJECTOR) return;
+  const f = ACT[el.dataset.act]; if (f) f(el);
+});
+document.addEventListener('keydown', ev => {
+  if (PROJECTOR || ev.target.closest('input,textarea')) return;
+  if (ev.key === ' ' && anim) { ev.preventDefault(); skip(); }
+});
+
+/* ---------- projector window ---------- */
+let proj = null, sentVer = -1;
+function sync() {
+  if (!proj || proj.closed) return;
+  const msg = { type: 'crucible', S, tickIdx, playFrom, animating: !!anim };
+  if (sentVer !== logVer) { msg.log = LOG; sentVer = logVer; }
+  try { proj.postMessage(msg, '*'); } catch (e) {}
+}
+window.addEventListener('message', ev => {
+  const m = ev.data || {};
+  if (PROJECTOR && m.type === 'crucible') {
+    S = m.S; tickIdx = m.tickIdx; playFrom = m.playFrom; if ('log' in m) LOG = m.log;
+    anim = m.animating ? {} : null; render();
+  } else if (!PROJECTOR && m.type === 'crucible-hello') { proj = ev.source; sentVer = -1; sync(); }
+});
+$('btn-proj').addEventListener('click', () => {
+  proj = window.open(location.href.split('#')[0] + '#projector', 'crucible-projector');
+  sentVer = -1;
+  if (!proj) $('btn-proj').textContent = 'Popups blocked: use Room layout';
+});
+$('btn-layout').addEventListener('click', () => { document.body.classList.toggle('proj'); $('btn-layout').textContent = document.body.classList.contains('proj') ? 'DM layout' : 'Room layout'; render(); });
+$('btn-theme').addEventListener('click', () => {
+  const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme = dark ? 'light' : 'dark';
+});
+
+/* ---------- table sheets (print from the downloaded file) ---------- */
+$('btn-sheets').addEventListener('click', () => {
+  const el = $('sheets');
+  el.innerHTML = '<div class="sheet noprint" style="flex-direction:row;align-items:center;gap:12px"><span>One page per table. Print this page from the downloaded file with your browser&rsquo;s print command.</span><span style="flex:1"></span><button class="btn" id="sheets-close" type="button">Close</button></div>'
+    + PIDS.map(p => '<section class="sheet"><span class="lbl">' + esc(P.title) + '</span><h2>' + esc(pname(p)) + ': ' + esc(P.careSites[p]) + '</h2>'
+      + (P.ask[p] || []).map((id, b) => { const d = DATA.dilemmas[id]; return '<div class="q"><span class="lbl">' + esc(roundOf(b).title) + '</span><h3>' + esc(d.title) + '</h3><p>' + esc(d.setup) + '</p>'
+        + d.options.map((o, i) => '<p><b class="mono">' + LETTERS[i] + '</b> ' + esc(o.label) + '. ' + esc(o.description) + '</p>').join('') + '</div>'; }).join('')
+      + '</section>').join('');
+  el.hidden = false;
+  $('sheets-close').addEventListener('click', () => { el.hidden = true; });
+});
+
+/* ---------- boot ---------- */
+if (PROJECTOR) {
+  document.body.classList.add('proj');
+  render();
+  if (window.opener) window.opener.postMessage({ type: 'crucible-hello' }, '*');
+} else {
+  render();
+  initEngine().then(() => render()).catch(e => { $('side').insertAdjacentHTML('afterbegin', '<p style="padding:12px;color:var(--neg)">The engine failed to load: ' + esc(e.message) + '</p>'); });
+}
+</script>

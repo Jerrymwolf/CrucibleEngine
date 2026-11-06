@@ -1,3 +1,17 @@
+---
+title: "Keystone parish (v2, superseded)"
+date: 2026-10-21
+type: world-bible
+status: superseded
+superseded_by: "[[concordia-parishes-v3]]"
+project: Crucible Engine (The Values Crucible)
+tags: [crucible-engine, lore, parishes, keystone, superseded]
+related:
+  - "[[concordia-parishes-v3]]"
+  - "[[decision-2026-10-21-parish-leadership-redesign]]"
+canon_note: "Keystone's section in [[concordia-parishes-v3]] replaces this. Kept: Frank Reeves, the 24,000-dose day, the vault. Changed: concentrate now comes from Heartland, not Haven; the research campus is Sterling's; Southfield housing and its drainage memo are new."
+---
+
 # KEYSTONE PARISH
 
 ## Overview

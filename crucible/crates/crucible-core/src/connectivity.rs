@@ -1,7 +1,7 @@
 //! Micropolis-derived connectivity. Power, water and communications flow from
 //! their sources over links; a parish not reached loses the system at a
-//! bounded rate unless it has backup generators (power only). Roads form a
-//! separate graph; a parish with no passable path to another is isolated.
+//! bounded rate unless it has backup generators (power only). Road isolation
+//! lives in `routes`: a parish is isolated when no road route touching it is open.
 
 use crate::content::Content;
 use crate::state::SimState;
@@ -41,20 +41,24 @@ pub fn backup_hours(content: &Content, parish: &str) -> f64 {
     if !power.backup_generators.iter().any(|(k, v)| k.eq_ignore_ascii_case(parish) && *v) {
         return 0.0;
     }
-    if power.priority.iter().any(|p| p.eq_ignore_ascii_case(parish)) { BACKUP_HOURS_PRIORITY } else { BACKUP_HOURS_OTHER }
+    if power.priority.iter().any(|p| p.eq_ignore_ascii_case(parish)) {
+        BACKUP_HOURS_PRIORITY
+    } else {
+        BACKUP_HOURS_OTHER
+    }
 }
 
-/// Service order for power: the content priority list, then population
-/// descending, then id. Deterministic so the "last traced region blacks
-/// out" rule of the reference engine does not depend on scan order.
-pub fn power_priority(content: &Content) -> Vec<String> {
-    let priority: Vec<String> = content.concordia.infrastructure.power.priority.iter().map(|p| p.to_lowercase()).collect();
-    let mut rest: Vec<(u64, String)> = content
-        .parish_ids()
-        .into_iter()
-        .filter(|p| !priority.contains(p))
-        .map(|p| (content.parish(&p).map(|x| x.population).unwrap_or(0), p))
-        .collect();
+/// Service order for power: the priority list (a decision's override in the
+/// state, else the content's), then population descending, then id.
+/// Deterministic so the "last traced region blacks out" rule of the
+/// reference engine does not depend on scan order.
+pub fn power_priority(content: &Content, state: &SimState) -> Vec<String> {
+    let priority: Vec<String> = match &state.power_priority {
+        Some(list) => list.iter().map(|p| p.to_lowercase()).collect(),
+        None => content.concordia.infrastructure.power.priority.iter().map(|p| p.to_lowercase()).collect(),
+    };
+    let mut rest: Vec<(u64, String)> =
+        content.parish_ids().into_iter().filter(|p| !priority.contains(p)).map(|p| (content.parish(&p).map(|x| x.population).unwrap_or(0), p)).collect();
     rest.sort_by(|a, b| b.0.cmp(&a.0).then_with(|| a.1.cmp(&b.1)));
     priority.into_iter().chain(rest.into_iter().map(|(_, p)| p)).collect()
 }
@@ -68,7 +72,7 @@ fn apply_power_capacity(content: &Content, state: &SimState, source: &str, reach
         keep.insert(source.to_string());
     }
     let mut served = 0;
-    for p in power_priority(content) {
+    for p in power_priority(content, state) {
         if p == source || !reached.contains(&p) {
             continue;
         }
@@ -102,22 +106,14 @@ pub fn utility_links(content: &Content) -> BTreeMap<String, BTreeSet<String>> {
 
 /// Road edges between real parishes, expanding the virtual "ring" node.
 fn road_edges(content: &Content) -> Vec<(String, String)> {
-    let ring: BTreeSet<String> = content
-        .concordia
-        .ring_road
-        .segments
-        .iter()
-        .flat_map(|s| [s.from.to_lowercase(), s.to.to_lowercase()])
-        .collect();
+    let ring: BTreeSet<String> = content.concordia.ring_road.segments.iter().flat_map(|s| [s.from.to_lowercase(), s.to.to_lowercase()]).collect();
     let mut edges = Vec::new();
     for s in &content.concordia.ring_road.segments {
         edges.push((s.from.to_lowercase(), s.to.to_lowercase()));
     }
     for s in &content.concordia.crater_roads.segments {
-        let ends: Vec<Vec<String>> = [&s.from, &s.to]
-            .iter()
-            .map(|e| if e.as_str() == "ring" { ring.iter().cloned().collect() } else { vec![e.to_lowercase()] })
-            .collect();
+        let ends: Vec<Vec<String>> =
+            [&s.from, &s.to].iter().map(|e| if e.as_str() == "ring" { ring.iter().cloned().collect() } else { vec![e.to_lowercase()] }).collect();
         for a in &ends[0] {
             for b in &ends[1] {
                 edges.push((a.clone(), b.clone()));
@@ -234,54 +230,6 @@ pub fn step(content: &Content, state: &mut SimState, step_minutes: i64, repairin
     changes
 }
 
-/// Road isolation for this tick. Returns (newly isolated, newly reconnected).
-pub fn roads_step(content: &Content, state: &mut SimState, wind_mph: f64, rain_in_per_hour: f64) -> (Vec<String>, Vec<String>) {
-    let failed = failed_threshold(content);
-    let parishes = content.parish_ids();
-    let mut adj: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
-    let passable = |p: &str| state.level(p, "roads") > failed;
-    let ring: Vec<String> = content.concordia.ring_road.segments.iter().map(|s| s.from.to_lowercase()).collect();
-    let mut add = |a: &str, b: &str| {
-        if passable(a) && passable(b) {
-            adj.entry(a.to_string()).or_default().insert(b.to_string());
-            adj.entry(b.to_string()).or_default().insert(a.to_string());
-        }
-    };
-    for s in &content.concordia.ring_road.segments {
-        add(&s.from.to_lowercase(), &s.to.to_lowercase());
-    }
-    for s in &content.concordia.crater_roads.segments {
-        // Crater roads close in hurricane-force wind (>= 65 mph) when not storm
-        // passable, and flood-risk roads close in rain of 2 in/h or more.
-        if s.storm_passable == Some(false) && wind_mph >= 65.0 {
-            continue;
-        }
-        if s.flood_risk == Some(true) && rain_in_per_hour >= 2.0 {
-            continue;
-        }
-        let expand = |e: &str| if e == "ring" { ring.clone() } else { vec![e.to_lowercase()] };
-        for a in expand(&s.from) {
-            for b in expand(&s.to) {
-                add(&a, &b);
-            }
-        }
-    }
-    let mut newly = Vec::new();
-    let mut restored = Vec::new();
-    for p in &parishes {
-        let connected = adj.get(p).map(|n| !n.is_empty()).unwrap_or(false);
-        let was = state.isolated.contains(p);
-        if !connected && !was {
-            state.isolated.insert(p.clone());
-            newly.push(p.clone());
-        } else if connected && was {
-            state.isolated.remove(p);
-            restored.push(p.clone());
-        }
-    }
-    (newly, restored)
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -306,13 +254,19 @@ mod tests {
     #[test]
     fn power_priority_and_backup_hours_follow_content() {
         let c = content();
-        let order = power_priority(&c);
-        assert_eq!(&order[..2], &["keystone".to_string(), "summit".to_string()]);
-        assert_eq!(order[2], "sterling"); // largest population after the priority list
+        let mut state = crate::state::blank_state();
+        let order = power_priority(&c, &state);
+        assert_eq!(&order[..2], &["keystone".to_string(), "sterling".to_string()]);
+        assert_eq!(order[2], "summit"); // largest population after the priority list
         assert_eq!(order.len(), 6);
         assert_eq!(backup_hours(&c, "keystone"), BACKUP_HOURS_PRIORITY);
         assert_eq!(backup_hours(&c, "gateway"), BACKUP_HOURS_OTHER);
-        assert_eq!(backup_hours(&c, "haven"), 0.0);
+        assert_eq!(backup_hours(&c, "nowhere"), 0.0);
+        // A decision can put the hospital first.
+        state.power_priority = Some(vec!["sterling".into(), "summit".into()]);
+        let order = power_priority(&c, &state);
+        assert_eq!(&order[..2], &["sterling".to_string(), "summit".to_string()]);
+        assert_eq!(order.len(), 6);
     }
 
     #[test]

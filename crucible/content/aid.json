@@ -1,0 +1,967 @@
+{
+  "CANON": "crucible-calls-for-aid-v3",
+  "RULES": [
+    "A granted token travels by the route named on the call; if the route is cut when the call is answered, the delivery fails and the token is lost for the quarter.",
+    "The values gap scores only the answer, never the weather: a parish that granted and lost the token honoured the value.",
+    "A call unanswered at its deadline is answered by silence, scored as the call's silenceAnswer.",
+    "An AI-run parish grants when it holds the token beyond its own remaining needs and the route is open, and refuses otherwise."
+  ],
+  "CALLS": [
+    {
+      "answerTicks": 22,
+      "id": "A1",
+      "quarter": "approach",
+      "asker": "summit",
+      "holder": "sterling",
+      "token": "LIFT",
+      "count": 2,
+      "route": "heli-summit-mainland",
+      "windowClosesT": -1440,
+      "personaId": "okonkwo",
+      "line": "I can keep eighteen people alive on a generator until the generator stops. Your aircraft can take six of them somewhere the lights stay on. I am asking once.",
+      "ask": "LIFT x2 (both helicopters, two sorties each) to move six ventilated patients to the mainland hospital before the runway closes at T-24h.",
+      "grantingCosts": "The executive manifest is bumped; the Whitfield twins and the Haddads ride out the storm on the headland; Chicago is told why.",
+      "refusingCosts": "Six patients ride out the storm on the hospital's generator; two of them need the ventilator the eleven-minute gap will stop.",
+      "answers": {
+        "grant": {
+          "label": "GRANT: both aircraft",
+          "signals": {
+            "service": 2,
+            "compassion": 2,
+            "loyalty": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "loyalty": 2,
+            "compassion": -2,
+            "fairness": -1
+          }
+        },
+        "part": {
+          "label": "PART: one sortie",
+          "signals": {
+            "fairness": 1,
+            "compassion": 1
+          },
+          "count": 1
+        }
+      },
+      "silenceAnswer": "refuse",
+      "delivered": {
+        "grant": {
+          "groups": [
+            {
+              "id": "icu-patients",
+              "state": "sheltered",
+              "count": 6
+            }
+          ],
+          "flags": [
+            "icu-evacuated"
+          ]
+        },
+        "part": {
+          "groups": [
+            {
+              "id": "icu-patients",
+              "state": "sheltered",
+              "count": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 22,
+      "id": "A2",
+      "quarter": "approach",
+      "asker": "keystone",
+      "holder": "haven",
+      "token": null,
+      "count": 0,
+      "route": "ring-haven-keystone",
+      "windowClosesT": -1800,
+      "personaId": "santos",
+      "line": "You want my people on the crane in forty-knot gusts for a ship whose master already told the harbourmaster she's leaving at thirty hours. Did anyone tell you that?",
+      "ask": "Six hours of berth time past T-30h (really nine) so batch 47's 24,000 doses can load.",
+      "grantingCosts": "The Kestrel Reach loads in rising wind with Dmitri Volkov in the cab; if she does not clear the breakwater by T-24h she rides out the storm at the berth.",
+      "refusingCosts": "24,000 doses stay in the vault on battery power; batch 47 was made for nothing; Anh Tran's shift was for nothing.",
+      "answers": {
+        "grant": {
+          "label": "GRANT: hold the ship",
+          "signals": {
+            "duty": 2,
+            "safety": -2,
+            "loyalty": 1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE, and tell Keystone the master's word",
+          "signals": {
+            "safety": 2,
+            "duty": -1,
+            "candor": 1
+          }
+        },
+        "refuse_silent": {
+          "label": "REFUSE without telling them",
+          "signals": {
+            "safety": 2,
+            "duty": -1,
+            "honesty": -2
+          }
+        }
+      },
+      "silenceAnswer": "refuse",
+      "effects": {
+        "grant": {
+          "cards": [
+            {
+              "id": "dmitri-volkov",
+              "state": "at_risk",
+              "untilT": -1440,
+              "thenState": "safe"
+            }
+          ],
+          "doses": [
+            {
+              "sailDelayHours": 6,
+              "aboard": 24000,
+              "vault": -24000
+            }
+          ],
+          "flags": [
+            "ship-held"
+          ]
+        },
+        "refuse": {
+          "flags": [
+            "master-sails-at-30"
+          ]
+        },
+        "refuse_silent": {
+          "flags": [
+            "master-sails-at-30",
+            "keystone-not-told"
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 22,
+      "id": "A3",
+      "quarter": "approach",
+      "asker": "gateway",
+      "holder": "haven",
+      "token": "FUEL",
+      "count": 1,
+      "route": null,
+      "windowClosesT": -1080,
+      "personaId": "mendez",
+      "line": "I can go out once on what's in the tanks. If Southfield calls after the Harvester, I pick one.",
+      "ask": "FUEL x1 by tanker along the ring road west, before the Gateway-Summit road goes at T-18h.",
+      "grantingCosts": "One tanker and one driver on the road for four hours; one less load for the hospital or the dam.",
+      "refusingCosts": "The three rescue boats have fuel for one run, not three; the terminal's generator lasts the first night and not the second.",
+      "answers": {
+        "grant": {
+          "label": "GRANT",
+          "signals": {
+            "service": 2,
+            "fairness": 1,
+            "stewardship": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "stewardship": 2,
+            "fairness": -1,
+            "service": -2
+          }
+        }
+      },
+      "silenceAnswer": "refuse",
+      "effects": {
+        "refuse": {
+          "flags": [
+            "gateway-fuel-refused"
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 22,
+      "id": "A4",
+      "quarter": "approach",
+      "asker": "heartland",
+      "holder": "summit",
+      "token": "CREW",
+      "count": 1,
+      "route": "gorge-road",
+      "windowClosesT": -720,
+      "personaId": "tanaka",
+      "line": "I have forty people I can shelter inside the dam. The village is four hundred and twenty. They will not walk up in the dark unless someone in a uniform knocks.",
+      "ask": "CREW x1 of police (twelve officers, two vehicles) up the Gorge Road to evacuate Caldera village's 140 households to the dam shelter before the Switchbacks slide.",
+      "grantingCosts": "Twelve officers out of Riverside for six hours during the hours the lower town should be clearing.",
+      "refusingCosts": "Sam Oyelaran's wife and daughter are in a village with one road out, and the road goes under at T-18h.",
+      "answers": {
+        "grant": {
+          "label": "GRANT",
+          "signals": {
+            "service": 2,
+            "compassion": 1,
+            "safety": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "loyalty": 2,
+            "duty": 1,
+            "compassion": -2
+          }
+        }
+      },
+      "silenceAnswer": "refuse",
+      "delivered": {
+        "grant": {
+          "groups": [
+            {
+              "id": "caldera-villagers",
+              "state": "sheltered"
+            }
+          ],
+          "flags": [
+            "caldera-evacuated"
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 22,
+      "id": "A5",
+      "quarter": "approach",
+      "asker": "haven",
+      "holder": "summit",
+      "token": "SHELTER",
+      "count": 2,
+      "route": "ring-sterling-haven",
+      "windowClosesT": -720,
+      "personaId": "santos",
+      "line": "The hospital doesn't check pay stubs. Do the schools?",
+      "ask": "SHELTER x2 (1,000 places in the Summit schools) for longshore families from the surge zone, moved by bus before T-12h.",
+      "grantingCosts": "Two of three school shelters go to Haven's families; Riverside's own evacuees overflow into the municipal building and the hospital corridors.",
+      "refusingCosts": "The union hall (800 places, surge zone) takes everyone; the Sato family stays above the noodle bar; Jonah Baptiste's grandmother stays in her ground-floor flat.",
+      "answers": {
+        "grant": {
+          "label": "GRANT: both",
+          "signals": {
+            "fairness": 2,
+            "compassion": 2,
+            "loyalty": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "loyalty": 2,
+            "fairness": -2
+          }
+        },
+        "part": {
+          "label": "PART: one school",
+          "signals": {
+            "fairness": 1
+          },
+          "count": 1
+        }
+      },
+      "silenceAnswer": "refuse",
+      "delivered": {
+        "grant": {
+          "groups": [
+            {
+              "id": "longshore-families",
+              "state": "sheltered"
+            }
+          ],
+          "flags": [
+            "longshore-sheltered"
+          ]
+        },
+        "part": {
+          "groups": [
+            {
+              "id": "longshore-families",
+              "state": "sheltered",
+              "count": 300
+            }
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 22,
+      "id": "A6",
+      "quarter": "approach",
+      "asker": "keystone",
+      "holder": "heartland",
+      "token": "GEN",
+      "count": 1,
+      "route": "switchbacks",
+      "windowClosesT": -1080,
+      "personaId": "reeves",
+      "line": "Your schedule says we're first. I'm not asking about the schedule. I'm asking whether you'll send the one you can spare before the road goes.",
+      "ask": "GEN x1 down the South Switchbacks before they slide, so two clean-room feeds hold positive pressure through the peak.",
+      "grantingCosts": "One of the three dam spares; the dam's own controls run on two with no reserve.",
+      "refusingCosts": "At T-2h the rooms lose pressure; the batch in progress is contaminated; a nine-hour restart after the storm.",
+      "answers": {
+        "grant": {
+          "label": "GRANT",
+          "signals": {
+            "duty": 2,
+            "service": 1,
+            "safety": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "safety": 2,
+            "stewardship": 1,
+            "duty": -1,
+            "fairness": 0
+          }
+        }
+      },
+      "silenceAnswer": "refuse",
+      "effects": {
+        "refuse": {
+          "doses": [
+            {
+              "vault": -12000,
+              "productionRate": 0.0,
+              "atT": -120
+            },
+            {
+              "productionRate": 1.0,
+              "atT": 900
+            }
+          ],
+          "flags": [
+            "second-feed-refused"
+          ]
+        }
+      },
+      "delivered": {
+        "grant": {
+          "flags": [
+            "second-cleanroom-feed"
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 22,
+      "id": "A7",
+      "quarter": "approach",
+      "asker": "summit",
+      "holder": "keystone",
+      "token": "COLD",
+      "count": 1,
+      "route": null,
+      "windowClosesT": -1080,
+      "personaId": "okonkwo",
+      "line": "I need one cold room that stays cold. You have twelve.",
+      "ask": "COLD x1 (one vault bay) for the hospital's blood bank, insulin and vaccines, moved by reefer truck before T-18h.",
+      "grantingCosts": "One bay's worth of finished doses (24,000) moves to the Haven reefer yard or stays at room temperature on a truck.",
+      "refusingCosts": "When the hospital generator gaps, the blood bank has four hours of battery; after that, surgery runs on what is in the fridge on the floor.",
+      "answers": {
+        "grant": {
+          "label": "GRANT",
+          "signals": {
+            "service": 2,
+            "compassion": 1,
+            "duty": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "duty": 2,
+            "compassion": -1,
+            "stewardship": 1
+          }
+        }
+      },
+      "silenceAnswer": "refuse",
+      "effects": {
+        "grant": {
+          "doses": [
+            {
+              "vault": -24000
+            }
+          ]
+        },
+        "refuse": {
+          "groups": [
+            {
+              "id": "dialysis-patients",
+              "state": "at_risk",
+              "count": 20,
+              "atT": -60
+            }
+          ]
+        }
+      },
+      "delivered": {
+        "grant": {
+          "flags": [
+            "blood-bank-cold",
+            "hospital-first"
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 9,
+      "id": "L1",
+      "quarter": "landfall",
+      "asker": "keystone",
+      "holder": "gateway",
+      "token": "BOAT",
+      "count": 2,
+      "route": "sea-gateway-keystone",
+      "windowClosesT": 120,
+      "personaId": "reeves",
+      "line": "I have two hundred people on the roofs of Block C. I can see them from the plant. Your boats are the only ones that draw shallow enough.",
+      "ask": "BOAT x2 to take people off the roofs and upper floors of Southfield Block C and D. By sea round the south-west point, in the eye only.",
+      "grantingCosts": "The two boats are not available for the Harvester; they must be back in the Mole before the backside at T+2h or they are lost with their crews.",
+      "refusingCosts": "Gloria Adebayo-Ferris and Anh Tran's children spend the backside on the top floor of Block C with the water a flight below.",
+      "answers": {
+        "grant": {
+          "label": "GRANT",
+          "signals": {
+            "compassion": 2,
+            "courage": 1,
+            "loyalty": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "loyalty": 2,
+            "safety": 1,
+            "compassion": -2
+          }
+        }
+      },
+      "silenceAnswer": "refuse",
+      "delivered": {
+        "grant": {
+          "groups": [
+            {
+              "id": "southfield-residents",
+              "state": "rescued",
+              "count": 200
+            }
+          ],
+          "cards": [
+            {
+              "id": "gloria-adebayo-ferris",
+              "state": "rescued"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 9,
+      "id": "L2",
+      "quarter": "landfall",
+      "asker": "gateway",
+      "holder": "sterling",
+      "token": "LIFT",
+      "count": 1,
+      "route": "heli-sterling-gateway",
+      "windowClosesT": 120,
+      "personaId": "mendez",
+      "line": "Two men on a boat with no engine, somewhere in a ten-mile box, with two hours of sky. You have the only thing that can look from above.",
+      "ask": "LIFT x1 (one helicopter sortie) to search the sea south of the Mole for the Pacific Harvester in the eye.",
+      "grantingCosts": "The aircraft is airborne in the eye instead of on the pad; if the backside comes early it is lost.",
+      "refusingCosts": "The search is by boat or not at all; Tomás Reyes's chances halve.",
+      "answers": {
+        "grant": {
+          "label": "GRANT",
+          "signals": {
+            "courage": 2,
+            "service": 2,
+            "safety": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "safety": 2,
+            "stewardship": 1,
+            "compassion": -1
+          }
+        }
+      },
+      "silenceAnswer": "refuse",
+      "delivered": {
+        "grant": {
+          "chance": [
+            {
+              "p": 0.4,
+              "then": {
+                "groups": [
+                  {
+                    "id": "harvester-watch",
+                    "state": "rescued"
+                  }
+                ],
+                "cards": [
+                  {
+                    "id": "tomas-reyes",
+                    "state": "rescued"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 9,
+      "id": "L3",
+      "quarter": "landfall",
+      "asker": "summit",
+      "holder": "heartland",
+      "token": null,
+      "count": 0,
+      "route": "radio-council",
+      "windowClosesT": -30,
+      "personaId": "chen",
+      "line": "I am not asking you to risk the dam. I am asking you to tell me before you drown my town, and to give me the two hours my officers need to knock on doors.",
+      "ask": "A warning on the Council channel before any release and a two-hour delay at 94% so Riverside can be cleared by the police boats.",
+      "grantingCosts": "Two hours of rise at 2% an hour takes the reservoir to 98% with a gate that takes ninety minutes to establish a release; the dam's margin is spent on the town.",
+      "refusingCosts": "The release arrives with the river already in Riverside's ground floors; the board puts 2,000 people at risk at once.",
+      "answers": {
+        "grant": {
+          "label": "GRANT: warn and delay two hours",
+          "signals": {
+            "candor": 2,
+            "compassion": 2,
+            "safety": -2
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "safety": 2,
+            "duty": 1,
+            "candor": -2,
+            "compassion": -2
+          }
+        },
+        "warn_only": {
+          "label": "WARN without delaying",
+          "signals": {
+            "candor": 2,
+            "compassion": 0
+          }
+        }
+      },
+      "silenceAnswer": "refuse",
+      "effects": {
+        "grant": {
+          "groups": [
+            {
+              "id": "riverside-residents",
+              "state": "sheltered",
+              "count": 1020
+            }
+          ],
+          "flags": [
+            "riverside-warned",
+            "release-delayed"
+          ]
+        },
+        "warn_only": {
+          "groups": [
+            {
+              "id": "riverside-residents",
+              "state": "sheltered",
+              "count": 500
+            }
+          ],
+          "flags": [
+            "riverside-warned"
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 9,
+      "id": "L4",
+      "quarter": "landfall",
+      "asker": "haven",
+      "holder": "keystone",
+      "token": "MEDIC",
+      "count": 1,
+      "route": "foot-haven-keystone",
+      "windowClosesT": 120,
+      "personaId": "santos",
+      "line": "They stayed because you people needed the fuel. One of them is twenty-two. Send me somebody.",
+      "ask": "MEDIC x1 (Keystone's two EMTs) for Elena Marsh and Jonah Baptiste, injured in the control room when Tank 3's manifold let go. In the eye, on foot by the surge creek bridge.",
+      "grantingCosts": "The only medics at the plant leave two hundred skeleton crew and Southfield with none during the backside.",
+      "refusingCosts": "Two injured people wait six hours for the Summit ambulance that cannot reach them either.",
+      "answers": {
+        "grant": {
+          "label": "GRANT",
+          "signals": {
+            "service": 2,
+            "courage": 1,
+            "safety": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "safety": 2,
+            "loyalty": 1,
+            "service": -1
+          }
+        }
+      },
+      "silenceAnswer": "refuse",
+      "delivered": {
+        "grant": {
+          "groups": [
+            {
+              "id": "terminal-staff",
+              "state": "rescued",
+              "count": 2,
+              "from": "injured"
+            }
+          ],
+          "cards": [
+            {
+              "id": "elena-marsh",
+              "state": "rescued"
+            },
+            {
+              "id": "jonah-baptiste",
+              "state": "rescued"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 9,
+      "id": "L5",
+      "quarter": "landfall",
+      "asker": "sterling",
+      "holder": "summit",
+      "token": "CREW",
+      "count": 1,
+      "route": "boat-summit-sterling",
+      "windowClosesT": 120,
+      "personaId": "webb",
+      "line": "I have three hundred people at my fence and a bunker with a door. I need someone there who isn't me.",
+      "ask": "CREW x1 of police to the campus gate, where three hundred Riverside residents are in the water at the fence. The gate is reachable by police boat.",
+      "grantingCosts": "The boats go to the campus gate instead of to the Riverside streets behind it.",
+      "refusingCosts": "The gate is the crisis room's decision alone; whatever happens at it, happened under Meridian's cameras with no one else present.",
+      "answers": {
+        "grant": {
+          "label": "GRANT: officers to the gate",
+          "signals": {
+            "order": 1,
+            "service": 1,
+            "fairness": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "fairness": 1,
+            "loyalty": 1,
+            "service": -1
+          }
+        },
+        "boats_to_hill": {
+          "label": "Send the boats to take the people away from the gate to the hospital hill",
+          "signals": {
+            "compassion": 2,
+            "courage": 1
+          }
+        }
+      },
+      "silenceAnswer": "refuse",
+      "effects": {
+        "boats_to_hill": {
+          "groups": [
+            {
+              "id": "riverside-at-gate",
+              "state": "rescued"
+            }
+          ],
+          "cards": [
+            {
+              "id": "celeste-dubois",
+              "state": "rescued"
+            }
+          ],
+          "flags": [
+            "gate-cleared-by-boat"
+          ]
+        }
+      },
+      "delivered": {
+        "grant": {
+          "flags": [
+            "officers-at-gate"
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 9,
+      "id": "L6",
+      "quarter": "landfall",
+      "asker": "summit",
+      "holder": "sterling",
+      "token": "SHELTER",
+      "count": 1,
+      "route": "foot-summit-sterling",
+      "windowClosesT": 120,
+      "personaId": "chen",
+      "line": "Your lobby is above the water. Your door is locked. I am told you have five hundred places and a hundred and eighty people. Count again.",
+      "ask": "SHELTER x1 (the operations centre's remaining 320 places) for the Riverside residents at the gate.",
+      "grantingCosts": "480 people in a space for 500 through the backside; Dr. Haddad's infection risk; Chicago's security team's objections on the record.",
+      "refusingCosts": "The three hundred go back into the water or up the tower's open stairwells.",
+      "answers": {
+        "grant": {
+          "label": "GRANT: open the bunker",
+          "signals": {
+            "compassion": 3,
+            "courage": 1,
+            "safety": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "loyalty": 2,
+            "safety": 1,
+            "compassion": -3
+          }
+        },
+        "lobby": {
+          "label": "Open the lobby, not the bunker",
+          "signals": {
+            "compassion": 1,
+            "fairness": -1
+          }
+        },
+        "part": {
+          "label": "Open the bunker to the first 150",
+          "signals": {
+            "compassion": 0,
+            "order": 1,
+            "fairness": -2
+          },
+          "count": 150
+        }
+      },
+      "silenceAnswer": "refuse",
+      "effects": {
+        "grant": {
+          "groups": [
+            {
+              "id": "riverside-at-gate",
+              "state": "rescued"
+            }
+          ],
+          "cards": [
+            {
+              "id": "celeste-dubois",
+              "state": "rescued"
+            }
+          ],
+          "flags": [
+            "bunker-opened"
+          ]
+        },
+        "lobby": {
+          "groups": [
+            {
+              "id": "riverside-at-gate",
+              "state": "rescued",
+              "count": 260
+            },
+            {
+              "id": "riverside-at-gate",
+              "state": "injured",
+              "count": 40
+            }
+          ],
+          "cards": [
+            {
+              "id": "celeste-dubois",
+              "state": "rescued"
+            }
+          ],
+          "flags": [
+            "lobby-opened"
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 9,
+      "id": "L7",
+      "quarter": "landfall",
+      "asker": "heartland",
+      "holder": "sterling",
+      "token": "LIFT",
+      "count": 1,
+      "route": "heli-sterling-heartland",
+      "windowClosesT": 120,
+      "personaId": "tanaka",
+      "line": "If I lose the controls with the gate shut, I cannot open it. If I lose them with the gate open, I cannot close it. Four drums.",
+      "ask": "LIFT x1 carrying four drums (a quarter of a FUEL token) to the dam in the eye, because the control generators are on their last twelve hours.",
+      "grantingCosts": "The helicopter flies into the crater's downdraughts in the eye; it is not searching for the Harvester or lifting the lower campus.",
+      "refusingCosts": "When the controls go dark the gate cannot be moved; whatever state the spillway is in at T+6h is its state until the road reopens.",
+      "answers": {
+        "grant": {
+          "label": "GRANT",
+          "signals": {
+            "stewardship": 2,
+            "service": 2,
+            "safety": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "safety": 2,
+            "loyalty": 1,
+            "stewardship": -2
+          }
+        }
+      },
+      "silenceAnswer": "refuse",
+      "effects": {
+        "refuse": {
+          "flags": [
+            "dam-controls-dark"
+          ]
+        }
+      },
+      "delivered": {
+        "grant": {
+          "flags": [
+            "dam-controls-fuelled"
+          ],
+          "generatorHours": {
+            "heartland": 12
+          }
+        }
+      }
+    },
+    {
+      "answerTicks": 9,
+      "id": "L8",
+      "quarter": "landfall",
+      "asker": "gateway",
+      "holder": "summit",
+      "token": "MEDIC",
+      "count": 1,
+      "route": "ring-gateway-summit",
+      "windowClosesT": 120,
+      "personaId": "mendez",
+      "line": "I've got a nurse, a cabinet and forty people who don't speak the language of the forms. Half of them are kids.",
+      "ask": "MEDIC x1 (an ambulance crew) for forty injured at the terminal when the Strand's roofs go at the peak. Gateway-Summit road, passable in the eye with a crew ahead of the vehicle.",
+      "grantingCosts": "One of two ambulance crews out of the capital for the backside.",
+      "refusingCosts": "The airport nurse triages forty people with a first-aid cabinet; the Albrecht children are among them.",
+      "answers": {
+        "grant": {
+          "label": "GRANT",
+          "signals": {
+            "service": 2,
+            "fairness": 1,
+            "safety": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "loyalty": 2,
+            "fairness": -1,
+            "compassion": -1
+          }
+        }
+      },
+      "silenceAnswer": "refuse",
+      "delivered": {
+        "grant": {
+          "groups": [
+            {
+              "id": "strand-visitors",
+              "state": "rescued",
+              "count": 40,
+              "from": "injured"
+            }
+          ],
+          "cards": [
+            {
+              "id": "albrecht-family",
+              "state": "rescued"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "answerTicks": 22,
+      "id": "R1",
+      "quarter": "recovery",
+      "asker": "haven",
+      "holder": "sterling",
+      "token": "FUND",
+      "count": 1,
+      "route": "ring-sterling-haven",
+      "windowClosesT": 2400,
+      "personaId": "santos",
+      "line": "Two of mine got hurt doing what the island asked. Fifty percent is what you offered the ones who didn't. I am asking for the other half, for them.",
+      "ask": "FUND x1 for the injured longshoremen and the terminal watch, released by the crisis room.",
+      "grantingCosts": "Chicago's budget line; a precedent every parish will cite.",
+      "refusingCosts": "The report names the injured and the pay they were offered on the same page.",
+      "answers": {
+        "grant": {
+          "label": "GRANT",
+          "signals": {
+            "fairness": 2,
+            "compassion": 1,
+            "stewardship": -1
+          }
+        },
+        "refuse": {
+          "label": "REFUSE",
+          "signals": {
+            "stewardship": 1,
+            "loyalty": 1,
+            "compassion": -2
+          }
+        }
+      },
+      "silenceAnswer": "refuse"
+    }
+  ]
+}

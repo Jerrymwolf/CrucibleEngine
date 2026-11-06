@@ -1,3 +1,17 @@
+---
+title: "Values Crucible: during-crisis and post-crisis design"
+date: 2026-10-21
+type: experience-design
+status: reference
+project: Crucible Engine (The Values Crucible)
+tags: [crucible-engine, experience, debrief, reference]
+related:
+  - "[[values-crucible-session-90]]"
+  - "[[values-crucible-experience-arc]]"
+  - "[[concordia-parishes-v3]]"
+canon_note: "The during- and post-crisis design stands in principle. The live format is now 90 minutes (15 brief, 60 play in four 15-minute quarters, 15 debrief) per [[values-crucible-session-90]]; parish facts follow [[concordia-parishes-v3]]."
+---
+
 # Values Crucible: During-Crisis & Post-Crisis Design
 
 ## Connecting to Pre-Crisis Discovery

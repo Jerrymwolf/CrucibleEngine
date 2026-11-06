@@ -1,3 +1,17 @@
+---
+title: "Concordia parishes: complete specifications (v2, superseded)"
+date: 2026-10-21
+type: world-bible
+status: superseded
+superseded_by: "[[concordia-parishes-v3]]"
+project: Crucible Engine (The Values Crucible)
+tags: [crucible-engine, lore, parishes, superseded]
+related:
+  - "[[concordia-parishes-v3]]"
+  - "[[decision-2026-10-21-parish-leadership-redesign]]"
+canon_note: "Kept for its texture and its history. Where this document and [[concordia-parishes-v3]] disagree (Haven as processing plant, the Summit and Sterling populations and placement, the Coast Guard station as an asset, BioCore-7, the Keystone research campus, the southern Sterling flood), v3 wins, per [[decision-2026-10-21-parish-leadership-redesign]]."
+---
+
 # CONCORDIA PARISHES: Complete Specifications
 
 ## Parish Overview Map

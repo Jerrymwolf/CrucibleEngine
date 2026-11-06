@@ -8,13 +8,17 @@ This directory is a restart. The previous TypeScript application in `../apps` an
 
 | Path | What it is |
 |---|---|
-| `content/` | The world as data: parishes, hurricane timeline, cascade rules, dilemmas, personas, values deck, intensity levers. Exported from the old TypeScript constants. Facilitators edit these files, never Rust. |
+| `content/` | The world as data: parishes, the hurricane timeline and its quarters, cascade rules, dilemmas with their default options and Board effects, personas, values deck, intensity levers, the production line, resource tokens and their scoring tables, routes with their cut and reopen times, calls for aid, resident groups and the storm's hazards. Facilitators edit these files, never Rust. |
 | `docs/ENGINE_SPEC.md` | The simulation model, determinism rules, property tests, and CLI contract. |
 | `docs/RUN_LOG_SCHEMA.md` | The run log contract. Everything downstream reads only this document. |
 | `docs/rea-micropolis-brief.md` | Mechanics brief produced with REA on Micropolis, the GPL-released SimCity engine. Descriptive only; see its license hygiene section. |
 | `crates/crucible-core` | The deterministic headless core. |
-| `crates/crucible-cli` | The `crucible` command: `run`, `replay`, `validate`, `summary`. |
+| `crates/crucible-cli` | The `crucible` command: `run` (`--seed`, `--session`, `--inputs`, `--until`, `--teams`, `--decisions`, `--intensity`, `--live`), `replay`, `validate`, `summary`. |
 | `viewer/` | A single-file replay viewer built from a run log. `node viewer/build.mjs <run.json> <out.html>`. |
+| `crates/crucible-wasm` | The core compiled for the browser, content embedded. |
+| `crates/crucible-host` | The `crucible-host` session server for the room: HTTP for the client bundle and the join QR, WebSockets for six tables, their phones, the projector and the DM, the ordered input log, the clock, per-client filtering, restore and export. Protocol in `docs/PROTOCOL.md`. |
+| `board/` | The live board for running a session in the room. See `board/README.md`. |
+| `content/sessions/` | Session profiles: which cards each table is asked and when, the deadlines, the allocation lock, the scheduled maydays, the intensity curve. Read by the core (`run --session`) and by the board builds. |
 | `runs/` | Sample runs and how to regenerate them. |
 
 ## Quick start
@@ -26,7 +30,11 @@ cargo run -p crucible-cli -- validate --content ./content
 cargo run -p crucible-cli -- run --seed 42 --content ./content --out runs/seed-42.run.json
 cargo run -p crucible-cli -- replay runs/seed-42.run.json
 cargo run -p crucible-cli -- summary runs/seed-42.run.json
+cargo run -p crucible-cli -- run --seed 42 --content ./content --session parish-90 --until -3000 --out /tmp/parish-90.json
 node viewer/build.mjs runs/seed-42.run.json viewer/index.html
+cargo run -p crucible-host -- --content ./content --session parish-90 --bundle board-rts/index.html   # the LAN host: prints the join QR, links and the DM PIN
+cargo run -p crucible-host -- --restore sessions/<date>-<CODE>                                         # resume a session, paused at its horizon
+cargo run -p crucible-host -- --restore sessions/<date>-<CODE> --export-only /tmp/run.json             # the run log, for `crucible replay`
 ```
 
 ## Determinism
@@ -35,7 +43,7 @@ One ChaCha20 random number generator seeded from `--seed`. Ordered maps wherever
 
 ## Model in one paragraph
 
-Time advances in 15-minute ticks from T-72h to T+48h (24 hours past the start of the last timeline window). Each tick: the hurricane window and weather advance; weather degrades exposed systems per parish; power, water, and communications are traced from their sources across operational links, and parishes cut off by road are marked isolated; cascade rules fire once when a trigger system crosses its threshold and land their effects after a delay; eligible dilemmas are presented at a cadence that rises with intensity; teams decide, by script or by a drift model that honors stated values at low pressure and trades them for expedience as pressure rises; consequences land immediately or later; and the tick is appended to the log. At the end the engine computes, per parish, the gap between each stated value's rank and the mean signal of the decisions actually taken.
+Time advances in 15-minute ticks from T-72h to T+48h (24 hours past the start of the last timeline window). Each tick: the hurricane window and weather advance; weather degrades exposed systems per parish; power, water, and communications are traced from their sources across operational links, and parishes cut off by road are marked isolated; cascade rules fire once when a trigger system crosses its threshold and land their effects after a delay; eligible dilemmas are presented at a cadence that rises with intensity; teams decide, by script or by a drift model that honors stated values at low pressure and trades them for expedience as pressure rises; consequences land immediately or later; and the tick is appended to the log. Since 2026-10-21 the tick also applies the tables' inputs (allocations, answers to calls for aid, decisions, declared reserves, repair sends, lines of credit), moves convoys over the open routes, moves resident groups through the storm's hazards, runs the doses tally and hashes the state. At the end the engine computes, per parish, the gap between each stated value's rank and the mean signal of the decisions actually taken, allocations and answers to calls included.
 
 ## Status
 

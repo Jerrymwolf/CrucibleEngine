@@ -12,42 +12,105 @@ use std::collections::BTreeMap;
 /// pass through unchanged; keys not listed here and not in the deck are kept
 /// verbatim so no signal is lost.
 const ALIASES: &[(&str, &str)] = &[
-    ("worker-safety", "safety"), ("crew-safety", "safety"), ("child-safety", "safety"),
-    ("system-safety", "safety"), ("existing-safety", "safety"), ("tourist-lives", "safety"),
-    ("life-first", "safety"), ("life-saving", "safety"), ("survival", "resilience"),
-    ("self-preservation", "stability"), ("corporate-survival", "loyalty"),
-    ("corporate-loyalty", "loyalty"), ("corporate-priority", "loyalty"),
-    ("corporate-protection", "loyalty"), ("worker-loyalty", "loyalty"),
-    ("production", "success"), ("quota", "ambition"), ("quota-pressure", "ambition"),
-    ("economics", "success"), ("financial", "stewardship"), ("financial-responsibility", "stewardship"),
-    ("cost", "stewardship"), ("value", "stewardship"), ("shareholder-value", "success"),
-    ("numbers", "success"), ("efficiency", "competence"), ("expertise", "competence"),
-    ("quality", "excellence"), ("quality-control", "excellence"), ("speed", "boldness"),
-    ("expedience", "boldness"), ("heroism", "courage"), ("risk-management", "prudence"),
-    ("prudence", "preparedness"), ("caution", "preparedness"), ("precaution", "preparedness"),
-    ("preparation", "preparedness"), ("known-risk", "preparedness"), ("unknown-risk", "boldness"),
-    ("protocol", "discipline"), ("compliance", "obedience"), ("hierarchy", "authority"),
-    ("control", "authority"), ("order", "order"), ("panic-prevention", "order"),
-    ("continuity", "stability"), ("livelihood", "stability"), ("job-security", "stability"),
-    ("long-term", "stewardship"), ("resource-conservation", "stewardship"),
-    ("resource-optimization", "competence"), ("environmental", "stewardship"),
-    ("agricultural-harm", "stewardship"), ("downstream-harm", "compassion"),
-    ("vulnerability", "compassion"), ("mercy", "forgiveness"), ("healing", "kindness"),
-    ("medical-care", "service"), ("public-good", "service"), ("mission", "duty"),
-    ("demand-pressure", "duty"), ("community", "community"), ("local-priority", "loyalty"),
-    ("island-wide", "equality"), ("unity", "loyalty"), ("solidarity", "loyalty"),
-    ("worker-solidarity", "loyalty"), ("cooperation", "service"), ("equity", "equality"),
-    ("fairness", "fairness"), ("justice", "justice"), ("dignity", "respect"),
-    ("worker-voice", "respect"), ("worker-comfort", "kindness"), ("consent", "autonomy"),
-    ("crew-autonomy", "autonomy"), ("flexibility", "creativity"), ("change", "creativity"),
-    ("systemic-fix", "accountability"), ("accountability", "accountability"),
-    ("liability", "accountability"), ("transparency", "honesty"), ("truth", "honesty"),
-    ("trust", "honesty"), ("public-trust", "honesty"), ("candor", "candor"),
-    ("conscience", "integrity"), ("system-integrity", "integrity"), ("optics", "recognition"),
-    ("career", "ambition"), ("self-interest", "ambition"), ("property", "stewardship"),
-    ("property-protection", "stewardship"), ("property-rights", "justice"),
-    ("tourism-recovery", "success"), ("industrial", "success"), ("capacity", "competence"),
-    ("isolation", "independence"), ("disruption", "boldness"),
+    ("worker-safety", "safety"),
+    ("crew-safety", "safety"),
+    ("child-safety", "safety"),
+    ("system-safety", "safety"),
+    ("existing-safety", "safety"),
+    ("tourist-lives", "safety"),
+    ("life-first", "safety"),
+    ("life-saving", "safety"),
+    ("survival", "resilience"),
+    ("self-preservation", "stability"),
+    ("corporate-survival", "loyalty"),
+    ("corporate-loyalty", "loyalty"),
+    ("corporate-priority", "loyalty"),
+    ("corporate-protection", "loyalty"),
+    ("worker-loyalty", "loyalty"),
+    ("production", "success"),
+    ("quota", "ambition"),
+    ("quota-pressure", "ambition"),
+    ("economics", "success"),
+    ("financial", "stewardship"),
+    ("financial-responsibility", "stewardship"),
+    ("cost", "stewardship"),
+    ("value", "stewardship"),
+    ("shareholder-value", "success"),
+    ("numbers", "success"),
+    ("efficiency", "competence"),
+    ("expertise", "competence"),
+    ("quality", "excellence"),
+    ("quality-control", "excellence"),
+    ("speed", "boldness"),
+    ("expedience", "boldness"),
+    ("heroism", "courage"),
+    ("risk-management", "prudence"),
+    ("prudence", "preparedness"),
+    ("caution", "preparedness"),
+    ("precaution", "preparedness"),
+    ("preparation", "preparedness"),
+    ("known-risk", "preparedness"),
+    ("unknown-risk", "boldness"),
+    ("protocol", "discipline"),
+    ("compliance", "obedience"),
+    ("hierarchy", "authority"),
+    ("control", "authority"),
+    ("order", "order"),
+    ("panic-prevention", "order"),
+    ("continuity", "stability"),
+    ("livelihood", "stability"),
+    ("job-security", "stability"),
+    ("long-term", "stewardship"),
+    ("resource-conservation", "stewardship"),
+    ("resource-optimization", "competence"),
+    ("environmental", "stewardship"),
+    ("agricultural-harm", "stewardship"),
+    ("downstream-harm", "compassion"),
+    ("vulnerability", "compassion"),
+    ("mercy", "forgiveness"),
+    ("healing", "kindness"),
+    ("medical-care", "service"),
+    ("public-good", "service"),
+    ("mission", "duty"),
+    ("demand-pressure", "duty"),
+    ("community", "community"),
+    ("local-priority", "loyalty"),
+    ("island-wide", "equality"),
+    ("unity", "loyalty"),
+    ("solidarity", "loyalty"),
+    ("worker-solidarity", "loyalty"),
+    ("cooperation", "service"),
+    ("equity", "equality"),
+    ("fairness", "fairness"),
+    ("justice", "justice"),
+    ("dignity", "respect"),
+    ("worker-voice", "respect"),
+    ("worker-comfort", "kindness"),
+    ("consent", "autonomy"),
+    ("crew-autonomy", "autonomy"),
+    ("flexibility", "creativity"),
+    ("change", "creativity"),
+    ("systemic-fix", "accountability"),
+    ("accountability", "accountability"),
+    ("liability", "accountability"),
+    ("transparency", "honesty"),
+    ("truth", "honesty"),
+    ("trust", "honesty"),
+    ("public-trust", "honesty"),
+    ("candor", "candor"),
+    ("conscience", "integrity"),
+    ("system-integrity", "integrity"),
+    ("optics", "recognition"),
+    ("career", "ambition"),
+    ("self-interest", "ambition"),
+    ("property", "stewardship"),
+    ("property-protection", "stewardship"),
+    ("property-rights", "justice"),
+    ("tourism-recovery", "success"),
+    ("industrial", "success"),
+    ("capacity", "competence"),
+    ("isolation", "independence"),
+    ("disruption", "boldness"),
 ];
 
 pub fn canonical(content: &Content, key: &str) -> String {
@@ -57,11 +120,11 @@ pub fn canonical(content: &Content, key: &str) -> String {
     ALIASES.iter().find(|(k, _)| *k == key).map(|(_, v)| v.to_string()).unwrap_or_else(|| key.to_string())
 }
 
-/// Option signals on the -3..3 scale, keyed by canonical value id. When two
+/// A signal table on the -3..3 scale, keyed by canonical value id. When two
 /// keys collapse onto one id the larger magnitude wins (ties: first in key order).
-pub fn option_signals(content: &Content, option: &DilemmaOption) -> BTreeMap<String, i64> {
+pub fn canonical_signals(content: &Content, raw: &BTreeMap<String, i64>) -> BTreeMap<String, i64> {
     let mut out: BTreeMap<String, i64> = BTreeMap::new();
-    for (k, v) in &option.value_alignment {
+    for (k, v) in raw {
         let id = canonical(content, k);
         let v = (*v).clamp(-3, 3);
         let e = out.entry(id).or_insert(v);
@@ -70,6 +133,11 @@ pub fn option_signals(content: &Content, option: &DilemmaOption) -> BTreeMap<Str
         }
     }
     out
+}
+
+/// Option signals: the option's `valueAlignment` made canonical.
+pub fn option_signals(content: &Content, option: &DilemmaOption) -> BTreeMap<String, i64> {
+    canonical_signals(content, &option.value_alignment)
 }
 
 /// Default stated values for a parish: its `valuesTested` mapped to deck ids,
@@ -98,11 +166,23 @@ pub fn default_stated_values(content: &Content, parish_id: &str, rng: &mut SimRn
     out
 }
 
+/// One scored choice behind a values-gap row. `kind` says what `dilemma_id`
+/// names: a dilemma, an allocation entry (`allocate:TOKEN`), a call for aid,
+/// a repair send or a line of credit.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Evidence {
+    #[serde(default = "dilemma_kind")]
+    pub kind: String,
     pub dilemma_id: String,
     pub option_id: String,
     pub signal: i64,
+    /// "storm" when the deadline passed and the default option was applied.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub decided_by: Option<String>,
+}
+
+fn dilemma_kind() -> String {
+    "dilemma".into()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -126,9 +206,11 @@ pub fn values_gap(teams: &[(String, Vec<String>)], decisions: &[DecisionRecord])
                 .filter(|d| &d.parish_id == parish_id)
                 .filter_map(|d| {
                     d.values_signaled.get(value).map(|s| Evidence {
+                        kind: d.kind.clone(),
                         dilemma_id: d.dilemma_id.clone(),
                         option_id: d.option_id.clone(),
                         signal: *s,
+                        decided_by: d.decided_by.clone(),
                     })
                 })
                 .collect();
@@ -139,14 +221,7 @@ pub fn values_gap(teams: &[(String, Vec<String>)], decisions: &[DecisionRecord])
                 let sum: i64 = evidence.iter().map(|e| e.signal).sum();
                 ((sum as f64 / n as f64) * 1000.0).round() / 1000.0
             };
-            rows.push(ValuesGapRow {
-                parish_id: parish_id.clone(),
-                value: value.clone(),
-                stated_rank: i + 1,
-                enacted_score: score,
-                n_decisions: n,
-                evidence,
-            });
+            rows.push(ValuesGapRow { parish_id: parish_id.clone(), value: value.clone(), stated_rank: i + 1, enacted_score: score, n_decisions: n, evidence });
         }
     }
     rows

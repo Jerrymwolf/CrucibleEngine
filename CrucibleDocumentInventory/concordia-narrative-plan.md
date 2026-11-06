@@ -1,3 +1,18 @@
+---
+title: "Concordia narrative development plan (superseded)"
+date: 2026-10-21
+type: plan
+status: superseded
+superseded_by: "[[concordia-parishes-v3]]"
+project: Crucible Engine (The Values Crucible)
+tags: [crucible-engine, plan, lore, superseded]
+related:
+  - "[[concordia-plan-v2]]"
+  - "[[concordia-parishes-v3]]"
+  - "[[decision-2026-10-18-restart]]"
+canon_note: "Written for the abandoned TypeScript application (concordia.ts, personas.ts, dilemmas.ts). The world bible it called for now exists as [[concordia-parishes-v3]]; content lives in crucible/content/*.json per [[decision-2026-10-18-restart]]."
+---
+
 # Concordia Narrative Development Plan
 
 ## Objective

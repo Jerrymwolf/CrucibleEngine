@@ -1,7 +1,7 @@
 //! Integration tests: determinism, replay, and the run-log rules.
 
 use crucible_core::log::Event;
-use crucible_core::{replay, run, Content, RunConfig};
+use crucible_core::{replay, run, Content, RunConfig, RunLog};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
 
@@ -121,4 +121,20 @@ fn scripted_decision_is_honoured() {
     let log = run(&c, &RunConfig { seed: 3, decisions, ..Default::default() });
     let found = log.ticks.iter().flat_map(|t| t.events.iter()).any(|e| matches!(e, Event::Decision { dilemma_id: id, parish_id, option_id, controller, .. } if id == &dilemma_id && parish_id == &parish && option_id == &want && controller == "script"));
     assert!(found);
+}
+
+/// The committed reference run is the current engine's output, byte for byte.
+/// When the engine or the content changes on purpose, regenerate it (see
+/// runs/README.md) and say so in the commit.
+#[test]
+fn golden_seed_42_run_is_current() {
+    let c = content();
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../runs/seed-42.run.json");
+    let want = std::fs::read_to_string(&path).expect("runs/seed-42.run.json exists");
+    let log = run(&c, &RunConfig { seed: 42, ..Default::default() });
+    let got = log.to_json();
+    assert!(got == want, "runs/seed-42.run.json is stale ({} vs {} bytes): regenerate it deliberately", want.len(), got.len());
+    let golden = RunLog::from_json(&want).unwrap();
+    assert_eq!(golden.content_hash, c.content_hash);
+    assert_eq!(replay(&c, &golden).summary.state_hash, golden.summary.state_hash);
 }

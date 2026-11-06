@@ -1,3 +1,18 @@
+---
+title: "Values Crucible: full experience arc"
+date: 2026-10-21
+type: experience-design
+status: reference
+project: Crucible Engine (The Values Crucible)
+tags: [crucible-engine, experience, arc, reference]
+related:
+  - "[[values-crucible-session-90]]"
+  - "[[values-crucible-pre-crisis-discovery]]"
+  - "[[values-crucible-during-post-crisis]]"
+  - "[[concordia-parishes-v3]]"
+canon_note: "The learning model (the gap is the lesson) stands. The full-day arc and the dashboard mock-ups that show Haven processing kelp are superseded: the live 90-minute format is in [[values-crucible-session-90]] and the canon in [[concordia-parishes-v3]]."
+---
+
 # Values Crucible: Full Experience Arc
 
 ## The Learning Model

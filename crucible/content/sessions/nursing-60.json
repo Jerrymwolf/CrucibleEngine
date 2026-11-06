@@ -1,0 +1,104 @@
+{
+  "id": "nursing-60",
+  "title": "The Values Crucible: nursing leadership, 60 minutes",
+  "status": "draft: dilemma choices and the deck are Jerry's call",
+  "seed": 42,
+  "valuesDeck": [
+    "safety",
+    "fairness",
+    "candor",
+    "courage",
+    "accountability",
+    "compassion",
+    "integrity",
+    "loyalty",
+    "stewardship",
+    "respect",
+    "honesty",
+    "duty"
+  ],
+  "valuesToPick": 3,
+  "careSites": {
+    "sterling": "Concordia General Hospital",
+    "heartland": "Rural clinic and dialysis unit",
+    "summit": "Meridian executive health clinic",
+    "keystone": "Plant occupational health",
+    "haven": "Port clinic",
+    "gateway": "Airport urgent care"
+  },
+  "rounds": [
+    {
+      "id": "watch",
+      "title": "Round 1: The Watch",
+      "phase": "watch",
+      "minutes": 9,
+      "brief": "Midas is two days out. Every choice now is made with time, and remembered later."
+    },
+    {
+      "id": "landfall",
+      "title": "Round 2: Landfall",
+      "phase": "crisis",
+      "minutes": 11,
+      "brief": "The storm is here. Power, roads and phones start to fail. Decide with less than you need."
+    },
+    {
+      "id": "recovery",
+      "title": "Round 3: Recovery",
+      "phase": "recovery",
+      "minutes": 8,
+      "brief": "The water goes down and the questions come up. Who answers for what happened?"
+    }
+  ],
+  "ask": {
+    "gateway": [
+      "watch-gateway-02",
+      "crisis-gateway-01",
+      "crisis-gateway-03",
+      "recovery-gateway-01"
+    ],
+    "haven": [
+      "watch-haven-01",
+      "crisis-haven-03",
+      "crisis-haven-01",
+      "recovery-haven-01"
+    ],
+    "heartland": [
+      "watch-heartland-02",
+      "crisis-heartland-02",
+      "crisis-heartland-03",
+      "recovery-heartland-01"
+    ],
+    "keystone": [
+      "watch-keystone-02",
+      "crisis-keystone-02",
+      "crisis-keystone-01",
+      "recovery-keystone-01"
+    ],
+    "sterling": [
+      "watch-sterling-02",
+      "crisis-sterling-01",
+      "crisis-sterling-02",
+      "recovery-sterling-01"
+    ],
+    "summit": [
+      "watch-summit-01",
+      "crisis-summit-03",
+      "crisis-summit-01",
+      "recovery-summit-01"
+    ]
+  },
+  "beats": [
+    {
+      "round": "watch"
+    },
+    {
+      "round": "landfall"
+    },
+    {
+      "round": "landfall"
+    },
+    {
+      "round": "recovery"
+    }
+  ]
+}
