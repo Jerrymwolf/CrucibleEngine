@@ -55,6 +55,9 @@ Without post-crisis reflection, there's no transfer to real life.
 
 ### 3. Team Values Discovery (45 min)
 
+> [!warning] Superseded 2026-11-06
+> Replaced by the concept decisions with Jerry ([[concordia-concept-decisions-5]], decisions 53 and 55). Each team is **given 3 values** (the default Community or Meridian set, or the client's real values if the CM enters them) and **creates up to 3 of its own**, each with a name and a definition written by the team. Members draft them on handwritten cards they keep; the team then types the agreed values into the tablet, and the AI matches each to the nearest of the 21 dissertation values for the team to confirm. Teams rank all six freely. The card sort below is kept for history only.
+
 **Purpose:** Teams surface, negotiate, and commit to shared values. This creates the "stated values" baseline.
 
 | Activity | Duration | Platform |
